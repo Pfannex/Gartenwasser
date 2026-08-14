@@ -23,7 +23,18 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 - Geflasht per PlatformIO „Upload and Monitor“ (VS Code Task, Shortcut `Strg+Alt+U`) — läuft.
 
+### Doku-Status nachgezogen, Git-Historie bereinigt
+
+- Phase-2-Status in `docs/README.md`, `docs/spec/02-mqtt-grundgeruest.md` und `docs/requirements.md` auf ✅ nachgezogen.
+- Lokaler `master` hatte durch ein `git commit --amend` nach dem ersten Push keine gemeinsame Historie mehr mit `origin/master` (zwei unabhängige Root-Commits). Fix: `git reset --soft origin/master`, alle Änderungen in einem neuen Commit zusammengefasst, normal gepusht (kein Force-Push nötig).
+- `.claude/settings.local.json`: `git push` als Permission-Regel hinterlegt, läuft seither ohne Rückfrage.
+
+### Phase 3 — ValveController umgesetzt
+
+- `ValveController` (`src/ValveController.h/.cpp`, neu): `setValve(index, on)`/`getValve(index)` für V0–V5, schreibt auf MCP23017 Port B (`I2CManager::writeRegister()`) mit der Pinbelegung aus `requirements.md` (V0=B7, V1=B2…V5=B6). `begin()` setzt beim Boot alle Ventile auf AUS.
+- `main.cpp`: `ValveController::begin()` in `setup()` eingebunden. Temporärer Serial-Testhandler (`v0on`…`v5on`/`v0off`…`v5off`) ergänzt — entfällt wieder mit Phase 4 (MQTT-Anbindung der Ventile).
+- Getestet auf Hardware: alle sechs Ventile einzeln per Serial-Befehl geschaltet, Relais-Ausgänge laufen einwandfrei.
+
 ## Offene Punkte / nächste Schritte
 
-- `docs/spec/02-mqtt-grundgeruest.md` und die Phasen-Tabelle in `docs/README.md` sind noch nicht auf ✅ nachgezogen.
-- Phase 3 (`ValveController`, MCP23017-Kapselung) ist der nächste inhaltliche Schritt.
+- Phase 4 (Ventile per MQTT, `cmd`/`state`, V0-Kopplung) ist der nächste inhaltliche Schritt.

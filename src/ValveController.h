@@ -1,0 +1,24 @@
+/**
+ * @file    ValveController.h
+ * @brief   Kapselt V0-V5 als MCP23017-Ausgaenge (Port B), unabhaengig von MQTT.
+ */
+
+#pragma once
+
+#include <cstdint>
+
+class ValveController {
+ public:
+  static constexpr uint8_t kValveCount = 6;  ///< V0 (Hauptventil) .. V5
+
+  ValveController() = delete;
+
+  /// Setzt alle Ventile auf AUS (sicherer Boot-Grundzustand).
+  static void begin();
+
+  /// Schaltet Ventil `index` (0=V0 .. 5=V5) ein/aus.
+  static void setValve(uint8_t index, bool on);
+
+  /// Liefert den zuletzt gesetzten Schaltzustand von Ventil `index`.
+  static bool getValve(uint8_t index);
+};

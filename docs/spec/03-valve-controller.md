@@ -1,6 +1,6 @@
 # Phase 3 — ValveController (Hardware, ohne MQTT)
 
-**Status:** 📋 Geplant
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -29,3 +29,7 @@ Ventilsteuerung als eigene Klasse kapseln, unabhängig von MQTT testbar.
 2. Jedes Ventil/Relais (`V0`–`V5`) einzeln per Serial-Befehl schalten.
 3. Hardware-Reaktion (Relais/LED) prüfen.
 4. `getValve()`-Rücklesung gegen tatsächlichen Schaltzustand verifizieren.
+
+## Test / Ergebnis
+
+- Geflasht per PlatformIO „Upload and Monitor“, alle Ventile V0–V5 per Serial-Testbefehle (`v0on`…`v5on`/`v0off`…`v5off`) einzeln geschaltet — Hardware-Ausgänge laufen einwandfrei.
