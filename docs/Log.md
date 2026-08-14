@@ -35,6 +35,14 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - `main.cpp`: `ValveController::begin()` in `setup()` eingebunden. Temporärer Serial-Testhandler (`v0on`…`v5on`/`v0off`…`v5off`) ergänzt — entfällt wieder mit Phase 4 (MQTT-Anbindung der Ventile).
 - Getestet auf Hardware: alle sechs Ventile einzeln per Serial-Befehl geschaltet, Relais-Ausgänge laufen einwandfrei.
 
+### Phase 4 — Ventile per MQTT umgesetzt
+
+- `MqttManager`: abonniert `gartenwasser/V{1..5}/cmd` nach jedem (Re-)Connect, Callback parst `ON`/`OFF` und schaltet über `ValveController`. `state` (inkl. `V0`) wird retained published, nur bei tatsächlicher Änderung. Nach jedem Connect werden zusätzlich alle aktuellen Ventilzustände neu published (Resilienz bei Reconnect, siehe `requirements.md`).
+- V0-Kopplung: `Vn ON` schaltet `V0` mit ein; `Vn OFF` schaltet `V0` nur aus, wenn kein anderes Ventil mehr aktiv ist (`ValveController::anyIrrigationValveActive()`, neu).
+- Ungültige Topics/Payloads werden geloggt und ignoriert.
+- `main.cpp`: temporärer Serial-Testhandler aus Phase 3 entfernt (durch MQTT abgelöst).
+- Getestet auf Hardware: alle Ventile per MQTT einzeln/kombiniert geschaltet, V0-Kopplung verifiziert.
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 4 (Ventile per MQTT, `cmd`/`state`, V0-Kopplung) ist der nächste inhaltliche Schritt.
+- Phase 5 (Laufzeit & Restlaufzeit je Ventil) ist der nächste inhaltliche Schritt.

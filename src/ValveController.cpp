@@ -43,3 +43,12 @@ bool ValveController::getValve(uint8_t index) {
   }
   return (portBState & (1 << kValvePins[index])) != 0;
 }
+
+bool ValveController::anyIrrigationValveActive() {
+  for (uint8_t i = 1; i <= 5; i++) {
+    if (getValve(i)) {
+      return true;
+    }
+  }
+  return false;
+}

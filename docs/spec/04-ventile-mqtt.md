@@ -1,6 +1,6 @@
 # Phase 4 — Ventile per MQTT (ohne Timer/Automatik)
 
-**Status:** 📋 Geplant
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -36,3 +36,7 @@
 2. Zweites Ventil `V2/cmd ON` → `V0` bleibt `ON`.
 3. `V1/cmd OFF` → `V1/state OFF`, `V0` bleibt `ON` (da `V2` noch aktiv).
 4. `V2/cmd OFF` → `V0/state OFF`.
+
+## Test / Ergebnis
+
+- Alle Ventile V1–V5 per MQTT (`cmd ON`/`OFF`) einzeln und in Kombination geschaltet, V0-Kopplung verifiziert (schaltet mit ein, bleibt an solange mind. ein Ventil aktiv, schaltet erst aus wenn alle aus sind) — funktioniert wie spezifiziert.

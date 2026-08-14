@@ -21,4 +21,8 @@ class ValveController {
 
   /// Liefert den zuletzt gesetzten Schaltzustand von Ventil `index`.
   static bool getValve(uint8_t index);
+
+  /// Liefert true, wenn mindestens eines der Bewaesserungsventile V1-V5 eingeschaltet ist
+  /// (fuer die V0-Kopplung: V0 bleibt an, solange irgendein Ventil aktiv ist).
+  static bool anyIrrigationValveActive();
 };
