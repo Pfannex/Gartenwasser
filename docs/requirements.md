@@ -116,10 +116,10 @@ Die Firmware ist in eigenständige Klassen mit jeweils eigener `.h`/`.cpp`-Datei
 | Klasse | Zuständigkeit | Status |
 |---|---|---|
 | `Logger` | Einheitliches Log-Format für alle Subsysteme | ✅ Fertig |
-| `WifiManager` | WLAN-Verbindung, Reconnect | ✅ Fertig |
+| `WifiManager` | WLAN-Verbindung, Reconnect, NTP-Sync beim Boot | ✅ Fertig |
 | `HmiManager` | Display (ST7789/SPI), Touch (AXS5106L/I2C), LVGL | ✅ Fertig |
 | `I2CManager` | I2C-Bus-Scan, generischer Register-Zugriff, MCP23017-Grundsetup | ✅ Fertig |
-| `MqttManager` | MQTT-Verbindung, `availability`/LWT, Publish/Subscribe-Helfer, NTP-Sync | 📋 Phase 2 |
+| `MqttManager` | MQTT-Verbindung, `availability`/LWT, Publish/Subscribe-Helfer | ✅ Fertig |
 | `ValveController` | Kapselt V0–V5 als MCP23017-Ausgänge (on/off/state) | 📋 Phase 3 |
 | `ValveTimer` | Laufzeit/Restlaufzeit je Ventil, `maxTime`-Obergrenze | 📋 Phase 5 |
 | `ConfigStore` | Persistenz aller Einstellwerte (`time`, `auto`, `alias`, `maxTime`) im SPIFFS | 📋 Phase 5 |

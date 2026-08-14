@@ -2,8 +2,11 @@
 
 #include <Arduino.h>
 #include <cstdarg>
+#include <ctime>
 
 namespace {
+
+bool realTimeEnabled = false;
 
 const char *typeToString(Logger::Type type) {
   switch (type) {
@@ -16,24 +19,41 @@ const char *typeToString(Logger::Type type) {
 
 const char *sourceToString(Logger::Source source) {
   switch (source) {
-    case Logger::Source::WIFI: return "WIFI ";
-    case Logger::Source::MQTT: return "MQTT ";
-    case Logger::Source::I2C:  return "I2C  ";
-    case Logger::Source::HMI:  return "HMI  ";
+    case Logger::Source::WIFI:   return "WIFI ";
+    case Logger::Source::MQTT:   return "MQTT ";
+    case Logger::Source::I2C:    return "I2C  ";
+    case Logger::Source::HMI:    return "HMI  ";
+    case Logger::Source::SYSTEM: return "SYS  ";
   }
   return "?????";
 }
 
+void formatTimestamp(char *buffer, size_t bufferSize) {
+  if (realTimeEnabled) {
+    const time_t now = time(nullptr);
+    struct tm timeinfo;
+    localtime_r(&now, &timeinfo);
+    snprintf(buffer, bufferSize, "%02d:%02d:%02d:%03lu", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec,
+             millis() % 1000UL);
+  } else {
+    const unsigned long ms = millis();
+    const unsigned long hh = ms / 3600000UL;
+    const unsigned long mm = (ms / 60000UL) % 60UL;
+    const unsigned long ss = (ms / 1000UL) % 60UL;
+    snprintf(buffer, bufferSize, "%02lu:%02lu:%02lu:%03lu", hh, mm, ss, ms % 1000UL);
+  }
+}
+
 }  // namespace
 
+void Logger::enableRealTime() {
+  realTimeEnabled = true;
+}
+
 void Logger::log(Type type, Source source, const char *message) {
-  const unsigned long ms = millis();
-  const unsigned long hh = ms / 3600000UL;
-  const unsigned long mm = (ms / 60000UL) % 60UL;
-  const unsigned long ss = (ms / 1000UL) % 60UL;
-  const unsigned long msPart = ms % 1000UL;
-  Serial.printf("%02lu:%02lu:%02lu:%03lu %s %s %s\n", hh, mm, ss, msPart,
-                typeToString(type), sourceToString(source), message);
+  char timestamp[16];
+  formatTimestamp(timestamp, sizeof(timestamp));
+  Serial.printf("%s %s %s %s\n", timestamp, typeToString(type), sourceToString(source), message);
 }
 
 void Logger::logf(Type type, Source source, const char *format, ...) {

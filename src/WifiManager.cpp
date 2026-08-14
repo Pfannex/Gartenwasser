@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <time.h>
 
 #include "Logger.h"
 #include "secrets.h"
@@ -15,8 +16,43 @@ namespace {
 // "wifi:sta is connecting, return error").
 constexpr unsigned long kReconnectIntervalMs = 15000;
 
+// Timeouts fuer den blockierenden Boot-Ablauf (connectAndSyncTimeBlocking()).
+constexpr unsigned long kWifiConnectTimeoutMs = 20000;
+constexpr unsigned long kNtpSyncTimeoutMs = 10000;
+constexpr const char *kTimezone = "CET-1CEST,M3.5.0,M10.5.0/3";
+constexpr const char *kNtpServer1 = "pool.ntp.org";
+constexpr const char *kNtpServer2 = "de.pool.ntp.org";
+// Alles darunter gilt als "noch nicht synchronisiert" (Systemuhr startet 1970).
+constexpr time_t kMinValidEpoch = 1700000000;
+
 unsigned long lastAttemptMs = 0;
 bool wasConnected = false;
+
+// Blockiert, bis WLAN verbunden ist oder das Timeout erreicht wird.
+bool waitForConnection(unsigned long timeoutMs) {
+  const unsigned long start = millis();
+  while (!WifiManager::isConnected()) {
+    if (millis() - start >= timeoutMs) {
+      return false;
+    }
+    WifiManager::loop();
+    delay(100);
+  }
+  return true;
+}
+
+// Blockiert, bis die Systemzeit per NTP synchronisiert ist oder das Timeout erreicht wird.
+bool waitForNtpSync(unsigned long timeoutMs) {
+  configTzTime(kTimezone, kNtpServer1, kNtpServer2);
+  const unsigned long start = millis();
+  while (time(nullptr) < kMinValidEpoch) {
+    if (millis() - start >= timeoutMs) {
+      return false;
+    }
+    delay(100);
+  }
+  return true;
+}
 
 }  // namespace
 
@@ -58,4 +94,18 @@ void WifiManager::loop() {
 
 bool WifiManager::isConnected() {
   return WiFi.status() == WL_CONNECTED;
+}
+
+void WifiManager::connectAndSyncTimeBlocking() {
+  begin();
+  if (waitForConnection(kWifiConnectTimeoutMs)) {
+    if (waitForNtpSync(kNtpSyncTimeoutMs)) {
+      Logger::enableRealTime();
+      Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "NTP-Synchronisierung erfolgreich.");
+    } else {
+      Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "NTP-Synchronisierung fehlgeschlagen (Timeout).");
+    }
+  } else {
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "WLAN-Verbindung fehlgeschlagen (Timeout).");
+  }
 }

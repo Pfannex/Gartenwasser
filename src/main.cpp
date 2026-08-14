@@ -12,14 +12,19 @@
 
 #include "HmiManager.h"
 #include "I2CManager.h"
+#include "MqttManager.h"
 #include "WifiManager.h"
+#include "Logger.h"
 
 void setup() {
   Serial.begin(115200);
   delay(500);
 
-  // WLAN-Verbindung starten (nicht blockierend, siehe WifiManager::loop())
-  WifiManager::begin();
+  // WLAN verbinden, danach NTP synchronisieren (beides blockierend beim Boot, siehe WifiManager).
+  WifiManager::connectAndSyncTimeBlocking();
+
+  // MQTT-Client konfigurieren (nicht blockierend, siehe MqttManager::loop())
+  MqttManager::begin();
 
   // Display/Touch/LVGL initialisieren (startet dabei auch den I2C-Bus)
   HmiManager::begin();
@@ -28,10 +33,11 @@ void setup() {
   I2CManager::scan();
   I2CManager::mcp23017Setup();
 
-  Serial.println("Setup fertig!");
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "Setup abgeschlossen.");
 }
 
 void loop() {
   WifiManager::loop();
+  MqttManager::loop();
   HmiManager::loop();
 }

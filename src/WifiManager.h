@@ -16,4 +16,9 @@ void loop();
 /// Liefert true, wenn aktuell eine WLAN-Verbindung besteht.
 bool isConnected();
 
+/// Blockiert beim Boot: baut die WLAN-Verbindung auf und synchronisiert danach
+/// die Systemzeit per NTP (je mit Timeout). Schaltet den Logger bei Erfolg auf
+/// Echtzeit um (siehe Logger::enableRealTime()).
+void connectAndSyncTimeBlocking();
+
 }  // namespace WifiManager
