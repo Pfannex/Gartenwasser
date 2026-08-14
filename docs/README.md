@@ -12,7 +12,7 @@
 | [02](spec/02-mqtt-grundgeruest.md) | MQTT-Grundgerüst + `availability`/LWT | ✅ |
 | [03](spec/03-valve-controller.md) | ValveController (MCP23017-Kapselung) | ✅ |
 | [04](spec/04-ventile-mqtt.md) | Ventile per MQTT (`cmd`/`state`, V0-Kopplung) | ✅ |
-| [05](spec/05-laufzeit-restlaufzeit.md) | Laufzeit & Restlaufzeit je Ventil | 📋 |
+| [05](spec/05-laufzeit-restlaufzeit.md) | Laufzeit & Restlaufzeit je Ventil | ✅ |
 | [06](spec/06-automatik-flag.md) | Automatik-Flag je Ventil | 📋 |
 | [07](spec/07-automatik-sequenz.md) | Automatik-Sequenz (`main/cmd`, Sequencer) | 📋 |
 | [08](spec/08-diagnostics.md) | Diagnostics (`i2cStatus`, `lastError`) | 📋 |

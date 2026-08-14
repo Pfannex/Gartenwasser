@@ -121,8 +121,8 @@ Die Firmware ist in eigenständige Klassen mit jeweils eigener `.h`/`.cpp`-Datei
 | `I2CManager` | I2C-Bus-Scan, generischer Register-Zugriff, MCP23017-Grundsetup | ✅ Fertig |
 | `MqttManager` | MQTT-Verbindung, `availability`/LWT, Publish/Subscribe-Helfer | ✅ Fertig |
 | `ValveController` | Kapselt V0–V5 als MCP23017-Ausgänge (on/off/state) | ✅ Fertig |
-| `ValveTimer` | Laufzeit/Restlaufzeit je Ventil, `maxTime`-Obergrenze | 📋 Phase 5 |
-| `ConfigStore` | Persistenz aller Einstellwerte (`time`, `auto`, `alias`, `maxTime`) im SPIFFS | 📋 Phase 5 |
+| `ValveTimer` | Laufzeit/Restlaufzeit je Ventil, `maxTime`-Obergrenze | ✅ Fertig |
+| `ConfigStore` | Persistenz aller Einstellwerte (`time`, `auto`, `alias`, `maxTime`) im SPIFFS | ✅ Fertig (bisher nur `time`/`maxTime`) |
 | `Sequencer` | Automatik-Ablauf V1→V5 (`main/cmd`), Fortsetzung bei manuellem Aus/`maxTime` | 📋 Phase 7 |
 | `HaDiscovery` | Home-Assistant-MQTT-Discovery-Configs | 📋 Phase 10 |
 | `Diagnostics` | `i2cStatus`/`lastError` | 📋 Phase 8 |

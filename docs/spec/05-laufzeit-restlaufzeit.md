@@ -1,6 +1,6 @@
 # Phase 5 — Laufzeit & Restlaufzeit je Ventil
 
-**Status:** 📋 Geplant
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -40,3 +40,12 @@ Einstellbare Einschaltdauer je Ventil, mit sekündlich aktualisierter Restlaufze
 4. `time/set` innerhalb `maxTime` (z. B. 1 Minute) → Countdown startet regulär bei `01:00`.
 5. Ungültigen Wert senden (`time/set -5` bzw. nicht-numerisch) → wird ignoriert, `time/state` unverändert, Log-Eintrag `ERROR`.
 6. Neustart des Boards → `time`- und `maxTime`-Werte bleiben erhalten (Persistenz-Test via `ConfigStore`).
+
+## Test / Ergebnis
+
+- `time/set` getestet, Wert übersteht Neustart (Persistenz via `ConfigStore`/SPIFFS bestätigt), Ventile schalten bei `00:00` automatisch ab (inkl. V0-Kopplung). `maxTime` bleibt vorerst bei seinem Default (60 Min.), da der MQTT-Set-Weg (`main/time/set`-JSON) erst in Phase 11 kommt.
+
+## Abweichung von der Spec (während der Umsetzung)
+
+- Der sekündliche Countdown/die Auto-Abschaltung läuft in `MqttManager::loop()` bewusst **vor** dem WLAN-Verbindungscheck, also unabhängig von WLAN/MQTT — sonst würde ein Verbindungsausfall den Countdown einfrieren und ein Ventil könnte unbegrenzt offen bleiben (siehe `docs/requirements.md`, „läuft lokal/autonom weiter“). In der Spec nicht explizit erwähnt, ergibt sich aber zwingend aus der Anforderung.
+- Wie in Phase 2 bereits abweichend von „Betroffene Dateien“: die eigentliche MQTT-Anbindung (`time/set`-Handler, State-Publish) liegt in `MqttManager.cpp`, nicht nur in `ValveTimer`/`ConfigStore`.

@@ -10,16 +10,21 @@
 
 #include <Arduino.h>
 
+#include "ConfigStore.h"
 #include "HmiManager.h"
 #include "I2CManager.h"
 #include "MqttManager.h"
 #include "ValveController.h"
+#include "ValveTimer.h"
 #include "WifiManager.h"
 #include "Logger.h"
 
 void setup() {
   Serial.begin(115200);
   delay(500);
+
+  // Persistente Konfiguration laden (time, maxTime; spaeter auto, alias)
+  ConfigStore::begin();
 
   // WLAN verbinden, danach NTP synchronisieren (beides blockierend beim Boot, siehe WifiManager).
   WifiManager::connectAndSyncTimeBlocking();
@@ -36,6 +41,7 @@ void setup() {
 
   // Ventile V0-V5 auf sicheren Grundzustand (AUS) setzen
   ValveController::begin();
+  ValveTimer::begin();
 
   Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "Setup abgeschlossen.");
 }
