@@ -139,8 +139,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Doku: vollständiges Beispiel (alle Ventile, `time`/`auto`/`alias` inkl. V0, `maxTime`) in `docs/spec/11-sammelbefehle.md` ergänzt.
 - Alle vier Testfälle aus der Spec auf Hardware verifiziert.
 
+### Phase 12 — Aufräumen/Refactoring (Code-Review-Pass)
+
+- Veraltete Kommentare korrigiert: `main.cpp`s Datei-Header (nannte nur 3 von 11 Klassen) und `ConfigStore::begin()`-Kommentar (\"später auto, alias\" — beides längst fertig).
+- `ConfigStore::kJsonCapacity` (768) öffentlich gemacht, `MqttManager`s eigene doppelte `768`-Konstante entfernt und ersetzt.
+- `MqttManager.cpp`: individuell geschätzte Topic-Puffer (`char topic[24]`/`[32]`, ca. ein Dutzend Stellen) durch eine gemeinsame, großzügige `kTopicBufferSize = 48` ersetzt — genau aus so einer Einzelgröße kam schon einmal der `auto/state`-Truncation-Bug.
+- Geprüft und als bereits erledigt markiert: „MqttManager/Diagnostics/Logger koppeln" war noch als offener Punkt gelistet, ist aber seit Phase 8 fertig.
+- Bewusste Entscheidung **gegen** eine zentrale Topic-Präfix-Konfiguration (Aufwand/Risiko vs. rein hypothetischem Nutzen bei einem Einzelgerät-Hobbyprojekt) — mit Begründung in `docs/spec/12-aufraeumen.md` dokumentiert, damit die Entscheidung nachvollziehbar bleibt statt einfach zu verschwinden.
+- Speicher-Check dokumentiert: RAM 33,6 % (110.108/327.680 Byte), Flash 41,0 % (1.288.653/3.145.728 Byte) — nach Build ohne Regression.
+- 10-Punkte-Test-Checkliste für künftige Firmware-Updates in `docs/spec/12-aufraeumen.md` ergänzt (Boot, Ventile, Laufzeit, Auto-Flag, Sequenz, Diagnostics, Alias, Config-JSON, Resilienz, Persistenz).
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 12 (Aufräumen/Refactoring) ist der nächste inhaltliche Schritt.
+- Phase 13 (Touch-UI) ist der nächste inhaltliche Schritt.
 - Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
+- Vollständiger, zusammenhängender Regressionsdurchlauf (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.

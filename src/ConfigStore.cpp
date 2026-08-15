@@ -14,11 +14,6 @@ constexpr uint16_t kDefaultMaxTimeMinutes = 60;
 constexpr bool kDefaultValveAuto = false;
 constexpr const char *kDefaultValveAlias = "";
 
-// Groesse des JSON-Speicherpools (Baumstruktur + kopierte Alias-Strings beim
-// Laden). Grosszuegig bemessen: time/auto (je 5 kleine Werte) + bis zu 5
-// Alias-Strings (kAliasMaxLength Zeichen) + maxTime.
-constexpr size_t kJsonDocCapacity = 768;
-
 // Index 0 (V0) hat keine eigene Laufzeit/Automatik, aber einen Alias.
 uint16_t valveTimeMinutes[6] = {0, kDefaultValveTimeMinutes, kDefaultValveTimeMinutes, kDefaultValveTimeMinutes,
                                  kDefaultValveTimeMinutes, kDefaultValveTimeMinutes};
@@ -44,7 +39,7 @@ void buildJson(JsonDocument &doc) {
 }
 
 void save() {
-  StaticJsonDocument<kJsonDocCapacity> doc;
+  StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
   buildJson(doc);
 
   File file = SPIFFS.open(kConfigPath, FILE_WRITE);
@@ -67,7 +62,7 @@ void load() {
     return;
   }
 
-  StaticJsonDocument<kJsonDocCapacity> doc;
+  StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, file);
   file.close();
   if (err) {
@@ -159,7 +154,7 @@ void ConfigStore::setValveAlias(uint8_t index, const char *alias) {
 }
 
 size_t ConfigStore::toJson(char *buffer, size_t bufferSize) {
-  StaticJsonDocument<kJsonDocCapacity> doc;
+  StaticJsonDocument<kJsonCapacity> doc;
   buildJson(doc);
   return serializeJson(doc, buffer, bufferSize);
 }

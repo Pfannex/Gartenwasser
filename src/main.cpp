@@ -2,10 +2,12 @@
  * @file    main.cpp
  * @brief   Projekt "Gartenwasser" - Einstiegspunkt (Setup/Loop-Orchestrierung).
  *
- * Die eigentliche Hardware-/Netzwerklogik steckt in eigenen Klassen:
- * WifiManager (WLAN), HmiManager (Display/Touch/LVGL), I2CManager (I2C-Bus,
- * MCP23017). Die Anwendungslogik (Bewässerungssteuerung) wird im Anschluss
- * gemeinsam spezifiziert und hier ergänzt.
+ * Die eigentliche Logik steckt in eigenen Klassen (src/), main.cpp bleibt ein
+ * schlanker Orchestrator: WifiManager (WLAN/NTP), MqttManager (MQTT-Verbindung
+ * und komplette Ventil-/Automatik-/Config-Anbindung), HmiManager (Display/
+ * Touch/LVGL), I2CManager (I2C-Bus, MCP23017), ValveController (Ventil-Ein-
+ * gänge/Alias), ValveTimer (Restlaufzeit), Sequencer (Automatik-Ablauf),
+ * ConfigStore (Persistenz), Diagnostics (i2cStatus/lastError), Logger.
  */
 
 #include <Arduino.h>
@@ -33,7 +35,7 @@ void setup() {
   // in diagnostics/lastError landen (siehe Logger::setErrorCallback()).
   Diagnostics::begin();
 
-  // Persistente Konfiguration laden (time, maxTime; spaeter auto, alias)
+  // Persistente Konfiguration laden (time, auto, alias, maxTime)
   ConfigStore::begin();
 
   // WLAN verbinden, danach NTP synchronisieren (beides blockierend beim Boot, siehe WifiManager).

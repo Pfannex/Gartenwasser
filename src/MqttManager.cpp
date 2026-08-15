@@ -35,16 +35,17 @@ constexpr const char *kV0AliasSetTopic = "gartenwasser/V0/alias/set";
 constexpr const char *kConfigSetTopic = "gartenwasser/main/config/set";
 constexpr const char *kConfigStateTopic = "gartenwasser/main/config/state";
 
-// Puffergroesse fuer main/config/set (eingehend) und main/config/state
-// (ausgehend) - muss die komplette Konfiguration inkl. aller Aliase fassen
-// (siehe ConfigStore::kJsonDocCapacity, dieselbe Groessenordnung).
-constexpr size_t kConfigJsonCapacity = 768;
-
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
 constexpr char kTimeSetSuffix[] = "/time/set";
 constexpr char kAutoSetSuffix[] = "/auto/set";
 constexpr char kAliasSetSuffix[] = "/alias/set";
+
+// Gemeinsame Puffergroesse fuer alle zusammengebauten Topic-Strings (z.B.
+// "gartenwasser/V1/time/remaining"). Grosszuegig bemessen statt jede Topic-
+// Variante einzeln zu vermessen - genau daraus resultierte einmal ein Bug
+// (V{n}/auto/state wurde mit zu kleinem Puffer abgeschnitten, siehe Log.md).
+constexpr size_t kTopicBufferSize = 48;
 
 // Grenzen fuer time/set (Minuten). Obere Grenze ist ein grosszuegiger Sanity-Check,
 // die eigentliche Deckelung der effektiven Laufzeit erfolgt ueber maxTime (ValveTimer).
@@ -111,13 +112,13 @@ void publishAndLog(const char *topic, const char *payload, bool retained) {
 }
 
 void publishValveState(uint8_t index, bool on) {
-  char topic[24];
+  char topic[kTopicBufferSize];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/state", index);
   publishAndLog(topic, on ? "ON" : "OFF", true);
 }
 
 void publishTimeState(uint8_t index, uint16_t minutes) {
-  char topic[32];
+  char topic[kTopicBufferSize];
   char payload[8];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/time/state", index);
   snprintf(payload, sizeof(payload), "%u", minutes);
@@ -125,7 +126,7 @@ void publishTimeState(uint8_t index, uint16_t minutes) {
 }
 
 void publishRemaining(uint8_t index, uint16_t seconds) {
-  char topic[32];
+  char topic[kTopicBufferSize];
   char payload[8];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/time/remaining", index);
   snprintf(payload, sizeof(payload), "%02u:%02u", seconds / 60, seconds % 60);
@@ -139,13 +140,13 @@ void publishMaxTime() {
 }
 
 void publishAutoState(uint8_t index, bool on) {
-  char topic[32];
+  char topic[kTopicBufferSize];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/auto/state", index);
   publishAndLog(topic, on ? "ON" : "OFF", true);
 }
 
 void publishAlias(uint8_t index, const char *alias) {
-  char topic[24];
+  char topic[kTopicBufferSize];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/alias", index);
   publishAndLog(topic, alias, true);
 }
@@ -168,7 +169,7 @@ bool isValidAliasPayload(const char *payloadStr, size_t length) {
 // als JSON, retained - bei jeder Aenderung (egal welches Topic) und nach
 // jedem (Re-)Connect (siehe docs/spec/11-sammelbefehle.md).
 void publishConfigState() {
-  char payload[kConfigJsonCapacity];
+  char payload[ConfigStore::kJsonCapacity];
   const size_t written = ConfigStore::toJson(payload, sizeof(payload));
   if (written == 0) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/state: Serialisierung fehlgeschlagen.");
@@ -474,7 +475,7 @@ bool parseValveKey(const char *key, uint8_t minIndex, uint8_t maxIndex, uint8_t 
 }
 
 void handleConfigSet(const char *payloadStr) {
-  StaticJsonDocument<kConfigJsonCapacity> doc;
+  StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, payloadStr);
   if (err) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: JSON-Fehler: %s", err.c_str());
@@ -521,7 +522,7 @@ void handleConfigSet(const char *payloadStr) {
 }
 
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
-  char payloadStr[kConfigJsonCapacity];
+  char payloadStr[ConfigStore::kJsonCapacity];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
   Logger::logf(Logger::Type::SUB, Logger::Source::MQTT, "%s = %s", topic, payloadStr);
 
@@ -594,10 +595,10 @@ bool connectToBroker() {
     mqttClient.subscribe(kV0AliasSetTopic);
     mqttClient.subscribe(kConfigSetTopic);
     for (uint8_t i = 1; i <= 5; i++) {
-      char cmdTopic[24];
-      char timeSetTopic[32];
-      char autoSetTopic[32];
-      char aliasSetTopic[32];
+      char cmdTopic[kTopicBufferSize];
+      char timeSetTopic[kTopicBufferSize];
+      char autoSetTopic[kTopicBufferSize];
+      char aliasSetTopic[kTopicBufferSize];
       snprintf(cmdTopic, sizeof(cmdTopic), "gartenwasser/V%u/cmd", i);
       snprintf(timeSetTopic, sizeof(timeSetTopic), "gartenwasser/V%u/time/set", i);
       snprintf(autoSetTopic, sizeof(autoSetTopic), "gartenwasser/V%u/auto/set", i);

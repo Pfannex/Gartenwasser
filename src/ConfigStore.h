@@ -13,6 +13,10 @@ class ConfigStore {
   /// Maximale Laenge (ohne Nullterminator) fuer einen Ventil-Alias.
   static constexpr size_t kAliasMaxLength = 32;
 
+  /// Puffer-/Speicherpool-Groesse fuer die vollstaendige Konfiguration als JSON
+  /// (SPIFFS-Persistenz und main/config/set|state teilen sich diese Konstante).
+  static constexpr size_t kJsonCapacity = 768;
+
   ConfigStore() = delete;
 
   /// Mountet SPIFFS und laedt /config.json (falls vorhanden), sonst gelten Defaultwerte.
