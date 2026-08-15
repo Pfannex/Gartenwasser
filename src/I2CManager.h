@@ -24,4 +24,7 @@ class I2CManager {
 
   /// Konfiguriert den MCP23017 (Port B, alle Pins Ausgang, LOW).
   static void mcp23017Setup();
+
+  /// Prueft, ob der MCP23017 aktuell auf dem I2C-Bus antwortet.
+  static bool isMcp23017Reachable();
 };

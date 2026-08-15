@@ -9,12 +9,15 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 class Logger {
  public:
   enum class Type : uint8_t { ERROR, INFO, DEBUG, PUB, SUB };
   enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, SYSTEM };
+
+  using ErrorCallback = void (*)(const char *message);
 
   Logger() = delete;
 
@@ -23,4 +26,12 @@ class Logger {
 
   /// Schaltet den Zeitstempel von boot-relativer Zeit auf Echtzeit um (nach erfolgreicher NTP-Synchronisierung).
   static void enableRealTime();
+
+  /// Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach `buffer`.
+  static void currentTimestamp(char *buffer, size_t bufferSize);
+
+  /// Registriert einen Callback, der bei jedem ERROR-Log-Eintrag mit der reinen
+  /// (unformatierten) Meldung aufgerufen wird - Grundlage fuer diagnostics/lastError
+  /// (Diagnostics), ohne dass Logger die Diagnostics-Klasse kennen muss.
+  static void setErrorCallback(ErrorCallback callback);
 };

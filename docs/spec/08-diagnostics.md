@@ -1,6 +1,6 @@
 # Phase 8 — Diagnostics
 
-**Status:** 📋 Geplant
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -31,3 +31,13 @@ I2C-Bus-Status und letzte Fehlermeldung über MQTT sichtbar machen.
 1. MCP23017-Verkabelung kurz trennen → `i2cStatus` wird `error`, `lastError` erhält passende Meldung.
 2. Wieder verbinden → `i2cStatus` zurück auf `ok`.
 3. Ungültigen `time/set`-Wert senden (siehe Phase 5) → `lastError` wird aktualisiert.
+
+## Test / Ergebnis
+
+- Auf Hardware getestet, vom Nutzer bestätigt.
+
+## Umsetzung (finale Kopplung)
+
+- Entscheidung zur „Kopplung" oben: `Logger` bekommt einen generischen `setErrorCallback()` (Funktionszeiger), den `Diagnostics::begin()` registriert. Jeder `Logger::Type::ERROR`-Aufruf ruft den Callback automatisch mit der Meldung auf — `Logger` kennt `Diagnostics` dabei nicht (lose Kopplung). Dadurch landen I2C-Ausfall, ungültige MQTT-Payloads und WLAN-Verlust automatisch in `lastError`, ohne bestehende Log-Aufrufe in `WifiManager`/`MqttManager` anzufassen.
+- `Diagnostics::begin()` wird ganz am Anfang von `main.cpp`s `setup()` aufgerufen (vor `ConfigStore::begin()`), damit auch frühe Boot-Fehler (SPIFFS-Mount, WLAN-Timeout) erfasst werden.
+- Der periodische `i2cStatus`-Check läuft wie der Ventil-Timer-Tick unabhängig von WLAN/MQTT-Verbindungsstatus.

@@ -7,6 +7,7 @@
 namespace {
 
 bool realTimeEnabled = false;
+Logger::ErrorCallback errorCallback = nullptr;
 
 const char *typeToString(Logger::Type type) {
   switch (type) {
@@ -30,7 +31,13 @@ const char *sourceToString(Logger::Source source) {
   return "?????";
 }
 
-void formatTimestamp(char *buffer, size_t bufferSize) {
+}  // namespace
+
+void Logger::enableRealTime() {
+  realTimeEnabled = true;
+}
+
+void Logger::currentTimestamp(char *buffer, size_t bufferSize) {
   if (realTimeEnabled) {
     const time_t now = time(nullptr);
     struct tm timeinfo;
@@ -46,16 +53,18 @@ void formatTimestamp(char *buffer, size_t bufferSize) {
   }
 }
 
-}  // namespace
-
-void Logger::enableRealTime() {
-  realTimeEnabled = true;
+void Logger::setErrorCallback(ErrorCallback callback) {
+  errorCallback = callback;
 }
 
 void Logger::log(Type type, Source source, const char *message) {
   char timestamp[16];
-  formatTimestamp(timestamp, sizeof(timestamp));
+  currentTimestamp(timestamp, sizeof(timestamp));
   Serial.printf("%s %s %s %s\n", timestamp, sourceToString(source), typeToString(type), message);
+
+  if (type == Type::ERROR && errorCallback != nullptr) {
+    errorCallback(message);
+  }
 }
 
 void Logger::logf(Type type, Source source, const char *format, ...) {

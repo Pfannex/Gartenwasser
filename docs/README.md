@@ -15,7 +15,7 @@
 | [05](spec/05-laufzeit-restlaufzeit.md) | Laufzeit & Restlaufzeit je Ventil | ✅ |
 | [06](spec/06-automatik-flag.md) | Automatik-Flag je Ventil | ✅ |
 | [07](spec/07-automatik-sequenz.md) | Automatik-Sequenz (`main/cmd`, Sequencer) | ✅ |
-| [08](spec/08-diagnostics.md) | Diagnostics (`i2cStatus`, `lastError`) | 📋 |
+| [08](spec/08-diagnostics.md) | Diagnostics (`i2cStatus`, `lastError`) | ✅ |
 | [09](spec/09-alias.md) | Alias je Ventil (inkl. `set`, Persistenz) | 📋 |
 | [10](spec/10-ha-discovery.md) | Home Assistant MQTT-Discovery | 📋 |
 | [11](spec/11-sammelbefehle.md) | Konfiguration per JSON (`main/config/set`/`state`) | 📋 |

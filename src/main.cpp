@@ -11,6 +11,7 @@
 #include <Arduino.h>
 
 #include "ConfigStore.h"
+#include "Diagnostics.h"
 #include "HmiManager.h"
 #include "I2CManager.h"
 #include "MqttManager.h"
@@ -27,6 +28,10 @@ void setup() {
   // Boot-Trenner, damit im Serial-Monitor klar erkennbar ist, wo ein Neustart beginnt.
   Serial.println();
   Serial.println("------------------------------------------------------------");
+
+  // So frueh wie moeglich, damit auch fruehe Boot-Fehler (SPIFFS, WLAN, ...)
+  // in diagnostics/lastError landen (siehe Logger::setErrorCallback()).
+  Diagnostics::begin();
 
   // Persistente Konfiguration laden (time, maxTime; spaeter auto, alias)
   ConfigStore::begin();

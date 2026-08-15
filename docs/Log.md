@@ -104,8 +104,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Tages- und Wochenplan sind keine getrennten Features, sondern beides Trigger-Typen (`daily`/`weekly`/`once`) desselben Zeitplan-Mechanismus: eine beliebig lange, über `main/config/set` editierbare Liste von Einträgen (Trigger-Regel + Programm-Referenz aus Phase 14), nicht auf 7 feste Wochentags-Slots begrenzt. Deckt „jeden Tag 21:00 Uhr", „jeden Dienstag" und „genau am 01.02.26, 11:00 Uhr" ab.
 - Zusätzliche offene Fragen ergänzt: Umgang mit einmaligen (`once`-)Triggern nach dem Feuern, Konflikte bei zeitgleichen Triggern. `docs/spec/15-wochenplan.md` entsprechend erweitert (Dateiname unverändert gelassen, um Verweise nicht zu brechen).
 
+### Phase 8 — Diagnostics umgesetzt
+
+- `Logger`: `currentTimestamp()` öffentlich gemacht, neuer `setErrorCallback()` — jeder `Type::ERROR`-Aufruf ruft optional einen registrierten Callback mit der Meldung auf (lose Kopplung per Funktionszeiger, `Logger` kennt `Diagnostics` nicht).
+- `I2CManager`: `isMcp23017Reachable()` als wiederverwendbare Prüfung ergänzt.
+- `Diagnostics` (`src/Diagnostics.h/.cpp`, neu): registriert sich als Logger-Error-Callback (→ `lastError` inkl. Zeitstempel aus `Logger::currentTimestamp()`), prüft periodisch `i2cStatus` über `I2CManager`.
+- `MqttManager`: `diagnostics/i2cStatus`/`diagnostics/lastError` (beide retained) bei Änderung published, republished nach jedem Connect. Check läuft wie der Ventil-Timer-Tick unabhängig von WLAN/MQTT.
+- `main.cpp`: `Diagnostics::begin()` ganz am Anfang von `setup()`, vor `ConfigStore::begin()`, damit auch frühe Boot-Fehler (SPIFFS-Mount, WLAN-Timeout) erfasst werden.
+- Clou: I2C-Ausfall, ungültige MQTT-Payloads und WLAN-Verlust landen automatisch in `lastError`, ohne bestehende `ERROR`-Log-Aufrufe in `WifiManager`/`MqttManager`/etc. anzufassen.
+- Getestet auf Hardware, vom Nutzer bestätigt ("klappt!!").
+- Nebenbei nachgezogen: `Sequencer`-Zeile in der Architektur-Tabelle (`requirements.md`) war noch nicht auf ✅ aktualisiert; Log-Format-Beispiel (`TYPE CLASS` statt `CLASS TYPE`, fehlendes `PUB`/`SUB`/`SYS`) war veraltet.
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 8 (Diagnostics, `i2cStatus`/`lastError`) ist der nächste inhaltliche Schritt.
+- Phase 9 (Alias je Ventil) ist der nächste inhaltliche Schritt.
 - Phase 11 (`main/config/set`/`state`) ist neu gefasst, aber noch nicht implementiert — baut auf Phase 5/6 auf, zeitlich flexibel einordbar.
 - Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.

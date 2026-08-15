@@ -47,3 +47,8 @@ void I2CManager::mcp23017Setup() {
   writeRegister(kMcp23017Addr, kIodirB, 0x00);  // alle Ausgang
   writeRegister(kMcp23017Addr, kGpioB, 0x00);   // alle LOW
 }
+
+bool I2CManager::isMcp23017Reachable() {
+  Wire.beginTransmission(kMcp23017Addr);
+  return Wire.endTransmission() == 0;
+}

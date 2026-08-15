@@ -133,23 +133,24 @@ Die Firmware ist in eigenständige Klassen mit jeweils eigener `.h`/`.cpp`-Datei
 | `ValveController` | Kapselt V0–V5 als MCP23017-Ausgänge (on/off/state) | ✅ Fertig |
 | `ValveTimer` | Laufzeit/Restlaufzeit je Ventil, `maxTime`-Obergrenze | ✅ Fertig |
 | `ConfigStore` | Persistenz aller Einstellwerte (`time`, `auto`, `alias`, `maxTime`) im SPIFFS | ✅ Fertig (bisher nur `time`/`maxTime`) |
-| `Sequencer` | Automatik-Ablauf V1→V5 (`main/cmd`), Fortsetzung bei manuellem Aus/`maxTime` | 📋 Phase 7 |
+| `Sequencer` | Automatik-Ablauf V1→V5 (`main/cmd`), Fortsetzung bei manuellem Aus/`maxTime` | ✅ Fertig |
 | `HaDiscovery` | Home-Assistant-MQTT-Discovery-Configs | 📋 Phase 10 |
-| `Diagnostics` | `i2cStatus`/`lastError` | 📋 Phase 8 |
+| `Diagnostics` | `i2cStatus`/`lastError` | ✅ Fertig |
 
 `main.cpp` bleibt ein schlanker Orchestrator (`setup()`/`loop()` ruft die Manager-Klassen auf).
 
 ### Log-Format (`Logger`)
 
 ```
-hh:mm:ss:mmm TYPE CLASS logtext
+hh:mm:ss:mmm CLASS TYPE logtext
 ```
 
-- `hh:mm:ss:mmm`: Laufzeit-/Uhrzeit-Format. Bis Phase 2 (NTP-Sync) boot-relative Zeit seit Start (`millis()`-basiert); danach Echtzeituhr.
-- `TYPE` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `ERROR`, `INFO `, `DEBUG`
-- `CLASS` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `WIFI `, `MQTT `, `I2C  `, `HMI  `
+- `hh:mm:ss:mmm`: Laufzeit-/Uhrzeit-Format. Bis zur ersten erfolgreichen NTP-Synchronisierung beim Boot (siehe `WifiManager::connectAndSyncTimeBlocking()`, Phase 2) boot-relative Zeit seit Start (`millis()`-basiert); danach Echtzeituhr.
+- `CLASS` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `WIFI `, `MQTT `, `I2C  `, `HMI  `, `SYS  `
+- `TYPE` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `ERROR`, `INFO `, `DEBUG`, `PUB  `, `SUB  ` (`PUB`/`SUB` = ausgehende/eingehende MQTT-Nachrichten, siehe `MqttManager`)
+- Jeder `ERROR`-Eintrag landet zusätzlich automatisch in `diagnostics/lastError` (siehe `Diagnostics`, Phase 8) — über `Logger::setErrorCallback()`, ohne dass `Logger` `Diagnostics` kennt.
 
-Beispiel: `00:00:01:909 INFO  I2C   I2C-Scan gestartet...`
+Beispiel: `00:00:01:909 I2C   INFO  I2C-Scan gestartet...`
 
 ## Home-Assistant-MQTT-Discovery (Phase 10, geplant)
 

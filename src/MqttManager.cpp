@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "ConfigStore.h"
+#include "Diagnostics.h"
 #include "Logger.h"
 #include "Sequencer.h"
 #include "ValveController.h"
@@ -25,6 +26,8 @@ constexpr const char *kMainCmdTopic = "gartenwasser/main/cmd";
 constexpr const char *kMainStateTopic = "gartenwasser/main/state";
 constexpr const char *kMainActiveValveTopic = "gartenwasser/main/activeValve";
 constexpr const char *kMainRemainingTotalTopic = "gartenwasser/main/remainingTotal";
+constexpr const char *kI2cStatusTopic = "gartenwasser/diagnostics/i2cStatus";
+constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
 
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
@@ -131,6 +134,25 @@ void publishAutoState(uint8_t index, bool on) {
 
 void publishMainState(bool running) {
   publishAndLog(kMainStateTopic, running ? "ON" : "OFF", true);
+}
+
+void publishI2cStatus(bool ok) {
+  publishAndLog(kI2cStatusTopic, ok ? "ok" : "error", true);
+}
+
+void publishLastError(const char *text) {
+  publishAndLog(kLastErrorTopic, text, true);
+}
+
+// Sicherheitskritisch im weiteren Sinne (Fehlererkennung soll auch ohne MQTT
+// funktionieren) - laeuft daher wie tickValveTimers() unabhaengig von WLAN/MQTT.
+void checkDiagnostics() {
+  if (Diagnostics::checkI2cStatus()) {
+    publishI2cStatus(Diagnostics::isI2cOk());
+  }
+  if (Diagnostics::consumeNewError()) {
+    publishLastError(Diagnostics::getLastError());
+  }
 }
 
 void publishActiveValve(uint8_t index) {
@@ -431,6 +453,10 @@ bool connectToBroker() {
     publishMainState(Sequencer::isRunning());
     publishActiveValve(Sequencer::getActiveValve());
     publishRemainingTotalNow();
+    publishI2cStatus(Diagnostics::isI2cOk());
+    if (Diagnostics::getLastError()[0] != '\0') {
+      publishLastError(Diagnostics::getLastError());
+    }
   }
   return ok;
 }
@@ -447,6 +473,7 @@ void MqttManager::loop() {
   if (now - lastTickMs >= kTickIntervalMs) {
     lastTickMs = now;
     tickValveTimers();
+    checkDiagnostics();
   }
 
   if (!WifiManager::isConnected()) {
