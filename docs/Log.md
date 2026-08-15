@@ -124,8 +124,13 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Nachtrag auf Nutzerwunsch: `V0` (Hauptventil) hatte noch keinen Alias (Spec war auf `V1`–`V5` begrenzt). `ConfigStore::getValveAlias()`/`setValveAlias()` erlauben jetzt Index `0..5`; `V0/alias/set` wird in `MqttManager` separat behandelt (nicht über `parseValveTopic()`, das bewusst auf `V1..V5` begrenzt bleibt, da `V0` kein `cmd`/`time`/`auto` hat).
 - Getestet auf Hardware, vom Nutzer bestätigt ("klapp!").
 
+### Priorisierung angepasst: Phase 10 (HA-Discovery) ans Ende gestellt
+
+- Auf Wunsch: erst alles geräteintern fertigstellen, bevor die erste externe Integration (Home Assistant) angegangen wird. Neue Bearbeitungsreihenfolge: 11 (Konfiguration per JSON) → 12 (Aufräumen) → 13 (Touch-UI) → 14 (Programme) → 15 (Zeitplan/Scheduler) → 10 (HA-Discovery, ganz am Ende).
+- Phasennummern/Dateinamen bleiben unverändert, nur die Reihenfolge in `docs/README.md` wurde angepasst (Tabellenreihenfolge = Bearbeitungsreihenfolge, nicht mehr die Nummer). Begründung in `requirements.md`, Entscheidungshistorie.
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 10 (Home Assistant MQTT-Discovery) ist der nächste inhaltliche Schritt.
-- Phase 11 (`main/config/set`/`state`) ist neu gefasst, aber noch nicht implementiert — baut auf Phase 5/6 auf, zeitlich flexibel einordbar.
+- Phase 11 (`main/config/set`/`state`) ist der nächste inhaltliche Schritt.
 - Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.
+- Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
