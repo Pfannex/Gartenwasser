@@ -14,6 +14,7 @@
 #include "HmiManager.h"
 #include "I2CManager.h"
 #include "MqttManager.h"
+#include "Sequencer.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
 #include "WifiManager.h"
@@ -46,6 +47,7 @@ void setup() {
   // Ventile V0-V5 auf sicheren Grundzustand (AUS) setzen
   ValveController::begin();
   ValveTimer::begin();
+  Sequencer::begin();
 
   Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "Setup abgeschlossen.");
 }

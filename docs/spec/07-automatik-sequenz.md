@@ -1,6 +1,6 @@
 # Phase 7 — Automatik-Sequenz
 
-**Status:** 📋 Geplant
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -45,3 +45,8 @@
 6. Während des Laufs `V3/cmd ON` senden (V1 ist aktiv) → wird ignoriert, `activeValve` bleibt `V1`.
 7. `maxTime` kleiner als `time` eines Ventils setzen → Sequenz wechselt beim Erreichen von `maxTime` normal zum nächsten Ventil.
 8. Nach natürlichem Ablaufende: alle Ventile aus, alle Timer auf `time` zurückgesetzt, `activeValve "-"`.
+
+## Test / Ergebnis
+
+- Sequenzverlauf, vorzeitiges Weiterschalten per manuellem `V{n}/cmd OFF` und Abbruch per `main/cmd OFF` auf Hardware getestet — funktioniert wie spezifiziert.
+- Nachtrag (siehe `docs/Log.md`, 2026-08-15): Restlaufzeit-Anzeige verfeinert — Ventile, die noch nicht an der Reihe waren, zeigen `remaining = time` (armiert); bereits durchgelaufene Ventile zeigen `remaining = 00:00`, solange die Sequenz noch läuft; erst nach Sequenz-Ende (natürlich oder `main/cmd OFF`) werden alle Restlaufzeiten wieder auf `time` gesetzt.

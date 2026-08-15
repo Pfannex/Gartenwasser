@@ -7,11 +7,18 @@ namespace {
 // Index 0 ungenutzt (V0 hat keinen eigenen Timer).
 uint16_t remainingSeconds[6] = {0};
 
+uint16_t effectiveSeconds(uint8_t index) {
+  const uint16_t timeMinutes = ConfigStore::getValveTime(index);
+  const uint16_t maxTimeMinutes = ConfigStore::getMaxTime();
+  const uint16_t effectiveMinutes = timeMinutes < maxTimeMinutes ? timeMinutes : maxTimeMinutes;
+  return effectiveMinutes * 60;
+}
+
 }  // namespace
 
 void ValveTimer::begin() {
-  for (uint8_t i = 0; i < 6; i++) {
-    remainingSeconds[i] = 0;
+  for (uint8_t i = 1; i <= 5; i++) {
+    remainingSeconds[i] = effectiveSeconds(i);
   }
 }
 
@@ -19,23 +26,27 @@ void ValveTimer::start(uint8_t index) {
   if (index < 1 || index > 5) {
     return;
   }
-  const uint16_t timeMinutes = ConfigStore::getValveTime(index);
-  const uint16_t maxTimeMinutes = ConfigStore::getMaxTime();
-  const uint16_t effectiveMinutes = timeMinutes < maxTimeMinutes ? timeMinutes : maxTimeMinutes;
-  remainingSeconds[index] = effectiveMinutes * 60;
+  remainingSeconds[index] = effectiveSeconds(index);
 }
 
-void ValveTimer::stop(uint8_t index) {
+void ValveTimer::reset(uint8_t index) {
+  if (index < 1 || index > 5) {
+    return;
+  }
+  remainingSeconds[index] = effectiveSeconds(index);
+}
+
+void ValveTimer::clear(uint8_t index) {
   if (index < 1 || index > 5) {
     return;
   }
   remainingSeconds[index] = 0;
 }
 
-uint8_t ValveTimer::tick() {
+uint8_t ValveTimer::tick(uint8_t activeMask) {
   uint8_t expiredMask = 0;
   for (uint8_t i = 1; i <= 5; i++) {
-    if (remainingSeconds[i] > 0) {
+    if ((activeMask & (1 << i)) && remainingSeconds[i] > 0) {
       remainingSeconds[i]--;
       if (remainingSeconds[i] == 0) {
         expiredMask |= (1 << i);

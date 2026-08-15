@@ -8,6 +8,7 @@
 
 #include "ConfigStore.h"
 #include "Logger.h"
+#include "Sequencer.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
 #include "WifiManager.h"
@@ -20,6 +21,10 @@ constexpr const char *kOnlinePayload = "online";
 constexpr const char *kOfflinePayload = "offline";
 constexpr uint8_t kAvailabilityQos = 1;
 constexpr const char *kMaxTimeTopic = "gartenwasser/main/time/maxTime";
+constexpr const char *kMainCmdTopic = "gartenwasser/main/cmd";
+constexpr const char *kMainStateTopic = "gartenwasser/main/state";
+constexpr const char *kMainActiveValveTopic = "gartenwasser/main/activeValve";
+constexpr const char *kMainRemainingTotalTopic = "gartenwasser/main/remainingTotal";
 
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
@@ -124,6 +129,45 @@ void publishAutoState(uint8_t index, bool on) {
   publishAndLog(topic, on ? "ON" : "OFF", true);
 }
 
+void publishMainState(bool running) {
+  publishAndLog(kMainStateTopic, running ? "ON" : "OFF", true);
+}
+
+void publishActiveValve(uint8_t index) {
+  char payload[4];
+  if (index == 0) {
+    snprintf(payload, sizeof(payload), "-");
+  } else {
+    snprintf(payload, sizeof(payload), "V%u", index);
+  }
+  publishAndLog(kMainActiveValveTopic, payload, true);
+}
+
+// Restzeit der Gesamtsequenz: Restlaufzeit des aktiven Ventils + effektive
+// Laufzeit (min(time, maxTime)) aller noch ausstehenden Ventile in der Warteschlange.
+uint32_t computeRemainingTotalSeconds() {
+  if (!Sequencer::isRunning()) {
+    return 0;
+  }
+  uint32_t total = ValveTimer::getRemainingSeconds(Sequencer::getActiveValve());
+  const uint8_t pendingCount = Sequencer::getPendingCount();
+  for (uint8_t i = 0; i < pendingCount; i++) {
+    const uint8_t v = Sequencer::getPendingValve(i);
+    const uint16_t timeMinutes = ConfigStore::getValveTime(v);
+    const uint16_t maxTimeMinutes = ConfigStore::getMaxTime();
+    const uint16_t effectiveMinutes = timeMinutes < maxTimeMinutes ? timeMinutes : maxTimeMinutes;
+    total += static_cast<uint32_t>(effectiveMinutes) * 60UL;
+  }
+  return total;
+}
+
+void publishRemainingTotalNow() {
+  const uint32_t seconds = computeRemainingTotalSeconds();
+  char payload[12];
+  snprintf(payload, sizeof(payload), "%02lu:%02lu", seconds / 60, seconds % 60);
+  publishAndLog(kMainRemainingTotalTopic, payload, false);  // nicht retained (sekuendlicher Live-Wert)
+}
+
 // V0-Kopplung: V1-V5 ON schaltet V0 mit ein; V1-V5 OFF schaltet V0 nur aus,
 // wenn kein anderes Bewaesserungsventil mehr aktiv ist (siehe docs/requirements.md).
 // Steuert ausserdem den Laufzeit-Countdown (ValveTimer) mit.
@@ -143,12 +187,102 @@ void applyValveCommand(uint8_t index, bool targetOn) {
       publishValveState(0, true);
     }
   } else {
-    ValveTimer::stop(index);
+    // Restlaufzeit-Anzeige auf 0: ob wieder armiert wird (auf `time` zurueck) oder
+    // nicht, entscheidet der Aufrufer - haengt davon ab, ob eine Automatik-Sequenz
+    // damit weitermacht (dann bleibt 0, siehe advanceSequence()) oder nicht
+    // (dann sofort re-armieren, siehe armIdleValve()).
+    ValveTimer::clear(index);
     publishRemaining(index, 0);
     if (!ValveController::anyIrrigationValveActive() && ValveController::getValve(0)) {
       ValveController::setValve(0, false);
       publishValveState(0, false);
     }
+  }
+}
+
+// Armiert ein einzelnes idle Ventil wieder auf seine konfigurierte effektive
+// Laufzeit und publiziert die aktualisierte Restlaufzeit.
+void armIdleValve(uint8_t index) {
+  ValveTimer::reset(index);
+  publishRemaining(index, ValveTimer::getRemainingSeconds(index));
+}
+
+// Alle Ventile wieder armieren - nach Ende einer Automatik-Sequenz (natuerlich
+// oder per main/cmd OFF), siehe docs/requirements.md ("alle Timer auf time zurueck").
+void armAllValves() {
+  for (uint8_t i = 1; i <= 5; i++) {
+    armIdleValve(i);
+  }
+}
+
+// Ruecken der Automatik-Sequenz zum naechsten Ventil vor (nach Zeitablauf ODER
+// manuellem OFF des gerade aktiven Ventils - beides identisch behandelt, siehe
+// docs/spec/07-automatik-sequenz.md). Schaltet das naechste Ventil ein bzw.
+// beendet die Sequenz, wenn die Warteschlange erschoepft ist.
+void advanceSequence() {
+  const uint8_t next = Sequencer::advance();
+  if (next == 0) {
+    publishMainState(false);
+    publishActiveValve(0);
+    armAllValves();  // Sequenz fertig: alle Restlaufzeiten zurueck auf `time`
+  } else {
+    applyValveCommand(next, true);
+    publishActiveValve(next);
+  }
+  publishRemainingTotalNow();
+}
+
+void startSequence() {
+  if (Sequencer::isRunning()) {
+    Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "main/cmd ON ignoriert (Automatik laeuft bereits).");
+    return;
+  }
+
+  uint8_t autoValves[5];
+  uint8_t count = 0;
+  for (uint8_t i = 1; i <= 5; i++) {
+    if (ValveController::getAuto(i)) {
+      autoValves[count++] = i;
+    }
+  }
+
+  if (!Sequencer::start(autoValves, count)) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/cmd ON ignoriert: kein Ventil mit auto=ON.");
+    return;
+  }
+
+  publishMainState(true);
+  const uint8_t first = Sequencer::getActiveValve();
+  applyValveCommand(first, true);
+  publishActiveValve(first);
+  publishRemainingTotalNow();
+}
+
+void stopSequence() {
+  const bool wasRunning = Sequencer::isRunning();
+  const uint8_t active = Sequencer::getActiveValve();
+  if (active != 0) {
+    applyValveCommand(active, false);
+  }
+  Sequencer::stop();
+  publishMainState(false);
+  publishActiveValve(0);
+  if (wasRunning) {
+    armAllValves();  // Sequenz abgebrochen: alle Restlaufzeiten zurueck auf `time`
+  }
+  publishRemainingTotalNow();
+}
+
+void handleMainCmd(const char *payloadStr) {
+  bool targetOn = false;
+  if (!parseOnOffPayload(payloadStr, &targetOn)) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Payload '%s' fuer main/cmd", payloadStr);
+    return;
+  }
+  if (targetOn) {
+    startSequence();
+  } else {
+    stopSequence();
   }
 }
 
@@ -159,7 +293,24 @@ void handleValveCmd(uint8_t index, const char *payloadStr) {
                  index);
     return;
   }
+
+  // Waehrend die Automatik laeuft: manuelles ON ignorieren (siehe
+  // docs/spec/07-automatik-sequenz.md); manuelles OFF des aktiven Ventils
+  // wird angenommen und stoesst den naechsten Schritt der Sequenz an.
+  if (targetOn && Sequencer::isRunning()) {
+    Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "V%u/cmd ON ignoriert (Automatik laeuft).", index);
+    return;
+  }
+
+  const bool wasActiveSequenceValve = Sequencer::isRunning() && Sequencer::getActiveValve() == index;
   applyValveCommand(index, targetOn);
+  if (!targetOn) {
+    if (wasActiveSequenceValve) {
+      advanceSequence();  // Restlaufzeit bleibt 0, bis die ganze Sequenz endet
+    } else {
+      armIdleValve(index);  // normaler manueller Stopp: sofort wieder auf `time` armiert
+    }
+  }
 }
 
 void handleAutoSet(uint8_t index, const char *payloadStr) {
@@ -185,12 +336,26 @@ void handleTimeSet(uint8_t index, const char *payloadStr) {
   const uint16_t minutes = static_cast<uint16_t>(value);
   ConfigStore::setValveTime(index, minutes);
   publishTimeState(index, minutes);
+
+  // Ventil laeuft gerade nicht und es laeuft auch keine Automatik-Sequenz:
+  // angezeigte Restlaufzeit sofort an die neue Konfiguration anpassen (armiert),
+  // statt auf den naechsten Start zu warten. Waehrend einer laufenden Sequenz
+  // NICHT re-armieren - sonst sieht ein bereits durchgelaufenes Ventil so aus,
+  // als waere es noch an der Reihe (siehe armIdleValve()/advanceSequence()).
+  if (!ValveController::getValve(index) && !Sequencer::isRunning()) {
+    armIdleValve(index);
+  }
 }
 
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
   char payloadStr[8];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
   Logger::logf(Logger::Type::SUB, Logger::Source::MQTT, "%s = %s", topic, payloadStr);
+
+  if (strcmp(topic, kMainCmdTopic) == 0) {
+    handleMainCmd(payloadStr);
+    return;
+  }
 
   uint8_t valveIndex = 0;
   if (parseValveTopic(topic, kCmdSuffix, &valveIndex)) {
@@ -208,14 +373,32 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
 // Aufrufstelle in MqttManager::loop()). publish()-Aufrufe sind bei fehlender
 // Verbindung ein sicherer No-Op (PubSubClient liefert dann nur false zurueck).
 void tickValveTimers() {
-  const uint8_t expiredMask = ValveTimer::tick();
+  uint8_t activeMask = 0;
+  for (uint8_t i = 1; i <= 5; i++) {
+    if (ValveController::getValve(i)) {
+      activeMask |= (1 << i);
+    }
+  }
+
+  const uint8_t expiredMask = ValveTimer::tick(activeMask);
   for (uint8_t i = 1; i <= 5; i++) {
     if (ValveController::getValve(i)) {
       publishRemaining(i, ValveTimer::getRemainingSeconds(i));
     }
     if (expiredMask & (1 << i)) {
+      // Zeitablauf des aktiven Sequenz-Ventils wird identisch zu manuellem OFF
+      // behandelt: naechstes Ventil der Automatik-Sequenz uebernehmen.
+      const bool wasActiveSequenceValve = Sequencer::isRunning() && Sequencer::getActiveValve() == i;
       applyValveCommand(i, false);
+      if (wasActiveSequenceValve) {
+        advanceSequence();  // Restlaufzeit bleibt 0, bis die ganze Sequenz endet
+      } else {
+        armIdleValve(i);  // normaler Zeitablauf ausserhalb einer Sequenz: sofort re-armiert
+      }
     }
+  }
+  if (Sequencer::isRunning()) {
+    publishRemainingTotalNow();
   }
 }
 
@@ -224,6 +407,7 @@ bool connectToBroker() {
   if (ok) {
     Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "Verbunden.");
     publishAndLog(kAvailabilityTopic, kOnlinePayload, true);
+    mqttClient.subscribe(kMainCmdTopic);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[24];
       char timeSetTopic[32];
@@ -244,6 +428,9 @@ bool connectToBroker() {
       publishAutoState(i, ValveController::getAuto(i));
     }
     publishMaxTime();
+    publishMainState(Sequencer::isRunning());
+    publishActiveValve(Sequencer::getActiveValve());
+    publishRemainingTotalNow();
   }
   return ok;
 }

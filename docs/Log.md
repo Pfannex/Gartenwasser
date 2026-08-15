@@ -81,8 +81,31 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Neue Idee: mehrere benannte Presets (`time` **und** `auto` je Ventil, z. B. `SHORT`/`MEDIUM`/`LONG`/`TEST`) als Array in `config.json`, auswählbar per `main/program/cmd <integer>`, `main/program/state` zeigt den aktiven Index (Phase 14, `docs/spec/14-programme.md`). `auto` bewusst mit im Programm, um z. B. „nur Rasen, nicht die Beete" abzubilden — Auswahl überschreibt einmalig, kein dauerhaftes Lock.
 - Als Ausblick weit hinten im Backlog: ein Wochenplan/Scheduler (Phase 15, `docs/spec/15-wochenplan.md`, „on top" auf Sequencer + Programme), der pro Wochentag automatisch ein Programm anwendet und `main/cmd ON` zu einer konfigurierten Uhrzeit auslöst. Bewusst grob/unentschieden dokumentiert (offene Fragen: Startzeit pro Tag oder global, Verhalten bei verpasstem Trigger, ...) — Zweck ist, dass die Umsetzung von Phase 7/14 nicht in eine Richtung läuft, die das später erschwert.
 
+### Phase 7 — Automatik-Sequenz umgesetzt
+
+- `Sequencer` (`src/Sequencer.h/.cpp`, neu): reine Warteschlange + Cursor (kein Ventil-/MQTT-Wissen), analog zu `ValveTimer`.
+- `MqttManager`: `main/cmd ON` baut die Warteschlange aus allen Ventilen mit `auto=ON` (V1→V5) und startet das erste; `main/cmd OFF` schaltet das aktive Ventil aus und resettet. `main/state`/`main/activeValve` (retained), `main/remainingTotal` (sekündlich, nicht retained) published.
+- Manuelles `V{n}/cmd ON` wird während der Automatik ignoriert; manuelles `V{n}/cmd OFF` des aktiven Ventils wird angenommen und rückt die Sequenz sofort weiter — identisch zum Zeitablauf-Fall (beide Pfade über `advanceSequence()`).
+- Getestet auf Hardware: Sequenzverlauf, vorzeitiges Weiterschalten per manuellem OFF, Abbruch per `main/cmd OFF` — alles wie spezifiziert.
+
+### Retained Broker-Leichen bereinigt
+
+- Alte truncated Topics (`gartenwasser/V{n}/auto/st`, vom Buffer-Bug aus Phase 6) waren noch als retained Messages auf dem Broker vorhanden, obwohl der Code-Fix schon lief. Per kurzem Python/paho-mqtt-Skript alle 23 retained Topics unter `gartenwasser/#` ermittelt und gelöscht (leerer retained Payload je Topic) — Board publiziert die korrekten Werte beim nächsten (Re-)Connect automatisch neu.
+
+### Restlaufzeit-Semantik verfeinert: idle = time, aber nicht waehrend laufender Sequenz
+
+- Ursprünglicher Phase-5-Nachtrag (idle Ventil zeigt `remaining = time` statt `00:00`, siehe oben) hatte eine Lücke: waehrend eine Automatik-Sequenz noch läuft, sahen bereits durchgelaufene Ventile durch das Re-Armieren wieder wie "noch an der Reihe" aus.
+- Fix: `ValveTimer` bekommt `clear(index)` (Restlaufzeit auf 0) zusaetzlich zu `reset(index)` (auf konfigurierte Zeit). `applyValveCommand`s OFF-Zweig setzt jetzt immer erst `clear()`; die Aufrufer entscheiden: Ventil war aktives Sequenz-Ventil → bleibt 0 bis Sequenz-Ende (`advanceSequence()`), sonst sofort `armIdleValve()` (zurück auf `time`). Sequenz-Ende (Warteschlange erschöpft oder `main/cmd OFF`) → `armAllValves()`, alle fünf Ventile zurück auf `time` (deckt sich mit der Original-Anforderung in `requirements.md`).
+- `handleTimeSet()`s Idle-Refresh greift jetzt nur noch, wenn keine Sequenz läuft — sonst würde ein `time/set` auf ein bereits durchgelaufenes Ventil es faelschlich wieder auf "time" (= "noch an der Reihe") springen lassen.
+- Getestet auf Hardware, vom Nutzer bestätigt ("passt jetzt").
+
+### Backlog-Erweiterung: Phase 15 von Wochenplan zu generischem Zeitplan/Scheduler
+
+- Tages- und Wochenplan sind keine getrennten Features, sondern beides Trigger-Typen (`daily`/`weekly`/`once`) desselben Zeitplan-Mechanismus: eine beliebig lange, über `main/config/set` editierbare Liste von Einträgen (Trigger-Regel + Programm-Referenz aus Phase 14), nicht auf 7 feste Wochentags-Slots begrenzt. Deckt „jeden Tag 21:00 Uhr", „jeden Dienstag" und „genau am 01.02.26, 11:00 Uhr" ab.
+- Zusätzliche offene Fragen ergänzt: Umgang mit einmaligen (`once`-)Triggern nach dem Feuern, Konflikte bei zeitgleichen Triggern. `docs/spec/15-wochenplan.md` entsprechend erweitert (Dateiname unverändert gelassen, um Verweise nicht zu brechen).
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 7 (Automatik-Sequenz, `main/cmd`, `Sequencer`) ist der nächste inhaltliche Schritt.
+- Phase 8 (Diagnostics, `i2cStatus`/`lastError`) ist der nächste inhaltliche Schritt.
 - Phase 11 (`main/config/set`/`state`) ist neu gefasst, aber noch nicht implementiert — baut auf Phase 5/6 auf, zeitlich flexibel einordbar.
-- Phase 14 (Bewässerungsprogramme) und Phase 15 (Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.
+- Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.
