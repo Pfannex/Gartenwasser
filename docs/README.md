@@ -21,3 +21,5 @@
 | [11](spec/11-sammelbefehle.md) | Konfiguration per JSON (`main/config/set`/`state`) | 📋 |
 | [12](spec/12-aufraeumen.md) | Aufräumen/Refactoring | 📋 (teils vorgezogen) |
 | [13](spec/13-touch-ui.md) | Touch-UI (Automatik-Toggle & Statusanzeige) | 📋 |
+| [14](spec/14-programme.md) | Bewässerungsprogramme (`main/program/cmd`/`state`) | 📋 (Backlog) |
+| [15](spec/15-wochenplan.md) | Wochenplan (Scheduler auf Programme + Sequencer) | 📋 (Backlog, grob skizziert) |

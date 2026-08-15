@@ -173,6 +173,7 @@ Discovery-Configs werden retained unter `homeassistant/<component>/gartenwasser/
 ## Entscheidungshistorie
 
 - Konfiguration per MQTT (2026-08-15): statt eines separaten `main/reset`-Topics mit fest hinterlegten Presets (`DEFAULT`/`TEST`) gibt es `main/config/set`/`main/config/state` (volle Konfiguration als JSON, lesen/schreiben, Teil-Updates möglich). Presets sind damit einfach extern gespeicherte JSON-Payloads statt Firmware-Code. Ersetzt außerdem die für Phase 11 geplanten Sammel-Befehle `main/time/set`/`main/auto/set`. Noch nicht implementiert (siehe `docs/spec/11-sammelbefehle.md`).
+- Bewässerungsprogramme im Backlog ergänzt (2026-08-15): benannte Presets (`time` **und** `auto` je Ventil, z. B. `SHORT`/`MEDIUM`/`LONG`/`TEST`) als Array in `config.json`, auswählbar per `main/program/cmd <integer>` (Phase 14, baut auf Phase 7 + Phase 11 auf). `auto` bewusst mit im Programm, um z. B. „nur Rasen, nicht die Beete” abzubilden. Zusätzlich als noch weiter entfernter Ausblick ein Wochenplan/Scheduler (Phase 15, „on top”, baut auf Phase 7 + 14 auf) — bewusst früh dokumentiert, damit die Umsetzung von Sequencer (Phase 7) und Programmen (Phase 14) nicht in eine Richtung läuft, die einen späteren Scheduler erschwert. Beide noch nicht implementiert (siehe `docs/spec/14-programme.md`, `docs/spec/15-wochenplan.md`).
 
 Ursprünglich als „Offene Punkte” zur Diskussion gestellt, mittlerweile entschieden und oben in die jeweiligen Abschnitte eingearbeitet (Datum: 2026-08-14):
 
