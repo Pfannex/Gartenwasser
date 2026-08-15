@@ -69,6 +69,26 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
 - Bewusst nicht retained (das `set`-Topic): ein Broker-Neustart oder erneutes Subscriben darf keine alte Konfiguration versehentlich erneut anwenden.
 - Ersetzt die ursprünglich für Phase 11 vorgesehenen Sammel-Befehle `main/time/set`/`main/auto/set` (JSON) — deckt deren Funktion vollständig ab, ohne pro Domäne ein eigenes Topic zu brauchen.
 
+**Vollständiges Beispiel** (alle Elemente — genau die Struktur, die `main/config/state` liefert; ein `set` kann jede beliebige Teilmenge davon enthalten):
+
+```json
+{
+  "time": {"V1": 5, "V2": 10, "V3": 5, "V4": 15, "V5": 5},
+  "auto": {"V1": true, "V2": true, "V3": false, "V4": true, "V5": false},
+  "alias": {
+    "V0": "Hauptventil",
+    "V1": "Rasen Vorgarten",
+    "V2": "Rasen Garten",
+    "V3": "Beet Rosen",
+    "V4": "Beet Gemüse",
+    "V5": "Kübelpflanzen"
+  },
+  "maxTime": 30
+}
+```
+
+`alias` enthält zusätzlich `V0` (Hauptventil); `time`/`auto` gibt es nur für `V1`–`V5`. Details siehe `docs/spec/11-sammelbefehle.md`.
+
 ### Touch-UI (Phase 13, geplant)
 
 - Toggle-Button „AUTO“/„OFF“ auf dem Display, gekoppelt an `main/cmd`.
