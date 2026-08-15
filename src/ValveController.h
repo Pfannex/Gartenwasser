@@ -25,4 +25,9 @@ class ValveController {
   /// Liefert true, wenn mindestens eines der Bewaesserungsventile V1-V5 eingeschaltet ist
   /// (fuer die V0-Kopplung: V0 bleibt an, solange irgendein Ventil aktiv ist).
   static bool anyIrrigationValveActive();
+
+  /// Automatik-Flag von Ventil `index` (1..5): Teilnahme an der Automatik-Sequenz (Phase 7).
+  /// Persistiert via ConfigStore, hat vorerst noch keine Funktion.
+  static bool getAuto(uint8_t index);
+  static void setAuto(uint8_t index, bool on);
 };

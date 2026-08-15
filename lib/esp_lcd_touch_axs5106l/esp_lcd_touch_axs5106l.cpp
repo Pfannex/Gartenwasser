@@ -61,14 +61,6 @@ void bsp_touch_init(TwoWire *touch_i2c,int tp_rst, int tp_int, uint16_t rotation
     delay(300);
 
     attachInterrupt(tp_int, touch_int_cb, FALLING);
-
-    uint8_t data[5] = {0};
-    touch_i2c_read(AXS5106L_ADDR, AXS5106L_ID_REG, data, 3);
-    if (data[0] != 0){
-        Serial.print("read: ");
-        Serial.print(data[0]);Serial.print(data[1]);Serial.print(data[2]);
-        Serial.println();
-    }
 }
 
 

@@ -10,19 +10,24 @@ namespace {
 constexpr const char *kConfigPath = "/config.json";
 constexpr uint16_t kDefaultValveTimeMinutes = 5;
 constexpr uint16_t kDefaultMaxTimeMinutes = 60;
+constexpr bool kDefaultValveAuto = false;
 
-// Index 0 ungenutzt (V0 hat keine eigene Laufzeit).
+// Index 0 ungenutzt (V0 hat keine eigene Laufzeit/Automatik).
 uint16_t valveTimeMinutes[6] = {0, kDefaultValveTimeMinutes, kDefaultValveTimeMinutes, kDefaultValveTimeMinutes,
                                  kDefaultValveTimeMinutes, kDefaultValveTimeMinutes};
+bool valveAuto[6] = {kDefaultValveAuto, kDefaultValveAuto, kDefaultValveAuto, kDefaultValveAuto,
+                      kDefaultValveAuto, kDefaultValveAuto};
 uint16_t maxTimeMinutes = kDefaultMaxTimeMinutes;
 
 void save() {
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<384> doc;
   JsonObject time = doc.createNestedObject("time");
+  JsonObject autoFlags = doc.createNestedObject("auto");
   for (uint8_t i = 1; i <= 5; i++) {
     char key[3];
     snprintf(key, sizeof(key), "V%u", i);
     time[key] = valveTimeMinutes[i];
+    autoFlags[key] = valveAuto[i];
   }
   doc["maxTime"] = maxTimeMinutes;
 
@@ -46,7 +51,7 @@ void load() {
     return;
   }
 
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<384> doc;
   const DeserializationError err = deserializeJson(doc, file);
   file.close();
   if (err) {
@@ -55,10 +60,12 @@ void load() {
   }
 
   JsonObjectConst time = doc["time"];
+  JsonObjectConst autoFlags = doc["auto"];
   for (uint8_t i = 1; i <= 5; i++) {
     char key[3];
     snprintf(key, sizeof(key), "V%u", i);
     valveTimeMinutes[i] = time[key] | kDefaultValveTimeMinutes;
+    valveAuto[i] = autoFlags[key] | kDefaultValveAuto;
   }
   maxTimeMinutes = doc["maxTime"] | kDefaultMaxTimeMinutes;
 }
@@ -94,5 +101,20 @@ uint16_t ConfigStore::getMaxTime() {
 
 void ConfigStore::setMaxTime(uint16_t minutes) {
   maxTimeMinutes = minutes;
+  save();
+}
+
+bool ConfigStore::getValveAuto(uint8_t index) {
+  if (index < 1 || index > 5) {
+    return false;
+  }
+  return valveAuto[index];
+}
+
+void ConfigStore::setValveAuto(uint8_t index, bool on) {
+  if (index < 1 || index > 5) {
+    return;
+  }
+  valveAuto[index] = on;
   save();
 }

@@ -1,5 +1,6 @@
 #include "ValveController.h"
 
+#include "ConfigStore.h"
 #include "I2CManager.h"
 #include "Logger.h"
 
@@ -51,4 +52,12 @@ bool ValveController::anyIrrigationValveActive() {
     }
   }
   return false;
+}
+
+bool ValveController::getAuto(uint8_t index) {
+  return ConfigStore::getValveAuto(index);
+}
+
+void ValveController::setAuto(uint8_t index, bool on) {
+  ConfigStore::setValveAuto(index, on);
 }

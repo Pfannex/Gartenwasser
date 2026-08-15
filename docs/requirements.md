@@ -61,6 +61,14 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
 
 - Alle Einstellwerte (`time`, `auto`, `alias`, `maxTime`) werden dauerhaft im Flash-Dateisystem (SPIFFS) gespeichert und überleben einen Neustart.
 
+### Konfiguration (Backup/Restore, Presets)
+
+- `main/config/set` (JSON, **nicht** retained) setzt die komplette Konfiguration (`time`, `auto`, `maxTime`, später `alias`) oder einen Teil davon — fehlende Keys bleiben unverändert (kein Rücksprung auf Defaults). Struktur identisch zur internen `ConfigStore`-Persistenz, z. B. `{"time":{"V1":5,"V2":10},"auto":{"V3":true},"maxTime":30}`. Validierung wie bei den einzelnen `V{n}/time/set`/`auto/set`-Topics (ungültige Werte ignorieren + loggen statt übernehmen).
+- `main/config/state` (JSON, retained) publiziert die aktuelle Gesamt-Konfiguration — bei jeder Änderung und nach jedem (Re-)Connect.
+- Zweck: schneller, reproduzierbarer Ausgangszustand für Tests und im laufenden Betrieb, ohne fest im Firmware-Code hinterlegte Presets — „Default“- oder „Test“-Konfigurationen sind einfach extern gespeicherte JSON-Payloads, die bei Bedarf auf `main/config/set` publiziert werden.
+- Bewusst nicht retained (das `set`-Topic): ein Broker-Neustart oder erneutes Subscriben darf keine alte Konfiguration versehentlich erneut anwenden.
+- Ersetzt die ursprünglich für Phase 11 vorgesehenen Sammel-Befehle `main/time/set`/`main/auto/set` (JSON) — deckt deren Funktion vollständig ab, ohne pro Domäne ein eigenes Topic zu brauchen.
+
 ### Touch-UI (Phase 13, geplant)
 
 - Toggle-Button „AUTO“/„OFF“ auf dem Display, gekoppelt an `main/cmd`.
@@ -69,35 +77,37 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
 ## MQTT-Topic-Struktur
 
 ```
-gartenwasser/
-├── availability                    online|offline    (LWT)
-├── V0/
-│   └── state                       ON|OFF             (read-only)
-├── V1/ .. V5/
-│   ├── state                       ON|OFF             (read-only, Ist-Zustand)
-│   ├── cmd                         ON|OFF             (Befehl, von HA)
-│   ├── alias                       "Rasen Seite"      (Klartextname)
-│   │   └── set                     "Text"             (Editieren des Alias-Namens)
-│   ├── time/
-│   │   ├── state                   <Minuten>          (aktuell eingestellte Laufzeit)
-│   │   ├── set                     <Minuten>          (Befehl, von HA)
-│   │   └── remaining               mm:ss              (Restlaufzeit, Sekundentakt)
-│   └── auto/
-│       ├── state                   ON|OFF             (Automatik-Flag Ist)
-│       └── set                     ON|OFF             (Automatik-Flag Befehl)
-├── main/
-│   ├── cmd                         ON|OFF             (Start/Stop Befehl)
-│   ├── state                       ON|OFF             (Sequenz läuft?)
-│   ├── activeValve                 "V1".."V5" | "-"   (aktives Ventil)
-│   ├── remainingTotal              mm:ss              (Restzeit der gesamten Sequenz)
-│   ├── time/
-│   │   ├── set                     JSON               (Sammel-Befehl, setzt maxTime + time/set mehrerer Ventile)
-│   │   └── maxTime                 <Minuten>          (Obergrenze pro Ventil, effektive Laufzeit = min(time, maxTime))
-│   └── auto
-│       └── set                     JSON               (Sammel-Befehl, setzt auto/set mehrerer Ventile)
-└── diagnostics/
-    ├── i2cStatus                   ok|error           (Status i2cBus / MCP23017)
-    └── lastError                   <Text/Zeitstempel> (letzte Fehlermeldung)
+TOPIC                  | RETAIN | VALUE              | DESCRIPTION
+------------------------------------------------------------------
+gartenwasser/          |        |                    |
+├── availability       | ja     | online|offline     | LWT
+├── V0/                |        |                    |
+│   └── state          | ja     | ON|OFF             | read-only
+├── V1/ .. V5/         |        |                    |
+│   ├── state          | ja     | ON|OFF             | read-only, Ist-Zustand
+│   ├── cmd            | nein   | ON|OFF             | Befehl, von HA
+│   ├── alias          | ja     | "Rasen Seite"      | Klartextname
+│   │   └── set        | nein   | "Text"             | Editieren des Alias-Namens
+│   ├── time/          |        |                    |
+│   │   ├── state      | ja     | <Minuten>          | aktuell eingestellte Laufzeit
+│   │   ├── set        | nein   | <Minuten>          | Befehl, von HA
+│   │   └── remaining  | nein   | mm:ss              | Restlaufzeit, Sekundentakt
+│   └── auto/          |        |                    |
+│       ├── state      | ja     | ON|OFF             | Automatik-Flag Ist
+│       └── set        | nein   | ON|OFF             | Automatik-Flag Befehl
+├── main/              |        |                    |
+│   ├── cmd            | nein   | ON|OFF             | Start/Stop Befehl
+│   ├── state          | ja     | ON|OFF             | Sequenz läuft?
+│   ├── activeValve    | ja     | "V1".."V5"|"-"     | aktives Ventil
+│   ├── remainingTotal | nein   | mm:ss              | Restzeit der gesamten Sequenz
+│   ├── time/          |        |                    |
+│   │   └── maxTime    | ja     | <Minuten>          | Obergrenze pro Ventil, effektive Laufzeit = min(time, maxTime)
+│   └── config/        |        |                    |
+│       ├── set        | nein   | JSON               | Komplette/Teil-Konfiguration setzen (time/auto/maxTime je Ventil)
+│       └── state      | ja     | JSON               | Aktuelle Gesamt-Konfiguration (retained, Backup/Restore, Presets)
+└── diagnostics/       |        |                    |
+    ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
+    └── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
 ```
 
 ## Zugangsdaten
@@ -162,7 +172,9 @@ Discovery-Configs werden retained unter `homeassistant/<component>/gartenwasser/
 
 ## Entscheidungshistorie
 
-Ursprünglich als „Offene Punkte“ zur Diskussion gestellt, mittlerweile entschieden und oben in die jeweiligen Abschnitte eingearbeitet (Datum: 2026-08-14):
+- Konfiguration per MQTT (2026-08-15): statt eines separaten `main/reset`-Topics mit fest hinterlegten Presets (`DEFAULT`/`TEST`) gibt es `main/config/set`/`main/config/state` (volle Konfiguration als JSON, lesen/schreiben, Teil-Updates möglich). Presets sind damit einfach extern gespeicherte JSON-Payloads statt Firmware-Code. Ersetzt außerdem die für Phase 11 geplanten Sammel-Befehle `main/time/set`/`main/auto/set`. Noch nicht implementiert (siehe `docs/spec/11-sammelbefehle.md`).
+
+Ursprünglich als „Offene Punkte” zur Diskussion gestellt, mittlerweile entschieden und oben in die jeweiligen Abschnitte eingearbeitet (Datum: 2026-08-14):
 
 - Verbindungsabbruch während Automatik/Ventilbetrieb → läuft lokal autonom weiter.
 - Manuelles Ein-/Ausschalten während Automatik → Ein ignoriert, Aus wird angenommen (Sequenz macht mit nächstem Ventil weiter).

@@ -13,6 +13,8 @@ const char *typeToString(Logger::Type type) {
     case Logger::Type::ERROR: return "ERROR";
     case Logger::Type::INFO:  return "INFO ";
     case Logger::Type::DEBUG: return "DEBUG";
+    case Logger::Type::PUB:   return "PUB  ";
+    case Logger::Type::SUB:   return "SUB  ";
   }
   return "?????";
 }
@@ -53,7 +55,7 @@ void Logger::enableRealTime() {
 void Logger::log(Type type, Source source, const char *message) {
   char timestamp[16];
   formatTimestamp(timestamp, sizeof(timestamp));
-  Serial.printf("%s %s %s %s\n", timestamp, typeToString(type), sourceToString(source), message);
+  Serial.printf("%s %s %s %s\n", timestamp, sourceToString(source), typeToString(type), message);
 }
 
 void Logger::logf(Type type, Source source, const char *format, ...) {

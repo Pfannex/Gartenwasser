@@ -21,4 +21,8 @@ class ConfigStore {
   /// Globale Obergrenze in Minuten (main/time/maxTime, effektive Laufzeit = min(time, maxTime)).
   static uint16_t getMaxTime();
   static void setMaxTime(uint16_t minutes);
+
+  /// Automatik-Flag fuer Ventil `index` (1..5): Teilnahme an der Automatik-Sequenz (Phase 7).
+  static bool getValveAuto(uint8_t index);
+  static void setValveAuto(uint8_t index, bool on);
 };

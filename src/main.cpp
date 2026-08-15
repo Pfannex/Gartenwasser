@@ -23,6 +23,10 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
+  // Boot-Trenner, damit im Serial-Monitor klar erkennbar ist, wo ein Neustart beginnt.
+  Serial.println();
+  Serial.println("------------------------------------------------------------");
+
   // Persistente Konfiguration laden (time, maxTime; spaeter auto, alias)
   ConfigStore::begin();
 

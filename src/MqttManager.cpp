@@ -24,6 +24,7 @@ constexpr const char *kMaxTimeTopic = "gartenwasser/main/time/maxTime";
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
 constexpr char kTimeSetSuffix[] = "/time/set";
+constexpr char kAutoSetSuffix[] = "/auto/set";
 
 // Grenzen fuer time/set (Minuten). Obere Grenze ist ein grosszuegiger Sanity-Check,
 // die eigentliche Deckelung der effektiven Laufzeit erfolgt ueber maxTime (ValveTimer).
@@ -42,7 +43,9 @@ constexpr unsigned long kReconnectIntervalMs = 15000;
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
-unsigned long lastAttemptMs = 0;
+// Sorgt dafuer, dass der erste Verbindungsversuch sofort erfolgt (nicht erst
+// 15s nach Boot) - der Reconnect-Intervall-Check greift sonst auch beim allerersten Versuch.
+unsigned long lastAttemptMs = 0 - kReconnectIntervalMs;
 unsigned long lastTickMs = 0;
 bool wasConnected = false;
 
@@ -69,10 +72,28 @@ void copyPayload(const uint8_t *payload, unsigned int length, char *outStr, size
   outStr[copyLen] = '\0';
 }
 
+bool parseOnOffPayload(const char *payloadStr, bool *outOn) {
+  if (strcmp(payloadStr, "ON") == 0) {
+    *outOn = true;
+    return true;
+  }
+  if (strcmp(payloadStr, "OFF") == 0) {
+    *outOn = false;
+    return true;
+  }
+  return false;
+}
+
+// Zentrale Publish-Stelle: sendet und loggt jedes ausgehende MQTT-Ereignis (Type::PUB).
+void publishAndLog(const char *topic, const char *payload, bool retained) {
+  mqttClient.publish(topic, payload, retained);
+  Logger::logf(Logger::Type::PUB, Logger::Source::MQTT, "%s = %s", topic, payload);
+}
+
 void publishValveState(uint8_t index, bool on) {
   char topic[24];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/state", index);
-  mqttClient.publish(topic, on ? "ON" : "OFF", true);
+  publishAndLog(topic, on ? "ON" : "OFF", true);
 }
 
 void publishTimeState(uint8_t index, uint16_t minutes) {
@@ -80,7 +101,7 @@ void publishTimeState(uint8_t index, uint16_t minutes) {
   char payload[8];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/time/state", index);
   snprintf(payload, sizeof(payload), "%u", minutes);
-  mqttClient.publish(topic, payload, true);
+  publishAndLog(topic, payload, true);
 }
 
 void publishRemaining(uint8_t index, uint16_t seconds) {
@@ -88,13 +109,19 @@ void publishRemaining(uint8_t index, uint16_t seconds) {
   char payload[8];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/time/remaining", index);
   snprintf(payload, sizeof(payload), "%02u:%02u", seconds / 60, seconds % 60);
-  mqttClient.publish(topic, payload);  // nicht retained (sekuendlicher Live-Wert)
+  publishAndLog(topic, payload, false);  // nicht retained (sekuendlicher Live-Wert)
 }
 
 void publishMaxTime() {
   char payload[8];
   snprintf(payload, sizeof(payload), "%u", ConfigStore::getMaxTime());
-  mqttClient.publish(kMaxTimeTopic, payload, true);
+  publishAndLog(kMaxTimeTopic, payload, true);
+}
+
+void publishAutoState(uint8_t index, bool on) {
+  char topic[32];
+  snprintf(topic, sizeof(topic), "gartenwasser/V%u/auto/state", index);
+  publishAndLog(topic, on ? "ON" : "OFF", true);
 }
 
 // V0-Kopplung: V1-V5 ON schaltet V0 mit ein; V1-V5 OFF schaltet V0 nur aus,
@@ -126,14 +153,24 @@ void applyValveCommand(uint8_t index, bool targetOn) {
 }
 
 void handleValveCmd(uint8_t index, const char *payloadStr) {
-  if (strcmp(payloadStr, "ON") == 0) {
-    applyValveCommand(index, true);
-  } else if (strcmp(payloadStr, "OFF") == 0) {
-    applyValveCommand(index, false);
-  } else {
+  bool targetOn = false;
+  if (!parseOnOffPayload(payloadStr, &targetOn)) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Payload '%s' fuer V%u/cmd", payloadStr,
                  index);
+    return;
   }
+  applyValveCommand(index, targetOn);
+}
+
+void handleAutoSet(uint8_t index, const char *payloadStr) {
+  bool targetOn = false;
+  if (!parseOnOffPayload(payloadStr, &targetOn)) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Payload '%s' fuer V%u/auto/set", payloadStr,
+                 index);
+    return;
+  }
+  ValveController::setAuto(index, targetOn);
+  publishAutoState(index, targetOn);
 }
 
 void handleTimeSet(uint8_t index, const char *payloadStr) {
@@ -153,12 +190,15 @@ void handleTimeSet(uint8_t index, const char *payloadStr) {
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
   char payloadStr[8];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
+  Logger::logf(Logger::Type::SUB, Logger::Source::MQTT, "%s = %s", topic, payloadStr);
 
   uint8_t valveIndex = 0;
   if (parseValveTopic(topic, kCmdSuffix, &valveIndex)) {
     handleValveCmd(valveIndex, payloadStr);
   } else if (parseValveTopic(topic, kTimeSetSuffix, &valveIndex)) {
     handleTimeSet(valveIndex, payloadStr);
+  } else if (parseValveTopic(topic, kAutoSetSuffix, &valveIndex)) {
+    handleAutoSet(valveIndex, payloadStr);
   } else {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Unbekanntes Topic: '%s'", topic);
   }
@@ -182,14 +222,18 @@ void tickValveTimers() {
 bool connectToBroker() {
   const bool ok = mqttClient.connect(MQTT_CLIENT_ID, kAvailabilityTopic, kAvailabilityQos, true, kOfflinePayload);
   if (ok) {
-    mqttClient.publish(kAvailabilityTopic, kOnlinePayload, true);
+    Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "Verbunden.");
+    publishAndLog(kAvailabilityTopic, kOnlinePayload, true);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[24];
       char timeSetTopic[32];
+      char autoSetTopic[32];
       snprintf(cmdTopic, sizeof(cmdTopic), "gartenwasser/V%u/cmd", i);
       snprintf(timeSetTopic, sizeof(timeSetTopic), "gartenwasser/V%u/time/set", i);
+      snprintf(autoSetTopic, sizeof(autoSetTopic), "gartenwasser/V%u/auto/set", i);
       mqttClient.subscribe(cmdTopic);
       mqttClient.subscribe(timeSetTopic);
+      mqttClient.subscribe(autoSetTopic);
     }
     for (uint8_t i = 0; i < ValveController::kValveCount; i++) {
       publishValveState(i, ValveController::getValve(i));
@@ -197,6 +241,7 @@ bool connectToBroker() {
     for (uint8_t i = 1; i <= 5; i++) {
       publishTimeState(i, ConfigStore::getValveTime(i));
       publishRemaining(i, ValveTimer::getRemainingSeconds(i));
+      publishAutoState(i, ValveController::getAuto(i));
     }
     publishMaxTime();
   }
@@ -226,9 +271,9 @@ void MqttManager::loop() {
   mqttClient.loop();
   const bool connected = mqttClient.connected();
 
-  if (connected && !wasConnected) {
-    Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "Verbunden.");
-  } else if (!connected && wasConnected) {
+  // "Verbunden." wird direkt in connectToBroker() geloggt (vor den Publishes),
+  // hier nur noch die Verbindungsverlust-Erkennung.
+  if (!connected && wasConnected) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "Verbindung verloren.");
   }
   wasConnected = connected;
