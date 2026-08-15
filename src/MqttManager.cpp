@@ -1,5 +1,6 @@
 #include "MqttManager.h"
 
+#include <ArduinoJson.h>
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -31,6 +32,13 @@ constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
 // V0 hat keinen cmd/time/auto, aber einen Alias - eigenes Topic statt ueber
 // parseValveTopic() (das ist bewusst auf V1..V5 begrenzt).
 constexpr const char *kV0AliasSetTopic = "gartenwasser/V0/alias/set";
+constexpr const char *kConfigSetTopic = "gartenwasser/main/config/set";
+constexpr const char *kConfigStateTopic = "gartenwasser/main/config/state";
+
+// Puffergroesse fuer main/config/set (eingehend) und main/config/state
+// (ausgehend) - muss die komplette Konfiguration inkl. aller Aliase fassen
+// (siehe ConfigStore::kJsonDocCapacity, dieselbe Groessenordnung).
+constexpr size_t kConfigJsonCapacity = 768;
 
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
@@ -154,6 +162,19 @@ bool isValidAliasPayload(const char *payloadStr, size_t length) {
     }
   }
   return true;
+}
+
+// Publiziert die komplette aktuelle Konfiguration (time/auto/alias/maxTime)
+// als JSON, retained - bei jeder Aenderung (egal welches Topic) und nach
+// jedem (Re-)Connect (siehe docs/spec/11-sammelbefehle.md).
+void publishConfigState() {
+  char payload[kConfigJsonCapacity];
+  const size_t written = ConfigStore::toJson(payload, sizeof(payload));
+  if (written == 0) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/state: Serialisierung fehlgeschlagen.");
+    return;
+  }
+  publishAndLog(kConfigStateTopic, payload, true);
 }
 
 void publishMainState(bool running) {
@@ -359,6 +380,13 @@ void handleValveCmd(uint8_t index, const char *payloadStr) {
   }
 }
 
+// Kernlogik ohne Payload-Parsing, wiederverwendet von main/config/set
+// (dort kommt der Wert direkt als JSON-Bool statt als ON/OFF-String).
+void applyAutoValue(uint8_t index, bool on) {
+  ValveController::setAuto(index, on);
+  publishAutoState(index, on);
+}
+
 void handleAutoSet(uint8_t index, const char *payloadStr) {
   bool targetOn = false;
   if (!parseOnOffPayload(payloadStr, &targetOn)) {
@@ -366,16 +394,15 @@ void handleAutoSet(uint8_t index, const char *payloadStr) {
                  index);
     return;
   }
-  ValveController::setAuto(index, targetOn);
-  publishAutoState(index, targetOn);
+  applyAutoValue(index, targetOn);
+  publishConfigState();
 }
 
-void handleTimeSet(uint8_t index, const char *payloadStr) {
-  char *endPtr = nullptr;
-  const long value = strtol(payloadStr, &endPtr, 10);
-  if (endPtr == payloadStr || *endPtr != '\0' || value < kMinValveTimeMinutes || value > kMaxValveTimeMinutes) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Wert '%s' fuer V%u/time/set", payloadStr,
-                 index);
+// Kernlogik ohne Payload-Parsing, wiederverwendet von main/config/set
+// (dort kommt der Wert direkt als JSON-Zahl statt als String).
+void applyTimeValue(uint8_t index, long value) {
+  if (value < kMinValveTimeMinutes || value > kMaxValveTimeMinutes) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Wert '%ld' fuer V%u/time", value, index);
     return;
   }
 
@@ -393,18 +420,108 @@ void handleTimeSet(uint8_t index, const char *payloadStr) {
   }
 }
 
-void handleAliasSet(uint8_t index, const char *payloadStr, unsigned int length) {
-  if (!isValidAliasPayload(payloadStr, length)) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Alias '%s' fuer V%u/alias/set", payloadStr,
+void handleTimeSet(uint8_t index, const char *payloadStr) {
+  char *endPtr = nullptr;
+  const long value = strtol(payloadStr, &endPtr, 10);
+  if (endPtr == payloadStr || *endPtr != '\0') {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Wert '%s' fuer V%u/time/set", payloadStr,
                  index);
     return;
   }
-  ValveController::setAlias(index, payloadStr);
-  publishAlias(index, payloadStr);
+  applyTimeValue(index, value);
+  publishConfigState();
+}
+
+// Kernlogik ohne Aufrufkontext, wiederverwendet von main/config/set.
+void applyAliasValue(uint8_t index, const char *alias, unsigned int length) {
+  if (!isValidAliasPayload(alias, length)) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Alias '%s' fuer V%u", alias, index);
+    return;
+  }
+  ValveController::setAlias(index, alias);
+  publishAlias(index, alias);
+}
+
+void handleAliasSet(uint8_t index, const char *payloadStr, unsigned int length) {
+  applyAliasValue(index, payloadStr, length);
+  publishConfigState();
+}
+
+// Kernlogik fuer maxTime - bisher nur ueber main/config/set erreichbar
+// (kein eigenes main/time/set-Topic, siehe docs/spec/11-sammelbefehle.md).
+void applyMaxTimeValue(long value) {
+  if (value < kMinValveTimeMinutes || value > kMaxValveTimeMinutes) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: ungueltiger maxTime-Wert '%ld'", value);
+    return;
+  }
+  ConfigStore::setMaxTime(static_cast<uint16_t>(value));
+  publishMaxTime();
+}
+
+// Erkennt Keys der Form "V<digit>" (z.B. "V1") und liefert den Index, sofern
+// er in [minIndex, maxIndex] liegt. Unbekannte/ausserhalb liegende Keys (z.B.
+// "V9") liefern false, damit der Aufrufer sie ignorieren + loggen kann.
+bool parseValveKey(const char *key, uint8_t minIndex, uint8_t maxIndex, uint8_t *outIndex) {
+  if (key[0] != 'V' || key[1] < '0' || key[1] > '9' || key[2] != '\0') {
+    return false;
+  }
+  const uint8_t index = static_cast<uint8_t>(key[1] - '0');
+  if (index < minIndex || index > maxIndex) {
+    return false;
+  }
+  *outIndex = index;
+  return true;
+}
+
+void handleConfigSet(const char *payloadStr) {
+  StaticJsonDocument<kConfigJsonCapacity> doc;
+  const DeserializationError err = deserializeJson(doc, payloadStr);
+  if (err) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: JSON-Fehler: %s", err.c_str());
+    return;
+  }
+
+  if (!doc["maxTime"].isNull()) {
+    applyMaxTimeValue(doc["maxTime"].as<long>());
+  }
+
+  uint8_t index = 0;
+  JsonObjectConst timeObj = doc["time"];
+  for (JsonPairConst kv : timeObj) {
+    if (parseValveKey(kv.key().c_str(), 1, 5, &index)) {
+      applyTimeValue(index, kv.value().as<long>());
+    } else {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: unbekanntes Ventil '%s' in time",
+                   kv.key().c_str());
+    }
+  }
+
+  JsonObjectConst autoObj = doc["auto"];
+  for (JsonPairConst kv : autoObj) {
+    if (parseValveKey(kv.key().c_str(), 1, 5, &index)) {
+      applyAutoValue(index, kv.value().as<bool>());
+    } else {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: unbekanntes Ventil '%s' in auto",
+                   kv.key().c_str());
+    }
+  }
+
+  JsonObjectConst aliasObj = doc["alias"];
+  for (JsonPairConst kv : aliasObj) {
+    if (parseValveKey(kv.key().c_str(), 0, 5, &index)) {
+      const char *aliasValue = kv.value().as<const char *>();
+      applyAliasValue(index, aliasValue, strlen(aliasValue));
+    } else {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: unbekanntes Ventil '%s' in alias",
+                   kv.key().c_str());
+    }
+  }
+
+  publishConfigState();
 }
 
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
-  char payloadStr[ConfigStore::kAliasMaxLength + 1];
+  char payloadStr[kConfigJsonCapacity];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
   Logger::logf(Logger::Type::SUB, Logger::Source::MQTT, "%s = %s", topic, payloadStr);
 
@@ -414,6 +531,10 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
   }
   if (strcmp(topic, kV0AliasSetTopic) == 0) {
     handleAliasSet(0, payloadStr, length);
+    return;
+  }
+  if (strcmp(topic, kConfigSetTopic) == 0) {
+    handleConfigSet(payloadStr);
     return;
   }
 
@@ -471,6 +592,7 @@ bool connectToBroker() {
     publishAndLog(kAvailabilityTopic, kOnlinePayload, true);
     mqttClient.subscribe(kMainCmdTopic);
     mqttClient.subscribe(kV0AliasSetTopic);
+    mqttClient.subscribe(kConfigSetTopic);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[24];
       char timeSetTopic[32];
@@ -503,6 +625,7 @@ bool connectToBroker() {
     if (Diagnostics::getLastError()[0] != '\0') {
       publishLastError(Diagnostics::getLastError());
     }
+    publishConfigState();
   }
   return ok;
 }
@@ -512,6 +635,9 @@ bool connectToBroker() {
 void MqttManager::begin() {
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(handleMqttMessage);
+  // Default (256 Byte) reicht nicht fuer main/config/set|state (komplette
+  // Konfiguration inkl. aller Aliase als JSON).
+  mqttClient.setBufferSize(1024);
 }
 
 void MqttManager::loop() {

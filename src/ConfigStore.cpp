@@ -27,8 +27,8 @@ bool valveAuto[6] = {kDefaultValveAuto, kDefaultValveAuto, kDefaultValveAuto, kD
 char valveAlias[6][ConfigStore::kAliasMaxLength + 1] = {{0}};
 uint16_t maxTimeMinutes = kDefaultMaxTimeMinutes;
 
-void save() {
-  StaticJsonDocument<kJsonDocCapacity> doc;
+// Baut die JSON-Struktur (identisch fuer SPIFFS-Persistenz und main/config/state).
+void buildJson(JsonDocument &doc) {
   JsonObject time = doc.createNestedObject("time");
   JsonObject autoFlags = doc.createNestedObject("auto");
   JsonObject alias = doc.createNestedObject("alias");
@@ -41,6 +41,11 @@ void save() {
   }
   alias["V0"] = valveAlias[0];
   doc["maxTime"] = maxTimeMinutes;
+}
+
+void save() {
+  StaticJsonDocument<kJsonDocCapacity> doc;
+  buildJson(doc);
 
   File file = SPIFFS.open(kConfigPath, FILE_WRITE);
   if (!file) {
@@ -151,4 +156,10 @@ void ConfigStore::setValveAlias(uint8_t index, const char *alias) {
   strncpy(valveAlias[index], alias, kAliasMaxLength);
   valveAlias[index][kAliasMaxLength] = '\0';
   save();
+}
+
+size_t ConfigStore::toJson(char *buffer, size_t bufferSize) {
+  StaticJsonDocument<kJsonDocCapacity> doc;
+  buildJson(doc);
+  return serializeJson(doc, buffer, bufferSize);
 }

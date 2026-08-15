@@ -35,4 +35,9 @@ class ConfigStore {
   /// (Aufrufer validiert vorher).
   static const char *getValveAlias(uint8_t index);
   static void setValveAlias(uint8_t index, const char *alias);
+
+  /// Serialisiert die aktuelle Gesamt-Konfiguration (time/auto/alias/maxTime) als JSON
+  /// nach `buffer` (dieselbe Struktur wie /config.json). Liefert die Anzahl geschriebener
+  /// Bytes (wie serializeJson()), oder 0 bei Fehler.
+  static size_t toJson(char *buffer, size_t bufferSize);
 };

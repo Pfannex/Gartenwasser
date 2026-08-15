@@ -129,8 +129,18 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Auf Wunsch: erst alles geräteintern fertigstellen, bevor die erste externe Integration (Home Assistant) angegangen wird. Neue Bearbeitungsreihenfolge: 11 (Konfiguration per JSON) → 12 (Aufräumen) → 13 (Touch-UI) → 14 (Programme) → 15 (Zeitplan/Scheduler) → 10 (HA-Discovery, ganz am Ende).
 - Phasennummern/Dateinamen bleiben unverändert, nur die Reihenfolge in `docs/README.md` wurde angepasst (Tabellenreihenfolge = Bearbeitungsreihenfolge, nicht mehr die Nummer). Begründung in `requirements.md`, Entscheidungshistorie.
 
+### Phase 11 — Konfiguration per JSON umgesetzt
+
+- `ConfigStore::toJson()`: serialisiert die komplette Konfiguration, nutzt intern dieselbe `buildJson()`-Struktur wie `save()` (SPIFFS) — kein doppelt gepflegtes Schema.
+- `MqttManager`: `main/config/set` (JSON, Teil-Updates) und `main/config/state` (retained, JSON). Die einzelnen `V{n}/time/set`/`auto/set`/`alias/set`-Handler wurden in reine `apply*Value()`-Kernfunktionen (Validierung + Persistierung + Publish, ohne Payload-Parsing) und dünne `handle*()`-Wrapper (parsen den MQTT-String-Payload) aufgeteilt — `handleConfigSet()` ruft dieselben `apply*Value()`-Funktionen direkt mit den JSON-Werten auf, keine doppelte Validierung.
+- `maxTime` ist jetzt zum ersten Mal setzbar, ausschließlich über `main/config/set` (kein eigenes `main/time/set`, wie geplant).
+- `main/config/state` wird nach jeder Konfigurationsänderung neu publiziert, egal über welches Topic sie kam (auch die Einzel-Topics lösen es aus), sowie nach jedem (Re-)Connect.
+- PubSubClient-Puffer (Default 256 Byte) reicht nicht für die volle Konfiguration inkl. aller Aliase als JSON → `setBufferSize(1024)` in `MqttManager::begin()`.
+- Doku: vollständiges Beispiel (alle Ventile, `time`/`auto`/`alias` inkl. V0, `maxTime`) in `docs/spec/11-sammelbefehle.md` ergänzt.
+- Alle vier Testfälle aus der Spec auf Hardware verifiziert.
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 11 (`main/config/set`/`state`) ist der nächste inhaltliche Schritt.
+- Phase 12 (Aufräumen/Refactoring) ist der nächste inhaltliche Schritt.
 - Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
