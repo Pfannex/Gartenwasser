@@ -115,8 +115,17 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Getestet auf Hardware, vom Nutzer bestätigt ("klappt!!").
 - Nebenbei nachgezogen: `Sequencer`-Zeile in der Architektur-Tabelle (`requirements.md`) war noch nicht auf ✅ aktualisiert; Log-Format-Beispiel (`TYPE CLASS` statt `CLASS TYPE`, fehlendes `PUB`/`SUB`/`SYS`) war veraltet.
 
+### Phase 9 — Alias je Ventil umgesetzt (inkl. V0-Nachtrag)
+
+- `ConfigStore`: `alias`-Werte je Ventil (max. 32 Zeichen, Default leer) persistiert in `/config.json`, JSON-Puffer auf 768 Byte erhöht (Alias-Texte werden beim Laden kopiert, nicht nur referenziert).
+- `ValveController::getAlias()`/`setAlias()` als Facade.
+- `MqttManager`: `V{n}/alias/set` → `V{n}/alias` (retained, bewusst **kein** `/state`-Suffix wie in der Spec). Validierung: max. 32 Zeichen und keine Steuerzeichen (Bytes < 0x20), UTF-8/Umlaute erlaubt.
+- Bug gefunden und gefixt: Längenprüfung lief zunächst gegen den bereits von `copyPayload()` gekürzten String — ein zu langer Alias wäre still gekürzt statt abgelehnt worden. Fix: Validierung nutzt die ursprüngliche Payload-Länge aus dem PubSubClient-Callback.
+- Nachtrag auf Nutzerwunsch: `V0` (Hauptventil) hatte noch keinen Alias (Spec war auf `V1`–`V5` begrenzt). `ConfigStore::getValveAlias()`/`setValveAlias()` erlauben jetzt Index `0..5`; `V0/alias/set` wird in `MqttManager` separat behandelt (nicht über `parseValveTopic()`, das bewusst auf `V1..V5` begrenzt bleibt, da `V0` kein `cmd`/`time`/`auto` hat).
+- Getestet auf Hardware, vom Nutzer bestätigt ("klapp!").
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 9 (Alias je Ventil) ist der nächste inhaltliche Schritt.
+- Phase 10 (Home Assistant MQTT-Discovery) ist der nächste inhaltliche Schritt.
 - Phase 11 (`main/config/set`/`state`) ist neu gefasst, aber noch nicht implementiert — baut auf Phase 5/6 auf, zeitlich flexibel einordbar.
 - Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.

@@ -28,11 +28,15 @@ constexpr const char *kMainActiveValveTopic = "gartenwasser/main/activeValve";
 constexpr const char *kMainRemainingTotalTopic = "gartenwasser/main/remainingTotal";
 constexpr const char *kI2cStatusTopic = "gartenwasser/diagnostics/i2cStatus";
 constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
+// V0 hat keinen cmd/time/auto, aber einen Alias - eigenes Topic statt ueber
+// parseValveTopic() (das ist bewusst auf V1..V5 begrenzt).
+constexpr const char *kV0AliasSetTopic = "gartenwasser/V0/alias/set";
 
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
 constexpr char kTimeSetSuffix[] = "/time/set";
 constexpr char kAutoSetSuffix[] = "/auto/set";
+constexpr char kAliasSetSuffix[] = "/alias/set";
 
 // Grenzen fuer time/set (Minuten). Obere Grenze ist ein grosszuegiger Sanity-Check,
 // die eigentliche Deckelung der effektiven Laufzeit erfolgt ueber maxTime (ValveTimer).
@@ -130,6 +134,26 @@ void publishAutoState(uint8_t index, bool on) {
   char topic[32];
   snprintf(topic, sizeof(topic), "gartenwasser/V%u/auto/state", index);
   publishAndLog(topic, on ? "ON" : "OFF", true);
+}
+
+void publishAlias(uint8_t index, const char *alias) {
+  char topic[24];
+  snprintf(topic, sizeof(topic), "gartenwasser/V%u/alias", index);
+  publishAndLog(topic, alias, true);
+}
+
+// Laenge (siehe ConfigStore::kAliasMaxLength) und Steuerzeichen pruefen. UTF-8-
+// Mehrbyte-Folgen (Umlaute etc., Bytes >= 0x80) sind ausdruecklich erlaubt.
+bool isValidAliasPayload(const char *payloadStr, size_t length) {
+  if (length > ConfigStore::kAliasMaxLength) {
+    return false;
+  }
+  for (size_t i = 0; i < length; i++) {
+    if (static_cast<unsigned char>(payloadStr[i]) < 0x20) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void publishMainState(bool running) {
@@ -369,13 +393,27 @@ void handleTimeSet(uint8_t index, const char *payloadStr) {
   }
 }
 
+void handleAliasSet(uint8_t index, const char *payloadStr, unsigned int length) {
+  if (!isValidAliasPayload(payloadStr, length)) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Alias '%s' fuer V%u/alias/set", payloadStr,
+                 index);
+    return;
+  }
+  ValveController::setAlias(index, payloadStr);
+  publishAlias(index, payloadStr);
+}
+
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
-  char payloadStr[8];
+  char payloadStr[ConfigStore::kAliasMaxLength + 1];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
   Logger::logf(Logger::Type::SUB, Logger::Source::MQTT, "%s = %s", topic, payloadStr);
 
   if (strcmp(topic, kMainCmdTopic) == 0) {
     handleMainCmd(payloadStr);
+    return;
+  }
+  if (strcmp(topic, kV0AliasSetTopic) == 0) {
+    handleAliasSet(0, payloadStr, length);
     return;
   }
 
@@ -386,6 +424,8 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
     handleTimeSet(valveIndex, payloadStr);
   } else if (parseValveTopic(topic, kAutoSetSuffix, &valveIndex)) {
     handleAutoSet(valveIndex, payloadStr);
+  } else if (parseValveTopic(topic, kAliasSetSuffix, &valveIndex)) {
+    handleAliasSet(valveIndex, payloadStr, length);
   } else {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Unbekanntes Topic: '%s'", topic);
   }
@@ -430,24 +470,30 @@ bool connectToBroker() {
     Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "Verbunden.");
     publishAndLog(kAvailabilityTopic, kOnlinePayload, true);
     mqttClient.subscribe(kMainCmdTopic);
+    mqttClient.subscribe(kV0AliasSetTopic);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[24];
       char timeSetTopic[32];
       char autoSetTopic[32];
+      char aliasSetTopic[32];
       snprintf(cmdTopic, sizeof(cmdTopic), "gartenwasser/V%u/cmd", i);
       snprintf(timeSetTopic, sizeof(timeSetTopic), "gartenwasser/V%u/time/set", i);
       snprintf(autoSetTopic, sizeof(autoSetTopic), "gartenwasser/V%u/auto/set", i);
+      snprintf(aliasSetTopic, sizeof(aliasSetTopic), "gartenwasser/V%u/alias/set", i);
       mqttClient.subscribe(cmdTopic);
       mqttClient.subscribe(timeSetTopic);
       mqttClient.subscribe(autoSetTopic);
+      mqttClient.subscribe(aliasSetTopic);
     }
     for (uint8_t i = 0; i < ValveController::kValveCount; i++) {
       publishValveState(i, ValveController::getValve(i));
     }
+    publishAlias(0, ValveController::getAlias(0));
     for (uint8_t i = 1; i <= 5; i++) {
       publishTimeState(i, ConfigStore::getValveTime(i));
       publishRemaining(i, ValveTimer::getRemainingSeconds(i));
       publishAutoState(i, ValveController::getAuto(i));
+      publishAlias(i, ValveController::getAlias(i));
     }
     publishMaxTime();
     publishMainState(Sequencer::isRunning());

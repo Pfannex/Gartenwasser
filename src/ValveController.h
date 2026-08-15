@@ -30,4 +30,8 @@ class ValveController {
   /// Persistiert via ConfigStore, hat vorerst noch keine Funktion.
   static bool getAuto(uint8_t index);
   static void setAuto(uint8_t index, bool on);
+
+  /// Klartextname (Alias) von Ventil `index` (0=V0 .. 5=V5). Persistiert via ConfigStore.
+  static const char *getAlias(uint8_t index);
+  static void setAlias(uint8_t index, const char *alias);
 };

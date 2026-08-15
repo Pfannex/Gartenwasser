@@ -82,7 +82,9 @@ TOPIC                  | RETAIN | VALUE              | DESCRIPTION
 gartenwasser/          |        |                    |
 ├── availability       | ja     | online|offline     | LWT
 ├── V0/                |        |                    |
-│   └── state          | ja     | ON|OFF             | read-only
+│   ├── state          | ja     | ON|OFF             | read-only
+│   ├── alias          | ja     | "Hauptventil"      | Klartextname
+│   └── alias/set      | nein   | "Text"             | Editieren des Alias-Namens
 ├── V1/ .. V5/         |        |                    |
 │   ├── state          | ja     | ON|OFF             | read-only, Ist-Zustand
 │   ├── cmd            | nein   | ON|OFF             | Befehl, von HA

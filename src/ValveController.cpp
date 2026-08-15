@@ -61,3 +61,11 @@ bool ValveController::getAuto(uint8_t index) {
 void ValveController::setAuto(uint8_t index, bool on) {
   ConfigStore::setValveAuto(index, on);
 }
+
+const char *ValveController::getAlias(uint8_t index) {
+  return ConfigStore::getValveAlias(index);
+}
+
+void ValveController::setAlias(uint8_t index, const char *alias) {
+  ConfigStore::setValveAlias(index, alias);
+}
