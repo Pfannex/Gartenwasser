@@ -109,6 +109,11 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 - Verhältnis zu manuellem `main/cmd ON`/`OFF` während eines geplant ausgelösten Laufs — vermutlich identisch zur bestehenden Regel „manuelles Aus wird angenommen, Sequenz macht weiter" (siehe `docs/requirements.md`), plus der neue Kollisions-Hinweis oben.
 - Exakte Topic-Benennung für die Cleanup-Funktion.
 
+### Nutzer-Merker (2026-08-16, für die nächste Session)
+
+1. **Eigenes Fehler-Topic für die Zeitplan-Validierung** (Arbeitstitel `main/schedule/settingsError`): für kollidierende Trigger (siehe offene Frage oben) und allgemeine Konfigurationsfehler beim Verarbeiten von `main/schedule/set` — eigener, schedule-spezifischer Kanal statt (oder zusätzlich zu) dem generischen `diagnostics/lastError`. Exakte Abgrenzung zu `lastError` (ersetzt es für Schedule-Fehler oder ergänzt es?) noch zu klären.
+2. **Noch genauer erläutern: Verhältnis Liste vs. minütlicher Prüfloop.** Wie genau der Scheduler die `schedule`-Liste gegen die aktuelle Zeit prüft (jede Minute komplett durchlaufen? Nächsten fälligen Trigger vorausberechnen und nur den vergleichen? Wie wirkt sich das auf den Kollisions-Hinweis und die „nächster Trigger"-Berechnung aus?) — für die nächste Session vertiefen, bevor die Umsetzung beginnt.
+
 ## Zweck des Eintrags
 
 Bewusst früh im Backlog dokumentiert, damit Entscheidungen in den vorherigen Phasen (v. a. Sequencer/Phase 7, Konfiguration/Phase 11, Programme/Phase 14) nicht in eine Richtung laufen, die einen späteren, generischen Scheduler erschwert.
