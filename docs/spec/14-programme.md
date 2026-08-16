@@ -4,7 +4,7 @@
 
 ## Ziel
 
-Mehrere benannte Presets (`time` **und** `auto` je Ventil) im Gerät speichern und per einfachem Integer-Befehl auswählen. Maximale Flexibilität: ein Programm bestimmt nicht nur *wie lange*, sondern auch *welche* Ventile überhaupt teilnehmen (z. B. „nur Rasen, nicht die Beete“). Die Touch-UI-Buttons `P1`–`P4` (Phase 13, bereits vorhanden, aktuell ohne Funktion) werden an die ersten vier Programme angebunden — dieser Teil folgt in einem eigenen Schritt nach der Config selbst.
+Mehrere benannte Presets (`time` **und** `auto` je Ventil) im Gerät speichern und per einfachem Integer-Befehl auswählen. Maximale Flexibilität: ein Programm bestimmt nicht nur *wie lange*, sondern auch *welche* Ventile überhaupt teilnehmen (z. B. „nur Rasen, nicht die Beete“). Die Touch-UI-Buttons `P1`–`P4` (Phase 13) sind über das `shortcut`-Feld an frei wählbare Programme gebunden (nicht zwingend die ersten vier).
 
 ## Voraussetzungen
 
@@ -62,17 +62,18 @@ Eigene Datei/eigenes Topic bedeutet: `ConfigStore::kJsonCapacity` für `config.j
 - `ConfigStore`: neue Datei `/programs.json` (eigenes Load/Save/`toJson()`, analog zu `config.json`), `programs`-Array + `activeProgram`, neue Getter (`getProgramCount()`, `getProgramName(index)`, `getProgramValveTime(index, valve)`, `getProgramValveAuto(index, valve)`, `getActiveProgram()`/`setActiveProgram()`).
 - `MqttManager`: `main/program/cmd`-Handler wendet das Programm an (Schleife über V1–V5, `applyTimeValue()`/`applyAutoValue()` wiederverwenden), publiziert `main/program/state` und `main/programs/state`. Zusätzlich `main/programs/set`-Handler (Bulk-JSON, Array-Replace + optional `activeProgram`) mit zugehörigem `main/programs/state`-Publish.
 
-### Noch offen: `P1`–`P4`-Anbindung (eigener Schritt, 2026-08-16 im Design ergänzt)
+### `P1`–`P4`-Anbindung umgesetzt (2026-08-16)
 
-- `ConfigStore`: `ProgramInput`/internes `StoredProgram` um `shortcut`-Feld (`uint8_t`, 0/1–4) erweitern, `buildProgramsJson()`/Laden entsprechend um den `"shortcut"`-Key ergänzen (String `"P1"`–`"P4"` ↔ `1`–`4`, ungültig ↔ `0`/ignoriert). Neue Funktion `getProgramIndexForShortcut(uint8_t shortcut)` — linearer Scan über `getProgramCount()` Einträge (max. 8, trivial billig), liefert den 1-basierten Programm-Index des **ersten** Treffers oder `0`. Duplikat-Erkennung (für den Log-Hinweis) direkt in `setPrograms()`, da dort ohnehin einmalig über das komplette neue Array iteriert wird.
-- `MqttManager`: `setPrograms()`-Aufruf in `handleProgramsSet()` um die Duplikat-Prüfung/Log ergänzen (kein Verhalten ändern, nur Logging).
-- `HmiManager`: `P1`–`P4`-Button-Handler ruft `ConfigStore::getProgramIndexForShortcut()` und wendet das Ergebnis über denselben Pfad wie `main/program/cmd` an (`MqttManager`-Funktion analog zu `requestMainCmd()`, kein MQTT-Umweg).
+- `ConfigStore`: `ProgramInput`/internes `StoredProgram` um `shortcut`-Feld (`uint8_t`, 0/1–4) erweitert, `buildProgramsJson()`/Laden lesen/schreiben den `"shortcut"`-Key (String `"P1"`–`"P4"` ↔ `1`–`4`, ungültig ↔ `0`/ignoriert, statische String-Literale statt lokaler Puffer für die JSON-Ausgabe, um Dangling-Pointer beim Serialisieren zu vermeiden). Neue Funktion `getProgramIndexForShortcut(uint8_t shortcut)` — linearer Scan über `getProgramCount()` Einträge, liefert den 1-basierten Programm-Index des **ersten** Treffers oder `0`. Duplikat-Erkennung direkt in `setPrograms()` (dort wird ohnehin einmalig über das komplette neue Array iteriert), Log-Meldung bewusst kurz gehalten (`"Shortcut Px doppelt belegt!"`) statt der ursprünglichen langen Variante, die im 96-Byte-`lastError`-Puffer abgeschnitten wurde.
+- `MqttManager`: `handleProgramsSet()` liest `"shortcut"` je Programm mit ein. Neu: `requestProgramByShortcut(shortcut)` (öffentlich, für Touch) und `requestProgramClear()` (öffentlich, entspricht `main/program/cmd 0`).
+- `HmiManager`: `P1`–`P4`-Button-Handler ruft `ConfigStore::getProgramIndexForShortcut()`; ist das gebundene Programm bereits aktiv, wählt ein erneuter Druck ab (`requestProgramClear()`, Toggle-Verhalten), sonst wird es angewendet (`requestProgramByShortcut()`). Ohne Bindung: transienter Hinweis „P{n} nicht konfiguriert!“. Checked-Status der Buttons wird periodisch aus `ConfigStore::getActiveProgram()` abgeleitet, nicht aus dem lokalen Klick-Zustand — bleibt so auch bei MQTT-Änderungen korrekt. Details siehe `docs/spec/13-touch-ui.md`.
+- **Zusätzlich, im selben Zug entschieden** (nicht ursprünglich Teil des Designs, ergab sich aus dem Hardware-Test): `main/cmd ON` erfordert jetzt ein gewähltes Programm (`activeProgram != 0`), sowohl per Touch als auch per MQTT — siehe `docs/spec/07-automatik-sequenz.md`, Nachtrag, und Entscheidungshistorie in `docs/requirements.md`. Direktes Ventilschalten (`V{n}/cmd`) bleibt davon unberührt.
 
 ## Betroffene Dateien
 
-- `src/ConfigStore.h/.cpp` (neue Datei `/programs.json`, Programme-Array + `activeProgram`)
-- `src/MqttManager.h/.cpp` (Subscribe-Handler `main/program/cmd`, `main/programs/set`, Publish `main/program/state`, `main/programs/state`)
-- `src/HmiManager.h/.cpp` (später: `P1`–`P4`-Anbindung)
+- `src/ConfigStore.h/.cpp` (`/programs.json`, Programme-Array + `activeProgram` + `shortcut`, `getProgramIndexForShortcut()`)
+- `src/MqttManager.h/.cpp` (Subscribe-Handler `main/program/cmd`, `main/programs/set`, Publish `main/program/state`, `main/programs/state`, `requestProgramByShortcut()`, `requestProgramClear()`, Programm-Pflicht in `startSequence()`)
+- `src/HmiManager.h/.cpp` (`P1`–`P4`-Anbindung, Statuszeile/Hinweise, siehe `docs/spec/13-touch-ui.md`)
 
 ## MQTT-Topics
 
@@ -89,9 +90,15 @@ Eigene Datei/eigenes Topic bedeutet: `ConfigStore::kJsonCapacity` für `config.j
 4. `main/program/cmd 0` → `main/program/state` zeigt `{"index":0,"name":null}`, keine Ventile werden angefasst.
 5. Neustart des Boards → zuletzt gewähltes Programm (Index) bleibt als reiner Konfigurationswert erhalten, es wird aber **nichts** automatisch gestartet (sicherer Boot-Grundzustand, siehe `docs/requirements.md`).
 6. `main/programs/set` mit `{"programs":[...]}` → komplettes Array wird ersetzt, `main/programs/state` zeigt den neuen Stand, `main/config/state` bleibt davon unberührt.
+7. `P1`-`P4` am Touch-Display drücken → passendes Programm wird angewendet (Statuszeile zeigt Programmname), erneuter Druck auf den bereits aktiven Button wählt wieder ab (Statuszeile zurück auf „MANUELL“).
+8. `P3`/`P4` ohne `shortcut`-Bindung drücken → transienter Hinweis „P{n} nicht konfiguriert!“, keine Änderung an Ventilen/Auswahl.
+9. 8 Programme laden, eines ohne `shortcut` aktivieren → keiner der `P1`-`P4`-Buttons leuchtet, Statuszeile zeigt trotzdem den Programmnamen.
+10. `main/cmd ON` (Touch **und** MQTT) ohne gewähltes Programm → bleibt wirkungslos (`main/state` bleibt `OFF`), Log-Eintrag `"main/cmd ON ignoriert: kein Programm gewaehlt."`; mit gewähltem Programm startet es normal.
 
 ## Test / Ergebnis
 
 Strukturierte Ergebnistabelle (Prüfpunkt/Test/Ergebnis/Bewertung) siehe **`docs/testing.md`**, Abschnitt „Phase 14 — Bewässerungsprogramme": 14 von 14 Checks bestanden (automatisiert per Python/paho-mqtt gegen den echten Broker, alle 6 Testfälle oben plus ein Bonus-Test für die Teilmengen-Semantik).
 
 **Bug gefunden und gefixt**: `main/programs/set` liess das Board mit einem Stack-Overflow abstuerzen (`Guru Meditation Error: Core 0 panic'ed (Stack protection fault)`, Serial-Monitor-Mitschnitt bestaetigt `Detected in task "loopTask"`). Ursache: mehrere grosse JSON-Puffer (`StaticJsonDocument<2048>`, `char payloadStr[2048]`) gleichzeitig auf dem Stack der Arduino-`loopTask`, deren Default-Groesse (8192 Byte) dafuer nicht mehr reichte. Fix: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp` (RAM-Headroom war reichlich vorhanden, siehe Phase-12-Speicher-Check).
+
+**`P1`–`P4`-Anbindung + Programm-Pflicht (2026-08-16)**: interaktiv auf Hardware getestet (Nutzer bedient Display, Ergebnis per gezielten MQTT-Abfragen gegengeprüft) — alle Testfälle 7–10 oben bestanden. Zweiter, kleinerer Bug unterwegs gefunden und gefixt: die Duplikat-Log-Meldung für Shortcuts wurde im 96-Byte-`lastError`-Puffer abgeschnitten, auf `"Shortcut Px doppelt belegt!"` gekürzt.

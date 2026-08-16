@@ -50,6 +50,26 @@ Alle 10 Punkte damit vor dem produktiven Einsatz abgedeckt.
 
 **Bug gefunden und gefixt**: `main/programs/set` verursachte einen Stack-Overflow-Absturz (`Guru Meditation Error: Core 0 panic'ed (Stack protection fault)` in der `loopTask`, per Serial-Monitor-Mitschnitt bestätigt). Ursache: mehrere 2048-Byte-JSON-Puffer gleichzeitig auf dem mit 8192 Byte knapp bemessenen Standard-Stack. Fix: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp`. Nach Re-Flash liefen alle Tests sauber durch — siehe `docs/spec/14-programme.md` für Details.
 
+## Phase 14 — `P1`–`P4`-Touch-UI-Anbindung + Programm-Pflicht — 2026-08-16
+
+Interaktiv getestet (Nutzer bedient das Touch-Display, Ergebnis per gezielten MQTT-Abfragen/Live-Mitschnitten gegengeprüft statt vollautomatisiertem Skript) — **alle Fälle bestanden**.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | `P1`/`P2` wenden Programm an | Programme „Kurz“ (`shortcut:"P1"`)/„Rasen“ (`shortcut:"P2"`) angelegt, Button gedrückt → `main/program/state` korrekt, `V1/time`/`auto` übernommen | PASS | ✅ |
+| 2 | Duplikat-Log gekürzt | Zwei Programme mit `shortcut:"P1"` gesendet → `lastError` zeigt jetzt vollständig `"Shortcut P1 doppelt belegt!"` statt abgeschnittenem Text | PASS | ✅ |
+| 3 | `P3`/`P4` ohne Bindung | Gedrückt, ohne dass ein Programm diesen `shortcut` hat → keine Auswahl ändert sich (bestätigt vom Nutzer: „gut ist, dass sich P3/P4 nicht anwählen lassen“) | PASS | ✅ |
+| 4 | Hinweis „P{n} nicht konfiguriert!“ | Nach Druck auf unkonfigurierten Button erscheint der Hinweis (orange, 2s) und verschwindet danach wieder | PASS | ✅ |
+| 5 | Programm-Toggle (Abwahl) | Aktives Programm erneut per Button gedrückt → `main/program/state` zurück auf `{"index":0,"name":null}` (bestätigt per MQTT-Abfrage nach Nutzeraktion) | PASS | ✅ |
+| 6 | 8 Programme, aktives ohne Button-Bindung | 8 Programme geladen (4 mit `shortcut`, 4 ohne), Programm 5 („Sommer“, kein `shortcut`) aktiviert → kein `P1`-`P4` leuchtet, Statuszeile zeigt trotzdem „Programm: Sommer“ (vom Nutzer am Display bestätigt) | PASS | ✅ |
+| 7 | `main/cmd ON` ohne Programm blockiert | Programmwahl auf `0` gesetzt, `main/cmd ON` per MQTT gesendet → `main/state` bleibt `OFF`, `lastError` zeigt `"main/cmd ON ignoriert: kein Programm gewaehlt."` | PASS | ✅ |
+| 8 | `main/cmd ON` mit Programm funktioniert normal | Programm 1 gewählt, `main/cmd ON` gesendet → `main/state=ON`, `activeValve=V1`, sauber mit `main/cmd OFF` gestoppt | PASS | ✅ |
+| 9 | „MANUELL“ statt „Bereit“ | Kein Programm gewählt, keine Aktivität → Statuszeile zeigt „MANUELL“ (vom Nutzer am Display bestätigt: „schaut gut aus“) | PASS | ✅ |
+
+**Design-Iteration während des Tests**: Ursprünglich war „Automatik ohne Programm“ nur mit einem nicht-blockierenden Hinweis vorgesehen (main/cmd startet trotzdem). Nach dem ersten Hardware-Test („es läuft auch V1 los, das darf dann nicht sein“) wurde gemeinsam entschieden, `main/cmd ON` stattdessen komplett zu blockieren, wenn kein Programm gewählt ist — siehe `docs/requirements.md`, Entscheidungshistorie 2026-08-16, und `docs/spec/07-automatik-sequenz.md`.
+
+**Nebenbei gefundener Fehler in der eigenen Test-Vorbereitung**: ein erster Versuch, den Resilienztest-Monitor neu zu starten, scheiterte, weil zwei Monitor-Prozesse mit identischer MQTT-Client-ID gleichzeitig liefen (siehe „Manuelle Regressionstest-Punkte“ oben) — hier nochmal relevant, da dieselbe Ursache auch bei einem der Beobachtungsfenster für diesen Test zunächst zu leeren Ergebnissen führte (Fenster lief ab, bevor der Nutzer die Aktion ausgeführt hatte). Behoben durch Wechsel von zeitgesteuerten Beobachtungsfenstern auf einmalige Statusabfragen nach expliziter Nutzerbestätigung.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

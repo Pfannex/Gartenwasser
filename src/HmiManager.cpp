@@ -5,8 +5,8 @@
 #include <Wire.h>
 #include <lvgl.h>
 
+#include "ConfigStore.h"
 #include "Diagnostics.h"
-#include "Logger.h"
 #include "MqttManager.h"
 #include "Sequencer.h"
 #include "ValveController.h"
@@ -172,8 +172,9 @@ void touchpadRead(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 // Sonderlogik), siehe docs/spec/13-touch-ui.md.
 
 constexpr uint8_t kValveCount = 6;  // V0..V5, siehe ValveController::kValveCount
-constexpr uint8_t kProgramButtonCount = 4;  // P1..P4, Platzhalter fuer Phase 14 (Bewaesserungsprogramme)
+constexpr uint8_t kProgramButtonCount = 4;  // P1..P4, wenden das Programm mit passendem "shortcut" an
 constexpr unsigned long kUiRefreshIntervalMs = 250;
+constexpr unsigned long kProgramHintDurationMs = 2000;  // Anzeigedauer fuer "P{n} nicht konfiguriert!"
 
 // Layout: Titel + AUTO/OFF-Button oben (bis y=76), darunter Ventil-Liste/
 // Programm-Buttons, die Statuszeile nimmt als Fussleiste die komplette
@@ -190,6 +191,12 @@ lv_obj_t *valveLeds[kValveCount] = {nullptr};
 lv_obj_t *valveNameLabels[kValveCount] = {nullptr};
 lv_obj_t *programButtons[kProgramButtonCount] = {nullptr};
 unsigned long lastUiRefreshMs = 0;
+
+// Transienter Hinweis "P{n} nicht konfiguriert!" nach Druck auf einen Button ohne
+// gebundenes Programm - blendet sich nach kProgramHintDurationMs von selbst wieder aus
+// (0 = kein aktiver Hinweis), siehe refreshStatusLine().
+char programHintText[24] = "";
+unsigned long programHintUntilMs = 0;
 
 // Der eingebaute LVGL-Font (Montserrat) enthaelt keine Umlaute - fuer die
 // lokale Anzeige auf ASCII transliterieren. Die eigentlichen Alias-Werte
@@ -229,30 +236,44 @@ void mainButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  MqttManager::requestMainCmd(!Sequencer::isRunning());
+  const bool startingSequence = !Sequencer::isRunning();
+  // Nur bewusst als Hinweis, nicht blockierend: main/cmd nutzt ohnehin die aktuell
+  // gesetzten auto-Flags, unabhaengig davon, ob/welches Programm "aktiv" markiert ist -
+  // rein manuelle Konfiguration ohne Programm ist ein vollwertiger, unveraenderter Weg.
+  if (startingSequence && ConfigStore::getActiveProgram() == 0) {
+    snprintf(programHintText, sizeof(programHintText), "Kein Programm vorgewaehlt!");
+    programHintUntilMs = millis() + kProgramHintDurationMs;
+  }
+  MqttManager::requestMainCmd(startingSequence);
 }
 
-// Platzhalter fuer Phase 14 (Bewaesserungsprogramme, noch nicht implementiert) -
-// die Buttons sind schon da, damit spaeter nur noch die Funktionalitaet drauf
-// muss, siehe docs/spec/14-programme.md.
+// P1-P4 (Phase 13/14): wendet das Programm an, dessen "shortcut"-Feld dem gedrueckten
+// Button entspricht - ueber MqttManager::requestProgramByShortcut(), analog zu
+// requestMainCmd() (kein MQTT-Umweg). Der sichtbare Checked-State der Buttons wird
+// nicht hier gesetzt, sondern periodisch in refreshProgramButtons() aus dem tatsaechlichen
+// ConfigStore::getActiveProgram() abgeleitet - so bleibt die Anzeige korrekt, auch wenn
+// die Auswahl ueber MQTT (main/program/cmd, main/programs/set) geaendert wird.
+// Ist keinem Programm dieser Shortcut zugeordnet, wird nichts angewendet, sondern nur
+// ein kurzer Hinweis in der Statuszeile eingeblendet. Ist das gebundene Programm bereits
+// aktiv, wird es abgewaehlt (Toggle-Verhalten, wie main/program/cmd 0).
 void programButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
   const uint8_t index = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(e)));
-
-  // Radio-Verhalten: nur ein Programm-Button gleichzeitig aktiv (LVGL toggelt
-  // den Checked-State des angeklickten Buttons bereits vor diesem Callback).
-  if (lv_obj_has_state(programButtons[index], LV_STATE_CHECKED)) {
-    for (uint8_t i = 0; i < kProgramButtonCount; i++) {
-      if (i != index) {
-        lv_obj_clear_state(programButtons[i], LV_STATE_CHECKED);
-      }
-    }
+  const uint8_t shortcut = index + 1;
+  const uint8_t boundProgram = ConfigStore::getProgramIndexForShortcut(shortcut);
+  if (boundProgram == 0) {
+    snprintf(programHintText, sizeof(programHintText), "P%u nicht konfiguriert!", shortcut);
+    programHintUntilMs = millis() + kProgramHintDurationMs;
+    return;
   }
-
-  Logger::logf(Logger::Type::INFO, Logger::Source::HMI, "P%u gedrueckt (Programme noch nicht implementiert).",
-               index + 1);
+  programHintUntilMs = 0;  // frischer Programmwechsel/-abwahl verdraengt einen evtl. sichtbaren Hinweis
+  if (boundProgram == ConfigStore::getActiveProgram()) {
+    MqttManager::requestProgramClear();
+    return;
+  }
+  MqttManager::requestProgramByShortcut(shortcut);
 }
 
 void refreshMainButton() {
@@ -294,15 +315,20 @@ void refreshValveStatus() {
   }
 }
 
-// Liefert den Index des aktuell gewaehlten Programm-Buttons (0-basiert), oder
-// -1 wenn keiner gewaehlt ist.
-int8_t getCheckedProgramIndex() {
+// Spiegelt den Checked-State der P1-P4-Buttons aus dem tatsaechlichen aktiven Programm
+// (ConfigStore::getActiveProgram()) - laeuft an, egal ob die Auswahl per Touch, MQTT
+// main/program/cmd oder main/programs/set zustande kam (kein lokaler Klick-Zustand).
+void refreshProgramButtons() {
+  const uint8_t active = ConfigStore::getActiveProgram();
   for (uint8_t i = 0; i < kProgramButtonCount; i++) {
-    if (lv_obj_has_state(programButtons[i], LV_STATE_CHECKED)) {
-      return static_cast<int8_t>(i);
+    const uint8_t boundProgram = ConfigStore::getProgramIndexForShortcut(i + 1);
+    const bool checked = (active != 0) && (boundProgram == active);
+    if (checked) {
+      lv_obj_add_state(programButtons[i], LV_STATE_CHECKED);
+    } else {
+      lv_obj_clear_state(programButtons[i], LV_STATE_CHECKED);
     }
   }
-  return -1;
 }
 
 // Formatiert "<Alias oder V{n}>  mm:ss[ +N weitere]" fuer die Statuszeile.
@@ -322,8 +348,12 @@ void formatValveActivity(char *out, size_t outSize, uint8_t valveIndex, uint8_t 
 }
 
 // Statuszeile: zeigt an, was das Geraet gerade tut - in Prioritaet
-// Fehler > laufende Automatik > manuell laufende Ventile > gewaehltes
-// Programm (Platzhalter Phase 14) > "Bereit".
+// Fehler > transienter Programm-Hinweis (2s) > laufende Automatik > manuell
+// laufende Ventile > gewaehltes Programm > "MANUELL" (kein Programm gewaehlt).
+// Der Hinweis steht bewusst
+// ueber "laufende Automatik": er wird genau beim Start ausgeloest (siehe
+// mainButtonEventHandler()), zu dem Zeitpunkt ist die Sequenz bereits aktiv -
+// mit niedrigerer Prioritaet waere er sofort wieder verdeckt.
 void refreshStatusLine() {
   char text[64];
   lv_color_t color = lv_color_white();
@@ -331,6 +361,9 @@ void refreshStatusLine() {
   if (!Diagnostics::isI2cOk()) {
     snprintf(text, sizeof(text), "I2C-Fehler!");
     color = lv_color_hex(0xFF3333);
+  } else if (millis() < programHintUntilMs) {
+    snprintf(text, sizeof(text), "%s", programHintText);
+    color = lv_color_hex(0xFF8800);  // Hinweis-Orange, unterscheidet sich von Fehler-Rot/Programm-Blau
   } else if (Sequencer::isRunning()) {
     formatValveActivity(text, sizeof(text), Sequencer::getActiveValve(), 0);
     color = lv_color_hex(0xFFFF00);  // wie die Hervorhebung des aktiven Ventils
@@ -349,12 +382,17 @@ void refreshStatusLine() {
       formatValveActivity(text, sizeof(text), firstRunning, runningCount - 1);
       color = lv_color_hex(0x33CCFF);  // manuell (nicht Teil der Automatik-Sequenz)
     } else {
-      const int8_t program = getCheckedProgramIndex();
-      if (program >= 0) {
-        snprintf(text, sizeof(text), "Programm P%d gewaehlt", program + 1);
+      const uint8_t activeProgram = ConfigStore::getActiveProgram();
+      if (activeProgram != 0) {
+        char nameAscii[40];
+        toDisplayAscii(ConfigStore::getProgramName(activeProgram), nameAscii, sizeof(nameAscii));
+        snprintf(text, sizeof(text), "Programm: %s", nameAscii);
         color = lv_color_hex(0x66CCFF);
       } else {
-        snprintf(text, sizeof(text), "Bereit");
+        // Kein Programm gewaehlt: main/cmd ON ist blockiert (siehe MqttManager::startSequence()),
+        // "Bereit" waere hier irrefuehrend - MANUELL beschreibt den tatsaechlichen Modus
+        // (Ventile direkt schaltbar, aber keine Automatik moeglich), bleibt neutral/grau wie zuvor.
+        snprintf(text, sizeof(text), "MANUELL");
         color = lv_color_hex(0x888888);
       }
     }
@@ -433,6 +471,7 @@ void setupUi() {
   refreshMainButton();
   refreshStatusLine();
   refreshValveStatus();
+  refreshProgramButtons();
 }
 
 }  // namespace
@@ -480,5 +519,6 @@ void HmiManager::loop() {
     refreshMainButton();
     refreshStatusLine();
     refreshValveStatus();
+    refreshProgramButtons();
   }
 }

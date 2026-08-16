@@ -212,10 +212,21 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 - Auf Nutzervorschlag ergaenzt, bevor die eigentliche Touch-UI-Anbindung umgesetzt wird: `programs.json` bekommt ein optionales `shortcut`-Feld je Programm (`"P1"`-`"P4"`), das die Button-Bindung von der Array-Position entkoppelt — sonst wuerde ein Umsortieren via `main/programs/set` (Array-Replace) die Belegung stillschweigend verschieben.
 - Duplikate werden bewusst **nicht** beim Schreiben abgelehnt (widerspraeche dem Array-Replace-Prinzip), sondern "erster Treffer in Array-Reihenfolge gewinnt" beim Aufloesen, zusaetzlich ein nicht-blockierender Log-Hinweis bei erkannten Duplikaten. Mit dem Array-Replace ist das sogar einfacher als bei inkrementellen Updates: ein einziger linearer Scan ueber max. 8 Eintraege reicht, weil `main/programs/set` immer die komplette finale Liste liefert.
-- Intern als `uint8_t` (0/1-4) gespeichert, analog zu `activeProgram`. Details in `docs/spec/14-programme.md` (Kernentscheidung 8) und `docs/requirements.md` (Entscheidungshistorie). Noch nicht implementiert.
+- Intern als `uint8_t` (0/1-4) gespeichert, analog zu `activeProgram`. Details in `docs/spec/14-programme.md` (Kernentscheidung 8) und `docs/requirements.md` (Entscheidungshistorie).
+
+### `P1`-`P4`-Anbindung umgesetzt, Grundsatzentscheidung "Automatik erfordert Programm"
+
+- `ConfigStore`: `shortcut`-Feld implementiert (Laden/Speichern/JSON, `getProgramIndexForShortcut()`). Statische String-Literale (`"P1"`.."P4"") statt lokaler Puffer bei der JSON-Ausgabe verwendet, um kein Dangling-Pointer-Risiko einzugehen.
+- `MqttManager`: `requestProgramByShortcut()` (wendet an) und `requestProgramClear()` (waehlt ab, wie `main/program/cmd 0`) neu, oeffentlich fuer die Touch-UI.
+- `HmiManager`: `P1`-`P4`-Buttons wenden das gebundene Programm an; erneuter Druck auf ein bereits aktives Programm waehlt es wieder ab (Toggle). Ohne Bindung: transienter Hinweis "P{n} nicht konfiguriert!" (2s, orange). Checked-Status der Buttons wird periodisch aus `ConfigStore::getActiveProgram()` abgeleitet statt aus dem lokalen Klick-Zustand, bleibt so auch bei MQTT-Aenderungen korrekt.
+- **Bug gefunden und gefixt**: Duplikat-Log-Meldung fuer Shortcuts wurde im 96-Byte-`lastError`-Puffer abgeschnitten (`ConfigStore`, `Diagnostics::lastError`). Auf Wunsch des Nutzers auf `"Shortcut Px doppelt belegt!"` gekuerzt.
+- **Design-Diskussion waehrend des Hardware-Tests**: urspruenglich sollte `main/cmd ON` ohne gewaehltes Programm nur einen Hinweis zeigen, aber trotzdem starten (nutzt dann die aktuellen `auto`-Flags, wie seit Phase 7). Nutzer-Feedback nach dem ersten Test ("es laeuft auch V1 los, das darf dann nicht sein") fuehrte zu einer Grundsatzentscheidung: **eine Automatik ohne gewaehltes Programm ergibt keinen Sinn mehr**, seit es Programme gibt. `startSequence()` (gemeinsam von Touch und MQTT genutzt) bricht jetzt ab, wenn `activeProgram == 0` - betrifft `main/cmd ON` ueberall (auch spaetere Home-Assistant-Automatisierungen), **nicht** aber direktes Ventilschalten (`V{n}/cmd`), das weiterhin uneingeschraenkt manuell funktioniert.
+- Ist ein Programm gewaehlt, wendet `startSequence()` es beim Start zusaetzlich nochmal frisch an (`applyProgram()`), damit garantiert dessen Werte laufen statt zwischenzeitlich manuell abgewichener Flags.
+- Statuszeile: "Bereit" durch "MANUELL" ersetzt, wenn kein Programm gewaehlt ist (Nutzer-Begruendung: "Bereit ohne Programmanwahl macht keinen Sinn, da dann beim Druecken auf AUTO ja auch nichts passiert, wie kann das dann bereit sein?"). "MANUELL" bleibt bewusst neutral/grau (kein Fehler, sondern ein normaler, dauerhafter Betriebsmodus fuer direktes Ventilschalten).
+- Getestet: interaktiv auf Hardware (Nutzer bedient Display, Ergebnis per gezielten MQTT-Abfragen/Live-Mitschnitten gegengeprueft) - alle Faelle bestanden, siehe `docs/testing.md`.
+- Nebenbei: eigener Fehler beim ersten Beobachtungsversuch gefunden (zwei Monitor-Prozesse mit gleicher Client-ID liefen gleichzeitig, siehe Eintrag oben) sowie eine Arbeitsweise-Korrektur vom Nutzer uebernommen: vor Tests mit noetiger Nutzeraktion immer zuerst ankuendigen und auf "ok" warten, statt sofort Vorbedingungen zu setzen und ein Zeitfenster zu starten (jetzt in Claude-Memory hinterlegt).
 
 ## Offene Punkte / nächste Schritte
 
-- `P1`–`P4`-Anbindung im Touch-UI an die Programme (per `shortcut`-Feld, Design siehe oben) — noch nicht implementiert.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.

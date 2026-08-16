@@ -50,3 +50,13 @@
 
 - Sequenzverlauf, vorzeitiges Weiterschalten per manuellem `V{n}/cmd OFF` und Abbruch per `main/cmd OFF` auf Hardware getestet — funktioniert wie spezifiziert.
 - Nachtrag (siehe `docs/Log.md`, 2026-08-15): Restlaufzeit-Anzeige verfeinert — Ventile, die noch nicht an der Reihe waren, zeigen `remaining = time` (armiert); bereits durchgelaufene Ventile zeigen `remaining = 00:00`, solange die Sequenz noch läuft; erst nach Sequenz-Ende (natürlich oder `main/cmd OFF`) werden alle Restlaufzeiten wieder auf `time` gesetzt.
+
+## Nachtrag (2026-08-16, Phase 14): `main/cmd ON` erfordert jetzt ein gewähltes Programm
+
+Diese Phase entstand, bevor es Bewässerungsprogramme (Phase 14) gab — `main/cmd ON` fuhr damals unqualifiziert einfach die aktuell gesetzten `auto`-Flags ab, ganz ohne Bezug zu einem benannten Programm. Nach Einführung der Programme wurde das bewusst geändert: **eine „Automatik" ohne gewähltes Programm ergibt konzeptionell keinen Sinn mehr** (direktes Ventilschalten per `V{n}/cmd` bleibt davon komplett unberührt und wird weiterhin als eigener, vollwertiger „manueller" Weg unterstützt).
+
+- `startSequence()` (in `MqttManager.cpp`, gemeinsam genutzt von Touch-`AUTO`-Button und MQTT `main/cmd ON`) bricht jetzt sofort ab, wenn `ConfigStore::getActiveProgram() == 0` — Log-Eintrag `"main/cmd ON ignoriert: kein Programm gewaehlt."`, `main/state` bleibt `OFF`.
+- Ist ein Programm gewählt, wird es beim Start noch einmal frisch angewendet (`applyProgram()`), damit garantiert die Werte des gewählten Programms laufen und nicht zwischenzeitlich manuell abgewichene Flags.
+- Betrifft **beide** Auslösewege (Touch **und** MQTT/spätere Home-Assistant-Automatisierungen) — bewusste Entscheidung, siehe `docs/requirements.md`, Entscheidungshistorie 2026-08-16.
+- Touch-UI zeigt in diesem Fall zusätzlich einen kurzen Hinweis „Kein Programm vorgewählt!" (siehe `docs/spec/13-touch-ui.md`).
+- Getestet: `main/cmd ON` per MQTT ohne Programm bleibt wirkungslos; mit gewähltem Programm startet es normal — siehe `docs/testing.md`.
