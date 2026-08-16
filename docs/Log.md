@@ -192,13 +192,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Ein zusammenhaengendes Python/paho-mqtt-Skript deckt 8 der 10 Punkte aus der Checkliste in `docs/spec/12-aufraeumen.md` automatisiert ab: Boot/Verfuegbarkeit, Ventile manuell + V0-Kopplung, Laufzeit (inkl. `maxTime`-Deckelung und einem echten 60s-Zeitablauf mit automatischer Abschaltung), Automatik-Flag, Automatik-Sequenz (inkl. manuellem Vorruecken und Abbruch), Alias (Umlaute, zu lang, Steuerzeichen), Konfiguration per JSON (Teil-Update, unbekannter Key), Persistenz.
 - **Persistenztest mit echtem Hardware-Reset**: `esptool --after hard-reset` (RTS-Pin-Puls, ohne Reflash) ausgeloest, danach verifiziert, dass `time`/`auto`/`alias` und die Programme-Liste den Neustart ueberleben, alle Ventile AUS sind und keine Automatik-Sequenz automatisch weiterlaeuft.
 - **Ergebnis: 48 von 49 Checks bestanden.** Die eine „fehlgeschlagene" Pruefung war ein Timing-Artefakt im Testskript (Restlaufzeit `00:59` statt exakt `01:00` gelesen, da zwischen Einschalten und Pruefung bereits ein Sekunden-Tick lief) — kein Firmware-Fehler, die `maxTime`-Deckelung selbst war korrekt.
-- **Nicht automatisiert** (physischer Eingriff noetig, bewusst nicht unbeaufsichtigt ausgefuehrt): Diagnostics-Fehlerfall (I2C-Kabel ziehen, Punkt 6) und Verbindungsabbruch-Resilienz (WLAN/MQTT trennen, Punkt 9). Vor dem produktiven Einsatz einmal manuell nachholen.
+- **Nicht automatisiert** (physischer Eingriff noetig, bewusst nicht unbeaufsichtigt ausgefuehrt): Diagnostics-Fehlerfall (I2C-Kabel ziehen, Punkt 6) und Verbindungsabbruch-Resilienz (WLAN/MQTT trennen, Punkt 9) — diese zwei wurden im Anschluss interaktiv nachgeholt, siehe naechster Eintrag.
 - Vor/nach dem Testlauf wurde der komplette Konfigurationsstand (`config`, `programs`) gesichert und am Ende per `main/config/set`/`main/programs/set` wiederhergestellt — keine bleibenden Aenderungen am Geraet.
+
+### Manuelle Regressionstest-Punkte nachgeholt (I2C-Fehlerfall, WLAN-Resilienz)
+
+- Interaktiv durchgefuehrt: Nutzer fuehrt die physische Aktion aus (I2C-Kabel ziehen, WLAN am Router trennen), waehrenddessen wertet ein Live-MQTT-Mitschnitt (Python/paho-mqtt) das Ergebnis aus.
+- **Eigener Fehler gefunden und behoben unterwegs**: der erste Versuch fuer Punkt 9 scheiterte, weil versehentlich mehrere Kopien des Monitor-Skripts mit identischer MQTT-Client-ID gleichzeitig liefen (ein fehlgeschlagener Hintergrund-Start war nicht sauber beendet worden) — die haben sich gegenseitig vom Broker geworfen (Reconnect alle 1-2s). Ursache erkannt, verwaiste Prozesse beendet, Monitor-Skript mit eindeutiger Client-ID neu geschrieben, Test sauber wiederholt.
+- **Punkt 6 (I2C-Fehlerfall)**: I2C-Bus kurz getrennt → `diagnostics/i2cStatus` wechselte auf `error`, `lastError` wurde gesetzt (`"MCP23017 nicht erreichbar (I2C-Bus-Ausfall)."`), nach Wiederverbinden (13s spaeter) zurueck auf `ok`. PASS.
+- **Punkt 9 (Resilienz)**: Automatik-Sequenz gestartet (V1 3 Min → V2 2 Min), waehrend V1 lief WLAN am Router fuer ~49s getrennt. Board meldete den Verbindungsverlust selbst in `lastError`. Nach Reconnect zeigte `V1/time/remaining` exakt den rechnerisch korrekten Wert (Restzeit minus real vergangene Zeit) — die lokale Restlaufzeit war waehrend des Ausfalls **nicht** pausiert oder zurueckgesetzt worden. Der Uebergang V1→V2 erfolgte anschliessend auf die Sekunde genau zur erwarteten Zeit. Bestaetigt die Kernanforderung "laeuft lokal/autonom weiter" empirisch mit Zeitstempeln. PASS.
+- Damit sind jetzt alle 10 Punkte der Checkliste aus `docs/spec/12-aufraeumen.md` abgedeckt und bestanden. Details/Zeitstempel siehe `docs/testing.md`.
 
 ## Offene Punkte / nächste Schritte
 
 - `P1`–`P4`-Anbindung im Touch-UI an die ersten vier Programme (Phase 13/14) — eigener Schritt, noch offen.
-- Manuelle Nachholung der zwei nicht automatisierbaren Regressionstest-Punkte (I2C-Fehlerfall, WLAN/MQTT-Verbindungsabbruch) vor dem produktiven Einsatz.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
-- Vollständiger, zusammenhängender Regressionsdurchlauf aller MQTT-Funktionalitäten (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.

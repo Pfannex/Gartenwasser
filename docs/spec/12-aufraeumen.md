@@ -1,6 +1,6 @@
 # Phase 12 — Aufräumen/Refactoring
 
-**Status:** ✅ Erledigt (Code-Review-Pass + automatisierter Regressionstest, 2026-08-16)
+**Status:** ✅ Erledigt (Code-Review-Pass + vollständiger Regressionstest, alle 10 Checklistenpunkte, 2026-08-16)
 
 ## Ziel
 
@@ -45,6 +45,6 @@ Manueller Regressionstest vor jedem Release (Hardware + `mosquitto_sub -t garten
 
 ## Test / Ergebnis
 
-Strukturierte Ergebnistabelle (Prüfpunkt/Test/Ergebnis/Bewertung) siehe **`docs/testing.md`**, Abschnitt „Regressionstest (Checkliste aus Phase 12)": zusammenhängender automatisierter Durchlauf am 2026-08-16, 48 von 49 Checks bestanden (1 Skript-Timing-Artefakt, kein Firmware-Fehler). Punkte 6 (Diagnostics-Fehlerfall) und 9 (Resilienz) erfordern physischen Eingriff und stehen vor dem produktiven Einsatz noch als manueller Test aus.
+Strukturierte Ergebnistabelle (Prüfpunkt/Test/Ergebnis/Bewertung) siehe **`docs/testing.md`**, Abschnitt „Regressionstest (Checkliste aus Phase 12)": zusammenhängender Durchlauf am 2026-08-16, alle 10 Punkte abgedeckt — 8 automatisiert (48/49 Checks, 1 Skript-Timing-Artefakt, kein Firmware-Fehler), Punkte 6 (Diagnostics-Fehlerfall) und 9 (Resilienz) interaktiv mit physischem Eingriff nachgeholt (Live-MQTT-Mitschnitt während Nutzer-Aktion). Alle 10 Punkte bestanden.
 
 HA-Dashboard-Kontrolle: entfällt vorerst — Phase 10 (Home Assistant) wurde bewusst ans Ende der Bearbeitungsreihenfolge gestellt (siehe `docs/requirements.md`, Entscheidungshistorie 2026-08-15), erst relevant sobald Phase 10 ansteht.

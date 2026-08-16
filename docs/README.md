@@ -21,7 +21,7 @@ Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (
 | [08](spec/08-diagnostics.md) | Diagnostics (`i2cStatus`, `lastError`) | ✅ |
 | [09](spec/09-alias.md) | Alias je Ventil (inkl. V0, `set`, Persistenz) | ✅ |
 | [11](spec/11-sammelbefehle.md) | Konfiguration per JSON (`main/config/set`/`state`) | ✅ |
-| [12](spec/12-aufraeumen.md) | Aufräumen/Refactoring | ✅ (Regressionstest 48/49, 2 Punkte manuell offen) |
+| [12](spec/12-aufraeumen.md) | Aufräumen/Refactoring | ✅ (Regressionstest: alle 10 Checklistenpunkte bestanden) |
 | [13](spec/13-touch-ui.md) | Touch-UI (Automatik-Toggle & Statusanzeige) | ✅ |
 | [14](spec/14-programme.md) | Bewässerungsprogramme (`main/program/cmd`/`state`) | ✅ |
 | [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | 📋 (Backlog, grob skizziert) |

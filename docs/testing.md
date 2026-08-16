@@ -9,11 +9,11 @@ Zentrale, strukturierte Übersicht aller Testläufe. Ergänzt die phasenweisen `
 - Skripte abonnieren `gartenwasser/#`, publizieren Testbefehle und prüfen die resultierenden (retained) States gegen Erwartungswerte.
 - Wo nötig, wird ein echter Hardware-Reset über `esptool --after hard-reset` ausgelöst (RTS-Pin-Puls, kein Reflash) statt eines simulierten Neustarts.
 - Vor/nach jedem Testlauf wird der bestehende Konfigurationsstand (`config`, `programs`) gesichert und am Ende wiederhergestellt — Testläufe hinterlassen keine dauerhaften Änderungen am Gerät.
-- Zwei Prüfpunkte der Checkliste erfordern physischen Eingriff (I2C-Kabel ziehen, WLAN/MQTT trennen) und werden bewusst **nicht** unbeaufsichtigt automatisiert (siehe unten).
+- Zwei Prüfpunkte der Checkliste erfordern physischen Eingriff (I2C-Kabel ziehen, WLAN/MQTT trennen) — die wurden bewusst nicht unbeaufsichtigt automatisiert, sondern separat interaktiv nachgeholt (Nutzer führt die physische Aktion aus, ein Live-MQTT-Mitschnitt wertet das Ergebnis aus, siehe Punkte 6 und 9 unten).
 
 ## Regressionstest (Checkliste aus Phase 12) — 2026-08-16
 
-Zusammenhängender Gesamtdurchlauf, autonom ausgeführt. **48 von 49 automatisierten Checks bestanden.**
+Zusammenhängender Gesamtdurchlauf. **Alle 10 Checklistenpunkte abgedeckt** (8 automatisiert, 49 Einzel-Checks, 48 PASS + 1 Skript-Timing-Artefakt; 2 davon — Punkte 6 und 9 — interaktiv mit physischem Eingriff nachgeholt).
 
 | # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
 |---|---|---|---|---|
@@ -22,15 +22,17 @@ Zusammenhängender Gesamtdurchlauf, autonom ausgeführt. **48 von 49 automatisie
 | 3 | Laufzeit | `time/set`, `maxTime`-Deckelung (`min(time, maxTime)`, mit `time=5`/`maxTime=1` erzwungen), echter Zeitablauf nach 60 s (kürzeste zulässige Laufzeit) inkl. automatischer Abschaltung und Re-Armierung auf `time` | 5/6 PASS | ⚠️ 1 Skript-Timing-Artefakt, kein Firmware-Fehler (siehe unten) |
 | 4 | Automatik-Flag | `auto/set` ON/OFF → `auto/state` | 2/2 PASS | ✅ |
 | 5 | Automatik-Sequenz | `main/cmd ON` startet mit erstem `auto=ON`-Ventil; manuelles `ON` eines nicht beteiligten Ventils wird ignoriert; manuelles `OFF` des aktiven Ventils rückt die Sequenz vor (Restlaufzeit bleibt `00:00`); `main/cmd OFF` bricht sofort ab und armiert alle Ventile neu | 9/9 PASS | ✅ |
-| 6 | Diagnostics-Fehlerfall | I2C-Bus kurz trennen → `i2cStatus = error` + `lastError` gesetzt, wieder verbinden → `ok` | — | ⛔ nicht automatisiert (physischer Eingriff) |
+| 6 | Diagnostics-Fehlerfall | I2C-Bus manuell kurz getrennt (Nutzer), per Live-MQTT-Mitschnitt ausgewertet: `i2cStatus = error` + `lastError` gesetzt, nach Wiederverbinden `ok` | 1/1 PASS | ✅ interaktiv nachgeholt |
 | 7 | Alias (inkl. V0) | Umlaute (UTF-8) funktionieren; zu lange Werte (> 32 Zeichen) und Werte mit Steuerzeichen werden abgelehnt (unverändert) | 4/4 PASS | ✅ |
 | 8 | Konfiguration per JSON | `main/config/set` Teil-Update ändert nur angegebene Felder; unbekannter Key (`V9`) wird ignoriert, Board bleibt responsiv | 3/3 PASS | ✅ |
-| 9 | Resilienz | WLAN/MQTT-Verbindungsabbruch → laufende Ventile/Sequenz laufen lokal weiter, Reconnect republiziert alle States | — | ⛔ nicht automatisiert (physischer Eingriff) |
+| 9 | Resilienz | Automatik-Sequenz gestartet, Nutzer trennt WLAN am Router manuell (~49 s Ausfall), per Live-MQTT-Mitschnitt ausgewertet: Restlaufzeit lief lokal exakt korrekt weiter (kein Pausieren/Reset), Sequenz-Übergang zur berechneten Sekunde, nach Reconnect alle States korrekt neu publiziert | 1/1 PASS | ✅ interaktiv nachgeholt |
 | 10 | Persistenz | Echter Hardware-Reset (`esptool --after hard-reset`) → `time`/`auto`/`alias` und Programme-Liste überleben, alle Ventile AUS, keine Automatik-Sequenz startet automatisch | 6/6 PASS | ✅ |
 
 **Anmerkung zu Punkt 3**: Die eine "fehlgeschlagene" Prüfung erwartete exakt `remaining = 01:00` nach dem Einschalten, gemessen wurde `00:59`. Ursache: zwischen Einschalten und Prüfung (1,5 s Wartezeit im Testskript) war bereits ein Sekunden-Tick (1000 ms-Takt) vergangen. Die eigentliche Prüfung — Deckelung auf `maxTime` statt der vollen `time` (`00:59`/`01:00` statt `05:00`) — war korrekt. Kein Firmware-Fehler, nur eine zu strenge Testskript-Assertion (inzwischen auf `{"01:00", "00:59"}` korrigiert).
 
-**Offen vor Produktivbetrieb**: Punkte 6 und 9 einmal manuell nachholen (physischer Eingriff, bewusst nicht unbeaufsichtigt getestet).
+**Details zu Punkt 9 (Resilienz)**: Automatik gestartet mit V1 (3 Min) → V2 (2 Min) um `18:38:19`. Nutzer trennt WLAN am Router; Board meldet selbst `18:39:39 Verbindung verloren.` (automatisch in `lastError`). Nach Wiederverbindung um `18:40:36` zeigt `V1/time/remaining = 00:43` — exakt der rechnerisch korrekte Wert (180 s − 137 s reale Elapsed-Zeit), keine Pause/kein Reset durch den ~49-sekündigen Ausfall. Übergang V1→V2 erfolgte um `18:41:19`, exakt 3:00 nach Start, auf die Sekunde genau. Bestätigt die Kernanforderung „läuft lokal/autonom weiter" (siehe `docs/requirements.md`) empirisch mit Zeitstempeln.
+
+Alle 10 Punkte damit vor dem produktiven Einsatz abgedeckt.
 
 ## Phase 14 — Bewässerungsprogramme — 2026-08-16
 
