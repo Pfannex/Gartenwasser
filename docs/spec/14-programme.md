@@ -23,14 +23,16 @@ Programme leben in einem eigenen Bereich, getrennt von `config` (siehe `docs/req
 ```json
 {
   "programs": [
-    {"name": "Kurz",  "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
-    {"name": "Rasen", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
-    {"name": "Alles", "time": {"V1": 8, "V2": 8, "V3": 12, "V4": 15, "V5": 6}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}},
+    {"name": "Kurz",  "shortcut": "P1", "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
+    {"name": "Rasen", "shortcut": "P2", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
+    {"name": "Alles", "shortcut": "P3", "time": {"V1": 8, "V2": 8, "V3": 12, "V4": 15, "V5": 6}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}},
     {"name": "Test",  "time": {"V1": 1, "V2": 1, "V3": 1, "V4": 1, "V5": 1}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}}
   ],
   "activeProgram": 2
 }
 ```
+
+`shortcut` (optional, 2026-08-16 ergänzt): `"P1"`–`"P4"`, bindet ein Programm an einen der vier physischen Touch-UI-Buttons (Phase 13), unabhängig von seiner Position im Array. Fehlt der Key, ist das Programm nur per `main/program/cmd <index>`/`main/programs/set` erreichbar, nicht über einen Button (wie „Test“ im Beispiel oben).
 
 `main/program/state` (Singular, kompakter Ausschnitt derselben Information):
 
@@ -49,6 +51,7 @@ Vollständiges Beispiel mit allen Elementen auch in `docs/requirements.md`.
 5. **Bulk-Editieren über das eigene `main/programs/set`** (nicht über `main/config/set`, siehe Entscheidungshistorie 2026-08-16 in `docs/requirements.md`) — der Key `"programs"` ist dabei „ganzes Array ersetzen, wenn mitgeschickt“ (kein Merge einzelner Programme, da Arrays keine natürlichen Schlüssel haben), der Key `"activeProgram"` wendet die Auswahl an (identisch zu `main/program/cmd`). Praktischer Ablauf: `main/programs/state` holen, lokal bearbeiten, komplett zurückschicken.
 6. **Obergrenze `ConfigStore::kMaxPrograms = 8`** — mehr als die 4 physischen Touch-Buttons, damit per MQTT/später Phase 15 (Zeitplan) noch Luft ist, aber als feste Array-Größe (passt zum bisherigen Stil mit festen C-Arrays statt dynamischer Allokation). Programmname wiederverwendet `ConfigStore::kAliasMaxLength` (32 Zeichen).
 7. **Persistenz**: `programs` + `activeProgram` beides in `/programs.json` (eigene Datei, siehe oben — `activeProgram` gehört inhaltlich zu den Programmen, nicht zu den Ventilparametern in `config.json`). Nach Neustart bleibt die letzte Auswahl als reiner Info-Wert erhalten, startet aber nichts automatisch (sicherer Grundzustand, wie überall sonst auch).
+8. **`shortcut`-Feld für die Touch-UI-Bindung** (2026-08-16 ergänzt, für die anstehende `P1`–`P4`-Anbindung): optionales String-Feld je Programm, Werte `"P1"`–`"P4"`. Ungültige Werte (falscher String, falsche Groß-/Kleinschreibung) werden wie bei `alias`/`time`/`auto` ignoriert + geloggt, nicht die ganze `main/programs/set`-Anfrage abgelehnt. **Doppelt vergebene Shortcuts werden nicht beim Schreiben verhindert** — würde dem Array-Replace-Prinzip widersprechen (ein doppelter Shortcut irgendwo im Array müsste sonst den kompletten Satz zurückweisen). Stattdessen: beim Auflösen eines Buttons gewinnt der **erste Treffer in Array-Reihenfolge**, zusätzlich wird bei `main/programs/set` ein nicht-blockierender `ERROR`-Log-Eintrag geschrieben, falls ein Duplikat erkannt wird (Sichtbarkeit ohne Ablehnung). Intern in `ConfigStore` als einfacher `uint8_t` (0 = kein Shortcut, 1–4 = P1–P4) gespeichert, analog zu `activeProgram` — kein String-Vergleich zur Laufzeit nötig.
 
 ### Technische Konsequenz
 
@@ -58,7 +61,12 @@ Eigene Datei/eigenes Topic bedeutet: `ConfigStore::kJsonCapacity` für `config.j
 
 - `ConfigStore`: neue Datei `/programs.json` (eigenes Load/Save/`toJson()`, analog zu `config.json`), `programs`-Array + `activeProgram`, neue Getter (`getProgramCount()`, `getProgramName(index)`, `getProgramValveTime(index, valve)`, `getProgramValveAuto(index, valve)`, `getActiveProgram()`/`setActiveProgram()`).
 - `MqttManager`: `main/program/cmd`-Handler wendet das Programm an (Schleife über V1–V5, `applyTimeValue()`/`applyAutoValue()` wiederverwenden), publiziert `main/program/state` und `main/programs/state`. Zusätzlich `main/programs/set`-Handler (Bulk-JSON, Array-Replace + optional `activeProgram`) mit zugehörigem `main/programs/state`-Publish.
-- Anbindung der Touch-UI-Buttons `P1`–`P4` (Phase 13) an die ersten vier Programme folgt **danach**, als eigener Schritt.
+
+### Noch offen: `P1`–`P4`-Anbindung (eigener Schritt, 2026-08-16 im Design ergänzt)
+
+- `ConfigStore`: `ProgramInput`/internes `StoredProgram` um `shortcut`-Feld (`uint8_t`, 0/1–4) erweitern, `buildProgramsJson()`/Laden entsprechend um den `"shortcut"`-Key ergänzen (String `"P1"`–`"P4"` ↔ `1`–`4`, ungültig ↔ `0`/ignoriert). Neue Funktion `getProgramIndexForShortcut(uint8_t shortcut)` — linearer Scan über `getProgramCount()` Einträge (max. 8, trivial billig), liefert den 1-basierten Programm-Index des **ersten** Treffers oder `0`. Duplikat-Erkennung (für den Log-Hinweis) direkt in `setPrograms()`, da dort ohnehin einmalig über das komplette neue Array iteriert wird.
+- `MqttManager`: `setPrograms()`-Aufruf in `handleProgramsSet()` um die Duplikat-Prüfung/Log ergänzen (kein Verhalten ändern, nur Logging).
+- `HmiManager`: `P1`–`P4`-Button-Handler ruft `ConfigStore::getProgramIndexForShortcut()` und wendet das Ergebnis über denselben Pfad wie `main/program/cmd` an (`MqttManager`-Funktion analog zu `requestMainCmd()`, kein MQTT-Umweg).
 
 ## Betroffene Dateien
 

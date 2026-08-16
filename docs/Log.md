@@ -203,8 +203,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - **Punkt 9 (Resilienz)**: Automatik-Sequenz gestartet (V1 3 Min → V2 2 Min), waehrend V1 lief WLAN am Router fuer ~49s getrennt. Board meldete den Verbindungsverlust selbst in `lastError`. Nach Reconnect zeigte `V1/time/remaining` exakt den rechnerisch korrekten Wert (Restzeit minus real vergangene Zeit) — die lokale Restlaufzeit war waehrend des Ausfalls **nicht** pausiert oder zurueckgesetzt worden. Der Uebergang V1→V2 erfolgte anschliessend auf die Sekunde genau zur erwarteten Zeit. Bestaetigt die Kernanforderung "laeuft lokal/autonom weiter" empirisch mit Zeitstempeln. PASS.
 - Damit sind jetzt alle 10 Punkte der Checkliste aus `docs/spec/12-aufraeumen.md` abgedeckt und bestanden. Details/Zeitstempel siehe `docs/testing.md`.
 
+### Log-Meldungen WLAN/MQTT-Verbindungsverlust unterscheidbar gemacht
+
+- Beide loggten bisher identisch "Verbindung verloren." — in `diagnostics/lastError` (kein Source-Praefix wie im Serial-Log) war dadurch nicht erkennbar, welche Verbindung gemeint war (aufgefallen beim Auswerten des Resilienztests oben).
+- Jetzt "WLAN Verbindung verloren." (`WifiManager.cpp`) bzw. "MQTT Verbindung verloren." (`MqttManager.cpp`). Geflasht und gepusht.
+
+### Design: `shortcut`-Feld fuer Programme (Vorbereitung `P1`-`P4`-Anbindung)
+
+- Auf Nutzervorschlag ergaenzt, bevor die eigentliche Touch-UI-Anbindung umgesetzt wird: `programs.json` bekommt ein optionales `shortcut`-Feld je Programm (`"P1"`-`"P4"`), das die Button-Bindung von der Array-Position entkoppelt — sonst wuerde ein Umsortieren via `main/programs/set` (Array-Replace) die Belegung stillschweigend verschieben.
+- Duplikate werden bewusst **nicht** beim Schreiben abgelehnt (widerspraeche dem Array-Replace-Prinzip), sondern "erster Treffer in Array-Reihenfolge gewinnt" beim Aufloesen, zusaetzlich ein nicht-blockierender Log-Hinweis bei erkannten Duplikaten. Mit dem Array-Replace ist das sogar einfacher als bei inkrementellen Updates: ein einziger linearer Scan ueber max. 8 Eintraege reicht, weil `main/programs/set` immer die komplette finale Liste liefert.
+- Intern als `uint8_t` (0/1-4) gespeichert, analog zu `activeProgram`. Details in `docs/spec/14-programme.md` (Kernentscheidung 8) und `docs/requirements.md` (Entscheidungshistorie). Noch nicht implementiert.
+
 ## Offene Punkte / nächste Schritte
 
-- `P1`–`P4`-Anbindung im Touch-UI an die ersten vier Programme (Phase 13/14) — eigener Schritt, noch offen.
+- `P1`–`P4`-Anbindung im Touch-UI an die Programme (per `shortcut`-Feld, Design siehe oben) — noch nicht implementiert.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.

@@ -99,21 +99,21 @@ Ersetzt die ursprünglich für Phase 11 vorgesehenen Sammel-Befehle `main/time/s
 
 `alias` enthält zusätzlich `V0` (Hauptventil); `time`/`auto` gibt es nur für `V1`–`V5`. Details siehe `docs/spec/11-sammelbefehle.md`.
 
-**Vollständiges Beispiel `programs`** (`main/programs/state`, Phase 14, geplant):
+**Vollständiges Beispiel `programs`** (`main/programs/state`):
 
 ```json
 {
   "programs": [
-    {"name": "Kurz",  "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
-    {"name": "Rasen", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
-    {"name": "Alles", "time": {"V1": 8, "V2": 8, "V3": 12, "V4": 15, "V5": 6}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}},
+    {"name": "Kurz",  "shortcut": "P1", "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
+    {"name": "Rasen", "shortcut": "P2", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
+    {"name": "Alles", "shortcut": "P3", "time": {"V1": 8, "V2": 8, "V3": 12, "V4": 15, "V5": 6}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}},
     {"name": "Test",  "time": {"V1": 1, "V2": 1, "V3": 1, "V4": 1, "V5": 1}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}}
   ],
   "activeProgram": 2
 }
 ```
 
-`time`/`auto` je Programm sind Teilmengen — was drinsteht, wird beim Anwenden übernommen, was fehlt, bleibt unverändert (dieselbe Semantik wie bei `main/config/set`). `activeProgram` ist 1-basiert (`0` = kein Programm gewählt), passend zu den Touch-UI-Buttons `P1`–`P4`, und lebt bewusst hier (nicht in `config`), weil er sich auf die Programme bezieht. `maxTime` und `alias` sind bewusst kein Teil eines Programms. Die schlanke Einzelwert-Auswahl `main/program/cmd <n>` (Singular) bleibt zusätzlich bestehen — bequemer Weg für die Touch-UI-Buttons `P1`–`P4`, ohne JSON senden zu müssen; intern dieselbe Wirkung wie `activeProgram` über `main/programs/set` zu setzen. Details siehe `docs/spec/14-programme.md`.
+`time`/`auto` je Programm sind Teilmengen — was drinsteht, wird beim Anwenden übernommen, was fehlt, bleibt unverändert (dieselbe Semantik wie bei `main/config/set`). `activeProgram` ist 1-basiert (`0` = kein Programm gewählt), und lebt bewusst hier (nicht in `config`), weil er sich auf die Programme bezieht. `shortcut` (optional, `"P1"`–`"P4"`) bindet ein Programm an einen Touch-UI-Button, unabhängig von seiner Position im Array — fehlt der Key (wie bei „Test“ oben), ist das Programm nur per `main/program/cmd`/`main/programs/set` erreichbar. Doppelt vergebene Shortcuts werden nicht abgelehnt (würde dem Array-Replace-Prinzip widersprechen), sondern beim Auflösen löst der erste Treffer in Array-Reihenfolge, zusätzlich mit einem Log-Hinweis. `maxTime` und `alias` sind bewusst kein Teil eines Programms. Die schlanke Einzelwert-Auswahl `main/program/cmd <n>` (Singular) bleibt zusätzlich bestehen — bequemer Weg z. B. für die Touch-UI-Buttons, ohne JSON senden zu müssen; intern dieselbe Wirkung wie `activeProgram` über `main/programs/set` zu setzen. Details siehe `docs/spec/14-programme.md`.
 
 **`schedule`** (`main/schedule/state`, Phase 15, geplant, Schema noch offen): Array von Zeitplan-Einträgen (Trigger-Typ `daily`/`weekly`/`once` + Programm-Referenz). Details siehe `docs/spec/15-wochenplan.md`.
 
@@ -241,6 +241,7 @@ Discovery-Configs werden retained unter `homeassistant/<component>/gartenwasser/
 - Design für Bewässerungsprogramme abgestimmt (2026-08-16): `programs`-Array + `activeProgram`, `time`/`auto` je Programm als Teilmengen mit identischer Semantik wie `main/config/set` (enthaltene Felder werden übernommen, fehlende bleiben unverändert — bewusst keine Sonderregel für `auto`). Anwenden eines Programms ruft dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen wie `main/config/set` auf. `maxTime`/`alias` sind kein Teil eines Programms. Obergrenze 8 Programme (`ConfigStore::kMaxPrograms`). Details siehe `docs/spec/14-programme.md`. Anbindung der Touch-UI-Buttons `P1`–`P4` folgt als eigener Schritt danach. Noch nicht implementiert. **Teilweise überholt durch den folgenden Eintrag** (eigene Datei/Topics statt Teil von `config.json`/`main/config/set`).
 - Konfiguration in drei Bereiche aufgeteilt — `config`/`programs`/`schedule` (2026-08-16): statt einer wachsenden gemeinsamen `config.json`/`main/config/set`-Struktur bekommt jeder Bereich seine eigene SPIFFS-Datei und sein eigenes `.../set`/`.../state`-Topic-Paar (`main/config/*`, `main/programs/*`, später `main/schedule/*`), da sie unterschiedlich oft und aus unterschiedlichen Gründen geändert werden und sonst Puffer-/JSON-Capacity immer weiter für alle drei zusammen wachsen müssten. `config.json` bleibt bei `time`/`auto`/`alias`/`maxTime` (Umfang unverändert zu Phase 11). `programs.json` bekommt zusätzlich zum Programme-Array auch `activeProgram` (gehört inhaltlich zu den Programmen, nicht zu den Ventilparametern) — die schlanke Einzelwert-Auswahl `main/program/cmd`/`state` (Singular) bleibt daneben bestehen. `schedule.json`/`main/schedule/set`/`state` für Phase 15 von vornherein als eigener Bereich reserviert. Betrifft nur Design/Dokumentation, noch keine Codeänderung. Details siehe `docs/spec/11-sammelbefehle.md`, `docs/spec/14-programme.md`, `docs/spec/15-wochenplan.md`.
 - Phase 14 umgesetzt, Stack-Overflow-Bug gefunden und gefixt (2026-08-16): `ConfigStore`/`MqttManager` gemäß obigem Design implementiert, automatisiert per Python/paho-mqtt getestet (14/14 Checks). Dabei einen echten Bug gefunden: `main/programs/set` liess das Board abstürzen (`Guru Meditation Error: Stack protection fault` in der `loopTask`), weil mehrere 2048-Byte-JSON-Puffer gleichzeitig auf dem mit 8192 Byte knapp bemessenen Standard-Stack lagen. Fix: `SET_LOOP_TASK_STACK_SIZE(16*1024)` in `main.cpp`. Details siehe `docs/spec/14-programme.md`, Abschnitt „Test/Ergebnis".
+- `shortcut`-Feld für Programme ergänzt, zur Vorbereitung der `P1`–`P4`-Touch-UI-Anbindung (2026-08-16): optionales String-Feld je Programm (`"P1"`–`"P4"`), bindet ein Programm an einen physischen Button unabhängig von seiner Array-Position — sonst würde ein Umsortieren via `main/programs/set` (Array-Replace) stillschweigend die Button-Belegung verschieben. Doppelt vergebene Shortcuts werden bewusst nicht beim Schreiben abgelehnt (würde dem Array-Replace-Prinzip widersprechen), sondern beim Auflösen löst der erste Treffer in Array-Reihenfolge, zusätzlich mit einem nicht-blockierenden Log-Hinweis bei Duplikaten. Intern als `uint8_t` (0/1–4) gespeichert. Details siehe `docs/spec/14-programme.md`, Kernentscheidung 8. Noch nicht implementiert.
 
 Ursprünglich als „Offene Punkte” zur Diskussion gestellt, mittlerweile entschieden und oben in die jeweiligen Abschnitte eingearbeitet (Datum: 2026-08-14):
 
