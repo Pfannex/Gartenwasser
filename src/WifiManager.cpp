@@ -72,7 +72,7 @@ void WifiManager::loop() {
     Logger::logf(Logger::Type::INFO, Logger::Source::WIFI, "Verbunden. IP: %s",
                  WiFi.localIP().toString().c_str());
   } else if (!connected && wasConnected) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::WIFI, "Verbindung verloren.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::WIFI, "WLAN Verbindung verloren.");
   }
   wasConnected = connected;
 

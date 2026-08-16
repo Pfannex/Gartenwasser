@@ -817,7 +817,7 @@ void MqttManager::loop() {
   // "Verbunden." wird direkt in connectToBroker() geloggt (vor den Publishes),
   // hier nur noch die Verbindungsverlust-Erkennung.
   if (!connected && wasConnected) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "Verbindung verloren.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "MQTT Verbindung verloren.");
   }
   wasConnected = connected;
 
