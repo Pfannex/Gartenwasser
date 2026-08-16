@@ -158,7 +158,20 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 ## Offene Punkte / nächste Schritte
 
-- Phase 14 (Bewässerungsprogramme) ist der nächste inhaltliche Schritt — die P1–P4-Buttons im Touch-UI warten schon darauf.
+### Phase 14 — Design fuer Bewaesserungsprogramme abgestimmt
+
+- `programs`-Array + `activeProgram` als Erweiterung derselben `config.json`/`main/config/set`-Struktur (Phase 11), keine neue Infrastruktur.
+- 1-basierte Nummerierung passend zu `P1`-`P4`/`V1`-`V5`, `0` = kein Programm gewaehlt (Startwert und explizit setzbar via `main/program/cmd 0`).
+- `time`/`auto` je Programm sind Teilmengen mit identischer Semantik wie `main/config/set` (enthaltene Felder werden uebernommen, fehlende bleiben unveraendert) - bewusst keine Sonderregel fuer `auto`, ein Regelwerk fuer alles ist einfacher.
+- Anwenden eines Programms ruft dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen wie `main/config/set` auf (Phase-11-Architektur zahlt sich hier direkt aus) - keine neue Validierungslogik.
+- `maxTime`/`alias` bewusst kein Teil eines Programms.
+- Obergrenze 8 Programme (`ConfigStore::kMaxPrograms`), Programmname nutzt `kAliasMaxLength` mit. `ConfigStore::kJsonCapacity` muss von 768 auf ca. 2048 Byte steigen, MQTT-Puffer entsprechend mit.
+- Vollstaendiges Beispiel in `docs/requirements.md` und `docs/spec/14-programme.md` ergaenzt.
+- Anbindung der Touch-UI-Buttons `P1`-`P4` (Phase 13) folgt als eigener Schritt **nach** der Config selbst - noch nicht umgesetzt.
+
+## Offene Punkte / nächste Schritte
+
+- Phase 14 (Bewässerungsprogramme) umsetzen: `ConfigStore`/`MqttManager` gemäß abgestimmtem Design (siehe oben, `docs/spec/14-programme.md`), danach `P1`–`P4`-Anbindung im Touch-UI.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
 - Vollständiger, zusammenhängender Regressionsdurchlauf (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.
