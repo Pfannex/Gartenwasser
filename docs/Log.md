@@ -186,9 +186,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - **Fix**: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp` (RAM-Headroom war reichlich vorhanden). Nach Re-Flash liefen alle 14 Testfaelle sauber durch.
 - Anbindung der Touch-UI-Buttons `P1`–`P4` (Phase 13) an die ersten vier Programme ist weiterhin ein eigener, noch offener Schritt.
 
+### Vollstaendiger MQTT-Regressionstest (autonom, Checkliste aus Phase 12)
+
+- Auf Nutzerwunsch vollstaendig autonom durchgefuehrt (Nutzer war nicht anwesend), inkl. eigenstaendiger Bug-Diagnose (siehe Phase-14-Eintrag oben) und Wiederherstellung des Ausgangszustands am Ende.
+- Ein zusammenhaengendes Python/paho-mqtt-Skript deckt 8 der 10 Punkte aus der Checkliste in `docs/spec/12-aufraeumen.md` automatisiert ab: Boot/Verfuegbarkeit, Ventile manuell + V0-Kopplung, Laufzeit (inkl. `maxTime`-Deckelung und einem echten 60s-Zeitablauf mit automatischer Abschaltung), Automatik-Flag, Automatik-Sequenz (inkl. manuellem Vorruecken und Abbruch), Alias (Umlaute, zu lang, Steuerzeichen), Konfiguration per JSON (Teil-Update, unbekannter Key), Persistenz.
+- **Persistenztest mit echtem Hardware-Reset**: `esptool --after hard-reset` (RTS-Pin-Puls, ohne Reflash) ausgeloest, danach verifiziert, dass `time`/`auto`/`alias` und die Programme-Liste den Neustart ueberleben, alle Ventile AUS sind und keine Automatik-Sequenz automatisch weiterlaeuft.
+- **Ergebnis: 48 von 49 Checks bestanden.** Die eine „fehlgeschlagene" Pruefung war ein Timing-Artefakt im Testskript (Restlaufzeit `00:59` statt exakt `01:00` gelesen, da zwischen Einschalten und Pruefung bereits ein Sekunden-Tick lief) — kein Firmware-Fehler, die `maxTime`-Deckelung selbst war korrekt.
+- **Nicht automatisiert** (physischer Eingriff noetig, bewusst nicht unbeaufsichtigt ausgefuehrt): Diagnostics-Fehlerfall (I2C-Kabel ziehen, Punkt 6) und Verbindungsabbruch-Resilienz (WLAN/MQTT trennen, Punkt 9). Vor dem produktiven Einsatz einmal manuell nachholen.
+- Vor/nach dem Testlauf wurde der komplette Konfigurationsstand (`config`, `programs`) gesichert und am Ende per `main/config/set`/`main/programs/set` wiederhergestellt — keine bleibenden Aenderungen am Geraet.
+
 ## Offene Punkte / nächste Schritte
 
 - `P1`–`P4`-Anbindung im Touch-UI an die ersten vier Programme (Phase 13/14) — eigener Schritt, noch offen.
+- Manuelle Nachholung der zwei nicht automatisierbaren Regressionstest-Punkte (I2C-Fehlerfall, WLAN/MQTT-Verbindungsabbruch) vor dem produktiven Einsatz.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
 - Vollständiger, zusammenhängender Regressionsdurchlauf aller MQTT-Funktionalitäten (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.
