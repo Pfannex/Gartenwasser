@@ -226,7 +226,18 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Getestet: interaktiv auf Hardware (Nutzer bedient Display, Ergebnis per gezielten MQTT-Abfragen/Live-Mitschnitten gegengeprueft) - alle Faelle bestanden, siehe `docs/testing.md`.
 - Nebenbei: eigener Fehler beim ersten Beobachtungsversuch gefunden (zwei Monitor-Prozesse mit gleicher Client-ID liefen gleichzeitig, siehe Eintrag oben) sowie eine Arbeitsweise-Korrektur vom Nutzer uebernommen: vor Tests mit noetiger Nutzeraktion immer zuerst ankuendigen und auf "ok" warten, statt sofort Vorbedingungen zu setzen und ein Zeitfenster zu starten (jetzt in Claude-Memory hinterlegt).
 
+### Phase 15 — erster Design-Entwurf fuer den Zeitplan
+
+- JSON-Schema-Vorschlag: `schedule.json`/`main/schedule/set`/`state` (Array-Replace wie bei `programs`), je Eintrag `type` (`daily`/`weekly`/`once`) mit typ-spezifischen Feldern (`weekdays`/`date`), `time`, `program`-Referenz, `enabled`.
+- **Programm-Referenz per Name statt Array-Index** (Nutzerentscheidung) — vermeidet das Drift-Problem, das die `shortcut`-Felder bei den Programmen bereits geloest haben: ein Umsortieren via `main/programs/set` wuerde sonst Zeitplan-Eintraege stillschweigend auf ein anderes Programm verschieben.
+- **Verpasste Trigger verfallen** (Nutzerentscheidung, mit Begruendung): ein nachgeholter Trigger zu unvorhersehbarer Zeit (z. B. erst beim naechsten Boot Stunden spaeter) waere ueberraschender als ein einmalig ausgefallener Termin.
+- **Globaler Ein/Aus-Schalter** fuer den kompletten Zeitplan gewuenscht: `enabled`-Feld auf oberster Ebene + Convenience-Topic `main/schedule/cmd` (`ON`/`OFF`), analog zu `main/program/cmd`.
+- **Zwei neue Nutzer-Merker**, noch nicht verfeinert:
+  - Kollisions-Hinweis bei manuellem `main/cmd ON` (Touch oder MQTT), wenn `main/remainingTotal` voraussichtlich ueber den naechsten faelligen Zeitplan-Trigger hinausreicht — nicht blockierend, nur Information.
+  - Aufraeum-Funktion (Arbeitstitel `main/schedule/cleanup`) zum gezielten Entfernen abgelaufener `once`-Eintraege auf Anfrage, ergaenzt aber ersetzt nicht das "liegen lassen"-Standardverhalten.
+- Rein Design-/Dokumentationsstand, noch keine Codeaenderung. Details in `docs/spec/15-wochenplan.md`, `docs/requirements.md` (Entscheidungshistorie).
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
+- Phase 15 (Zeitplan/Scheduler): Design-Entwurf abgestimmt (siehe oben), Umsetzung noch nicht begonnen — offene Detailfragen siehe `docs/spec/15-wochenplan.md`.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
