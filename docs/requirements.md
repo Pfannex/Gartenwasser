@@ -157,10 +157,10 @@ gartenwasser/          |        |                    |
 │   ├── config/        |        |                    |
 │   │   ├── set        | nein   | JSON               | time/auto/alias/maxTime setzen (komplett oder teilweise)
 │   │   └── state      | ja     | JSON               | Aktueller Gesamtstand von config (retained, Backup/Restore, Presets)
-│   ├── programs/      |        |                    | Phase 14, geplant
+│   ├── programs/      |        |                    |
 │   │   ├── set        | nein   | JSON               | Programme-Array + activeProgram setzen (Array wird komplett ersetzt)
 │   │   └── state      | ja     | JSON               | Aktueller Gesamtstand von programs (retained)
-│   ├── program/       |        |                    | Phase 14, geplant
+│   ├── program/       |        |                    |
 │   │   ├── cmd        | nein   | <integer>          | Programm per Index auswählen, 1-basiert (0 = keins)
 │   │   └── state      | ja     | JSON               | {"index":n,"name":"..."} , aktuell gewähltes Programm
 │   └── schedule/      |        |                    | Phase 15, geplant
