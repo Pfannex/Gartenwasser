@@ -1,6 +1,8 @@
 /**
  * @file    ConfigStore.h
- * @brief   Persistenz der Einstellwerte (aktuell: Ventil-Laufzeiten, maxTime) im SPIFFS.
+ * @brief   Persistenz der Einstellwerte (config.json: Ventil-Laufzeiten/Automatik/Alias/maxTime;
+ *          programs.json: Bewaesserungsprogramme, Phase 14) im SPIFFS. Siehe docs/requirements.md,
+ *          Abschnitt "Konfiguration" (config/programs/schedule als getrennte Bereiche).
  */
 
 #pragma once
@@ -10,16 +12,34 @@
 
 class ConfigStore {
  public:
-  /// Maximale Laenge (ohne Nullterminator) fuer einen Ventil-Alias.
+  /// Maximale Laenge (ohne Nullterminator) fuer einen Ventil-Alias bzw. Programmnamen.
   static constexpr size_t kAliasMaxLength = 32;
 
-  /// Puffer-/Speicherpool-Groesse fuer die vollstaendige Konfiguration als JSON
-  /// (SPIFFS-Persistenz und main/config/set|state teilen sich diese Konstante).
+  /// Puffer-/Speicherpool-Groesse fuer die config-JSON (SPIFFS-Persistenz und
+  /// main/config/set|state teilen sich diese Konstante).
   static constexpr size_t kJsonCapacity = 768;
+
+  /// Maximale Anzahl Bewaesserungsprogramme (Phase 14).
+  static constexpr uint8_t kMaxPrograms = 8;
+
+  /// Puffer-/Speicherpool-Groesse fuer die programs-JSON (SPIFFS-Persistenz und
+  /// main/programs/set|state teilen sich diese Konstante).
+  static constexpr size_t kProgramsJsonCapacity = 2048;
+
+  /// Ein (Teil-)Eintrag zum Setzen eines Programms ueber setPrograms(). `time`/`autoFlag`
+  /// sind nur gueltig, wenn das zugehoerige `timeSet[i]`/`autoSet[i]` gesetzt ist (Index 1..5,
+  /// 0 unbenutzt) - Programme sind Teilmengen wie main/config/set, siehe docs/spec/14-programme.md.
+  struct ProgramInput {
+    const char *name;
+    uint16_t time[6];
+    bool timeSet[6];
+    bool autoFlag[6];
+    bool autoSet[6];
+  };
 
   ConfigStore() = delete;
 
-  /// Mountet SPIFFS und laedt /config.json (falls vorhanden), sonst gelten Defaultwerte.
+  /// Mountet SPIFFS und laedt /config.json + /programs.json (falls vorhanden), sonst gelten Defaultwerte.
   static void begin();
 
   /// Konfigurierte Laufzeit in Minuten fuer Ventil `index` (1..5).
@@ -44,4 +64,29 @@ class ConfigStore {
   /// nach `buffer` (dieselbe Struktur wie /config.json). Liefert die Anzahl geschriebener
   /// Bytes (wie serializeJson()), oder 0 bei Fehler.
   static size_t toJson(char *buffer, size_t bufferSize);
+
+  /// Ersetzt das komplette Programme-Array (main/programs/set, Key "programs") und speichert
+  /// sofort. Mehr als kMaxPrograms Eintraege werden ignoriert + geloggt.
+  static void setPrograms(const ProgramInput *entries, uint8_t count);
+
+  /// Anzahl aktuell gespeicherter Programme.
+  static uint8_t getProgramCount();
+
+  /// Programmname, 1-basierter Index (1..getProgramCount()). Leerer String bei ungueltigem Index.
+  static const char *getProgramName(uint8_t programIndex);
+
+  /// Ob Programm `programIndex` (1-basiert) einen Laufzeit-/Automatik-Wert fuer Ventil
+  /// `valveIndex` (1..5) enthaelt, bzw. dessen Wert. Ungueltige Indizes liefern false/0.
+  static bool programHasTime(uint8_t programIndex, uint8_t valveIndex);
+  static uint16_t getProgramTime(uint8_t programIndex, uint8_t valveIndex);
+  static bool programHasAuto(uint8_t programIndex, uint8_t valveIndex);
+  static bool getProgramAuto(uint8_t programIndex, uint8_t valveIndex);
+
+  /// Aktuell gewaehltes Programm, 1-basiert (0 = keins). Persistiert in /programs.json.
+  static uint8_t getActiveProgram();
+  static void setActiveProgram(uint8_t programIndex);
+
+  /// Serialisiert programs+activeProgram als JSON (main/programs/state-Struktur). Liefert
+  /// die Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler.
+  static size_t programsToJson(char *buffer, size_t bufferSize);
 };

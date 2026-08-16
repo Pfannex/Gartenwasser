@@ -34,6 +34,13 @@ constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
 constexpr const char *kV0AliasSetTopic = "gartenwasser/V0/alias/set";
 constexpr const char *kConfigSetTopic = "gartenwasser/main/config/set";
 constexpr const char *kConfigStateTopic = "gartenwasser/main/config/state";
+// Phase 14 (Bewaesserungsprogramme): main/program/cmd|state (Singular) = einfache
+// Index-Auswahl, main/programs/set|state (Plural) = Bulk-JSON (Array-Replace + activeProgram),
+// eigener Bereich getrennt von main/config/* (siehe docs/requirements.md, "Konfiguration").
+constexpr const char *kProgramCmdTopic = "gartenwasser/main/program/cmd";
+constexpr const char *kProgramStateTopic = "gartenwasser/main/program/state";
+constexpr const char *kProgramsSetTopic = "gartenwasser/main/programs/set";
+constexpr const char *kProgramsStateTopic = "gartenwasser/main/programs/state";
 
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
@@ -46,6 +53,11 @@ constexpr char kAliasSetSuffix[] = "/alias/set";
 // Variante einzeln zu vermessen - genau daraus resultierte einmal ein Bug
 // (V{n}/auto/state wurde mit zu kleinem Puffer abgeschnitten, siehe Log.md).
 constexpr size_t kTopicBufferSize = 48;
+
+// Groesste vorkommende JSON-Payload (main/programs/set|state, Phase 14) - main/config/*
+// bleibt kleiner (kJsonCapacity), programs.json ist mit bis zu kMaxPrograms Eintraegen
+// der Puffer-bestimmende Fall.
+constexpr size_t kMaxJsonPayloadSize = ConfigStore::kProgramsJsonCapacity;
 
 // Grenzen fuer time/set (Minuten). Obere Grenze ist ein grosszuegiger Sanity-Check,
 // die eigentliche Deckelung der effektiven Laufzeit erfolgt ueber maxTime (ValveTimer).
@@ -176,6 +188,34 @@ void publishConfigState() {
     return;
   }
   publishAndLog(kConfigStateTopic, payload, true);
+}
+
+// Publiziert das aktuell gewaehlte Programm (Singular, kompakt), retained -
+// bei jeder Aenderung und nach jedem (Re-)Connect (siehe docs/spec/14-programme.md).
+void publishProgramState() {
+  const uint8_t active = ConfigStore::getActiveProgram();
+  StaticJsonDocument<96> doc;
+  doc["index"] = active;
+  if (active == 0 || active > ConfigStore::getProgramCount()) {
+    doc["name"] = nullptr;
+  } else {
+    doc["name"] = ConfigStore::getProgramName(active);
+  }
+  char payload[96];
+  serializeJson(doc, payload, sizeof(payload));
+  publishAndLog(kProgramStateTopic, payload, true);
+}
+
+// Publiziert die komplette Programme-Liste + activeProgram als JSON, retained -
+// bei jeder Aenderung (egal welches Topic) und nach jedem (Re-)Connect.
+void publishProgramsState() {
+  char payload[ConfigStore::kProgramsJsonCapacity];
+  const size_t written = ConfigStore::programsToJson(payload, sizeof(payload));
+  if (written == 0) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/programs/state: Serialisierung fehlgeschlagen.");
+    return;
+  }
+  publishAndLog(kProgramsStateTopic, payload, true);
 }
 
 void publishMainState(bool running) {
@@ -521,8 +561,112 @@ void handleConfigSet(const char *payloadStr) {
   publishConfigState();
 }
 
+// Kernfunktion (Phase 14): wendet Programm `programIndex` (1-basiert) an, indem fuer jedes im
+// Programm enthaltene Feld dieselben applyTimeValue()/applyAutoValue()-Kernfunktionen wie
+// main/config/set aufgerufen werden (siehe docs/spec/14-programme.md, Kernentscheidung 3).
+// `programIndex == 0` loescht nur die Auswahl, ohne Ventile anzufassen. Wiederverwendet von
+// main/program/cmd und dem Key "activeProgram" in main/programs/set.
+void applyProgram(uint8_t programIndex) {
+  if (programIndex != 0) {
+    if (programIndex > ConfigStore::getProgramCount()) {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Programm-Index '%u'", programIndex);
+      return;
+    }
+    for (uint8_t v = 1; v <= 5; v++) {
+      if (ConfigStore::programHasTime(programIndex, v)) {
+        applyTimeValue(v, ConfigStore::getProgramTime(programIndex, v));
+      }
+      if (ConfigStore::programHasAuto(programIndex, v)) {
+        applyAutoValue(v, ConfigStore::getProgramAuto(programIndex, v));
+      }
+    }
+  }
+  ConfigStore::setActiveProgram(programIndex);
+  publishProgramState();
+  publishProgramsState();
+  publishConfigState();  // time/auto koennen sich durchs Anwenden geaendert haben
+}
+
+void handleProgramCmd(const char *payloadStr) {
+  char *endPtr = nullptr;
+  const long value = strtol(payloadStr, &endPtr, 10);
+  if (endPtr == payloadStr || *endPtr != '\0' || value < 0 || value > ConfigStore::kMaxPrograms) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Wert '%s' fuer main/program/cmd",
+                 payloadStr);
+    return;
+  }
+  applyProgram(static_cast<uint8_t>(value));
+}
+
+// main/programs/set: "programs" ersetzt das komplette Array (kein Feld-Merge einzelner
+// Programme, siehe docs/spec/14-programme.md, Kernentscheidung 5), "activeProgram" wendet
+// die Auswahl an (identisch zu main/program/cmd, ueber applyProgram()). Beide optional.
+void handleProgramsSet(const char *payloadStr) {
+  StaticJsonDocument<ConfigStore::kProgramsJsonCapacity> doc;
+  const DeserializationError err = deserializeJson(doc, payloadStr);
+  if (err) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/programs/set: JSON-Fehler: %s", err.c_str());
+    return;
+  }
+
+  JsonArrayConst programsArr = doc["programs"];
+  if (!programsArr.isNull()) {
+    ConfigStore::ProgramInput entries[ConfigStore::kMaxPrograms];
+    uint8_t count = 0;
+    for (JsonObjectConst obj : programsArr) {
+      if (count >= ConfigStore::kMaxPrograms) {
+        Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
+                     "main/programs/set: mehr als %u Programme, Rest wird ignoriert.", ConfigStore::kMaxPrograms);
+        break;
+      }
+      ConfigStore::ProgramInput &entry = entries[count];
+      entry.name = obj["name"] | "";
+      for (uint8_t i = 0; i < 6; i++) {
+        entry.timeSet[i] = false;
+        entry.autoSet[i] = false;
+      }
+      JsonObjectConst timeObj = obj["time"];
+      uint8_t idx = 0;
+      for (JsonPairConst kv : timeObj) {
+        if (parseValveKey(kv.key().c_str(), 1, 5, &idx)) {
+          entry.time[idx] = kv.value().as<uint16_t>();
+          entry.timeSet[idx] = true;
+        } else {
+          Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
+                       "main/programs/set: unbekanntes Ventil '%s' in Programm-time", kv.key().c_str());
+        }
+      }
+      JsonObjectConst autoObj = obj["auto"];
+      for (JsonPairConst kv : autoObj) {
+        if (parseValveKey(kv.key().c_str(), 1, 5, &idx)) {
+          entry.autoFlag[idx] = kv.value().as<bool>();
+          entry.autoSet[idx] = true;
+        } else {
+          Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
+                       "main/programs/set: unbekanntes Ventil '%s' in Programm-auto", kv.key().c_str());
+        }
+      }
+      count++;
+    }
+    ConfigStore::setPrograms(entries, count);
+  }
+
+  if (!doc["activeProgram"].isNull()) {
+    const long value = doc["activeProgram"].as<long>();
+    if (value < 0 || value > ConfigStore::kMaxPrograms) {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/programs/set: ungueltiger activeProgram-Wert '%ld'",
+                   value);
+    } else {
+      applyProgram(static_cast<uint8_t>(value));  // publiziert programs/program/config-State bereits
+      return;
+    }
+  }
+
+  publishProgramsState();
+}
+
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
-  char payloadStr[ConfigStore::kJsonCapacity];
+  char payloadStr[kMaxJsonPayloadSize];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
   Logger::logf(Logger::Type::SUB, Logger::Source::MQTT, "%s = %s", topic, payloadStr);
 
@@ -536,6 +680,14 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
   }
   if (strcmp(topic, kConfigSetTopic) == 0) {
     handleConfigSet(payloadStr);
+    return;
+  }
+  if (strcmp(topic, kProgramCmdTopic) == 0) {
+    handleProgramCmd(payloadStr);
+    return;
+  }
+  if (strcmp(topic, kProgramsSetTopic) == 0) {
+    handleProgramsSet(payloadStr);
     return;
   }
 
@@ -594,6 +746,8 @@ bool connectToBroker() {
     mqttClient.subscribe(kMainCmdTopic);
     mqttClient.subscribe(kV0AliasSetTopic);
     mqttClient.subscribe(kConfigSetTopic);
+    mqttClient.subscribe(kProgramCmdTopic);
+    mqttClient.subscribe(kProgramsSetTopic);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[kTopicBufferSize];
       char timeSetTopic[kTopicBufferSize];
@@ -627,6 +781,8 @@ bool connectToBroker() {
       publishLastError(Diagnostics::getLastError());
     }
     publishConfigState();
+    publishProgramState();
+    publishProgramsState();
   }
   return ok;
 }
@@ -636,9 +792,9 @@ bool connectToBroker() {
 void MqttManager::begin() {
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(handleMqttMessage);
-  // Default (256 Byte) reicht nicht fuer main/config/set|state (komplette
-  // Konfiguration inkl. aller Aliase als JSON).
-  mqttClient.setBufferSize(1024);
+  // Default (256 Byte) reicht nicht fuer die JSON-Topics (main/config/*, main/programs/*).
+  // main/programs/set|state (Phase 14, bis zu kMaxPrograms Eintraege) ist der groesste Fall.
+  mqttClient.setBufferSize(static_cast<uint16_t>(kMaxJsonPayloadSize));
 }
 
 void MqttManager::loop() {

@@ -1,6 +1,6 @@
 # Phase 14 — Bewässerungsprogramme (`main/program/cmd`, `main/program/state`)
 
-**Status:** 📋 Geplant (Design abgestimmt, Umsetzung offen)
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -81,3 +81,9 @@ Eigene Datei/eigenes Topic bedeutet: `ConfigStore::kJsonCapacity` für `config.j
 4. `main/program/cmd 0` → `main/program/state` zeigt `{"index":0,"name":null}`, keine Ventile werden angefasst.
 5. Neustart des Boards → zuletzt gewähltes Programm (Index) bleibt als reiner Konfigurationswert erhalten, es wird aber **nichts** automatisch gestartet (sicherer Boot-Grundzustand, siehe `docs/requirements.md`).
 6. `main/programs/set` mit `{"programs":[...]}` → komplettes Array wird ersetzt, `main/programs/state` zeigt den neuen Stand, `main/config/state` bleibt davon unberührt.
+
+## Test / Ergebnis
+
+- Automatisiert per Python/paho-mqtt gegen den echten Broker getestet (alle 6 Testfälle oben plus ein Bonus-Test für die Teilmengen-Semantik) — 14/14 Checks bestanden.
+- **Bug gefunden und gefixt**: `main/programs/set` liess das Board mit einem Stack-Overflow abstuerzen (`Guru Meditation Error: Core 0 panic'ed (Stack protection fault)`, Serial-Monitor-Mitschnitt bestaetigt `Detected in task "loopTask"`). Ursache: mehrere grosse JSON-Puffer (`StaticJsonDocument<2048>`, `char payloadStr[2048]`) gleichzeitig auf dem Stack der Arduino-`loopTask`, deren Default-Groesse (8192 Byte) dafuer nicht mehr reichte. Fix: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp` (RAM-Headroom war reichlich vorhanden, siehe Phase-12-Speicher-Check).
+- Getestet: Bulk-Replace des Programme-Arrays, Index-Auswahl (gueltig/ungueltig/0), Persistenz der Auswahl neben laufenden manuellen Aenderungen (kein Lock), Teilmengen-Semantik (ein Programm, das ein Ventil in keinem Feld erwaehnt, laesst es unangetastet).

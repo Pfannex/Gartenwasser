@@ -177,9 +177,18 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - `schedule` (`/schedule.json`, `main/schedule/set`/`state`, Phase 15): von vornherein als eigener Bereich reserviert.
 - `docs/requirements.md`, `docs/spec/11-sammelbefehle.md`, `docs/spec/14-programme.md`, `docs/spec/15-wochenplan.md` entsprechend angepasst. Reine Doku-/Design-Änderung, noch keine Codeänderung.
 
+### Phase 14 — Bewaesserungsprogramme umgesetzt, Stack-Overflow-Bug gefunden und gefixt
+
+- `ConfigStore`: neue Datei `/programs.json` (eigenes Load/Save/`toJson()`), `kMaxPrograms=8`, `kProgramsJsonCapacity=2048`, `ProgramInput`-Struct + `setPrograms()`/`getProgramCount()`/`getProgramName()`/`programHasTime()`/`getProgramTime()`/`programHasAuto()`/`getProgramAuto()`/`getActiveProgram()`/`setActiveProgram()`/`programsToJson()`.
+- `MqttManager`: `main/program/cmd`/`state` (Singular, Index-Auswahl) + `main/programs/set`/`state` (Plural, Bulk-JSON) verdrahtet. `applyProgram()` als Kernfunktion wiederverwendet `applyTimeValue()`/`applyAutoValue()` aus Phase 11 (kein Duplikat). MQTT-/Payload-Puffer auf 2048 Byte angehoben.
+- Testet automatisiert per Python/paho-mqtt-Skript gegen den echten Broker (selbst geschrieben, auf Nutzerwunsch als Alternative zu manuellem `mosquitto_pub`) — deckt alle 6 Testfaelle aus der Spec plus einen Bonus-Test fuer die Teilmengen-Semantik ab.
+- **Bug gefunden**: `main/programs/set` liess das Board mit `Guru Meditation Error: Core 0 panic'ed (Stack protection fault)` abstuerzen (per Serial-Monitor-Mitschnitt bestaetigt, `Detected in task "loopTask"`, SP unterhalb der Stack-Grenze). Ursache: mehrere 2048-Byte-JSON-Puffer (`StaticJsonDocument`, `char payloadStr[]`) gleichzeitig auf dem Stack der Arduino-`loopTask`, deren Default (8192 Byte) dafuer zu knapp war.
+- **Fix**: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp` (RAM-Headroom war reichlich vorhanden). Nach Re-Flash liefen alle 14 Testfaelle sauber durch.
+- Anbindung der Touch-UI-Buttons `P1`–`P4` (Phase 13) an die ersten vier Programme ist weiterhin ein eigener, noch offener Schritt.
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 14 (Bewässerungsprogramme) umsetzen: `ConfigStore` (neue Datei `/programs.json`) + `MqttManager` (`main/program/cmd`/`state`, `main/programs/set`/`state`) gemäß abgestimmtem Design (siehe oben, `docs/spec/14-programme.md`), danach `P1`–`P4`-Anbindung im Touch-UI.
+- `P1`–`P4`-Anbindung im Touch-UI an die ersten vier Programme (Phase 13/14) — eigener Schritt, noch offen.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
-- Vollständiger, zusammenhängender Regressionsdurchlauf (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.
+- Vollständiger, zusammenhängender Regressionsdurchlauf aller MQTT-Funktionalitäten (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.

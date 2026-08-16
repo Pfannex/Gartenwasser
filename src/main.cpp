@@ -23,6 +23,13 @@
 #include "WifiManager.h"
 #include "Logger.h"
 
+// Default-Stack der Arduino-loopTask (8192 Byte) reicht nicht mehr: main/programs/set
+// (Phase 14) verarbeitet mehrere StaticJsonDocument<2048>/Puffer gleichzeitig auf dem
+// Stack (handleMqttMessage -> handleProgramsSet), das fuehrte zu einem "Stack protection
+// fault" (Guru Meditation Error). RAM-Headroom ist reichlich vorhanden (siehe Log.md,
+// Speicher-Check Phase 12), daher grosszuegig verdoppelt statt die JSON-Puffer zu verkleinern.
+SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+
 void setup() {
   Serial.begin(115200);
   delay(500);
