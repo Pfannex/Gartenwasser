@@ -5,6 +5,7 @@ Zentrale, strukturierte Übersicht aller Testläufe. Ergänzt die phasenweisen `
 ## Wie getestet wird
 
 - Testskripte liegen unter [`tools/mqtt-tests/`](../tools/mqtt-tests/) (siehe dortige `README.md` für Voraussetzungen/Nutzung).
+- Für manuelle/visuelle Kontrolle: [`tools/mqtt-spy/`](../tools/mqtt-spy/) enthält eine versionierte Kopie der [mqtt-spy](https://kamilfb.github.io/mqtt-spy/)-Konfiguration (Windows-Java-Tool), sinnvoll mit `+`-Wildcards nach Topic-Gruppen sortiert.
 - Automatisiert per Python + [paho-mqtt](https://pypi.org/project/paho-mqtt/) gegen den echten Broker (`192.168.1.123:1883`) und die echte Hardware — kein Mock/Simulator.
 - Skripte abonnieren `gartenwasser/#`, publizieren Testbefehle und prüfen die resultierenden (retained) States gegen Erwartungswerte.
 - Wo nötig, wird ein echter Hardware-Reset über `esptool --after hard-reset` ausgelöst (RTS-Pin-Puls, kein Reflash) statt eines simulierten Neustarts.

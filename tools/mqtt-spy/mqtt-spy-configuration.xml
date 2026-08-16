@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:MqttSpyConfiguration xmlns:ns2="http://baczkowicz.pl/mqtt-spy-configuration">
+    <ConnectionGroups>
+        <ID>default_group</ID>
+        <Name>All connections</Name>
+        <Connections>
+            <Reference>conn1114250560</Reference>
+        </Connections>
+    </ConnectionGroups>
+    <Connectivity>
+        <ConnectionV2>
+            <ID>conn1114250560</ID>
+            <Name>Broker_Proxmox</Name>
+            <Protocol>MQTT Default</Protocol>
+            <ServerURI>192.168.1.123</ServerURI>
+            <WebSocket>false</WebSocket>
+            <ClientID>Pfanne172554569</ClientID>
+            <CleanSession>true</CleanSession>
+            <ConnectionTimeout>30</ConnectionTimeout>
+            <KeepAliveInterval>60</KeepAliveInterval>
+            <!-- V0: Hauptventil (nur Alias editierbar, kein cmd/time/auto) -->
+            <Publication topic="gartenwasser/V0/alias/set"/>
+
+            <!-- V1-V5: Bewässerungsventile -->
+            <Publication topic="gartenwasser/V1/cmd"/>
+            <Publication topic="gartenwasser/V1/alias/set"/>
+            <Publication topic="gartenwasser/V1/time/set"/>
+            <Publication topic="gartenwasser/V1/auto/set"/>
+
+            <Publication topic="gartenwasser/V2/cmd"/>
+            <Publication topic="gartenwasser/V2/alias/set"/>
+            <Publication topic="gartenwasser/V2/time/set"/>
+            <Publication topic="gartenwasser/V2/auto/set"/>
+
+            <Publication topic="gartenwasser/V3/cmd"/>
+            <Publication topic="gartenwasser/V3/alias/set"/>
+            <Publication topic="gartenwasser/V3/time/set"/>
+            <Publication topic="gartenwasser/V3/auto/set"/>
+
+            <Publication topic="gartenwasser/V4/cmd"/>
+            <Publication topic="gartenwasser/V4/alias/set"/>
+            <Publication topic="gartenwasser/V4/time/set"/>
+            <Publication topic="gartenwasser/V4/auto/set"/>
+
+            <Publication topic="gartenwasser/V5/cmd"/>
+            <Publication topic="gartenwasser/V5/alias/set"/>
+            <Publication topic="gartenwasser/V5/time/set"/>
+            <Publication topic="gartenwasser/V5/auto/set"/>
+
+            <!-- main: Sequenzsteuerung -->
+            <Publication topic="gartenwasser/main/cmd"/>
+            <Publication topic="gartenwasser/main/config/set"/>
+
+            <!-- main: Programme -->
+            <Publication topic="gartenwasser/main/programs/set"/>
+            <Publication topic="gartenwasser/main/program/cmd"/>
+
+            <!-- main: Zeitplan (Phase 15, geplant) -->
+            <Publication topic="gartenwasser/main/schedule/set"/>
+
+            <!-- LWT -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/availability" scriptFile=""/>
+
+            <!-- Ist-Zustand aller Ventile (V0-V5) + Sequenz-Status (main), da main/state gleiche Ebene wie V0-V5/state hat -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/+/state" scriptFile=""/>
+
+            <!-- Aliase aller Ventile (V0-V5) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/+/alias" scriptFile=""/>
+
+            <!-- Laufzeit-Einstellung aller Ventile (nur V1-V5, V0 hat kein time/) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/+/time/state" scriptFile=""/>
+
+            <!-- Restlaufzeit aller Ventile (nur V1-V5) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/+/time/remaining" scriptFile=""/>
+
+            <!-- Automatik-Flag aller Ventile (nur V1-V5) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/+/auto/state" scriptFile=""/>
+
+            <!-- main: Sequenzsteuerung (Einzeltopics, da keine gemeinsame Ebene mit V0-V5 bzw. Verwechslungsgefahr mit main/cmd) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/main/activeValve" scriptFile=""/>
+            <Subscription createTab="true" qos="0" topic="gartenwasser/main/remainingTotal" scriptFile=""/>
+            <Subscription createTab="true" qos="0" topic="gartenwasser/main/time/maxTime" scriptFile=""/>
+
+            <!-- main: State-Topics aller Sub-Namespaces (config/state, programs/state, program/state, schedule/state) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/main/+/state" scriptFile=""/>
+
+            <!-- Diagnose -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/diagnostics/+" scriptFile=""/>
+
+            <AutoOpen>false</AutoOpen>
+            <AutoConnect>true</AutoConnect>
+            <AutoSubscribe>false</AutoSubscribe>
+            <MinMessagesStoredPerTopic>10</MinMessagesStoredPerTopic>
+            <MaxMessagesStored>5000</MaxMessagesStored>
+            <MessageLog logQos="false" logRetained="false" logConnection="false" logSubscription="false" logBeforeScripts="false">DISABLED</MessageLog>
+        </ConnectionV2>
+    </Connectivity>
+    <Formatting>
+        <Formatter>
+            <Name>Hex body decoder</Name>
+            <ID>hex-body-decoder</ID>
+            <Function>
+                <SubstringConversion>
+                    <StartTag>&lt;Body&gt;</StartTag>
+                    <EndTag>&lt;/Body&gt;</EndTag>
+                    <KeepTags>true</KeepTags>
+                    <Format>HexDecode</Format>
+                </SubstringConversion>
+            </Function>
+            <Function>
+                <SubstringExtract>
+                    <StartTag>&lt;Body&gt;</StartTag>
+                    <EndTag>&lt;/Body&gt;</EndTag>
+                    <KeepTags>false</KeepTags>
+                </SubstringExtract>
+            </Function>
+        </Formatter>
+        <Formatter>
+            <Name>Base64 body decoder</Name>
+            <ID>base64-body-decoder</ID>
+            <Function>
+                <SubstringConversion>
+                    <StartTag>&lt;Body&gt;</StartTag>
+                    <EndTag>&lt;/Body&gt;</EndTag>
+                    <KeepTags>true</KeepTags>
+                    <Format>Base64Decode</Format>
+                </SubstringConversion>
+            </Function>
+            <Function>
+                <SubstringExtract>
+                    <StartTag>&lt;Body&gt;</StartTag>
+                    <EndTag>&lt;/Body&gt;</EndTag>
+                    <KeepTags>false</KeepTags>
+                </SubstringExtract>
+            </Function>
+        </Formatter>
+    </Formatting>
+</ns2:MqttSpyConfiguration>
