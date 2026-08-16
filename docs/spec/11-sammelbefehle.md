@@ -8,6 +8,8 @@ Komplette oder teilweise Konfiguration (`time`, `auto`, `maxTime`, später `alia
 
 Ursprünglich als domänenspezifische Sammel-Befehle (`main/time/set`, `main/auto/set`) geplant — stattdessen ein einziges, vollständiges `config`-JSON, das dieselbe Funktion abdeckt und zusätzlich einen lesbaren Gesamt-Snapshot liefert (siehe `docs/requirements.md`, Entscheidungshistorie 2026-08-15).
 
+**Scope-Abgrenzung (2026-08-16):** `config`/`main/config/set`/`state` deckt ausschließlich `time`, `auto`, `alias`, `maxTime` ab. Bewässerungsprogramme (`programs`/`activeProgram`, Phase 14) und Zeitplan (`schedule`, Phase 15) leben bewusst in eigenen Dateien/Topics (`programs.json`/`main/programs/*`, `schedule.json`/`main/schedule/*`), nicht als weitere Keys hier — Details siehe `docs/requirements.md`, Abschnitt „Konfiguration (Backup/Restore, Presets)“, sowie `docs/spec/14-programme.md`/`docs/spec/15-wochenplan.md`.
+
 ## Voraussetzungen
 
 - Phase 5 (Laufzeit, `ConfigStore`) ✅

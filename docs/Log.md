@@ -160,7 +160,7 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 ### Phase 14 — Design fuer Bewaesserungsprogramme abgestimmt
 
-- `programs`-Array + `activeProgram` als Erweiterung derselben `config.json`/`main/config/set`-Struktur (Phase 11), keine neue Infrastruktur.
+- `programs`-Array + `activeProgram` als Konfigurationsbereich analog zu Phase 11 (später am selben Tag auf eigene Datei/Topics umgestellt, siehe nächster Eintrag).
 - 1-basierte Nummerierung passend zu `P1`-`P4`/`V1`-`V5`, `0` = kein Programm gewaehlt (Startwert und explizit setzbar via `main/program/cmd 0`).
 - `time`/`auto` je Programm sind Teilmengen mit identischer Semantik wie `main/config/set` (enthaltene Felder werden uebernommen, fehlende bleiben unveraendert) - bewusst keine Sonderregel fuer `auto`, ein Regelwerk fuer alles ist einfacher.
 - Anwenden eines Programms ruft dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen wie `main/config/set` auf (Phase-11-Architektur zahlt sich hier direkt aus) - keine neue Validierungslogik.
@@ -169,9 +169,17 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Vollstaendiges Beispiel in `docs/requirements.md` und `docs/spec/14-programme.md` ergaenzt.
 - Anbindung der Touch-UI-Buttons `P1`-`P4` (Phase 13) folgt als eigener Schritt **nach** der Config selbst - noch nicht umgesetzt.
 
+### Konfiguration in drei Bereiche aufgeteilt — config/programs/schedule
+
+- Auf Nutzerwunsch geprüft, ob eine gemeinsame `config.json` für laufende Ventilparameter, Programme (Phase 14) und Zeitplan (Phase 15) sinnvoll ist — Antwort: nein, stattdessen drei eigene Bereiche, weil sie unterschiedlich oft/aus unterschiedlichen Gründen geändert werden und eine gemeinsame Struktur mit jeder Phase weiter gewachsen wäre (Puffer-/JSON-Capacity für alle drei zusammen).
+- `config` (`/config.json`, `main/config/set`/`state`): bleibt bei `time`/`auto`/`alias`/`maxTime`, unverändert zu Phase 11.
+- `programs` (`/programs.json`, `main/programs/set`/`state` für Bulk-Editieren): Programme-Array + `activeProgram` (gehört inhaltlich zu den Programmen, nicht zur Config) — das schlanke `main/program/cmd`/`state` (Singular) zur Index-Auswahl bleibt zusätzlich bestehen, ruft intern dieselbe Logik auf.
+- `schedule` (`/schedule.json`, `main/schedule/set`/`state`, Phase 15): von vornherein als eigener Bereich reserviert.
+- `docs/requirements.md`, `docs/spec/11-sammelbefehle.md`, `docs/spec/14-programme.md`, `docs/spec/15-wochenplan.md` entsprechend angepasst. Reine Doku-/Design-Änderung, noch keine Codeänderung.
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 14 (Bewässerungsprogramme) umsetzen: `ConfigStore`/`MqttManager` gemäß abgestimmtem Design (siehe oben, `docs/spec/14-programme.md`), danach `P1`–`P4`-Anbindung im Touch-UI.
+- Phase 14 (Bewässerungsprogramme) umsetzen: `ConfigStore` (neue Datei `/programs.json`) + `MqttManager` (`main/program/cmd`/`state`, `main/programs/set`/`state`) gemäß abgestimmtem Design (siehe oben, `docs/spec/14-programme.md`), danach `P1`–`P4`-Anbindung im Touch-UI.
 - Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
 - Vollständiger, zusammenhängender Regressionsdurchlauf (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.

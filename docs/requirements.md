@@ -63,13 +63,23 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
 
 ### Konfiguration (Backup/Restore, Presets)
 
-- `main/config/set` (JSON, **nicht** retained) setzt die komplette Konfiguration (`time`, `auto`, `maxTime`, später `alias`) oder einen Teil davon — fehlende Keys bleiben unverändert (kein Rücksprung auf Defaults). Struktur identisch zur internen `ConfigStore`-Persistenz, z. B. `{"time":{"V1":5,"V2":10},"auto":{"V3":true},"maxTime":30}`. Validierung wie bei den einzelnen `V{n}/time/set`/`auto/set`-Topics (ungültige Werte ignorieren + loggen statt übernehmen).
-- `main/config/state` (JSON, retained) publiziert die aktuelle Gesamt-Konfiguration — bei jeder Änderung und nach jedem (Re-)Connect.
-- Zweck: schneller, reproduzierbarer Ausgangszustand für Tests und im laufenden Betrieb, ohne fest im Firmware-Code hinterlegte Presets — „Default“- oder „Test“-Konfigurationen sind einfach extern gespeicherte JSON-Payloads, die bei Bedarf auf `main/config/set` publiziert werden.
-- Bewusst nicht retained (das `set`-Topic): ein Broker-Neustart oder erneutes Subscriben darf keine alte Konfiguration versehentlich erneut anwenden.
-- Ersetzt die ursprünglich für Phase 11 vorgesehenen Sammel-Befehle `main/time/set`/`main/auto/set` (JSON) — deckt deren Funktion vollständig ab, ohne pro Domäne ein eigenes Topic zu brauchen.
+Die Konfiguration ist auf drei unabhängige Bereiche aufgeteilt — eigene SPIFFS-Datei und eigenes MQTT-Topic-Paar je Bereich. Grund: die drei wachsen unterschiedlich schnell und ändern sich aus unterschiedlichen Gründen (laufende Ventilparameter selten und einzeln, Programme gelegentlich als Ganzes, Zeitplan perspektivisch am umfangreichsten) — eine gemeinsame Struktur würde mit jeder weiteren Phase unübersichtlicher und der MQTT-/JSON-Puffer müsste immer weiter wachsen, obwohl die meisten Änderungen nur einen der drei Bereiche betreffen.
 
-**Vollständiges Beispiel** (alle Elemente — genau die Struktur, die `main/config/state` liefert; ein `set` kann jede beliebige Teilmenge davon enthalten):
+| Bereich | Datei | Inhalt | Topics |
+|---|---|---|---|
+| `config` | `/config.json` | `time`, `auto`, `alias`, `maxTime` | `main/config/set` / `main/config/state` |
+| `programs` | `/programs.json` | Bewässerungsprogramme (Phase 14, geplant) | `main/programs/set` / `main/programs/state` (Bulk), `main/program/cmd` / `main/program/state` (Auswahl per Index) |
+| `schedule` | `/schedule.json` | Zeitplan (Phase 15, geplant) | `main/schedule/set` / `main/schedule/state` |
+
+Jeder Bereich funktioniert nach demselben Muster: `.../set` (JSON, **nicht** retained) setzt den Bereich komplett oder teilweise — fehlende Keys bleiben unverändert (kein Rücksprung auf Defaults, anders als beim Laden einer fehlenden Datei nach Boot). `.../state` (JSON, retained) publiziert den aktuellen Gesamtstand des jeweiligen Bereichs, bei jeder Änderung und nach jedem (Re-)Connect. Validierung wie bei den einzelnen `V{n}/...`-Topics (ungültige Werte ignorieren + loggen statt übernehmen). Bewusst nicht retained (die `set`-Topics): ein Broker-Neustart oder erneutes Subscriben darf keine alte Konfiguration versehentlich erneut anwenden.
+
+Ausnahme vom Teil-Update-Prinzip: `programs` (Array) hat keine natürlichen Schlüssel für einen Feld-Merge — der Key `"programs"` in `main/programs/set` ersetzt das komplette Array, wenn mitgeschickt. Gleiches gilt später für `schedule`. Praktischer Ablauf: `.../state` holen, lokal bearbeiten, komplett zurückschicken.
+
+Zweck: schneller, reproduzierbarer Ausgangszustand für Tests und im laufenden Betrieb, ohne fest im Firmware-Code hinterlegte Presets — „Default“- oder „Test“-Konfigurationen sind einfach extern gespeicherte JSON-Payloads, die bei Bedarf auf das jeweilige `.../set`-Topic publiziert werden.
+
+Ersetzt die ursprünglich für Phase 11 vorgesehenen Sammel-Befehle `main/time/set`/`main/auto/set` (JSON) — deckt deren Funktion vollständig ab, ohne pro Domäne ein eigenes Topic zu brauchen.
+
+**Vollständiges Beispiel `config`** (`main/config/state`, alle Elemente — ein `set` kann jede beliebige Teilmenge davon enthalten):
 
 ```json
 {
@@ -83,7 +93,16 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
     "V4": "Beet Gemüse",
     "V5": "Kübelpflanzen"
   },
-  "maxTime": 30,
+  "maxTime": 30
+}
+```
+
+`alias` enthält zusätzlich `V0` (Hauptventil); `time`/`auto` gibt es nur für `V1`–`V5`. Details siehe `docs/spec/11-sammelbefehle.md`.
+
+**Vollständiges Beispiel `programs`** (`main/programs/state`, Phase 14, geplant):
+
+```json
+{
   "programs": [
     {"name": "Kurz",  "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
     {"name": "Rasen", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
@@ -94,9 +113,9 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
 }
 ```
 
-`alias` enthält zusätzlich `V0` (Hauptventil); `time`/`auto` gibt es nur für `V1`–`V5`. Details zu `time`/`auto`/`alias`/`maxTime` siehe `docs/spec/11-sammelbefehle.md`.
+`time`/`auto` je Programm sind Teilmengen — was drinsteht, wird beim Anwenden übernommen, was fehlt, bleibt unverändert (dieselbe Semantik wie bei `main/config/set`). `activeProgram` ist 1-basiert (`0` = kein Programm gewählt), passend zu den Touch-UI-Buttons `P1`–`P4`, und lebt bewusst hier (nicht in `config`), weil er sich auf die Programme bezieht. `maxTime` und `alias` sind bewusst kein Teil eines Programms. Die schlanke Einzelwert-Auswahl `main/program/cmd <n>` (Singular) bleibt zusätzlich bestehen — bequemer Weg für die Touch-UI-Buttons `P1`–`P4`, ohne JSON senden zu müssen; intern dieselbe Wirkung wie `activeProgram` über `main/programs/set` zu setzen. Details siehe `docs/spec/14-programme.md`.
 
-`programs`/`activeProgram` (Phase 14, geplant, siehe `docs/spec/14-programme.md`): `time`/`auto` je Programm sind Teilmengen — was drinsteht, wird beim Anwenden übernommen, was fehlt, bleibt unverändert (dieselbe Semantik wie bei `main/config/set` selbst). `activeProgram` ist 1-basiert (`0` = kein Programm gewählt), passend zu den Touch-UI-Buttons `P1`–`P4`. `maxTime` und `alias` sind bewusst kein Teil eines Programms.
+**`schedule`** (`main/schedule/state`, Phase 15, geplant, Schema noch offen): Array von Zeitplan-Einträgen (Trigger-Typ `daily`/`weekly`/`once` + Programm-Referenz). Details siehe `docs/spec/15-wochenplan.md`.
 
 ### Touch-UI (Phase 13, fertig)
 
@@ -135,9 +154,18 @@ gartenwasser/          |        |                    |
 │   ├── remainingTotal | nein   | mm:ss              | Restzeit der gesamten Sequenz
 │   ├── time/          |        |                    |
 │   │   └── maxTime    | ja     | <Minuten>          | Obergrenze pro Ventil, effektive Laufzeit = min(time, maxTime)
-│   └── config/        |        |                    |
-│       ├── set        | nein   | JSON               | Komplette/Teil-Konfiguration setzen (time/auto/maxTime je Ventil)
-│       └── state      | ja     | JSON               | Aktuelle Gesamt-Konfiguration (retained, Backup/Restore, Presets)
+│   ├── config/        |        |                    |
+│   │   ├── set        | nein   | JSON               | time/auto/alias/maxTime setzen (komplett oder teilweise)
+│   │   └── state      | ja     | JSON               | Aktueller Gesamtstand von config (retained, Backup/Restore, Presets)
+│   ├── programs/      |        |                    | Phase 14, geplant
+│   │   ├── set        | nein   | JSON               | Programme-Array + activeProgram setzen (Array wird komplett ersetzt)
+│   │   └── state      | ja     | JSON               | Aktueller Gesamtstand von programs (retained)
+│   ├── program/       |        |                    | Phase 14, geplant
+│   │   ├── cmd        | nein   | <integer>          | Programm per Index auswählen, 1-basiert (0 = keins)
+│   │   └── state      | ja     | JSON               | {"index":n,"name":"..."} , aktuell gewähltes Programm
+│   └── schedule/      |        |                    | Phase 15, geplant
+│       ├── set        | nein   | JSON               | Zeitplan-Array setzen (komplett ersetzt)
+│       └── state      | ja     | JSON               | Aktueller Zeitplan (retained)
 └── diagnostics/       |        |                    |
     ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
     └── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
@@ -165,7 +193,7 @@ Die Firmware ist in eigenständige Klassen mit jeweils eigener `.h`/`.cpp`-Datei
 | `MqttManager` | MQTT-Verbindung, `availability`/LWT, Publish/Subscribe-Helfer | ✅ Fertig |
 | `ValveController` | Kapselt V0–V5 als MCP23017-Ausgänge (on/off/state) | ✅ Fertig |
 | `ValveTimer` | Laufzeit/Restlaufzeit je Ventil, `maxTime`-Obergrenze | ✅ Fertig |
-| `ConfigStore` | Persistenz aller Einstellwerte (`time`, `auto`, `alias`, `maxTime`) im SPIFFS, JSON-Serialisierung für `main/config/state` | ✅ Fertig |
+| `ConfigStore` | Persistenz in drei getrennten SPIFFS-Dateien: `config.json` (`time`/`auto`/`alias`/`maxTime`), `programs.json` (Programme + `activeProgram`, Phase 14), `schedule.json` (Zeitplan, Phase 15), je eigene JSON-Serialisierung für `main/config`\|`programs`\|`schedule`/`state` | ✅ Fertig (config) / 📋 Phase 14 / 📋 Phase 15 |
 | `Sequencer` | Automatik-Ablauf V1→V5 (`main/cmd`), Fortsetzung bei manuellem Aus/`maxTime` | ✅ Fertig |
 | `HaDiscovery` | Home-Assistant-MQTT-Discovery-Configs | 📋 Phase 10 |
 | `Diagnostics` | `i2cStatus`/`lastError` | ✅ Fertig |
@@ -210,7 +238,8 @@ Discovery-Configs werden retained unter `homeassistant/<component>/gartenwasser/
 - Bewässerungsprogramme im Backlog ergänzt (2026-08-15): benannte Presets (`time` **und** `auto` je Ventil, z. B. `SHORT`/`MEDIUM`/`LONG`/`TEST`) als Array in `config.json`, auswählbar per `main/program/cmd <integer>` (Phase 14, baut auf Phase 7 + Phase 11 auf). `auto` bewusst mit im Programm, um z. B. „nur Rasen, nicht die Beete” abzubilden.
 - Phase 15 von „Wochenplan” auf generischen „Zeitplan/Scheduler” erweitert (2026-08-15): Tages- und Wochenplan sind keine getrennten Features, sondern beides Trigger-Typen (`daily`/`weekly`/`once`) desselben Zeitplan-Mechanismus — eine beliebig lange, über `main/config/set` editierbare Liste von Einträgen (Trigger-Regel + Programm-Referenz), nicht auf 7 feste Wochentags-Slots begrenzt. Deckt damit auch „jeden Tag 21:00 Uhr”, „jeden Dienstag” und „genau am 01.02.26, 11:00 Uhr” ab. Bewusst früh dokumentiert, damit die Umsetzung von Sequencer (Phase 7), Konfiguration (Phase 11) und Programmen (Phase 14) nicht in eine Richtung läuft, die einen späteren, generischen Scheduler erschwert. Details (Trigger-Schema, verpasste Trigger, Konflikte bei Gleichzeitigkeit) bewusst noch offen. Noch nicht implementiert (siehe `docs/spec/14-programme.md`, `docs/spec/15-wochenplan.md`).
 - Priorisierung: Phase 10 (Home Assistant MQTT-Discovery) ans Ende gestellt (2026-08-15): alle bisherigen Phasen sind rein geräteintern (Firmware/MQTT direkt), Phase 10 ist die erste mit einer externen Integration (Home Assistant). Erst alles Geräteinterne fertigstellen (Phasen 11–15), dann die externe Anbindung. Phasennummer/Dateiname bleiben unverändert (`docs/spec/10-ha-discovery.md`), nur die Bearbeitungsreihenfolge in `docs/README.md` wurde angepasst.
-- Design für Bewässerungsprogramme abgestimmt (2026-08-16): `programs`-Array + `activeProgram` als Erweiterung derselben `config.json`/`main/config/set`-Struktur (Phase 11), keine neue Infrastruktur. 1-basierte Nummerierung (`0` = kein Programm gewählt), `time`/`auto` je Programm sind Teilmengen mit identischer Semantik wie `main/config/set` (enthaltene Felder werden übernommen, fehlende bleiben unverändert — bewusst keine Sonderregel für `auto`). Anwenden eines Programms ruft dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen wie `main/config/set` auf. `maxTime`/`alias` sind kein Teil eines Programms. Obergrenze 8 Programme (`ConfigStore::kMaxPrograms`), `ConfigStore::kJsonCapacity` muss dafür auf ca. 2048 Byte steigen. Details siehe `docs/spec/14-programme.md`. Anbindung der Touch-UI-Buttons `P1`–`P4` folgt als eigener Schritt nach der Config selbst. Noch nicht implementiert.
+- Design für Bewässerungsprogramme abgestimmt (2026-08-16): `programs`-Array + `activeProgram`, `time`/`auto` je Programm als Teilmengen mit identischer Semantik wie `main/config/set` (enthaltene Felder werden übernommen, fehlende bleiben unverändert — bewusst keine Sonderregel für `auto`). Anwenden eines Programms ruft dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen wie `main/config/set` auf. `maxTime`/`alias` sind kein Teil eines Programms. Obergrenze 8 Programme (`ConfigStore::kMaxPrograms`). Details siehe `docs/spec/14-programme.md`. Anbindung der Touch-UI-Buttons `P1`–`P4` folgt als eigener Schritt danach. Noch nicht implementiert. **Teilweise überholt durch den folgenden Eintrag** (eigene Datei/Topics statt Teil von `config.json`/`main/config/set`).
+- Konfiguration in drei Bereiche aufgeteilt — `config`/`programs`/`schedule` (2026-08-16): statt einer wachsenden gemeinsamen `config.json`/`main/config/set`-Struktur bekommt jeder Bereich seine eigene SPIFFS-Datei und sein eigenes `.../set`/`.../state`-Topic-Paar (`main/config/*`, `main/programs/*`, später `main/schedule/*`), da sie unterschiedlich oft und aus unterschiedlichen Gründen geändert werden und sonst Puffer-/JSON-Capacity immer weiter für alle drei zusammen wachsen müssten. `config.json` bleibt bei `time`/`auto`/`alias`/`maxTime` (Umfang unverändert zu Phase 11). `programs.json` bekommt zusätzlich zum Programme-Array auch `activeProgram` (gehört inhaltlich zu den Programmen, nicht zu den Ventilparametern) — die schlanke Einzelwert-Auswahl `main/program/cmd`/`state` (Singular) bleibt daneben bestehen. `schedule.json`/`main/schedule/set`/`state` für Phase 15 von vornherein als eigener Bereich reserviert. Betrifft nur Design/Dokumentation, noch keine Codeänderung. Details siehe `docs/spec/11-sammelbefehle.md`, `docs/spec/14-programme.md`, `docs/spec/15-wochenplan.md`.
 
 Ursprünglich als „Offene Punkte” zur Diskussion gestellt, mittlerweile entschieden und oben in die jeweiligen Abschnitte eingearbeitet (Datum: 2026-08-14):
 

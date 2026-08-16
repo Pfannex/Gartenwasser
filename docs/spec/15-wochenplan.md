@@ -4,7 +4,7 @@
 
 ## Ziel
 
-Automatisch und autonom Bewässerungsprogramme (Phase 14) zu konfigurierten Zeitpunkten auslösen (`main/cmd ON`-Äquivalent) — ohne manuellen Eingriff. Tages- und Wochenplan sind **keine getrennten Features**, sondern beides Ausprägungen desselben, generischen Zeitplan-Mechanismus über die `config`-Infrastruktur (Phase 11): eine Liste beliebig vieler Zeitplan-Einträge, jeder mit einer eigenen Trigger-Regel + einem referenzierten Programm (Phase 14).
+Automatisch und autonom Bewässerungsprogramme (Phase 14) zu konfigurierten Zeitpunkten auslösen (`main/cmd ON`-Äquivalent) — ohne manuellen Eingriff. Tages- und Wochenplan sind **keine getrennten Features**, sondern beides Ausprägungen desselben, generischen Zeitplan-Mechanismus in einem eigenen `schedule`-Konfigurationsbereich (eigene Datei `/schedule.json`, eigenes Topic-Paar `main/schedule/set`/`main/schedule/state` — siehe `docs/requirements.md`, Abschnitt „Konfiguration“, Entscheidung 2026-08-16): eine Liste beliebig vieler Zeitplan-Einträge, jeder mit einer eigenen Trigger-Regel + einem referenzierten Programm (Phase 14).
 
 Trigger-Regeln sollen mindestens abdecken:
 - **Täglich, feste Uhrzeit** — z. B. „jeden Tag 21:00 Uhr".
@@ -19,12 +19,12 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 
 - Phase 2 (NTP-Sync, Echtzeituhr) ✅ — Datum/Wochentag/Uhrzeit sind bereits verfügbar.
 - Phase 7 (Automatik-Sequenz/Sequencer) — der Scheduler triggert im Kern dasselbe wie ein manuelles `main/cmd ON`.
-- Phase 11 (`main/config/set`/`state`, JSON-Infrastruktur) — die Zeitplan-Einträge sind strukturell eine weitere Erweiterung desselben `config.json`.
+- Phase 11 (`main/config/set`/`state`, JSON-Infrastruktur) — `schedule` folgt demselben Bulk-Set/State-Muster (eigene Datei/Topics statt Erweiterung von `config.json`, siehe Entscheidung 2026-08-16).
 - Phase 14 (Bewässerungsprogramme) — ein Zeitplan-Eintrag wählt ein Programm aus, statt Zeiten/Auto-Flags erneut zu definieren.
 
 ## Ganz grob angedacht (nicht final)
 
-- Zeitplan als Array in `config.json`, editierbar über `main/config/set` (Erweiterung von dessen Schema um z. B. `"schedule": [...]`), beliebig viele Einträge.
+- Zeitplan als Array in einer eigenen Datei `/schedule.json`, editierbar über ein eigenes `main/schedule/set` (analog zu `main/programs/set` aus Phase 14: „komplettes Array ersetzen, wenn mitgeschickt“, kein Merge einzelner Einträge), beliebig viele Einträge.
 - Je Eintrag: Trigger-Typ (`daily`/`weekly`/`once` o. ä.), zugehörige Zeit-/Datumsangaben, Programm-Index (Phase 14).
 - Einmal pro Minute prüfen, ob „jetzt" einem der konfigurierten Trigger entspricht → zugehöriges Programm anwenden + `main/cmd ON` auslösen (analog zu Phase 14s einmaliger Programmwahl, nur automatisch statt manuell per `main/program/cmd`).
 
@@ -34,7 +34,6 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 - Verhalten bei verpasstem Trigger (z. B. Reboot/Stromausfall genau im Startfenster) — nachholen oder für diesen Termin ausfallen lassen?
 - Was passiert mit einem einmaligen (`once`-)Trigger, nachdem er gefeuert hat — bleibt der Eintrag stehen (feuert nie wieder, da Datum in der Vergangenheit) oder wird er automatisch aus der Liste entfernt?
 - Zwei oder mehr Einträge, die zur exakt gleichen Zeit auslösen — nacheinander abarbeiten, oder ist das schlicht Konfigurationsfehler des Nutzers (dokumentieren, nicht technisch verhindern)?
-- Eigenes MQTT-Topic zum gezielten Editieren des Zeitplans, oder reicht die generische `main/config/set` dafür aus?
 - Verhältnis zu manuellem `main/cmd ON`/`OFF` während eines geplant ausgelösten Laufs — vermutlich identisch zur bestehenden Regel „manuelles Aus wird angenommen, Sequenz macht weiter" (siehe `docs/requirements.md`).
 
 ## Zweck des Eintrags

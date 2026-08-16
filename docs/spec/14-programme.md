@@ -12,18 +12,16 @@ Mehrere benannte Presets (`time` **und** `auto` je Ventil) im Gerät speichern u
 - Phase 11 (`main/config/set`/`state`, JSON-Infrastruktur) ✅ — Programme sind strukturell eine Erweiterung derselben `config.json`, kein neues System.
 - Phase 13 (Touch-UI) ✅ — `P1`–`P4`-Platzhalter-Buttons warten bereits auf die Anbindung.
 
-## Design (abgestimmt, 2026-08-16)
+## Design (abgestimmt, 2026-08-16, Persistenz/Topics am 2026-08-16 auf eigenen Bereich umgestellt)
+
+Programme leben in einem eigenen Bereich, getrennt von `config` (siehe `docs/requirements.md`, Abschnitt „Konfiguration“) — eigene Datei `/programs.json`, eigenes Topic-Paar `main/programs/set`/`main/programs/state` für Bulk-Editieren, plus das schlanke `main/program/cmd`/`main/program/state` (Singular) zur Auswahl per Index.
 
 ### JSON-Schema
 
-Erweitert dieselbe Struktur, die `ConfigStore`/`main/config/set`/`main/config/state` bereits nutzen (siehe Phase 11), um zwei weitere Top-Level-Keys:
+`main/programs/state` (und `main/programs/set` für Bulk-Updates):
 
 ```json
 {
-  "time": {"V1": 5, "V2": 10, "V3": 5, "V4": 15, "V5": 5},
-  "auto": {"V1": true, "V2": true, "V3": false, "V4": true, "V5": false},
-  "alias": {"V0": "Hauptventil", "V1": "Rasen Vorgarten", "V2": "Rasen Garten", "V3": "Beet Rosen", "V4": "Beet Gemüse", "V5": "Kübelpflanzen"},
-  "maxTime": 30,
   "programs": [
     {"name": "Kurz",  "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
     {"name": "Rasen", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
@@ -34,44 +32,52 @@ Erweitert dieselbe Struktur, die `ConfigStore`/`main/config/set`/`main/config/st
 }
 ```
 
+`main/program/state` (Singular, kompakter Ausschnitt derselben Information):
+
+```json
+{"index": 2, "name": "Rasen"}
+```
+
 Vollständiges Beispiel mit allen Elementen auch in `docs/requirements.md`.
 
 ### Kernentscheidungen
 
 1. **1-basierte Nummerierung**, passend zu den Touch-UI-Buttons `P1`–`P4` und dem bestehenden `V1`–`V5`-Schema. `0` = „kein Programm gewählt“ — Startwert nach Boot **und** explizit setzbar (`main/program/cmd 0` löscht die Auswahl, ohne Ventile anzufassen).
 2. **`time`/`auto` je Programm sind Teilmengen** — exakt dieselbe Semantik wie bei `main/config/set` (Phase 11): enthaltene Felder werden beim Anwenden übernommen, fehlende bleiben unverändert. Keine Sonderregel „auto muss vollständig sein“ — ein Regelwerk für alles ist einfacher zu merken und zu warten. Konsequenz: „nur Rasen, nicht die Beete“ muss ein Programm **explizit** mit `"auto":{"V4":false,"V5":false}` festhalten, sonst bleibt der vorherige Zustand der Beet-Ventile stehen.
-3. **Anwenden = Wiederverwendung von Phase 11**: `main/program/cmd <n>` ruft für jedes im Programm enthaltene Feld dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen auf, die `main/config/set` bereits nutzt — keine neue Validierungslogik.
+3. **Anwenden = Wiederverwendung von Phase 11**: sowohl `main/program/cmd <n>` als auch `activeProgram` in `main/programs/set` rufen für jedes im Programm enthaltene Feld dieselben `applyTimeValue()`/`applyAutoValue()`-Kernfunktionen auf, die `main/config/set` bereits nutzt — keine neue Validierungslogik.
 4. **`maxTime` und `alias` sind kein Teil eines Programms** — `maxTime` bleibt die geräteweite Sicherheitsgrenze (Phase 5), `alias` ist Ventil-Identität, hat mit Bewässerungsdauer nichts zu tun.
-5. **Editieren der Programme läuft über das bestehende `main/config/set`** — der Key `"programs"` ist dabei „ganzes Array ersetzen, wenn mitgeschickt“ (kein Merge einzelner Programme, da Arrays keine natürlichen Schlüssel haben). Praktischer Ablauf: `main/config/state` holen, lokal bearbeiten, komplett zurückschicken.
+5. **Bulk-Editieren über das eigene `main/programs/set`** (nicht über `main/config/set`, siehe Entscheidungshistorie 2026-08-16 in `docs/requirements.md`) — der Key `"programs"` ist dabei „ganzes Array ersetzen, wenn mitgeschickt“ (kein Merge einzelner Programme, da Arrays keine natürlichen Schlüssel haben), der Key `"activeProgram"` wendet die Auswahl an (identisch zu `main/program/cmd`). Praktischer Ablauf: `main/programs/state` holen, lokal bearbeiten, komplett zurückschicken.
 6. **Obergrenze `ConfigStore::kMaxPrograms = 8`** — mehr als die 4 physischen Touch-Buttons, damit per MQTT/später Phase 15 (Zeitplan) noch Luft ist, aber als feste Array-Größe (passt zum bisherigen Stil mit festen C-Arrays statt dynamischer Allokation). Programmname wiederverwendet `ConfigStore::kAliasMaxLength` (32 Zeichen).
-7. **Persistenz**: `programs` + `activeProgram` beides in `/config.json`. Nach Neustart bleibt die letzte Auswahl als reiner Info-Wert erhalten, startet aber nichts automatisch (sicherer Grundzustand, wie überall sonst auch).
+7. **Persistenz**: `programs` + `activeProgram` beides in `/programs.json` (eigene Datei, siehe oben — `activeProgram` gehört inhaltlich zu den Programmen, nicht zu den Ventilparametern in `config.json`). Nach Neustart bleibt die letzte Auswahl als reiner Info-Wert erhalten, startet aber nichts automatisch (sicherer Grundzustand, wie überall sonst auch).
 
 ### Technische Konsequenz
 
-`ConfigStore::kJsonCapacity` (aktuell 768 Byte) reicht mit bis zu 8 Programmen nicht mehr — muss auf ca. **2048 Byte** angehoben werden, inkl. passender Anhebung des MQTT-Puffers in `MqttManager` (`setBufferSize()`, aktuell 1024).
+Eigene Datei/eigenes Topic bedeutet: `ConfigStore::kJsonCapacity` für `config.json` bleibt unverändert bei 768 Byte (kein Wachstum durch Programme). Neue eigene Konstante `ConfigStore::kProgramsJsonCapacity` (ca. **2048 Byte** für bis zu 8 Programme) für `programs.json`/`main/programs/*`. Der MQTT-Puffer in `MqttManager` (`setBufferSize()`, aktuell 1024) muss auf die größte einzelne Payload angehoben werden — das bleibt `programs` mit ca. 2048 Byte.
 
 ## Umsetzung (im Detail bei der Implementierung)
 
-- `ConfigStore`: `programs`-Array + `activeProgram` laden/speichern (Erweiterung von `buildJson()`), neue Getter (`getProgramCount()`, `getProgramName(index)`, `getProgramValveTime(index, valve)`, `getProgramValveAuto(index, valve)`, `getActiveProgram()`/`setActiveProgram()`).
-- `MqttManager`: `main/program/cmd`-Handler wendet das Programm an (Schleife über V1–V5, `applyTimeValue()`/`applyAutoValue()` wiederverwenden), publiziert `main/program/state` und `main/config/state` (Programmwahl ist Teil der Gesamt-Konfiguration).
+- `ConfigStore`: neue Datei `/programs.json` (eigenes Load/Save/`toJson()`, analog zu `config.json`), `programs`-Array + `activeProgram`, neue Getter (`getProgramCount()`, `getProgramName(index)`, `getProgramValveTime(index, valve)`, `getProgramValveAuto(index, valve)`, `getActiveProgram()`/`setActiveProgram()`).
+- `MqttManager`: `main/program/cmd`-Handler wendet das Programm an (Schleife über V1–V5, `applyTimeValue()`/`applyAutoValue()` wiederverwenden), publiziert `main/program/state` und `main/programs/state`. Zusätzlich `main/programs/set`-Handler (Bulk-JSON, Array-Replace + optional `activeProgram`) mit zugehörigem `main/programs/state`-Publish.
 - Anbindung der Touch-UI-Buttons `P1`–`P4` (Phase 13) an die ersten vier Programme folgt **danach**, als eigener Schritt.
 
 ## Betroffene Dateien
 
-- `src/ConfigStore.h/.cpp` (Programme-Array + `activeProgram`)
-- `src/MqttManager.h/.cpp` (Subscribe-Handler `main/program/cmd`, Publish `main/program/state`)
+- `src/ConfigStore.h/.cpp` (neue Datei `/programs.json`, Programme-Array + `activeProgram`)
+- `src/MqttManager.h/.cpp` (Subscribe-Handler `main/program/cmd`, `main/programs/set`, Publish `main/program/state`, `main/programs/state`)
 - `src/HmiManager.h/.cpp` (später: `P1`–`P4`-Anbindung)
 
 ## MQTT-Topics
 
 - `gartenwasser/main/program/cmd` (subscribe, `<integer>`, 1-basiert, `0` = keine Auswahl, nicht retained)
 - `gartenwasser/main/program/state` (publish, retained, JSON `{"index":1,"name":"Kurz"}`, bei `0` `{"index":0,"name":null}`)
+- `gartenwasser/main/programs/set` (subscribe, JSON, `"programs"` ersetzt das komplette Array, `"activeProgram"` wendet die Auswahl an, beide optional, nicht retained)
+- `gartenwasser/main/programs/state` (publish, retained, JSON, kompletter Gesamtstand)
 
 ## Test
 
-1. `mosquitto_pub -t gartenwasser/main/program/cmd -m 4` (Test) → alle im Programm enthaltenen `V{n}/time/state`/`auto/state` ändern sich, `main/program/state` zeigt `{"index":4,"name":"Test"}`.
+1. `mosquitto_pub -t gartenwasser/main/program/cmd -m 4` (Test) → alle im Programm enthaltenen `V{n}/time/state`/`auto/state` ändern sich, `main/program/state` zeigt `{"index":4,"name":"Test"}`, `main/programs/state` zeigt `"activeProgram":4`.
 2. Einzelnes Ventil danach manuell per `V2/time/set` ändern → funktioniert normal, Programm-Auswahl bleibt bei `4` (kein Lock).
 3. Ungültigen Index (z. B. `99`) senden → wird ignoriert, `main/program/state` unverändert, Log-Eintrag `ERROR`.
 4. `main/program/cmd 0` → `main/program/state` zeigt `{"index":0,"name":null}`, keine Ventile werden angefasst.
 5. Neustart des Boards → zuletzt gewähltes Programm (Index) bleibt als reiner Konfigurationswert erhalten, es wird aber **nichts** automatisch gestartet (sicherer Boot-Grundzustand, siehe `docs/requirements.md`).
-6. `main/config/set` mit `"programs":[...]` → komplettes Array wird ersetzt, `main/config/state` zeigt den neuen Stand.
+6. `main/programs/set` mit `{"programs":[...]}` → komplettes Array wird ersetzt, `main/programs/state` zeigt den neuen Stand, `main/config/state` bleibt davon unberührt.
