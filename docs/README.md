@@ -2,6 +2,7 @@
 
 - [requirements.md](requirements.md) — Funktionsbeschreibung, MQTT-Topic-Struktur, Architektur, offene Punkte
 - [spec/](spec/) — Phasen-Specs der Implementierung (Ziel, Umsetzung, MQTT-Topics, Test je Phase)
+- [testing.md](testing.md) — zentrale, tabellarische Testergebnis-Übersicht (Prüfpunkt/Test/Ergebnis/Bewertung)
 
 ## Phasen-Übersicht
 

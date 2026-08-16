@@ -84,6 +84,6 @@ Eigene Datei/eigenes Topic bedeutet: `ConfigStore::kJsonCapacity` für `config.j
 
 ## Test / Ergebnis
 
-- Automatisiert per Python/paho-mqtt gegen den echten Broker getestet (alle 6 Testfälle oben plus ein Bonus-Test für die Teilmengen-Semantik) — 14/14 Checks bestanden.
-- **Bug gefunden und gefixt**: `main/programs/set` liess das Board mit einem Stack-Overflow abstuerzen (`Guru Meditation Error: Core 0 panic'ed (Stack protection fault)`, Serial-Monitor-Mitschnitt bestaetigt `Detected in task "loopTask"`). Ursache: mehrere grosse JSON-Puffer (`StaticJsonDocument<2048>`, `char payloadStr[2048]`) gleichzeitig auf dem Stack der Arduino-`loopTask`, deren Default-Groesse (8192 Byte) dafuer nicht mehr reichte. Fix: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp` (RAM-Headroom war reichlich vorhanden, siehe Phase-12-Speicher-Check).
-- Getestet: Bulk-Replace des Programme-Arrays, Index-Auswahl (gueltig/ungueltig/0), Persistenz der Auswahl neben laufenden manuellen Aenderungen (kein Lock), Teilmengen-Semantik (ein Programm, das ein Ventil in keinem Feld erwaehnt, laesst es unangetastet).
+Strukturierte Ergebnistabelle (Prüfpunkt/Test/Ergebnis/Bewertung) siehe **`docs/testing.md`**, Abschnitt „Phase 14 — Bewässerungsprogramme": 14 von 14 Checks bestanden (automatisiert per Python/paho-mqtt gegen den echten Broker, alle 6 Testfälle oben plus ein Bonus-Test für die Teilmengen-Semantik).
+
+**Bug gefunden und gefixt**: `main/programs/set` liess das Board mit einem Stack-Overflow abstuerzen (`Guru Meditation Error: Core 0 panic'ed (Stack protection fault)`, Serial-Monitor-Mitschnitt bestaetigt `Detected in task "loopTask"`). Ursache: mehrere grosse JSON-Puffer (`StaticJsonDocument<2048>`, `char payloadStr[2048]`) gleichzeitig auf dem Stack der Arduino-`loopTask`, deren Default-Groesse (8192 Byte) dafuer nicht mehr reichte. Fix: `SET_LOOP_TASK_STACK_SIZE(16 * 1024)` in `main.cpp` (RAM-Headroom war reichlich vorhanden, siehe Phase-12-Speicher-Check).

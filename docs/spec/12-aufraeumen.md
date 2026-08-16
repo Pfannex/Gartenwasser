@@ -43,27 +43,8 @@ Manueller Regressionstest vor jedem Release (Hardware + `mosquitto_sub -t garten
 9. **Resilienz**: WLAN/MQTT kurz trennen → laufende Ventile/Sequenz laufen lokal weiter, nach Reconnect werden alle retained States neu publiziert.
 10. **Persistenz**: Board neu starten → `time`/`auto`/`alias`/`maxTime` bleiben erhalten, alle Ventile sind AUS, keine Automatik-Sequenz startet automatisch neu.
 
-## Test
+## Test / Ergebnis
 
-- Vollständiger Regressionsdurchlauf aller MQTT-Topics laut `docs/requirements.md` — bereits einzeln je Phase auf Hardware verifiziert (siehe `docs/Log.md`); ein zusammenhängender Gesamtdurchlauf nach der Checkliste oben steht als Vorbereitung für den produktiven Einsatz noch aus.
-- HA-Dashboard-Kontrolle: entfällt vorerst — Phase 10 (Home Assistant) wurde bewusst ans Ende der Bearbeitungsreihenfolge gestellt (siehe `docs/requirements.md`, Entscheidungshistorie 2026-08-15), erst relevant sobald Phase 10 ansteht.
+Strukturierte Ergebnistabelle (Prüfpunkt/Test/Ergebnis/Bewertung) siehe **`docs/testing.md`**, Abschnitt „Regressionstest (Checkliste aus Phase 12)": zusammenhängender automatisierter Durchlauf am 2026-08-16, 48 von 49 Checks bestanden (1 Skript-Timing-Artefakt, kein Firmware-Fehler). Punkte 6 (Diagnostics-Fehlerfall) und 9 (Resilienz) erfordern physischen Eingriff und stehen vor dem produktiven Einsatz noch als manueller Test aus.
 
-## Test / Ergebnis (2026-08-16, automatisierter Gesamtdurchlauf)
-
-Zusammenhängender Regressionsdurchlauf gegen die echte Hardware, automatisiert per Python/paho-mqtt-Skript (eigenständig entwickelt, autonom ausgeführt): 48 von 49 Checks bestanden. Die eine "fehlgeschlagene" Prüfung war ein Timing-Artefakt im Testskript selbst (Restlaufzeit `00:59` statt exakt `01:00` gelesen, weil zwischen Einschalten und Prüfung bereits ein Sekunden-Tick lief — die `maxTime`-Deckelung selbst war korrekt), kein Firmware-Fehler.
-
-Abgedeckt (Checkliste Punkte 1–5, 7, 8, 10 vollständig automatisiert):
-1. **Boot/Verfügbarkeit**: `availability = online`, `main/config/state` sofort verfügbar.
-2. **Ventile manuell**: Einzel- und Mehrfachschaltung, V0-Kopplung (an sobald ein Ventil an, aus erst wenn alle aus).
-3. **Laufzeit**: `time/set`, `maxTime`-Deckelung (`min(time, maxTime)` bestätigt), echter Zeitablauf nach 60s (kürzeste zulässige Laufzeit) inkl. automatischer Abschaltung und Re-Armierung auf `time`.
-4. **Automatik-Flag**: `auto/set` → `auto/state`.
-5. **Automatik-Sequenz**: `main/cmd ON` startet mit dem ersten `auto=ON`-Ventil, manuelles `ON` eines nicht beteiligten Ventils wird ignoriert, manuelles `OFF` des aktiven Ventils rückt die Sequenz vor (Restlaufzeit bleibt `00:00`, nicht re-armiert, solange die Sequenz läuft), `main/cmd OFF` bricht sofort ab und armiert alle Ventile neu.
-7. **Alias**: Umlaute (UTF-8) funktionieren, zu lange Werte (> 32 Zeichen) und Werte mit Steuerzeichen werden abgelehnt (unverändert), inkl. `V0`.
-8. **Konfiguration per JSON**: Teil-Update ändert nur die angegebenen Felder, unbekannte Keys (`V9`) werden ignoriert, Board bleibt responsiv.
-10. **Persistenz**: echter Hardware-Reset (via `esptool --after hard-reset`, kein Reflash) mit anschließender Prüfung — `time`/`auto`/`alias` sowie die Programme-Liste überleben den Neustart, alle Ventile sind danach AUS, keine Automatik-Sequenz startet automatisch neu.
-
-Nicht automatisierbar, bewusst offen gelassen (physische Eingriffe, riskant für einen unbeaufsichtigten Testlauf):
-- **Punkt 6 (Diagnostics-Fehlerfall)**: I2C-Kabel ziehen/wieder verbinden erfordert manuellen Eingriff.
-- **Punkt 9 (Resilienz)**: WLAN/MQTT-Verbindungsabbruch (Kabel ziehen, Router trennen) erfordert manuellen Eingriff.
-
-Vor dem produktiven Einsatz sollten diese beiden Punkte einmal manuell nachgeholt werden; alle anderen sind jetzt durch ein wiederholbares Testskript abgedeckt statt nur einzeln je Phase verifiziert.
+HA-Dashboard-Kontrolle: entfällt vorerst — Phase 10 (Home Assistant) wurde bewusst ans Ende der Bearbeitungsreihenfolge gestellt (siehe `docs/requirements.md`, Entscheidungshistorie 2026-08-15), erst relevant sobald Phase 10 ansteht.
