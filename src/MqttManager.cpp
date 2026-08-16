@@ -680,3 +680,11 @@ void MqttManager::loop() {
 bool MqttManager::isConnected() {
   return mqttClient.connected();
 }
+
+void MqttManager::requestMainCmd(bool on) {
+  if (on) {
+    startSequence();
+  } else {
+    stopSequence();
+  }
+}

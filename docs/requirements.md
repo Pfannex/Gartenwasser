@@ -89,10 +89,12 @@ Die entsprechenden MQTT-Topics und Verhaltensweisen sind zu implementieren.
 
 `alias` enthält zusätzlich `V0` (Hauptventil); `time`/`auto` gibt es nur für `V1`–`V5`. Details siehe `docs/spec/11-sammelbefehle.md`.
 
-### Touch-UI (Phase 13, geplant)
+### Touch-UI (Phase 13, fertig)
 
 - Toggle-Button „AUTO“/„OFF“ auf dem Display, gekoppelt an `main/cmd`.
-- Statusanzeige der Ventile (`V0`–`V5`) auf dem Display.
+- Ventile `V0`–`V5` als LED-Statusindikatoren (grün/rot/dunkelgrau bei `auto=OFF` + AUS), aktives Sequenz-Ventil gelb hervorgehoben.
+- Statuszeile (Fußleiste) zeigt priorisiert, was gerade passiert (Fehler, Automatik, manueller Betrieb, gewähltes Programm, Bereit).
+- 4 Platzhalter-Buttons „P1“–„P4“ für die spätere Programmauswahl (Phase 14).
 
 ## MQTT-Topic-Struktur
 

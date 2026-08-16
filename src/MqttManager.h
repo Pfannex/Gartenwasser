@@ -16,4 +16,9 @@ void loop();
 /// Liefert true, wenn aktuell eine MQTT-Verbindung besteht.
 bool isConnected();
 
+/// Startet/stoppt die Automatik-Sequenz genau wie ein main/cmd MQTT-Befehl
+/// (inkl. aller Publishes) - fuer lokale Ausloeser wie das Touch-UI, keine
+/// Sonderlogik gegenueber dem MQTT-Pfad.
+void requestMainCmd(bool on);
+
 }  // namespace MqttManager

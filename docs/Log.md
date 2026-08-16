@@ -149,9 +149,16 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Speicher-Check dokumentiert: RAM 33,6 % (110.108/327.680 Byte), Flash 41,0 % (1.288.653/3.145.728 Byte) — nach Build ohne Regression.
 - 10-Punkte-Test-Checkliste für künftige Firmware-Updates in `docs/spec/12-aufraeumen.md` ergänzt (Boot, Ventile, Laufzeit, Auto-Flag, Sequenz, Diagnostics, Alias, Config-JSON, Resilienz, Persistenz).
 
+### Phase 13 — Touch-UI umgesetzt
+
+- `MqttManager::requestMainCmd(bool)` (neu, öffentlich): kapselt `startSequence()`/`stopSequence()` — von MQTT-`main/cmd` und Touch gleichermaßen genutzt, keine doppelte Logik.
+- `HmiManager`: Platzhalter-Screen ersetzt durch AUTO/OFF-Toggle-Button, Ventile `V0`–`V5` als `lv_led`-Statusindikatoren (grün=AUS, rot=AN), Statuszeile als dunkelgraue Fußleiste unten (Fehler > Automatik > manueller Betrieb > gewähltes Programm > „Bereit“, priorisiert und farbcodiert), 4 Platzhalter-Buttons „P1“–„P4“ (Radio-Verhalten) für Phase 14.
+- Iterativ verfeinert auf Nutzer-Feedback: Ventile mit `auto=OFF` werden im AUS-Zustand dunkelgrau gedimmt (springen bei manueller Einschaltung normal auf Rot); Alias-Anzeige aus der kompakten Ventil-Liste wieder entfernt (Platz für P1–P4), aber in der Statuszeile für das aktive/laufende Ventil wieder aufgenommen; Umlaute im eingebauten LVGL-Font nicht darstellbar → lokale ASCII-Transliteration (nur Anzeige, MQTT/`ConfigStore` bleiben UTF-8).
+- Getestet auf Hardware, vom Nutzer bestätigt ("sieht klasse aus").
+
 ## Offene Punkte / nächste Schritte
 
-- Phase 13 (Touch-UI) ist der nächste inhaltliche Schritt.
-- Phase 14 (Bewässerungsprogramme) und Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) sind grob spezifiziert im Backlog, noch nicht priorisiert.
+- Phase 14 (Bewässerungsprogramme) ist der nächste inhaltliche Schritt — die P1–P4-Buttons im Touch-UI warten schon darauf.
+- Phase 15 (Zeitplan/Scheduler, Tages- + Wochenplan) ist grob spezifiziert im Backlog, noch nicht priorisiert.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
 - Vollständiger, zusammenhängender Regressionsdurchlauf (Checkliste in `docs/spec/12-aufraeumen.md`) steht als letzter Schritt vor dem produktiven Einsatz noch aus.
