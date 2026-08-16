@@ -241,3 +241,11 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 - Phase 15 (Zeitplan/Scheduler): Design-Entwurf abgestimmt (siehe oben), Umsetzung noch nicht begonnen — offene Detailfragen siehe `docs/spec/15-wochenplan.md`.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
+
+### Phase 15 — Feldreferenz fuer den Zeitplan verfeinert
+
+- Kurz diskutiert, ob `name` gleichzeitig die Programm-Referenz sein koennte (spart ein Feld) - verworfen: dann koennte ein Eintrag nicht mehr eindeutig sein UND trotzdem zweimal dasselbe Programm referenzieren (z. B. "Rasen" taeglich + zusaetzlich dienstags).
+- Ebenso verworfen: ein zusaetzliches eindeutiges `index`-Feld je Eintrag - anders als bei Programmen (P1-P4-Buttons, `main/program/cmd` brauchen eine stabile Referenz von aussen) zeigt beim Zeitplan nichts von aussen auf einen einzelnen Eintrag, `main/schedule/set` ersetzt immer die komplette Liste als Block.
+- Ergebnis: eigenes `program`-Feld (Name-Referenz, darf sich ueber mehrere Eintraege wiederholen, keine Eindeutigkeitspflicht) bleibt bestehen, `name` ist optional und rein kosmetisch.
+- Vollstaendige Feldreferenz-Tabelle (Ebene/Pflicht/Werte/Bedeutung je Key) sowie 5 zusaetzliche Beispiele (Mehrfachnutzung eines Programms, pausierter Einzeleintrag, minimaler Eintrag ohne `name`, komplett pausierter Zeitplan, mehrere Wochentage in einem Eintrag) in `docs/spec/15-wochenplan.md` ergaenzt.
+- Rein Design-/Dokumentationsstand, noch keine Codeaenderung.
