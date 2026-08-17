@@ -339,10 +339,20 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Persistenz UND `uploadfs`-Dateien mit dem finalen Fix erneut end-to-end verifiziert (Alias-Wert ueberlebt Reboot; Web-Dateien nach frischem `uploadfs`+Reboot sofort korrekt ausgeliefert). Kehrseite des Fixes: eine wirklich leere, nie per `uploadfs` beschriebene Partition muss einmalig vorbereitet werden, sonst schlaegt der Mount fehl - fuer dieses eine, bereits mehrfach geflashte Geraet unkritisch.
 - Details siehe `docs/spec/16-webif-fundament.md`, `docs/testing.md`.
 
+### Phase 17 (Status-Dashboard) umgesetzt und getestet
+
+- WebSocket-Voraussetzung aus Phase 16 erledigt: Nutzer hat auf dem Mosquitto-Broker (2.0.21, Debian-LXC unter Proxmox, `include_dir`-Layout) eine neue `/etc/mosquitto/conf.d/websockets.conf` angelegt (`listener 9001`, `protocol websockets`, `allow_anonymous true` — passend zum bereits anonymen 1883-Listener) und den Dienst neu geladen, per `ss -tlnp | grep 9001` verifiziert.
+- `mqtt.min.js` (MQTT.js, 369 KB) und `alpine.min.js` (Alpine.js 3.x, 47 KB) per `curl` von `unpkg.com` bezogen, lokal in `data/` abgelegt (kein CDN zur Laufzeit) - zusammen ≈416 KB, komfortabel in der 1,875-MB-`LittleFS`-Partition.
+- Neue `data/app.js`: Alpine-Komponente `dashboard()` verbindet sich per `mqtt.connect("ws://192.168.1.123:9001/mqtt")` direkt mit dem Broker (feste Adresse wie in `tools/mqtt-tests/*.py`, liegt in einem anderen Netzsegment als die Geraete-IP), abonniert `gartenwasser/#`, pflegt reaktiven State fuer Ventile/Sequenz/Programm/Diagnostics. `valveState()` repliziert exakt die Farblogik der Touch-UI-Ventilmatrix (`HmiManager::refreshValveStatus()`).
+- `data/index.html` neu aufgebaut (Kopfzeile mit Verbindungs-/Online-Status, 2x3-Ventilkachel-Grid, Sequenz-/Programm-Karte, bedingte Fehler-Karte), `data/style.css` um `.header-bar`/`.valve-grid`/`.valve-tile`/`.valve-alias` ergaenzt. Keine Firmware-Aenderung noetig - `WebManager`s bestehendes `serveStatic()` reicht aus.
+- Vor dem Browser-Test die komplette Pipeline ohne Browser verifiziert: `paho-mqtt` mit `transport="websockets"` gegen den neuen Listener verbunden (simuliert exakt, was `mqtt.js` tut) - 26 retained Nachrichten sofort empfangen.
+- Vom Nutzer im Browser bestaetigt: Verbindungs-/Online-Anzeige korrekt, Ventilkacheln farbig wie erwartet, Live-Update beim Schalten eines Ventils funktioniert. Zitat: „ja, alles wie geplant!!“.
+- Details siehe `docs/spec/17-webif-dashboard.md`, `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
-- **Phase 17 (Web-Interface: Status-Dashboard, read-only)** — nächster Arbeitsschritt: MQTT-over-WebSocket-Client (Alpine.js + `mqtt.js`) im Browser, testet den Lesepfad der in Phase 16 entschiedenen Architektur B. Voraussetzung außerhalb der Firmware: WebSocket-Listener auf dem Mosquitto-Broker einrichten (noch nicht erledigt).
-- Phasen 18–21 (Web-Interface: Konfiguration, Programme, Zeitplan, OTA) — geplant, hängen an Phase 17.
+- **Phase 18 (Web-Interface: Konfiguration bearbeiten)** — nächster Arbeitsschritt: erster Schreibpfad (Architektur B - der Browser publiziert direkt per MQTT-over-WebSocket, z. B. `V{n}/time/set`), am einfachsten Datenmodell (`time`/`auto`/`alias`/`maxTime`) erprobt, bevor Phase 19/20 komplexere Listen-Datenmodelle hinzufuegen.
+- Phasen 19–21 (Web-Interface: Programme, Zeitplan, OTA) — geplant, hängen an Phase 18.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste.

@@ -26,7 +26,7 @@ Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (
 | [14](spec/14-programme.md) | Bewässerungsprogramme (`main/program/cmd`/`state`) | ✅ |
 | [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | ✅ |
 | [16](spec/16-webif-fundament.md) | Web-Interface: Fundament & Architekturentscheidung | ✅ |
-| [17](spec/17-webif-dashboard.md) | Web-Interface: Status-Dashboard (read-only) | 📋 |
+| [17](spec/17-webif-dashboard.md) | Web-Interface: Status-Dashboard (read-only) | ✅ |
 | [18](spec/18-webif-konfiguration.md) | Web-Interface: Konfiguration bearbeiten | 📋 |
 | [19](spec/19-webif-programme.md) | Web-Interface: Programme verwalten | 📋 |
 | [20](spec/20-webif-zeitplan.md) | Web-Interface: Zeitplan verwalten | 📋 |

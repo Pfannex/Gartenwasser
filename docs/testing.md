@@ -128,6 +128,20 @@ Auf Hardware getestet (Build→Flash→curl/Browser-Prüfung je Änderung).
 
 **Nebenbefund**: der ursprüngliche `LittleFS.begin(true)`-Versuch (Prüfpunkt 4) hat die zu diesem Zeitpunkt gesetzten Testdaten (5 Programme, 1 Zeitplan-Eintrag, Config-Werte) gelöscht — nicht vorher angekündigt, im Nachhinein vom Nutzer als unkritisch bestätigt (reine Testdaten dieser Session). Mit dem finalen Fix (`begin(false)`) tritt dieses Problem nicht mehr auf.
 
+## Phase 17 — Web-Interface: Status-Dashboard — 2026-08-17
+
+Broker-seitiger WebSocket-Listener vom Nutzer eingerichtet und verifiziert (`ss -tlnp | grep 9001`), danach Dashboard implementiert und getestet.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | MQTT-over-WebSocket-Pipeline (ohne Browser) | `paho-mqtt` mit `transport="websockets"` gegen `192.168.1.123:9001/mqtt` verbunden, simuliert `mqtt.js` | Verbindung erfolgreich, 26 retained Nachrichten sofort empfangen | ✅ |
+| 2 | Dateiauslieferung | `/`, `/index.html`, `/style.css`, `/app.js`, `/mqtt.min.js`, `/alpine.min.js` per `curl` geprüft | HTTP 200, korrekte Größe je Datei | ✅ |
+| 3 | Verbindungs-/Online-Anzeige im Browser | Seite geöffnet (gleiches Netz wie Broker) | „Verbunden“/„Gerät online“ korrekt angezeigt | ✅ |
+| 4 | Ventilkacheln, Farblogik | Sichtprüfung im Browser | Farbig wie erwartet (grün/grau/rot, deckungsgleich zur Touch-UI-Matrix) | ✅ |
+| 5 | Live-Update | Ventil geschaltet, Browser beobachtet | Anzeige aktualisiert sich sofort | ✅ |
+
+Vom Nutzer bestätigt: „ja, alles wie geplant!!“.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

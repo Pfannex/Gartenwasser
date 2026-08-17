@@ -5,24 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gartenwasser</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="mqtt.min.js"></script>
+  <script src="app.js"></script>
+  <script defer src="alpine.min.js"></script>
 </head>
-<body>
-  <h1>Gartenwasser</h1>
-  <p>Web-Interface-Fundament (Phase 16) — statisches File-Serving über LittleFS läuft.</p>
-
-  <div class="card">
-    <p>Beispiel-Ventilstatus (Design-Vorschau, noch ohne Live-Daten — folgt in Phase 17):</p>
-    <span class="chip" data-state="running">V0</span>
-    <span class="chip" data-state="idle">V1</span>
-    <span class="chip" data-state="running">V2</span>
-    <span class="chip" data-state="auto">V3</span>
-    <span class="chip" data-state="idle">V4</span>
-    <span class="chip" data-state="auto">V5</span>
+<body x-data="dashboard()">
+  <div class="header-bar">
+    <h1>Gartenwasser</h1>
+    <div>
+      <span class="chip" :data-state="connected ? 'auto' : 'running'" x-text="connected ? 'Verbunden' : 'Getrennt'"></span>
+      <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'" x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span>
+    </div>
   </div>
 
-  <p style="margin-top: 16px;">
-    <button class="primary">Beispiel-Button</button>
-    <button>Sekundär</button>
-  </p>
+  <div class="card">
+    <p>Ventile</p>
+    <div class="valve-grid">
+      <template x-for="v in valves" :key="v.index">
+        <div>
+          <div class="valve-tile" :data-state="valveState(v)" x-text="'V' + v.index"></div>
+          <div class="valve-alias" x-text="v.alias || ''"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <template x-if="sequenceRunning">
+      <p>
+        Automatik läuft: <strong x-text="activeValve"></strong> ·
+        Restlaufzeit gesamt <strong x-text="remainingTotal"></strong>
+      </p>
+    </template>
+    <template x-if="!sequenceRunning">
+      <p>
+        Automatik inaktiv
+        <template x-if="activeProgramName"><span> · Programm: <strong x-text="activeProgramName"></strong></span></template>
+      </p>
+    </template>
+  </div>
+
+  <template x-if="i2cStatus !== 'ok'">
+    <div class="card" style="margin-top: 12px;">
+      <p><strong style="color: var(--state-running);">I2C-Fehler</strong></p>
+      <p x-text="lastError"></p>
+    </div>
+  </template>
 </body>
 </html>
