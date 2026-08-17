@@ -303,9 +303,14 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 - Merker vom 2026-08-16 aufgelöst: `once`-Eintrag 5 Minuten in der Zukunft (`18:00`) gesetzt, referenziert Programm „V1" (eines der 5 an diesem Tag geladenen Testprogramme). Trigger feuerte pünktlich, Programm korrekt angewendet, Sequenz lief die konfigurierte Minute durch und beendete sich selbstständig — vom Nutzer live am Display verfolgt und bestätigt („sauber angelaufen, das können wir abhaken!"). Bestätigt, dass der Scheduler nach den `shortcut`-Entfernung/`kMaxPrograms`-Änderungen weiterhin korrekt mit dem Programm-Bestand zusammenspielt. Details siehe `docs/testing.md`.
 
+### Kollisions-Hinweis (Phase 15) endgültig verworfen
+
+- Der seit 2026-08-16 offene Merker „Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Zeitplan-Trigger" wurde auf Nutzerentscheidung komplett gestrichen, nicht nur zurückgestellt — Begründung: die dafür nötige „nächster fälliger Trigger"-Berechnung (Wiederkehr-Mathematik für `daily`/`weekly`) wäre unverhältnismäßig aufwendig für den gebotenen Nutzen (Nutzer-Zitat: „der Nutzen ist auch mäßig").
+- Der bereits vorhandene `Sequencer::isRunning()`-Guard in `startSequence()` (siehe Phase-15-Kernentscheidung 4, „gleichzeitige Trigger") deckt die eigentliche Sicherheitsanforderung ohnehin schon vollständig ab — nicht nur für zwei gleichzeitig fällige Zeitplan-Einträge, sondern genauso für einen manuellen Start waehrend eines geplanten Laufs und umgekehrt: „wer zuerst kommt, malt zuerst" (Nutzer-Bestätigung), der zweite Versuch wird abgewiesen und geloggt (`"main/cmd ON ignoriert (Automatik laeuft bereits)."`).
+- Details/Aktualisierung in `docs/spec/15-wochenplan.md` (Abschnitt „Verworfen", Status-Zeile bereinigt) und `docs/requirements.md` (Entscheidungshistorie).
+
 ## Offene Punkte / nächste Schritte
 
-- Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Zeitplan-Trigger (Phase 15, Merker), inkl. der dafür nötigen „nächster fälliger Trigger"-Berechnung — bewusst zurückgestellt, kein Termin.
 - Touch-UI-Anbindung für den Zeitplan (Anzeige/Bedienung am Display) — weiterhin nicht umgesetzt (siehe `docs/spec/13-touch-ui.md`, Nachtrag 2026-08-17: „Timer“-Unterseite bewusst verworfen, kein Ersatzkonzept eingeplant).
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Web-Interface zur vollständigen Geräte-Konfiguration (Programme/Zeitplan komfortabel editieren) — eigene, noch nicht begonnene Phase.

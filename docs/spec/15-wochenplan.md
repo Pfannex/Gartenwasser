@@ -1,6 +1,6 @@
 # Phase 15 — Zeitplan / Scheduler (Tages- und Wochenplan)
 
-**Status:** ✅ Erledigt & getestet (Kernfunktion) — Kollisions-Hinweis + „nächster Trigger"-Berechnung bewusst noch nicht umgesetzt (siehe unten)
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -103,17 +103,16 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 
 ### Neue Punkte (Nutzer-Merker, 2026-08-16, noch zu verfeinern)
 
-- **Kollisions-Hinweis bei manuellem `main/cmd ON`** (Touch **und** MQTT): läuft eine manuell gestartete Sequenz voraussichtlich noch, wenn der nächste Zeitplan-Trigger fällig wird (`main/remainingTotal` würde über den nächsten geplanten Start hinausreichen), soll ein Hinweis erfolgen — nicht blockierend, nur Information (passt zum bisherigen Stil: Hinweis statt Verhinderung, siehe `docs/spec/13-touch-ui.md`). Braucht die oben beschriebene separate „nächster Trigger"-Berechnung. Anzeige vermutlich Touch-Statuszeile (transienter Hinweis) + `lastError`/Log für den MQTT-Fall — Details bei Umsetzung.
 - **Aufräum-Funktion für abgelaufene `once`-Einträge** — **umgesetzt** als `main/schedule/cleanup` (beliebiger Payload, reiner Einmalbefehl): entfernt alle Einträge, die nie wieder auslösen können (abgelaufene `once`-Termine, lexikographischer Datumsvergleich Jahr/Monat/Tag). Kein Automatismus — bewusst nur auf Anfrage, damit „warum ist mein Eintrag weg“ nicht überrascht. Ergänzt (löst aber nicht ab) das oben entschiedene „liegen lassen“-Verhalten.
 
 ### Verworfen
 
 - **Eigenes Fehler-Topic `main/schedule/settingsError`** (2026-08-16 verworfen): ursprünglich für kollidierende Trigger und allgemeine Konfigurationsfehler angedacht. Da überschneidende Einträge bewusst erlaubt sind und über „erster in Listen-Reihenfolge gewinnt" automatisch aufgelöst werden (siehe Mechanik oben) — kein Fehlerfall, nichts zu melden. Allgemeine Konfigurationsfehler (z. B. ungültiger `program`-Name) laufen stattdessen über den bereits bestehenden generischen Kanal `diagnostics/lastError`, wie überall sonst im Projekt (kein neues Topic nötig).
+- **Kollisions-Hinweis bei manuellem `main/cmd ON`** (2026-08-17 verworfen, ursprünglich als Nutzer-Merker notiert): die dafür nötige „nächster fälliger Trigger"-Berechnung (echte Wiederkehr-Mathematik für `daily`/`weekly`) wäre unverhältnismäßig aufwendig für den gebotenen Nutzen — Nutzer-Einschätzung: „der Nutzen ist auch mäßig". Der bereits bestehende `Sequencer::isRunning()`-Guard in `startSequence()` (siehe Kernentscheidung 4 oben) deckt die eigentliche Sicherheitsanforderung ohnehin bereits vollständig ab: er gilt nicht nur für zwei gleichzeitig fällige Zeitplan-Einträge, sondern genauso für einen manuellen Start (Touch/MQTT) während eines geplant ausgelösten Laufs und umgekehrt — in allen Fällen gewinnt schlicht, wer zuerst da ist („wer zuerst kommt, malt zuerst"), der zweite Versuch wird abgewiesen und geloggt (`"main/cmd ON ignoriert (Automatik laeuft bereits)."`). Ein zusätzlicher, rein informativer Vorab-Hinweis wurde damit als entbehrlich eingestuft.
 
 ### Noch offene Fragen
 
-- Verhältnis zu manuellem `main/cmd ON`/`OFF` während eines geplant ausgelösten Laufs — verhält sich bereits identisch zur bestehenden Regel „manuelles Aus wird angenommen, Sequenz macht weiter" (keine Sonderbehandlung nötig, der Scheduler startet nur dieselbe Sequenz wie `main/cmd ON`). Der Kollisions-Hinweis bei einem **neuen** manuellen Start waehrend ein Zeitplan-Trigger bald faellig ist, bleibt offen (siehe Merker oben).
-- Genaue Berechnung/Implementierung der „nächster fälliger Trigger"-Funktion (Wiederkehr-Mathematik für `daily`/`weekly`) — noch nicht umgesetzt, siehe „Umsetzung" unten.
+Keine mehr offen — das Verhältnis zu manuellem `main/cmd ON`/`OFF` während eines geplant ausgelösten Laufs (und umgekehrt) ist durch den bestehenden `Sequencer::isRunning()`-Guard vollständig geklärt (siehe „Verworfen" oben).
 
 ## Umsetzung (2026-08-16)
 
@@ -121,7 +120,7 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 - `MqttManager`: `main/schedule/set` (Bulk, Array-Replace + globales `enabled`), `main/schedule/state` (retained), `main/schedule/cmd` (`ON`/`OFF`, globaler Schalter), `main/schedule/cleanup` (Einmalbefehl). Ungueltige Einzeleintraege (fehlendes `program`, unbekannter `type`, ungueltige `time`/`date`, `weekly` ohne gueltige `weekdays`) werden einzeln uebersprungen + geloggt, nicht die ganze Anfrage abgelehnt (wie ueberall sonst im Projekt).
 - **Scheduler-Tick** (`checkSchedule()`): laeuft unconditional in `MqttManager::loop()` neben `tickValveTimers()`/`checkDiagnostics()` (unabhaengig von WLAN/MQTT, siehe Kernentscheidung 4). Deaktiviert sich selbst, solange `Logger::isRealTimeEnabled()` false ist (keine verlaessliche Uhrzeit vor NTP-Sync) — dafuer neue `Logger::isRealTimeEnabled()`-Abfrage ergaenzt. Bei Trigger-Match: `applyProgram()` (per Name aufgeloest) + `startSequence()`, exakt derselbe Pfad wie `main/cmd ON`.
 - **Stack-Konsequenz**: `kScheduleJsonCapacity` (4096 Byte) ist groesser als `kProgramsJsonCapacity` (2048 Byte) und wird jetzt der puffer-bestimmende Fall (`kMaxJsonPayloadSize` in `MqttManager.cpp`, `mqttClient.setBufferSize()`). `SET_LOOP_TASK_STACK_SIZE` in `main.cpp` vorsorglich von 16 KB auf 32 KB verdoppelt (RAM-Headroom reichlich vorhanden), um denselben Stack-Overflow-Bug wie bei Phase 14 von vornherein zu vermeiden.
-- **Noch nicht umgesetzt** (bewusst zurückgestellt): Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am naechsten Trigger, sowie die dafuer noetige „naechster faelliger Trigger"-Berechnung. Ebenso: Touch-UI-Anzeige/-Bedienung fuer den Zeitplan (siehe Backlog-Idee in `docs/spec/13-touch-ui.md`).
+- **Noch nicht umgesetzt** (bewusst zurückgestellt): Touch-UI-Anzeige/-Bedienung für den Zeitplan (siehe `docs/spec/13-touch-ui.md`, Nachtrag 2026-08-17 — „Timer"-Unterseite bewusst verworfen). Der Kollisions-Hinweis bei manuellem `main/cmd ON` wurde am 2026-08-17 komplett verworfen (siehe Abschnitt „Verworfen" oben), nicht nur zurückgestellt.
 
 ### Nachtrag (2026-08-16): `name`-Feld wieder entfernt
 
