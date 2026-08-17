@@ -48,3 +48,23 @@ Lokale Bedienung/Anzeige direkt am Gerät, ergänzend zur MQTT/Home-Assistant-St
 - Der sichtbare Checked-Status der Buttons wird **nicht** beim Klick lokal gesetzt, sondern periodisch (`refreshProgramButtons()`, alle 250 ms) aus `ConfigStore::getActiveProgram()` abgeleitet — bleibt dadurch auch korrekt, wenn die Programmwahl über MQTT (`main/program/cmd`, `main/programs/set`) geändert wird, nicht nur über Touch. Ist ein Programm ohne Button-Bindung aktiv (z. B. Programm 5–8 der bis zu 8 möglichen), leuchtet konsequent keiner der Buttons — die Statuszeile zeigt den Programmnamen trotzdem an.
 - Zusätzlich, im selben Zug umgesetzt: `main/cmd ON` (Touch **und** MQTT) startet nur noch, wenn ein Programm gewählt ist — siehe `docs/spec/07-automatik-sequenz.md`, Nachtrag. Ohne Programm zeigt der Touch-`AUTO`-Button einen Hinweis „Kein Programm vorgewählt!“ (2 s, orange), startet aber nichts.
 - Getestet interaktiv auf Hardware (Nutzer bedient Display, Ergebnis per Live-MQTT-Mitschnitt/gezielten Abfragen gegengeprüft) — siehe `docs/testing.md`.
+
+## Backlog-Idee (2026-08-16): Untermenü-Struktur statt fester Buttons
+
+Noch nicht eingeplant, reine Notiz für später — aktuell begrenzen feste `P1`–`P4`-Buttons die Touch-Auswahl auf 4 gebundene Programme (von bis zu 8 möglichen), und es gibt noch keine Display-Bedienung für den Zeitplan (Phase 15, „Timer“). Idee: Hauptseite mit Untermenüs statt alles auf einer Seite:
+
+- **Hauptseite**
+  - Button „Programme“ (→ Untermenü)
+  - Anzeige aktives Programm
+  - Button „Timer“ (→ Untermenü)
+  - Anzeige aktiver Timer
+- **Untermenü „Programme“**
+  - Buttons „<“/„>“ zum rollierenden Durchblättern aller Programme (nicht auf 4 begrenzt)
+  - Anzeige Programmname
+  - Buttons „OK“/„Abbrechen“
+- **Untermenü „Timer“** (Zeitplan, Phase 15)
+  - Buttons „<“/„>“ zum rollierenden Durchblättern der Zeitplan-Einträge
+  - Anzeige Eintragsname
+  - Buttons „OK“/„Abbrechen“
+
+Setzt Phase 15 (Zeitplan) voraus, um sinnvoll zu sein („Timer“-Untermenü braucht `schedule`-Einträge). Würde die aktuelle, mit Phase 13/14 gebaute Ein-Seiten-Struktur (feste Buttons, permanente Statuszeile) grundlegend ersetzen — bei Umsetzung gegen den dann aktuellen Funktionsumfang neu bewerten, nicht blind übernehmen.
