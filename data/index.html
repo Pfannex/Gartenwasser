@@ -29,7 +29,7 @@
     </div>
 
     <div class="card hero">
-      <button class="hero-btn" :data-running="sequenceRunning">
+      <button class="hero-btn" :data-running="sequenceRunning" @click="toggleSequence()">
         <span class="icon" x-text="sequenceRunning ? '■' : '▶'"></span>
         <span class="label" x-text="sequenceRunning ? 'STOP' : 'START'"></span>
       </button>
@@ -56,7 +56,7 @@
     <h2>Ventile</h2>
     <div class="valve-grid">
       <template x-for="v in valves" :key="v.index">
-        <div class="card valve-card">
+        <div class="card valve-card" :class="v.index > 0 ? 'clickable' : ''" @click="toggleValve(v)">
           <div class="valve-dot" :data-state="valveState(v)" x-text="'V' + v.index"></div>
           <div class="valve-name" x-text="v.alias || ('V' + v.index)"></div>
           <div class="valve-meta" x-text="valveMeta(v)"></div>

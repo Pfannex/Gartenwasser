@@ -166,5 +166,19 @@ function dashboard() {
         .map((k) => (prog.time && prog.time[k] ? `${k} ${prog.time[k]}min` : k));
       return parts.length ? `${parts.join(" · ")} automatisch` : "";
     },
+
+    // Start/Stop der Automatik-Sequenz - identisch zu main/cmd per MQTT/Touch-UI, keine
+    // Sonderlogik. Die Firmware blockiert main/cmd ON ohnehin schon ohne gewaehltes
+    // Programm (siehe MqttManager::startSequence()), hier also keine zusaetzliche Pruefung noetig.
+    toggleSequence() {
+      this.client.publish(TOPIC_PREFIX + "main/cmd", this.sequenceRunning ? "OFF" : "ON");
+    },
+
+    // Direktes Ventilschalten wie V{n}/cmd per MQTT/Touch-UI-Matrix. V0 hat keinen eigenen
+    // cmd (Kopplung an V1-V5, siehe MqttManager) und bleibt ohne Funktion.
+    toggleValve(v) {
+      if (v.index === 0) return;
+      this.client.publish(TOPIC_PREFIX + `V${v.index}/cmd`, v.on ? "OFF" : "ON");
+    },
   };
 }

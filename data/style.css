@@ -139,8 +139,9 @@ nav.tabs a.soon::after { content: " (bald)"; font-weight: 400; font-size: 11px; 
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 2px; box-shadow: var(--shadow);
   background: var(--state-auto); color: #fff;
-  transition: background .15s ease;
+  transition: background .15s ease, transform .1s ease;
 }
+.hero-btn:active { transform: scale(0.96); }
 .hero-btn[data-running="true"] { background: var(--state-running); }
 .hero-btn .icon { font-size: 26px; line-height: 1; }
 .hero-btn .label { font-size: 15px; font-weight: 700; letter-spacing: .03em; }
@@ -172,6 +173,9 @@ h2 {
 
 .valve-card { padding: 16px; text-align: center; }
 .valve-card.reserved { border-style: dashed; box-shadow: none; opacity: .55; }
+.valve-card.clickable { cursor: pointer; transition: transform .1s ease, box-shadow .15s ease; }
+.valve-card.clickable:hover { box-shadow: 0 2px 4px rgba(20, 30, 28, 0.1), 0 10px 24px rgba(20, 30, 28, 0.1); }
+.valve-card.clickable:active { transform: scale(0.96); }
 .valve-dot {
   width: 46px; height: 46px; border-radius: 12px; margin: 0 auto 10px;
   display: flex; align-items: center; justify-content: center;

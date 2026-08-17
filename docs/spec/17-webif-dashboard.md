@@ -43,3 +43,12 @@ Nach einem optisch abgestimmten Vorschlag (Artefakt, siehe `docs/requirements.md
 - `WebManager` liefert alle Dateien jetzt mit `Cache-Control: no-cache, no-store, must-revalidate` aus (Nutzer bemerkte veraltete gecachte Inhalte auf dem Handy) — bewusst nur für die aktive Entwicklungsphase, vor einem produktiven Release wieder auf normales Caching umstellen.
 
 Dabei zweimal auf Hardware reproduziert und strukturell gelöst: `pio run --target uploadfs` überschrieb wiederholt die persistierte Konfiguration, da sie zunächst weiterhin dieselbe Partition wie die Web-Dateien nutzte — siehe `docs/spec/16-webif-fundament.md`, Abschnitt „Nachtrag" (Partitionstrennung `webfs`/`config`).
+
+## Nachtrag (2026-08-17): Dashboard interaktiv statt read-only
+
+Auf Nutzerwunsch, noch vor den separaten Unterseiten (Phasen 18–20), die bereits sichtbaren Hauptseiten-Elemente funktional gemacht — bewusst nur die, die schon in der UI stehen (kein Formular/Editor, das bleibt Phase 18+):
+
+- **START/STOP-Button**: `toggleSequence()` publiziert `main/cmd` (`ON`/`OFF`) direkt per `mqtt.js` — identisch zum Touch-UI-Pfad, keine eigene Logik. Die Firmware blockiert `main/cmd ON` ohnehin ohne gewähltes Programm (`MqttManager::startSequence()`), daher client-seitig keine zusätzliche Prüfung nötig.
+- **Ventilkacheln `V1`–`V5`**: `toggleValve(v)` publiziert `V{n}/cmd` (`ON`/`OFF`) direkt — `V0` bleibt ohne Handler (kein eigener `cmd`, wie bei Touch-UI/MQTT).
+- Hover-/Press-Feedback (`cursor: pointer`, leichte Skalierung beim Antippen) für beide.
+- Vor dem Browser-Test der Schreibpfad per `paho-mqtt` (`transport="websockets"`) simuliert (identisch zu einem echten Kachel-Klick): `V1/cmd ON` → `V1/state` wechselt auf `ON`, `V1/cmd OFF` → zurück auf `OFF`. ✅
