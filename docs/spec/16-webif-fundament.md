@@ -1,6 +1,6 @@
 # Phase 16 — Web-Interface: Fundament & Architekturentscheidung
 
-**Status:** 📋 Geplant (Architektur noch offen, wird im Interview mit dem Nutzer geklärt)
+**Status:** 📋 Geplant (Design vollständig abgestimmt, Umsetzung steht an)
 
 ## Ziel
 
@@ -22,28 +22,27 @@ Technisches und architektonisches Fundament für das Web-Interface, bevor in den
 
 **Visueller Stil: „Dashboard Cards“** (2026-08-17 vom Nutzer gewählt, siehe Stilrichtungen-Vergleich) — farbige Statuschips, weiche Karten, nah an der Home-Assistant-Formsprache. CSS-Tokens (Farben/Typografie/Radius) aus diesem Stil bilden die gemeinsame Basis für die Phasen 17–20.
 
-## Noch offene Fragen (im Interview zu klären, vor Umsetzungsbeginn)
+## Entschiedene Punkte
 
-1. **Architektur A vs. B** — die zentrale, alles andere prägende Entscheidung:
-   - **A) ESP32 hostet eine eigene REST/WebSocket-API.** Web-Interface spricht nur mit dem Gerät. Mehr Code auf dem ESP32 (neue Endpoints, JSON-Bridging zu `ConfigStore`/`MqttManager`), funktioniert aber unabhängig vom Broker.
-   - **B) ESP32 liefert nur statische Dateien aus, der Browser verbindet sich per MQTT-over-WebSocket direkt mit dem Broker** (z. B. via `mqtt.js`), nutzt exakt dieselben Topics wie mqtt-spy/Home Assistant. Kaum neue Logik auf dem Gerät, volle Wiederverwendung des bestehenden MQTT-Modells — braucht aber einen WebSocket-Listener auf dem Mosquitto-Broker (externe Config-Änderung, nicht Teil der Firmware).
-   - Tendenz aus der Diskussion: B passt zur bereits stark MQTT-zentrierten Architektur des Projekts — noch nicht final entschieden.
-2. **Frontend-Ansatz**: Vanilla HTML/CSS/JS, ein leichtgewichtiges Reaktivitäts-Framework (Alpine.js/htmx) oder ein volles SPA-Framework mit Build-Schritt (Vue/Svelte/Preact). Der gewählte „Dashboard Cards“-Stil braucht für Listen (Programme/Zeitplan) spürbar mehr Interaktivität als „Native Minimal“ — tendenziell Alpine.js/htmx-Niveau, noch zu bestätigen.
-3. **Dateisystem**: `SPIFFS` → `LittleFS` wechseln (moderner Nachfolger, bessere Eignung für mehrere benannte Dateien wie `index.html`/`style.css`/`app.js`) — Empfehlung steht, betrifft `ConfigStore`s Dateizugriff (Persistenz-Regressionsrisiko), noch zu bestätigen.
+1. **Architektur: Option B** (2026-08-17 entschieden). ESP32 liefert nur statische Dateien aus (HTML/CSS/JS via `ESPAsyncWebServer`), der Browser verbindet sich per MQTT-over-WebSocket **direkt** mit dem Broker (z. B. via `mqtt.js`) und nutzt exakt dieselben Topics wie mqtt-spy/Home Assistant. Kaum neue Logik auf dem ESP32 (kein REST-/State-Bridging nötig), volle Wiederverwendung des bestehenden MQTT-Modells. Begründung: passt zur bereits stark MQTT-zentrierten Architektur des Projekts.
+   - **Voraussetzung außerhalb der Firmware**: WebSocket-Listener auf dem Mosquitto-Broker (z. B. `listener 9001` + `protocol websockets` in der Broker-Config) — nicht Teil dieser Phase, muss separat eingerichtet werden.
+   - **Netzwerk-Hinweis**: funktioniert direkt, wenn das Gerät (Handy/PC), von dem aus die Weboberfläche geöffnet wird, im selben Subnetz wie der Broker ist (Normalfall im Heimnetz). Für Zugriff von unterwegs (z. B. Mobilfunknetz statt Heim-WLAN) müsste der Broker zusätzlich über denselben Weg erreichbar sein wie der ESP32 selbst (siehe frühere VPN-Kopplung Heimnetz↔Ferienhaus, `docs/requirements.md`) — reine Netzwerk-/Infrastrukturfrage, kein Firmware-Thema, hier nur als Hinweis festgehalten.
+2. **Frontend-Ansatz: Alpine.js** (2026-08-17 entschieden). Leichtgewichtig (~15–40 KB), kein Build-Schritt, direkt als einzelne Datei in LittleFS ablegbar. Deklarative Reaktivität für Listen (Programme/Zeitplan) und Live-Updates aus eintreffenden MQTT-Nachrichten, ohne den Aufwand eines vollen SPA-Frameworks mit Build-Pipeline.
+3. **Dateisystem: `LittleFS`** statt `SPIFFS` (moderner Nachfolger, bessere Eignung für mehrere benannte Dateien wie `index.html`/`style.css`/`app.js`) — betrifft `ConfigStore`s Dateizugriff, bei der Umsetzung auf Persistenz-Regression prüfen (`config.json`/`programs.json`/`schedule.json` müssen nach dem Wechsel weiterhin korrekt geladen werden).
 
-## Geplante Umsetzung (nach Klärung der offenen Fragen)
+## Geplante Umsetzung
 
-- `ESPAsyncWebServer` + `AsyncTCP` als neue Abhängigkeit (`platformio.ini`) — De-facto-Standard für nicht-blockierende ESP32-Webserver, passt zum durchgehaltenen Non-Blocking-Prinzip des Projekts (`WebServer.h` wäre synchron/blockierend, bewusst nicht gewählt).
-- Ggf. Dateisystem-Wechsel `SPIFFS` → `LittleFS`.
-- Minimale statische Seite ausliefern (kein Fachinhalt) — beweist die komplette Kette WLAN → Webserver → Dateisystem → Browser end-to-end, bevor Phase 17 Fachlogik aufsetzt.
+- `ESPAsyncWebServer` + `AsyncTCP` als neue Abhängigkeit (`platformio.ini`) — De-facto-Standard für nicht-blockierende ESP32-Webserver, passt zum durchgehaltenen Non-Blocking-Prinzip des Projekts (`WebServer.h` wäre synchron/blockierend, bewusst nicht gewählt). Dank Architekturentscheidung B beschränkt sich `WebManager` rein auf statisches File-Serving — keine REST-Endpoints, kein JSON-Bridging zu `ConfigStore`/`MqttManager` nötig, das übernimmt der Browser direkt per MQTT.
+- Dateisystem-Wechsel `SPIFFS` → `LittleFS` (`board_build.filesystem` in `platformio.ini`, `ConfigStore` auf `LittleFS.h` statt `SPIFFS.h` umstellen).
+- Minimale statische Seite ausliefern (kein Fachinhalt) — beweist die komplette Kette WLAN → Webserver → Dateisystem → Browser end-to-end, bevor Phase 17 den MQTT-over-WebSocket-Client (Alpine.js + `mqtt.js`) aufsetzt.
 - Dashboard-Cards-CSS-Basis (Farb-/Typografie-Tokens) als gemeinsame Grundlage ablegen.
 
 ## Betroffene Dateien (voraussichtlich)
 
 - `platformio.ini` (neue `lib_deps`, ggf. `board_build.filesystem`)
-- `src/WebManager.h/.cpp` (neu, analog zu `MqttManager`/`HmiManager` als eigenständige Klasse)
+- `src/WebManager.h/.cpp` (neu, analog zu `MqttManager`/`HmiManager` als eigenständige Klasse — bleibt dank Architektur B schlank, reines File-Serving)
 - `src/main.cpp` (Einbindung `WebManager::begin()`/`loop()`)
-- `data/` (neues PlatformIO-Verzeichnis für LittleFS-Inhalte, falls Option „statische Dateien“ gewählt wird)
+- `data/` (neues PlatformIO-Verzeichnis für LittleFS-Inhalte)
 
 ## Test (geplant)
 
