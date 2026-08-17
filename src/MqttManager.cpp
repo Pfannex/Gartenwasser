@@ -817,7 +817,6 @@ void handleScheduleSet(const char *payloadStr) {
         break;
       }
       ConfigStore::ScheduleInput &entry = entries[count];
-      entry.name = obj["name"] | "";
       entry.program = obj["program"] | "";
       if (entry.program[0] == '\0') {
         Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
@@ -921,7 +920,6 @@ void handleScheduleCleanup() {
   const uint8_t currentDay = static_cast<uint8_t>(timeinfo.tm_mday);
 
   const uint8_t count = ConfigStore::getScheduleCount();
-  static char nameBuf[ConfigStore::kMaxScheduleEntries][ConfigStore::kAliasMaxLength + 1];
   static char programBuf[ConfigStore::kMaxScheduleEntries][ConfigStore::kAliasMaxLength + 1];
   ConfigStore::ScheduleInput entries[ConfigStore::kMaxScheduleEntries];
   uint8_t keepCount = 0;
@@ -942,13 +940,10 @@ void handleScheduleCleanup() {
       continue;
     }
 
-    strncpy(nameBuf[keepCount], ConfigStore::getScheduleName(i), ConfigStore::kAliasMaxLength);
-    nameBuf[keepCount][ConfigStore::kAliasMaxLength] = '\0';
     strncpy(programBuf[keepCount], ConfigStore::getScheduleProgram(i), ConfigStore::kAliasMaxLength);
     programBuf[keepCount][ConfigStore::kAliasMaxLength] = '\0';
 
     ConfigStore::ScheduleInput &entry = entries[keepCount];
-    entry.name = nameBuf[keepCount];
     entry.program = programBuf[keepCount];
     entry.enabled = ConfigStore::getScheduleEnabled(i);
     entry.type = ConfigStore::getScheduleType(i);

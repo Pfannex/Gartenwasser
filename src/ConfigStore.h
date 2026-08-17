@@ -117,7 +117,6 @@ class ConfigStore {
   /// 6=Sonntag) ist nur bei type=WEEKLY relevant, `year`/`month`/`day` nur bei type=ONCE -
   /// siehe docs/spec/15-wochenplan.md.
   struct ScheduleInput {
-    const char *name;     // optional, rein kosmetisch, "" erlaubt
     const char *program;  // Pflicht, muss einem Programmnamen entsprechen
     bool enabled;
     ScheduleType type;
@@ -139,7 +138,6 @@ class ConfigStore {
   /// Zeitplan-Eintrag-Felder, 0-basierter Index (0..getScheduleCount()-1). Kein von aussen
   /// ansprechbarer Identifikator noetig (main/schedule/set ersetzt immer die komplette
   /// Liste als Block, siehe docs/spec/15-wochenplan.md).
-  static const char *getScheduleName(uint8_t index);
   static bool getScheduleEnabled(uint8_t index);
   static ScheduleType getScheduleType(uint8_t index);
   static uint8_t getScheduleHour(uint8_t index);

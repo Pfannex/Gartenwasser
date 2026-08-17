@@ -268,6 +268,13 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - **Getestet** (automatisiert per Python/paho-mqtt, ad-hoc-Skript): Bulk-Set aller drei Trigger-Typen, globaler Schalter, Einzelvalidierung (5 gemischte Eintraege, nur der gueltige bleibt), Cleanup-Funktion (nur abgelaufene `once`-Eintraege entfernt), und ein **echter Zeit-Test**: Trigger 2 Minuten in der Zukunft gesetzt, ~130s gewartet, feuerte exakt zur Minute (Programm automatisch angewendet, Sequenz gestartet). Alle Faelle bestanden, siehe `docs/testing.md`.
 - Bewusst zurueckgestellt, nicht Teil dieser Umsetzung: Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am naechsten Trigger (braucht eine separate "naechster faelliger Trigger"-Berechnung mit Wiederkehr-Mathematik), sowie jede Touch-UI-Anbindung fuer den Zeitplan (siehe Backlog-Idee in `docs/spec/13-touch-ui.md`).
 
+### Phase 15 — `name`-Feld wieder entfernt
+
+- Auf Nutzerwunsch nach der ersten Umsetzung: das anfangs vorgesehene, rein kosmetische `name`-Feld je Zeitplan-Eintrag war ueberfluessig - "alles basiert auf dem Key `program`". `program` bleibt der einzige Identifikator eines Eintrags.
+- Betroffen: `ConfigStore` (`ScheduleInput`/`StoredScheduleEntry` ohne `name`, `getScheduleName()` entfernt), `MqttManager` (`handleScheduleSet()`/`handleScheduleCleanup()` ohne `name`-Handling).
+- Auf Hardware verifiziert: Eintraege ohne `name` funktionieren unveraendert korrekt (Bulk-Set/State-Roundtrip getestet).
+- Details in `docs/spec/15-wochenplan.md`, Abschnitt "Nachtrag".
+
 ## Offene Punkte / nächste Schritte
 
 - Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Zeitplan-Trigger (Phase 15, Merker), inkl. der dafür nötigen „nächster fälliger Trigger"-Berechnung — bewusst zurückgestellt, kein Termin.

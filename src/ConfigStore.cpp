@@ -50,7 +50,6 @@ constexpr const char *kShortcutLabels[5] = {"", "P1", "P2", "P3", "P4"};
 // nur bei type=WEEKLY relevant, `year`/`month`/`day` nur bei type=ONCE - siehe
 // docs/spec/15-wochenplan.md.
 struct StoredScheduleEntry {
-  char name[ConfigStore::kAliasMaxLength + 1];
   char program[ConfigStore::kAliasMaxLength + 1];
   bool enabled;
   ConfigStore::ScheduleType type;
@@ -339,9 +338,6 @@ void buildScheduleJson(JsonDocument &doc) {
   JsonArray arr = doc.createNestedArray("schedule");
   for (uint8_t i = 0; i < scheduleCount; i++) {
     JsonObject obj = arr.createNestedObject();
-    if (schedule[i].name[0] != '\0') {
-      obj["name"] = schedule[i].name;
-    }
     obj["enabled"] = schedule[i].enabled;
     obj["type"] = kScheduleTypeLabels[static_cast<uint8_t>(schedule[i].type)];
 
@@ -412,10 +408,6 @@ void loadScheduleFile() {
     if (i >= ConfigStore::kMaxScheduleEntries) {
       break;
     }
-    const char *name = obj["name"] | "";
-    strncpy(schedule[i].name, name, ConfigStore::kAliasMaxLength);
-    schedule[i].name[ConfigStore::kAliasMaxLength] = '\0';
-
     const char *program = obj["program"] | "";
     strncpy(schedule[i].program, program, ConfigStore::kAliasMaxLength);
     schedule[i].program[ConfigStore::kAliasMaxLength] = '\0';
@@ -678,8 +670,6 @@ void ConfigStore::setSchedule(const ScheduleInput *entries, uint8_t count) {
     count = kMaxScheduleEntries;
   }
   for (uint8_t i = 0; i < count; i++) {
-    strncpy(schedule[i].name, entries[i].name, kAliasMaxLength);
-    schedule[i].name[kAliasMaxLength] = '\0';
     strncpy(schedule[i].program, entries[i].program, kAliasMaxLength);
     schedule[i].program[kAliasMaxLength] = '\0';
     schedule[i].enabled = entries[i].enabled;
@@ -697,13 +687,6 @@ void ConfigStore::setSchedule(const ScheduleInput *entries, uint8_t count) {
 
 uint8_t ConfigStore::getScheduleCount() {
   return scheduleCount;
-}
-
-const char *ConfigStore::getScheduleName(uint8_t index) {
-  if (index >= scheduleCount) {
-    return "";
-  }
-  return schedule[index].name;
 }
 
 bool ConfigStore::getScheduleEnabled(uint8_t index) {

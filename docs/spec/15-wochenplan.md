@@ -30,16 +30,15 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 {
   "enabled": true,
   "schedule": [
-    {"name": "Rasen abends", "enabled": true, "type": "daily", "time": "21:00", "program": "Rasen"},
-    {"name": "Beete Di/Fr",  "enabled": true, "type": "weekly", "weekdays": ["tue", "fri"], "time": "20:00", "program": "Beete"},
-    {"name": "Fruehjahrsstart", "enabled": true, "type": "once", "date": "2026-02-01", "time": "11:00", "program": "Kurz"}
+    {"enabled": true, "type": "daily", "time": "21:00", "program": "Rasen"},
+    {"enabled": true, "type": "weekly", "weekdays": ["tue", "fri"], "time": "20:00", "program": "Beete"},
+    {"enabled": true, "type": "once", "date": "2026-02-01", "time": "11:00", "program": "Kurz"}
   ]
 }
 ```
 
 - **`type`** unterscheidet `daily`/`weekly`/`once`; typ-spezifische Felder (`weekdays` nur bei `weekly`, `date` nur bei `once`).
-- **`program`** referenziert ein Bewässerungsprogramm **per Name, nicht per Array-Index** (Entscheidung 2026-08-16) — sonst würde ein Umsortieren der Programme via `main/programs/set` die Zeitplan-Referenzen stillschweigend auf ein anderes Programm verschieben (dasselbe Problem, das die `shortcut`-Felder für `P1`–`P4` bereits lösen). `program` **muss nicht eindeutig sein** — dasselbe Programm darf in mehreren Einträgen referenziert werden (z. B. „Rasen" täglich abends **und** zusätzlich dienstags mit einem zweiten Eintrag). Verhalten bei nicht mehr existierendem Namen (Programm umbenannt/gelöscht) noch zu klären — vermutlich analog zu ungültigem `main/program/cmd`-Index: ignorieren + loggen.
-- **`name`** je Eintrag ist rein kosmetisch (bessere Lesbarkeit z. B. in mqtt-spy), **nicht eindeutig**, **optional** und hat **keine Funktion** — insbesondere ersetzt es nicht `program`. Anders als bei den Programmen selbst (dort ist der Name faktisch der Identifikator) braucht kein Bestandteil des Zeitplan-Eintrags von außen eindeutig referenzierbar zu sein, da nichts einzeln auf einen Eintrag zeigt — die ganze Liste wird immer als Block über `main/schedule/set` ersetzt (kein „ändere nur Eintrag Nr. 3"). Eine Eindeutigkeits-/ID-Pflicht (weder für `name` noch als zusätzliches `index`-Feld) wurde deshalb bewusst **nicht** eingeführt (Entscheidung 2026-08-16).
+- **`program`** referenziert ein Bewässerungsprogramm **per Name, nicht per Array-Index** (Entscheidung 2026-08-16) — sonst würde ein Umsortieren der Programme via `main/programs/set` die Zeitplan-Referenzen stillschweigend auf ein anderes Programm verschieben (dasselbe Problem, das die `shortcut`-Felder für `P1`–`P4` bereits lösen). `program` **muss nicht eindeutig sein** — dasselbe Programm darf in mehreren Einträgen referenziert werden (z. B. „Rasen" täglich abends **und** zusätzlich dienstags mit einem zweiten Eintrag). `program` ist gleichzeitig der einzige Identifikator/Beschriftung eines Eintrags — ein separates, rein kosmetisches `name`-Feld wurde bewusst **nicht** eingeführt (2026-08-16 entfernt, siehe Entscheidungshistorie): der Eintrag selbst ist ohnehin nicht von außen einzeln ansprechbar (`main/schedule/set` ersetzt immer die komplette Liste als Block), daher reicht `program` als einziger inhaltlicher Anker, ohne redundantes zweites Feld pflegen zu müssen. Verhalten bei nicht mehr existierendem Namen (Programm umbenannt/gelöscht) noch zu klären — vermutlich analog zu ungültigem `main/program/cmd`-Index: ignorieren + loggen.
 - **`enabled`** je Eintrag: einzelne Einträge pausieren, ohne sie zu löschen.
 - **`enabled`** auf oberster Ebene (2026-08-16 bestätigt): globaler Ein/Aus-Schalter für den kompletten Zeitplan — bei `false` ist der Zeitplan komplett außer Betrieb (kein Eintrag löst aus), ohne dass die Konfiguration verloren geht (z. B. „Urlaubsmodus“). Zusätzlich zum Bulk-Feld ein schlankes Convenience-Topic `main/schedule/cmd` (`ON`/`OFF`), analog zu `main/program/cmd` als Singular-Pendant zu `main/programs/set` — praktisch für ein späteres Home-Assistant-Switch-Entity (Phase 10), ohne JSON senden zu müssen.
 - Einmal pro Minute prüfen, ob „jetzt" einem aktiven (`enabled`) Trigger entspricht → referenziertes Programm auswählen + Sequenz starten (derselbe Pfad wie `main/cmd ON`, inkl. der seit Phase 14 geltenden Regel „Automatik erfordert Programm“ — der Scheduler hat ja durch die Referenz immer eins).
@@ -50,7 +49,6 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 |---|---|---|---|---|
 | `enabled` | oberste Ebene | optional (Default `true`) | `true` \| `false` | Globaler Ein/Aus-Schalter für den kompletten Zeitplan. `false` = kein Eintrag löst aus, Konfiguration bleibt erhalten. |
 | `schedule` | oberste Ebene | ja | Array | Liste der Zeitplan-Einträge, beliebig lang (keine feste Obergrenze wie bei Programmen vorgesehen — bei Bedarf bei der Umsetzung ergänzen). |
-| `name` | je Eintrag | optional | Freitext, nicht eindeutig | Rein kosmetische Beschriftung, keine Funktion. |
 | `enabled` | je Eintrag | optional (Default `true`) | `true` \| `false` | Einzelnen Eintrag pausieren, ohne ihn zu löschen. |
 | `type` | je Eintrag | ja | `"daily"` \| `"weekly"` \| `"once"` | Trigger-Art, bestimmt welche der folgenden Felder zusätzlich gelten. |
 | `time` | je Eintrag | ja | `"HH:MM"` (24h, führende Nullen, z. B. `"09:05"`) | Uhrzeit des Triggers. |
@@ -63,17 +61,17 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 **Dasselbe Programm mehrfach terminiert** (zeigt, warum `program` keine Eindeutigkeitspflicht hat):
 
 ```json
-{"name": "Rasen Standard", "type": "daily", "time": "21:00", "program": "Rasen"},
-{"name": "Rasen Zusatz heiss", "type": "weekly", "weekdays": ["tue"], "time": "06:00", "program": "Rasen"}
+{"type": "daily", "time": "21:00", "program": "Rasen"},
+{"type": "weekly", "weekdays": ["tue"], "time": "06:00", "program": "Rasen"}
 ```
 
 **Pausierter Einzeleintrag** (`enabled: false`, Konfiguration bleibt erhalten, feuert aber nicht):
 
 ```json
-{"name": "Beete Winterpause", "enabled": false, "type": "weekly", "weekdays": ["tue", "fri"], "time": "20:00", "program": "Beete"}
+{"enabled": false, "type": "weekly", "weekdays": ["tue", "fri"], "time": "20:00", "program": "Beete"}
 ```
 
-**Minimaler Eintrag ohne `name`** (`name` ist optional):
+**Minimaler Eintrag** (nur die Pflichtfelder `type`, `time`, `program`):
 
 ```json
 {"type": "daily", "time": "07:30", "program": "Kurz"}
@@ -82,13 +80,13 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 **Kompletter Zeitplan pausiert** (globaler Schalter, z. B. Urlaub — einzelne Einträge bleiben wie konfiguriert):
 
 ```json
-{"enabled": false, "schedule": [{"name": "Rasen abends", "type": "daily", "time": "21:00", "program": "Rasen"}]}
+{"enabled": false, "schedule": [{"type": "daily", "time": "21:00", "program": "Rasen"}]}
 ```
 
 **Mehrere Wochentage in einem Eintrag** (statt mehrerer separater `weekly`-Einträge):
 
 ```json
-{"name": "Beete Mo/Mi/Fr", "type": "weekly", "weekdays": ["mon", "wed", "fri"], "time": "19:30", "program": "Beete"}
+{"type": "weekly", "weekdays": ["mon", "wed", "fri"], "time": "19:30", "program": "Beete"}
 ```
 
 ### Entschiedene Punkte
@@ -124,6 +122,10 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 - **Scheduler-Tick** (`checkSchedule()`): laeuft unconditional in `MqttManager::loop()` neben `tickValveTimers()`/`checkDiagnostics()` (unabhaengig von WLAN/MQTT, siehe Kernentscheidung 4). Deaktiviert sich selbst, solange `Logger::isRealTimeEnabled()` false ist (keine verlaessliche Uhrzeit vor NTP-Sync) — dafuer neue `Logger::isRealTimeEnabled()`-Abfrage ergaenzt. Bei Trigger-Match: `applyProgram()` (per Name aufgeloest) + `startSequence()`, exakt derselbe Pfad wie `main/cmd ON`.
 - **Stack-Konsequenz**: `kScheduleJsonCapacity` (4096 Byte) ist groesser als `kProgramsJsonCapacity` (2048 Byte) und wird jetzt der puffer-bestimmende Fall (`kMaxJsonPayloadSize` in `MqttManager.cpp`, `mqttClient.setBufferSize()`). `SET_LOOP_TASK_STACK_SIZE` in `main.cpp` vorsorglich von 16 KB auf 32 KB verdoppelt (RAM-Headroom reichlich vorhanden), um denselben Stack-Overflow-Bug wie bei Phase 14 von vornherein zu vermeiden.
 - **Noch nicht umgesetzt** (bewusst zurückgestellt): Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am naechsten Trigger, sowie die dafuer noetige „naechster faelliger Trigger"-Berechnung. Ebenso: Touch-UI-Anzeige/-Bedienung fuer den Zeitplan (siehe Backlog-Idee in `docs/spec/13-touch-ui.md`).
+
+### Nachtrag (2026-08-16): `name`-Feld wieder entfernt
+
+Das anfangs vorgesehene, rein kosmetische `name`-Feld je Eintrag (analog zu `programs`) wurde auf Nutzerwunsch nach der ersten Umsetzung wieder gestrichen — „alles basiert auf dem Key `program`", ein zusätzliches, redundantes Beschriftungsfeld war überflüssig. `program` ist jetzt der einzige Identifikator/Anker eines Eintrags. Betroffen: `ConfigStore` (`ScheduleInput`/`StoredScheduleEntry` ohne `name`-Feld, `getScheduleName()` entfernt), `MqttManager` (`handleScheduleSet()`/`handleScheduleCleanup()` ohne `name`-Handling). Auf Hardware verifiziert, dass Einträge ohne `name` weiterhin korrekt funktionieren.
 
 ## Betroffene Dateien
 
