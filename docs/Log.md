@@ -359,10 +359,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Einmaliger Uebergang: die Repartitionierung selbst hat die Testdaten ein letztes Mal geloescht (vorher angekuendigt). Nach erneutem Setzen per echtem `uploadfs`-Testlauf verifiziert: Programme und Aliase (inkl. Umlaute) bleiben jetzt dauerhaft erhalten, auch nach einem frischen Dashboard-Update.
 - Details siehe `docs/spec/16-webif-fundament.md`, Abschnitt „Nachtrag", `partitions.csv`, `src/ConfigStore.cpp`, `src/WebManager.cpp`.
 
+### Phase 18 (Web-Interface: Konfiguration bearbeiten) umgesetzt und getestet
+
+- Erster Schreibpfad des Web-Interfaces (Phase 17 war rein lesend). Design vorab per Artefakt abgestimmt, iterativ verfeinert.
+- `maxTime` bewusst **kein** abgeleiteter Wert: zwei automatische Berechnungsvorschlaege (Summe aller Laufzeiten + 5 min, dann laengste Einzel-Laufzeit + 5 min als schreibgeschuetzter Wert) wurden nach Nutzer-Feedback wieder verworfen - „der user muss maxtime einstellen! beruecksichtige maxtime immer". Stattdessen zeigt die UI eine gelbe Warnung + „→ X min effektiv"-Hinweis, wenn `maxTime` eine konfigurierte Laufzeit tatsaechlich deckelt (`time > maxTime`) - die Deckelung selbst laeuft unveraendert im `ValveTimer`.
+- Bestaetigungs-Feedback pro Feld ebenfalls mehrfach angepasst: von einem Textbaustein („✓ gespeichert", als verwirrend verworfen) ueber ein optimistisches gruenes Aufblitzen zu der finalen Loesung - Feld faerbt sich beim Verlassen sofort rot (noch nicht per Geraete-Echo bestaetigt), blendet weich zur normalen Textfarbe zurueck sobald die Bestaetigung eintrifft. Ein dauerhaft rotes Feld zeigt automatisch eine vom Geraet abgelehnte Eingabe an, ohne eigenen Sonderfall.
+- Neue `data/konfiguration.html`/`data/konfig.js`: eigene Alpine-Komponente `konfiguration()`, eigene MQTT-Verbindung (analog `app.js`), Schreibpfade `V{n}/alias/set`, `V{n}/time/set`, `V{n}/auto/set`, `main/config/set` (fuer `maxTime`, kein eigenes `main/time/set`). `data/style.css` um Formular-Basisstile (bisher nicht noetig, Phase 17 war rein lesend) und `--state-warning`-Token ergaenzt. `data/index.html`-Navigation „Konfiguration" von Platzhalter auf echten Link umgestellt.
+- Schreibpfad vor dem Browser-Test wieder per `paho-mqtt` (`transport="websockets"`) verifiziert (alle 5 Set-Topics inkl. `maxTime`-Deckelungsfall), danach vom Nutzer im Browser bestaetigt: „passt alles“.
+- Details siehe `docs/spec/18-webif-konfiguration.md`, `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
-- **Phase 18 (Web-Interface: Konfiguration bearbeiten)** — nächster Arbeitsschritt: erster Schreibpfad (Architektur B - der Browser publiziert direkt per MQTT-over-WebSocket, z. B. `V{n}/time/set`), am einfachsten Datenmodell (`time`/`auto`/`alias`/`maxTime`) erprobt, bevor Phase 19/20 komplexere Listen-Datenmodelle hinzufuegen.
-- Phasen 19–21 (Web-Interface: Programme, Zeitplan, OTA) — geplant, hängen an Phase 18.
+- **Phase 19 (Web-Interface: Programme verwalten)** — nächster Arbeitsschritt: erstes komplexeres Datenmodell des Web-Interfaces (Array/Liste statt Einzelwerte, Teilmengen-Semantik wie bei `main/config/set`), baut auf dem in Phase 18 erprobten Schreibpfad-Muster auf.
+- Phasen 20–21 (Web-Interface: Zeitplan, OTA) — geplant, hängen an Phase 19.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste.

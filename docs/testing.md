@@ -156,6 +156,22 @@ Auslöser: `uploadfs`-Läufe während der Hauptseiten-Redesign-Iteration löscht
 
 Einmaliger Nebeneffekt der Repartitionierung selbst (Partitionsgrenzen verschieben sich): Testdaten gingen ein letztes Mal verloren, danach erneut gesetzt — ab jetzt bleiben sie bei jedem künftigen `uploadfs`-Lauf erhalten.
 
+## Phase 18 — Web-Interface: Konfiguration bearbeiten — 2026-08-17
+
+Erster Schreibpfad des Web-Interfaces (bisher nur Phase 17, rein lesend). Design vorab per Artefakt abgestimmt (`maxTime` bleibt manuell, gelbe Warnung bei Deckelung, rotes Bestätigungs-Feedback).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Dateiauslieferung | `/konfiguration.html`, `/konfig.js` per `curl` geprüft | HTTP 200, korrekter Inhalt | ✅ |
+| 2 | Alias setzen | `V3/alias/set "TestAlias"` (simuliert Feld-`blur()`) | `V3/alias` echot `TestAlias` | ✅ |
+| 3 | Laufzeit setzen | `V3/time/set "7"` | `V3/time/state` echot `7` | ✅ |
+| 4 | Automatik-Flag umschalten | `V3/auto/set` (Toggle-Klick) | `V3/auto/state` echot neuen Wert | ✅ |
+| 5 | `maxTime` setzen | `main/config/set {"maxTime":12}` | `main/time/maxTime` echot `12` | ✅ |
+| 6 | Laufzeit über `maxTime` gesetzt | `V3/time/set "20"` bei `maxTime=12` | `V3/time/state` zeigt weiterhin `20` (voller Sollwert, Deckelung wirkt erst beim Einschalten auf `time/remaining`) | ✅ |
+| 7 | Im Browser | Seite geöffnet, Felder bearbeitet | Rot beim Verlassen des Feldes, weiches Zurückblenden nach Bestätigung, gelbe Deckelungs-Warnung korrekt | ✅ |
+
+Testdaten (`V3`, `maxTime`) nach Punkt 6 auf Ausgangswerte zurückgesetzt. Vom Nutzer bestätigt: „passt alles“.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

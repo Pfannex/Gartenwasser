@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gartenwasser – Konfiguration</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="mqtt.min.js"></script>
+  <script src="konfig.js"></script>
+  <script defer src="alpine.min.js"></script>
+</head>
+<body x-data="konfiguration()">
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a href="index.html">Status</a>
+        <a class="active" href="#">Konfiguration</a>
+        <a class="soon" href="#">Programme</a>
+        <a class="soon" href="#">Zeitplan</a>
+      </nav>
+      <div class="status-chips">
+        <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
+        <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'"><span class="dot"></span><span x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span></span>
+      </div>
+    </div>
+
+    <h2>Globale Einstellungen</h2>
+    <div class="card">
+      <div class="global-row">
+        <div>
+          <div class="field-label">Maximale Laufzeit</div>
+          <div class="field-sub">Harte Obergrenze pro Ventil (min(Laufzeit, Max)) — deckelt sie eine Laufzeit, erscheint diese unten gelb</div>
+        </div>
+        <div class="field-input-group">
+          <input type="number" min="1" x-model.number="maxTime" @blur="setMaxTime()" :class="maxTimeClass()" />
+          <span class="unit">min</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Ventile</h2>
+    <p class="hint">Änderungen werden beim Verlassen eines Feldes bzw. beim Umschalten sofort übernommen — kein separater „Speichern“-Knopf nötig.</p>
+    <div class="card">
+      <template x-for="v in valves" :key="v.index">
+        <div class="valve-row">
+          <div class="valve-badge" :data-state="v.index > 0 && v.auto ? 'auto' : 'idle'" x-text="'V' + v.index"></div>
+          <div class="field-col">
+            <label>Alias</label>
+            <input type="text" x-model="v.alias" @blur="setAlias(v)" :class="aliasClass(v)" />
+          </div>
+          <template x-if="v.index > 0">
+            <div class="field-col">
+              <label>Laufzeit</label>
+              <div class="laufzeit-group">
+                <input type="number" min="1" x-model.number="v.time" @blur="setTime(v)" :class="timeClass(v)" />
+                <span class="unit">min</span>
+                <span class="cap-note" x-show="isCapped(v)" x-text="capLabel()"></span>
+              </div>
+            </div>
+          </template>
+          <template x-if="v.index === 0"><div></div></template>
+          <template x-if="v.index > 0">
+            <div class="switch-col">
+              <label>Automatik</label>
+              <div class="switch" :data-on="v.auto" @click="toggleAuto(v)"></div>
+            </div>
+          </template>
+          <template x-if="v.index === 0"><div></div></template>
+        </div>
+      </template>
+    </div>
+  </div>
+</body>
+</html>
