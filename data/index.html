@@ -35,17 +35,17 @@
       </button>
       <div class="hero-info">
         <template x-if="activeProgramName">
-          <div class="program-tag">Programm: <b x-text="activeProgramName"></b></div>
+          <div class="program-tag">Programm: <span x-text="activeProgramName"></span></div>
         </template>
         <div class="headline" x-text="heroHeadline()"></div>
         <template x-if="sequenceRunning">
           <div>
             <div class="meta-row">
-              <span>Restlaufzeit Ventil <b x-text="activeValveRemaining()"></b></span>
+              <span>Restlaufzeit <span x-text="activeValveLabel()"></span> - <b x-text="activeValveRemaining()"></b></span>
               <div class="progress-track"><div class="progress-fill" :style="`width: ${valveProgressPercent()}%`"></div></div>
             </div>
             <div class="meta-row">
-              <span>Restlaufzeit Sequenz <b x-text="remainingTotal"></b></span>
+              <span>Restlaufzeit Programm <span x-text="activeProgramName"></span> - <b x-text="remainingTotal"></b></span>
               <div class="progress-track"><div class="progress-fill total" :style="`width: ${sequenceProgressPercent()}%`"></div></div>
             </div>
           </div>

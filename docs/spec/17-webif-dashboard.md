@@ -32,3 +32,14 @@ Live-Übersicht im Browser: Ventilstatus (`V0`–`V5`), Automatik-Flags, laufend
 1. **Pipeline-Check ohne Browser**: `paho-mqtt` mit `transport="websockets"` gegen `192.168.1.123:9001/mqtt` verbunden (simuliert exakt, was `mqtt.js` im Browser tut) — Verbindung erfolgreich, 26 retained Nachrichten sofort empfangen. ✅
 2. **Dateiauslieferung**: alle sechs Dateien (`/`, `/index.html`, `/style.css`, `/app.js`, `/mqtt.min.js`, `/alpine.min.js`) per `curl` mit korrekter Größe/HTTP 200 geprüft. ✅
 3. **Im Browser** (Nutzer, gleiches Netz wie Broker): Seite zeigt „Verbunden“/„Gerät online“, Ventilkacheln korrekt farbig, Live-Update beim Schalten eines Ventils bestätigt. ✅ („ja, alles wie geplant!!“)
+
+## Nachtrag (2026-08-17): Hauptseiten-Redesign + No-Cache
+
+Nach einem optisch abgestimmten Vorschlag (Artefakt, siehe `docs/requirements.md` Entscheidungshistorie) die Hauptseite grundlegend überarbeitet: Kopfzeile mit Navigation-Platzhaltern (Konfiguration/Programme/Zeitplan, für Phasen 18–20), großer runder START/STOP-Button, größeres 4×2-Ventilraster (2 Zellen reserviert), Programm-/Diagnostics-Karten im Fußbereich. Nach Nutzer-Feedback iterativ verfeinert:
+
+- Aktives Programm als eigene, headline-große, akzentfarbene Zeile (`.program-tag`) statt kleiner Beschriftung.
+- Zwei getrennte, beschriftete Fortschrittsbalken statt einem (der ursprünglich fälschlich die Sequenz-Gesamtzeit unter dem Ventil-Label zeigte): „Restlaufzeit V1 · Apfel - 00:55“ (rot) und „Restlaufzeit Programm Rasen - 19:55“ (blau), jeweils mit „ - “ zwischen Label und Wert.
+- `activeValveLabel()`/`programDetail()` (neu in `app.js`) für die konkreten Ventil-/Programmnamen statt generischer Begriffe („Ventil“/„Sequenz“).
+- `WebManager` liefert alle Dateien jetzt mit `Cache-Control: no-cache, no-store, must-revalidate` aus (Nutzer bemerkte veraltete gecachte Inhalte auf dem Handy) — bewusst nur für die aktive Entwicklungsphase, vor einem produktiven Release wieder auf normales Caching umstellen.
+
+Dabei zweimal auf Hardware reproduziert und strukturell gelöst: `pio run --target uploadfs` überschrieb wiederholt die persistierte Konfiguration, da sie zunächst weiterhin dieselbe Partition wie die Web-Dateien nutzte — siehe `docs/spec/16-webif-fundament.md`, Abschnitt „Nachtrag" (Partitionstrennung `webfs`/`config`).

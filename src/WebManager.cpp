@@ -23,7 +23,11 @@ void WebManager::begin() {
     return;
   }
 
-  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+  // No-Cache waehrend der aktiven Entwicklung (2026-08-17, Nutzer-Wunsch nach einem
+  // Browser-Cache-Missverstaendnis auf dem Handy): jede Aenderung soll sofort sichtbar
+  // sein, statt gegen veraltete gecachte Dateien zu testen. Vor einem produktiven Release
+  // wieder auf normales Caching umstellen (die Dateien aendern sich dann nicht mehr staendig).
+  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html").setCacheControl("no-cache, no-store, must-revalidate");
   server.onNotFound([](AsyncWebServerRequest *request) { request->send(404, "text/plain", "Not found"); });
   server.begin();
   Logger::log(Logger::Type::INFO, Logger::Source::WEB, "WebManager: Webserver gestartet (Port 80).");

@@ -149,8 +149,7 @@ nav.tabs a.soon::after { content: " (bald)"; font-weight: 400; font-size: 11px; 
 .hero-info .headline { font-size: 19px; font-weight: 700; margin-bottom: 6px; text-wrap: balance; color: var(--text); }
 .hero-info .meta { font-size: 13.5px; color: var(--text-muted); }
 
-.program-tag { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
-.program-tag b { color: var(--text); font-weight: 700; }
+.program-tag { font-size: 19px; font-weight: 700; color: var(--accent); margin-bottom: 4px; text-wrap: balance; }
 
 .meta-row { font-size: 13.5px; color: var(--text-muted); margin-top: 10px; }
 .meta-row b { color: var(--text); font-variant-numeric: tabular-nums; }

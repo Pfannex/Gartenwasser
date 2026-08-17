@@ -121,12 +121,16 @@ function dashboard() {
       return `wartet · ${v.remaining}`;
     },
 
-    heroHeadline() {
-      if (!this.sequenceRunning) return "Automatik inaktiv";
+// "V1 · Apfel" (oder nur "V1" ohne Alias) - Basis fuer Headline und Ventil-Restlaufzeit-Label.
+    activeValveLabel() {
       const idx = parseInt((this.activeValve || "").replace("V", ""), 10);
       const v = this.valves[idx];
-      const name = v && v.alias ? v.alias : this.activeValve;
-      return `${this.activeValve} · ${name} läuft`;
+      return v && v.alias ? `${this.activeValve} · ${v.alias}` : this.activeValve;
+    },
+
+    heroHeadline() {
+      if (!this.sequenceRunning) return "Automatik inaktiv";
+      return `${this.activeValveLabel()} läuft`;
     },
 
     activeValveRemaining() {
