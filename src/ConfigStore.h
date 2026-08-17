@@ -96,4 +96,66 @@ class ConfigStore {
   /// Serialisiert programs+activeProgram als JSON (main/programs/state-Struktur). Liefert
   /// die Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler.
   static size_t programsToJson(char *buffer, size_t bufferSize);
+
+  /// Programm-Index (1-basiert), dessen Name exakt `name` entspricht (Case-sensitiv) -
+  /// fuer die Programm-Referenz im Zeitplan (Phase 15, siehe docs/spec/15-wochenplan.md).
+  /// 0, wenn kein Programm diesen Namen hat.
+  static uint8_t getProgramIndexForName(const char *name);
+
+  // --- Zeitplan (Phase 15) ---------------------------------------------------------------
+
+  /// Maximale Anzahl Zeitplan-Eintraege.
+  static constexpr uint8_t kMaxScheduleEntries = 16;
+
+  /// Puffer-/Speicherpool-Groesse fuer die schedule-JSON (SPIFFS-Persistenz und
+  /// main/schedule/set|state teilen sich diese Konstante).
+  static constexpr size_t kScheduleJsonCapacity = 4096;
+
+  enum class ScheduleType : uint8_t { DAILY, WEEKLY, ONCE };
+
+  /// Ein Zeitplan-Eintrag zum Setzen ueber setSchedule(). `weekdaysMask` (Bit 0=Montag..
+  /// 6=Sonntag) ist nur bei type=WEEKLY relevant, `year`/`month`/`day` nur bei type=ONCE -
+  /// siehe docs/spec/15-wochenplan.md.
+  struct ScheduleInput {
+    const char *name;     // optional, rein kosmetisch, "" erlaubt
+    const char *program;  // Pflicht, muss einem Programmnamen entsprechen
+    bool enabled;
+    ScheduleType type;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t weekdaysMask;
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+  };
+
+  /// Ersetzt das komplette Zeitplan-Array (main/schedule/set, Key "schedule") und speichert
+  /// sofort. Mehr als kMaxScheduleEntries Eintraege werden ignoriert + geloggt.
+  static void setSchedule(const ScheduleInput *entries, uint8_t count);
+
+  /// Anzahl aktuell gespeicherter Zeitplan-Eintraege.
+  static uint8_t getScheduleCount();
+
+  /// Zeitplan-Eintrag-Felder, 0-basierter Index (0..getScheduleCount()-1). Kein von aussen
+  /// ansprechbarer Identifikator noetig (main/schedule/set ersetzt immer die komplette
+  /// Liste als Block, siehe docs/spec/15-wochenplan.md).
+  static const char *getScheduleName(uint8_t index);
+  static bool getScheduleEnabled(uint8_t index);
+  static ScheduleType getScheduleType(uint8_t index);
+  static uint8_t getScheduleHour(uint8_t index);
+  static uint8_t getScheduleMinute(uint8_t index);
+  static uint8_t getScheduleWeekdaysMask(uint8_t index);
+  static uint16_t getScheduleYear(uint8_t index);
+  static uint8_t getScheduleMonth(uint8_t index);
+  static uint8_t getScheduleDay(uint8_t index);
+  static const char *getScheduleProgram(uint8_t index);
+
+  /// Globaler Ein/Aus-Schalter fuer den kompletten Zeitplan (main/schedule/cmd). Bei false
+  /// loest kein Eintrag aus, die Konfiguration bleibt aber erhalten.
+  static bool getScheduleGlobalEnabled();
+  static void setScheduleGlobalEnabled(bool enabled);
+
+  /// Serialisiert schedule+enabled als JSON (main/schedule/state-Struktur). Liefert die
+  /// Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler.
+  static size_t scheduleToJson(char *buffer, size_t bufferSize);
 };

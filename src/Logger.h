@@ -27,6 +27,11 @@ class Logger {
   /// Schaltet den Zeitstempel von boot-relativer Zeit auf Echtzeit um (nach erfolgreicher NTP-Synchronisierung).
   static void enableRealTime();
 
+  /// Liefert true, wenn die Systemzeit per NTP synchronisiert ist (siehe enableRealTime()).
+  /// Fuer Code, der echtes Datum/Uhrzeit braucht (z.B. Scheduler, Phase 15) statt nur eines
+  /// Log-Zeitstempels, der auch boot-relativ sinnvoll ist.
+  static bool isRealTimeEnabled();
+
   /// Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach `buffer`.
   static void currentTimestamp(char *buffer, size_t bufferSize);
 

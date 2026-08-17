@@ -37,6 +37,10 @@ void Logger::enableRealTime() {
   realTimeEnabled = true;
 }
 
+bool Logger::isRealTimeEnabled() {
+  return realTimeEnabled;
+}
+
 void Logger::currentTimestamp(char *buffer, size_t bufferSize) {
   if (realTimeEnabled) {
     const time_t now = time(nullptr);

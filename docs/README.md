@@ -24,5 +24,5 @@ Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (
 | [12](spec/12-aufraeumen.md) | Aufräumen/Refactoring | ✅ (Regressionstest: alle 10 Checklistenpunkte bestanden) |
 | [13](spec/13-touch-ui.md) | Touch-UI (Automatik-Toggle & Statusanzeige) | ✅ |
 | [14](spec/14-programme.md) | Bewässerungsprogramme (`main/program/cmd`/`state`) | ✅ |
-| [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | 📋 (Backlog, grob skizziert) |
+| [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | ✅ (Kollisions-Hinweis noch offen) |
 | [10](spec/10-ha-discovery.md) | Home Assistant MQTT-Discovery | 📋 (zurückgestellt — externe Integration, ganz zum Schluss) |

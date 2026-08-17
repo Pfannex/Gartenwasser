@@ -28,7 +28,9 @@
 // Stack (handleMqttMessage -> handleProgramsSet), das fuehrte zu einem "Stack protection
 // fault" (Guru Meditation Error). RAM-Headroom ist reichlich vorhanden (siehe Log.md,
 // Speicher-Check Phase 12), daher grosszuegig verdoppelt statt die JSON-Puffer zu verkleinern.
-SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+// Phase 15 (Zeitplan) hat main/schedule/set auf kScheduleJsonCapacity=4096 angehoben (groesser
+// als programs.json) - nochmal verdoppelt statt die knapp bemessenen 16 KB zu riskieren.
+SET_LOOP_TASK_STACK_SIZE(32 * 1024);
 
 void setup() {
   Serial.begin(115200);

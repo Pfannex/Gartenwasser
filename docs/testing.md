@@ -70,6 +70,20 @@ Interaktiv getestet (Nutzer bedient das Touch-Display, Ergebnis per gezielten MQ
 
 **Nebenbei gefundener Fehler in der eigenen Test-Vorbereitung**: ein erster Versuch, den Resilienztest-Monitor neu zu starten, scheiterte, weil zwei Monitor-Prozesse mit identischer MQTT-Client-ID gleichzeitig liefen (siehe „Manuelle Regressionstest-Punkte“ oben) — hier nochmal relevant, da dieselbe Ursache auch bei einem der Beobachtungsfenster für diesen Test zunächst zu leeren Ergebnissen führte (Fenster lief ab, bevor der Nutzer die Aktion ausgeführt hatte). Behoben durch Wechsel von zeitgesteuerten Beobachtungsfenstern auf einmalige Statusabfragen nach expliziter Nutzerbestätigung.
 
+## Phase 15 — Zeitplan/Scheduler — 2026-08-16
+
+Automatisiert per Python/paho-mqtt gegen den echten Broker getestet (Skript ad hoc erstellt, nicht dauerhaft im Repo) — **alle Fälle bestanden**, inkl. eines echten Zeit-Tests.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Bulk-Set aller Trigger-Typen | Je ein `daily`/`weekly`/`once`-Eintrag gesendet → `main/schedule/state` zeigt alle drei korrekt inkl. typ-spezifischer Felder (`weekdays`/`date`) | PASS | ✅ |
+| 2 | Globaler Schalter | `main/schedule/cmd OFF`/`ON` → `enabled` in `main/schedule/state` wechselt entsprechend | PASS | ✅ |
+| 3 | Einzelvalidierung | 5 Einträge gemischt gesendet (fehlendes `program`, unbekannter `type`, ungültige `time`, unbekannter Wochentag, ein gültiger) → nur der gültige bleibt übrig, `diagnostics/lastError` zeigt die Ablehnung | PASS | ✅ |
+| 4 | Cleanup-Funktion | `main/schedule/cleanup` mit einem abgelaufenen (`2020-01-01`) und einem zukünftigen (`2099-01-01`) `once`-Eintrag plus einem `daily`-Eintrag → nur der abgelaufene wird entfernt | PASS | ✅ |
+| 5 | **Echter Trigger-Test** | `daily`-Eintrag auf eine Uhrzeit 2 Minuten in der Zukunft gesetzt, ~130s gewartet → feuerte exakt zur Minute (`main/state=ON`, `activeValve=V1`, `main/program/state` zeigt das referenzierte Programm „Kurz" korrekt angewendet) | PASS | ✅ |
+
+Testzustand danach vollständig zurückgesetzt (Sequenz gestoppt, Test-Zeitplan geleert, Programmwahl zurückgesetzt). Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Trigger bewusst noch nicht umgesetzt (siehe `docs/spec/15-wochenplan.md`, „Noch nicht umgesetzt") — daher auch nicht getestet.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

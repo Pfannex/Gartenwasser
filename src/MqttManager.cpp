@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 #include "ConfigStore.h"
 #include "Diagnostics.h"
@@ -41,6 +42,14 @@ constexpr const char *kProgramCmdTopic = "gartenwasser/main/program/cmd";
 constexpr const char *kProgramStateTopic = "gartenwasser/main/program/state";
 constexpr const char *kProgramsSetTopic = "gartenwasser/main/programs/set";
 constexpr const char *kProgramsStateTopic = "gartenwasser/main/programs/state";
+// Phase 15 (Zeitplan): main/schedule/set|state = Bulk-JSON (Array-Replace + globales
+// enabled), main/schedule/cmd = Convenience-Singular-Topic fuer den globalen Schalter
+// (ON/OFF, analog main/program/cmd), main/schedule/cleanup = Einmalbefehl zum Entfernen
+// abgelaufener "once"-Eintraege (siehe docs/spec/15-wochenplan.md).
+constexpr const char *kScheduleSetTopic = "gartenwasser/main/schedule/set";
+constexpr const char *kScheduleStateTopic = "gartenwasser/main/schedule/state";
+constexpr const char *kScheduleCmdTopic = "gartenwasser/main/schedule/cmd";
+constexpr const char *kScheduleCleanupTopic = "gartenwasser/main/schedule/cleanup";
 
 constexpr char kValvePrefix[] = "gartenwasser/V";
 constexpr char kCmdSuffix[] = "/cmd";
@@ -54,10 +63,12 @@ constexpr char kAliasSetSuffix[] = "/alias/set";
 // (V{n}/auto/state wurde mit zu kleinem Puffer abgeschnitten, siehe Log.md).
 constexpr size_t kTopicBufferSize = 48;
 
-// Groesste vorkommende JSON-Payload (main/programs/set|state, Phase 14) - main/config/*
-// bleibt kleiner (kJsonCapacity), programs.json ist mit bis zu kMaxPrograms Eintraegen
-// der Puffer-bestimmende Fall.
-constexpr size_t kMaxJsonPayloadSize = ConfigStore::kProgramsJsonCapacity;
+// Groesste vorkommende JSON-Payload - main/config/* bleibt am kleinsten (kJsonCapacity),
+// schedule.json ist mit bis zu kMaxScheduleEntries Eintraegen (Phase 15) inzwischen der
+// Puffer-bestimmende Fall, groesser als programs.json (Phase 14).
+constexpr size_t kMaxJsonPayloadSize =
+    ConfigStore::kScheduleJsonCapacity > ConfigStore::kProgramsJsonCapacity ? ConfigStore::kScheduleJsonCapacity
+                                                                             : ConfigStore::kProgramsJsonCapacity;
 
 // Grenzen fuer time/set (Minuten). Obere Grenze ist ein grosszuegiger Sanity-Check,
 // die eigentliche Deckelung der effektiven Laufzeit erfolgt ueber maxTime (ValveTimer).
@@ -689,6 +700,337 @@ void handleProgramsSet(const char *payloadStr) {
   publishProgramsState();
 }
 
+// --- Zeitplan (Phase 15) ------------------------------------------------------------------
+
+constexpr const char *kWeekdayLabels[7] = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
+
+uint8_t parseWeekdayLabel(const char *value) {
+  if (value == nullptr) {
+    return 0xFF;
+  }
+  for (uint8_t i = 0; i < 7; i++) {
+    if (strcmp(value, kWeekdayLabels[i]) == 0) {
+      return i;
+    }
+  }
+  return 0xFF;
+}
+
+bool parseScheduleTypeValue(const char *value, ConfigStore::ScheduleType *outType) {
+  if (value == nullptr) {
+    return false;
+  }
+  if (strcmp(value, "daily") == 0) {
+    *outType = ConfigStore::ScheduleType::DAILY;
+    return true;
+  }
+  if (strcmp(value, "weekly") == 0) {
+    *outType = ConfigStore::ScheduleType::WEEKLY;
+    return true;
+  }
+  if (strcmp(value, "once") == 0) {
+    *outType = ConfigStore::ScheduleType::ONCE;
+    return true;
+  }
+  return false;
+}
+
+// Parst "HH:MM" (exakt 5 Zeichen, Doppelpunkt an Position 2) in Stunde/Minute.
+bool parseScheduleTimeValue(const char *value, uint8_t *outHour, uint8_t *outMinute) {
+  if (value == nullptr || strlen(value) != 5 || value[2] != ':') {
+    return false;
+  }
+  const char hourBuf[3] = {value[0], value[1], '\0'};
+  const char minuteBuf[3] = {value[3], value[4], '\0'};
+  char *end = nullptr;
+  const long hour = strtol(hourBuf, &end, 10);
+  if (*end != '\0' || hour < 0 || hour > 23) {
+    return false;
+  }
+  const long minute = strtol(minuteBuf, &end, 10);
+  if (*end != '\0' || minute < 0 || minute > 59) {
+    return false;
+  }
+  *outHour = static_cast<uint8_t>(hour);
+  *outMinute = static_cast<uint8_t>(minute);
+  return true;
+}
+
+// Parst "YYYY-MM-DD" (ISO 8601, exakt 10 Zeichen) in Jahr/Monat/Tag.
+bool parseScheduleDateValue(const char *value, uint16_t *outYear, uint8_t *outMonth, uint8_t *outDay) {
+  if (value == nullptr || strlen(value) != 10 || value[4] != '-' || value[7] != '-') {
+    return false;
+  }
+  const char yearBuf[5] = {value[0], value[1], value[2], value[3], '\0'};
+  const char monthBuf[3] = {value[5], value[6], '\0'};
+  const char dayBuf[3] = {value[8], value[9], '\0'};
+  char *end = nullptr;
+  const long year = strtol(yearBuf, &end, 10);
+  if (*end != '\0' || year < 2000 || year > 2099) {
+    return false;
+  }
+  const long month = strtol(monthBuf, &end, 10);
+  if (*end != '\0' || month < 1 || month > 12) {
+    return false;
+  }
+  const long day = strtol(dayBuf, &end, 10);
+  if (*end != '\0' || day < 1 || day > 31) {
+    return false;
+  }
+  *outYear = static_cast<uint16_t>(year);
+  *outMonth = static_cast<uint8_t>(month);
+  *outDay = static_cast<uint8_t>(day);
+  return true;
+}
+
+void publishScheduleState() {
+  char payload[ConfigStore::kScheduleJsonCapacity];
+  const size_t written = ConfigStore::scheduleToJson(payload, sizeof(payload));
+  if (written == 0) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/schedule/state: Serialisierung fehlgeschlagen.");
+    return;
+  }
+  publishAndLog(kScheduleStateTopic, payload, true);
+}
+
+// main/schedule/set: "schedule" ersetzt das komplette Array (wie main/programs/set,
+// kein Feld-Merge einzelner Eintraege), "enabled" setzt den globalen Schalter. Beide
+// optional. Ungueltige Einzeleintraege werden übersprungen + geloggt, nicht die ganze
+// Anfrage abgelehnt (wie ueberall sonst im Projekt).
+void handleScheduleSet(const char *payloadStr) {
+  StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
+  const DeserializationError err = deserializeJson(doc, payloadStr);
+  if (err) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/schedule/set: JSON-Fehler: %s", err.c_str());
+    return;
+  }
+
+  JsonArrayConst scheduleArr = doc["schedule"];
+  if (!scheduleArr.isNull()) {
+    ConfigStore::ScheduleInput entries[ConfigStore::kMaxScheduleEntries];
+    uint8_t count = 0;
+    for (JsonObjectConst obj : scheduleArr) {
+      if (count >= ConfigStore::kMaxScheduleEntries) {
+        Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
+                     "main/schedule/set: mehr als %u Eintraege, Rest wird ignoriert.",
+                     ConfigStore::kMaxScheduleEntries);
+        break;
+      }
+      ConfigStore::ScheduleInput &entry = entries[count];
+      entry.name = obj["name"] | "";
+      entry.program = obj["program"] | "";
+      if (entry.program[0] == '\0') {
+        Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
+                     "main/schedule/set: Eintrag ohne 'program', uebersprungen.");
+        continue;
+      }
+      entry.enabled = obj["enabled"] | true;
+
+      ConfigStore::ScheduleType type = ConfigStore::ScheduleType::DAILY;
+      if (!parseScheduleTypeValue(obj["type"] | "", &type)) {
+        Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
+                     "main/schedule/set: ungueltiger oder fehlender 'type', Eintrag uebersprungen.");
+        continue;
+      }
+      entry.type = type;
+
+      uint8_t hour = 0;
+      uint8_t minute = 0;
+      if (!parseScheduleTimeValue(obj["time"] | "", &hour, &minute)) {
+        Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
+                     "main/schedule/set: ungueltige oder fehlende 'time', Eintrag uebersprungen.");
+        continue;
+      }
+      entry.hour = hour;
+      entry.minute = minute;
+
+      entry.weekdaysMask = 0;
+      if (type == ConfigStore::ScheduleType::WEEKLY) {
+        JsonArrayConst weekdaysArr = obj["weekdays"];
+        for (JsonVariantConst wd : weekdaysArr) {
+          const uint8_t bit = parseWeekdayLabel(wd.as<const char *>());
+          if (bit != 0xFF) {
+            entry.weekdaysMask |= (1 << bit);
+          } else {
+            Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
+                         "main/schedule/set: unbekannter Wochentag '%s' ignoriert.", wd.as<const char *>());
+          }
+        }
+        if (entry.weekdaysMask == 0) {
+          Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
+                       "main/schedule/set: 'weekly'-Eintrag ohne gueltige 'weekdays', uebersprungen.");
+          continue;
+        }
+      }
+
+      entry.year = 0;
+      entry.month = 0;
+      entry.day = 0;
+      if (type == ConfigStore::ScheduleType::ONCE) {
+        uint16_t year = 0;
+        uint8_t month = 0;
+        uint8_t day = 0;
+        if (!parseScheduleDateValue(obj["date"] | "", &year, &month, &day)) {
+          Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
+                       "main/schedule/set: ungueltiges oder fehlendes 'date' fuer 'once'-Eintrag, uebersprungen.");
+          continue;
+        }
+        entry.year = year;
+        entry.month = month;
+        entry.day = day;
+      }
+
+      count++;
+    }
+    ConfigStore::setSchedule(entries, count);
+  }
+
+  if (!doc["enabled"].isNull()) {
+    ConfigStore::setScheduleGlobalEnabled(doc["enabled"].as<bool>());
+  }
+
+  publishScheduleState();
+}
+
+void handleScheduleCmd(const char *payloadStr) {
+  bool targetOn = false;
+  if (!parseOnOffPayload(payloadStr, &targetOn)) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Payload '%s' fuer main/schedule/cmd",
+                 payloadStr);
+    return;
+  }
+  ConfigStore::setScheduleGlobalEnabled(targetOn);
+  publishScheduleState();
+}
+
+// Entfernt alle "once"-Eintraege, deren Datum in der Vergangenheit liegt (koennen nie
+// wieder auslösen, siehe docs/spec/15-wochenplan.md) - auf Anfrage, kein Automatismus.
+// Statische Puffer statt Stack-Arrays, um den ohnehin schon knappen loopTask-Stack nicht
+// weiter zu belasten (siehe Phase-14-Stack-Overflow-Erfahrung).
+void handleScheduleCleanup() {
+  if (!Logger::isRealTimeEnabled()) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
+                 "main/schedule/cleanup: Echtzeit nicht verfuegbar, abgebrochen.");
+    return;
+  }
+  const time_t now = time(nullptr);
+  struct tm timeinfo;
+  localtime_r(&now, &timeinfo);
+  const uint16_t currentYear = static_cast<uint16_t>(timeinfo.tm_year + 1900);
+  const uint8_t currentMonth = static_cast<uint8_t>(timeinfo.tm_mon + 1);
+  const uint8_t currentDay = static_cast<uint8_t>(timeinfo.tm_mday);
+
+  const uint8_t count = ConfigStore::getScheduleCount();
+  static char nameBuf[ConfigStore::kMaxScheduleEntries][ConfigStore::kAliasMaxLength + 1];
+  static char programBuf[ConfigStore::kMaxScheduleEntries][ConfigStore::kAliasMaxLength + 1];
+  ConfigStore::ScheduleInput entries[ConfigStore::kMaxScheduleEntries];
+  uint8_t keepCount = 0;
+  uint8_t removedCount = 0;
+  for (uint8_t i = 0; i < count; i++) {
+    bool expired = false;
+    if (ConfigStore::getScheduleType(i) == ConfigStore::ScheduleType::ONCE) {
+      const uint16_t y = ConfigStore::getScheduleYear(i);
+      const uint8_t m = ConfigStore::getScheduleMonth(i);
+      const uint8_t d = ConfigStore::getScheduleDay(i);
+      if (y < currentYear || (y == currentYear && m < currentMonth) ||
+          (y == currentYear && m == currentMonth && d < currentDay)) {
+        expired = true;
+      }
+    }
+    if (expired) {
+      removedCount++;
+      continue;
+    }
+
+    strncpy(nameBuf[keepCount], ConfigStore::getScheduleName(i), ConfigStore::kAliasMaxLength);
+    nameBuf[keepCount][ConfigStore::kAliasMaxLength] = '\0';
+    strncpy(programBuf[keepCount], ConfigStore::getScheduleProgram(i), ConfigStore::kAliasMaxLength);
+    programBuf[keepCount][ConfigStore::kAliasMaxLength] = '\0';
+
+    ConfigStore::ScheduleInput &entry = entries[keepCount];
+    entry.name = nameBuf[keepCount];
+    entry.program = programBuf[keepCount];
+    entry.enabled = ConfigStore::getScheduleEnabled(i);
+    entry.type = ConfigStore::getScheduleType(i);
+    entry.hour = ConfigStore::getScheduleHour(i);
+    entry.minute = ConfigStore::getScheduleMinute(i);
+    entry.weekdaysMask = ConfigStore::getScheduleWeekdaysMask(i);
+    entry.year = ConfigStore::getScheduleYear(i);
+    entry.month = ConfigStore::getScheduleMonth(i);
+    entry.day = ConfigStore::getScheduleDay(i);
+    keepCount++;
+  }
+
+  if (removedCount > 0) {
+    ConfigStore::setSchedule(entries, keepCount);
+    publishScheduleState();
+  }
+  Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "main/schedule/cleanup: %u abgelaufene Eintraege entfernt.",
+               removedCount);
+}
+
+// Sicherheitskritisch im weiteren Sinne (lokale Zeitsteuerung soll wie der Ventil-Tick
+// unabhaengig von WLAN/MQTT laufen, siehe Aufrufstelle in MqttManager::loop()). Prueft
+// einmal pro Minute (siehe docs/spec/15-wochenplan.md, Kernentscheidung 4) die komplette
+// schedule-Liste gegen die aktuelle Zeit - kein Timer pro Eintrag.
+unsigned long lastCheckedScheduleMinute = 0xFFFFFFFFUL;  // Sentinel: noch nie geprueft
+
+void checkSchedule() {
+  if (!Logger::isRealTimeEnabled() || !ConfigStore::getScheduleGlobalEnabled()) {
+    return;
+  }
+
+  const time_t now = time(nullptr);
+  const unsigned long currentMinuteId = static_cast<unsigned long>(now / 60);
+  if (currentMinuteId == lastCheckedScheduleMinute) {
+    return;  // diese Minute schon geprueft
+  }
+  lastCheckedScheduleMinute = currentMinuteId;
+
+  struct tm timeinfo;
+  localtime_r(&now, &timeinfo);
+  const uint8_t currentHour = static_cast<uint8_t>(timeinfo.tm_hour);
+  const uint8_t currentMinute = static_cast<uint8_t>(timeinfo.tm_min);
+  const uint8_t currentWeekdayBit = static_cast<uint8_t>((timeinfo.tm_wday + 6) % 7);  // 0=Montag..6=Sonntag
+  const uint16_t currentYear = static_cast<uint16_t>(timeinfo.tm_year + 1900);
+  const uint8_t currentMonth = static_cast<uint8_t>(timeinfo.tm_mon + 1);
+  const uint8_t currentDay = static_cast<uint8_t>(timeinfo.tm_mday);
+
+  const uint8_t count = ConfigStore::getScheduleCount();
+  for (uint8_t i = 0; i < count; i++) {
+    if (!ConfigStore::getScheduleEnabled(i)) {
+      continue;
+    }
+    if (ConfigStore::getScheduleHour(i) != currentHour || ConfigStore::getScheduleMinute(i) != currentMinute) {
+      continue;
+    }
+    const ConfigStore::ScheduleType type = ConfigStore::getScheduleType(i);
+    if (type == ConfigStore::ScheduleType::WEEKLY) {
+      if (!(ConfigStore::getScheduleWeekdaysMask(i) & (1 << currentWeekdayBit))) {
+        continue;
+      }
+    } else if (type == ConfigStore::ScheduleType::ONCE) {
+      if (ConfigStore::getScheduleYear(i) != currentYear || ConfigStore::getScheduleMonth(i) != currentMonth ||
+          ConfigStore::getScheduleDay(i) != currentDay) {
+        continue;
+      }
+    }
+    // type == DAILY: Uhrzeit hat schon gepasst, kein weiterer Check noetig.
+
+    const char *programName = ConfigStore::getScheduleProgram(i);
+    const uint8_t programIndex = ConfigStore::getProgramIndexForName(programName);
+    if (programIndex == 0) {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Zeitplan: Programm '%s' (Eintrag %u) nicht gefunden.",
+                   programName, i);
+      continue;
+    }
+    Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "Zeitplan: Eintrag %u ausgeloest, Programm '%s'.", i,
+                 programName);
+    applyProgram(programIndex);
+    startSequence();  // Guard (Sequencer::isRunning()) loest "gleichzeitige Trigger" automatisch auf (siehe Spec)
+  }
+}
+
 void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
   char payloadStr[kMaxJsonPayloadSize];
   copyPayload(payload, length, payloadStr, sizeof(payloadStr));
@@ -712,6 +1054,18 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
   }
   if (strcmp(topic, kProgramsSetTopic) == 0) {
     handleProgramsSet(payloadStr);
+    return;
+  }
+  if (strcmp(topic, kScheduleSetTopic) == 0) {
+    handleScheduleSet(payloadStr);
+    return;
+  }
+  if (strcmp(topic, kScheduleCmdTopic) == 0) {
+    handleScheduleCmd(payloadStr);
+    return;
+  }
+  if (strcmp(topic, kScheduleCleanupTopic) == 0) {
+    handleScheduleCleanup();
     return;
   }
 
@@ -772,6 +1126,9 @@ bool connectToBroker() {
     mqttClient.subscribe(kConfigSetTopic);
     mqttClient.subscribe(kProgramCmdTopic);
     mqttClient.subscribe(kProgramsSetTopic);
+    mqttClient.subscribe(kScheduleSetTopic);
+    mqttClient.subscribe(kScheduleCmdTopic);
+    mqttClient.subscribe(kScheduleCleanupTopic);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[kTopicBufferSize];
       char timeSetTopic[kTopicBufferSize];
@@ -807,6 +1164,7 @@ bool connectToBroker() {
     publishConfigState();
     publishProgramState();
     publishProgramsState();
+    publishScheduleState();
   }
   return ok;
 }
@@ -827,6 +1185,7 @@ void MqttManager::loop() {
     lastTickMs = now;
     tickValveTimers();
     checkDiagnostics();
+    checkSchedule();  // laeuft wie die anderen beiden unabhaengig von WLAN/MQTT (siehe checkSchedule())
   }
 
   if (!WifiManager::isConnected()) {

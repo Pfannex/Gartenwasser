@@ -2,6 +2,7 @@
 
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
+#include <cstdlib>
 #include <cstring>
 
 #include "Logger.h"
@@ -10,6 +11,7 @@ namespace {
 
 constexpr const char *kConfigPath = "/config.json";
 constexpr const char *kProgramsPath = "/programs.json";
+constexpr const char *kSchedulePath = "/schedule.json";
 constexpr uint16_t kDefaultValveTimeMinutes = 5;
 constexpr uint16_t kDefaultMaxTimeMinutes = 60;
 constexpr bool kDefaultValveAuto = false;
@@ -44,6 +46,31 @@ uint8_t activeProgram = 0;
 // (kein Dangling-Pointer-Risiko wie bei einem lokalen Stack-Puffer je Schleifendurchlauf).
 constexpr const char *kShortcutLabels[5] = {"", "P1", "P2", "P3", "P4"};
 
+// Ein gespeicherter Zeitplan-Eintrag (Phase 15). `weekdaysMask` (Bit 0=Montag..6=Sonntag)
+// nur bei type=WEEKLY relevant, `year`/`month`/`day` nur bei type=ONCE - siehe
+// docs/spec/15-wochenplan.md.
+struct StoredScheduleEntry {
+  char name[ConfigStore::kAliasMaxLength + 1];
+  char program[ConfigStore::kAliasMaxLength + 1];
+  bool enabled;
+  ConfigStore::ScheduleType type;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t weekdaysMask;
+  uint16_t year;
+  uint8_t month;
+  uint8_t day;
+};
+
+StoredScheduleEntry schedule[ConfigStore::kMaxScheduleEntries];
+uint8_t scheduleCount = 0;
+bool scheduleGlobalEnabled = true;
+
+// Kurzform je Wochentag (Bit-Index 0=Montag..6=Sonntag), statische Speicherdauer wie
+// kShortcutLabels - sicher als const char* in ein JsonDocument zu schreiben.
+constexpr const char *kWeekdayLabels[7] = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
+constexpr const char *kScheduleTypeLabels[3] = {"daily", "weekly", "once"};
+
 // Erkennt Keys der Form "V<digit>" (Ventil 1..5) fuer das Laden von programs.json.
 bool parseProgramValveKey(const char *key, uint8_t *outIndex) {
   if (key[0] != 'V' || key[1] < '1' || key[1] > '5' || key[2] != '\0') {
@@ -61,6 +88,89 @@ uint8_t parseShortcutLabel(const char *value) {
     return 0;
   }
   return static_cast<uint8_t>(value[1] - '0');
+}
+
+// Wandelt "mon".."sun" in den Bit-Index 0..6 um, 0xFF bei unbekanntem Wert.
+uint8_t parseWeekdayLabel(const char *value) {
+  if (value == nullptr) {
+    return 0xFF;
+  }
+  for (uint8_t i = 0; i < 7; i++) {
+    if (strcmp(value, kWeekdayLabels[i]) == 0) {
+      return i;
+    }
+  }
+  return 0xFF;
+}
+
+// Wandelt "daily"/"weekly"/"once" in ConfigStore::ScheduleType um, liefert false bei
+// unbekanntem Wert (Aufrufer entscheidet, wie damit umgegangen wird).
+bool parseScheduleType(const char *value, ConfigStore::ScheduleType *outType) {
+  if (value == nullptr) {
+    return false;
+  }
+  if (strcmp(value, "daily") == 0) {
+    *outType = ConfigStore::ScheduleType::DAILY;
+    return true;
+  }
+  if (strcmp(value, "weekly") == 0) {
+    *outType = ConfigStore::ScheduleType::WEEKLY;
+    return true;
+  }
+  if (strcmp(value, "once") == 0) {
+    *outType = ConfigStore::ScheduleType::ONCE;
+    return true;
+  }
+  return false;
+}
+
+// Parst "HH:MM" (exakt 5 Zeichen, Doppelpunkt an Position 2) in Stunde/Minute.
+bool parseTimeString(const char *value, uint8_t *outHour, uint8_t *outMinute) {
+  if (value == nullptr || strlen(value) != 5 || value[2] != ':') {
+    return false;
+  }
+  const char hourBuf[3] = {value[0], value[1], '\0'};
+  const char minuteBuf[3] = {value[3], value[4], '\0'};
+  char *end = nullptr;
+  const long hour = strtol(hourBuf, &end, 10);
+  if (*end != '\0' || hour < 0 || hour > 23) {
+    return false;
+  }
+  const long minute = strtol(minuteBuf, &end, 10);
+  if (*end != '\0' || minute < 0 || minute > 59) {
+    return false;
+  }
+  *outHour = static_cast<uint8_t>(hour);
+  *outMinute = static_cast<uint8_t>(minute);
+  return true;
+}
+
+// Parst "YYYY-MM-DD" (ISO 8601, exakt 10 Zeichen) in Jahr/Monat/Tag. Prueft nur
+// Wertebereiche (kein Kalender-Check, z.B. 31. Februar wird nicht abgelehnt).
+bool parseDateString(const char *value, uint16_t *outYear, uint8_t *outMonth, uint8_t *outDay) {
+  if (value == nullptr || strlen(value) != 10 || value[4] != '-' || value[7] != '-') {
+    return false;
+  }
+  const char yearBuf[5] = {value[0], value[1], value[2], value[3], '\0'};
+  const char monthBuf[3] = {value[5], value[6], '\0'};
+  const char dayBuf[3] = {value[8], value[9], '\0'};
+  char *end = nullptr;
+  const long year = strtol(yearBuf, &end, 10);
+  if (*end != '\0' || year < 2000 || year > 2099) {
+    return false;
+  }
+  const long month = strtol(monthBuf, &end, 10);
+  if (*end != '\0' || month < 1 || month > 12) {
+    return false;
+  }
+  const long day = strtol(dayBuf, &end, 10);
+  if (*end != '\0' || day < 1 || day > 31) {
+    return false;
+  }
+  *outYear = static_cast<uint16_t>(year);
+  *outMonth = static_cast<uint8_t>(month);
+  *outDay = static_cast<uint8_t>(day);
+  return true;
 }
 
 // Baut die JSON-Struktur (identisch fuer SPIFFS-Persistenz und main/config/state).
@@ -224,6 +334,146 @@ void loadProgramsFile() {
   activeProgram = doc["activeProgram"] | 0;
 }
 
+// Baut die JSON-Struktur fuer schedule.json / main/schedule/state (identisch fuer beide).
+void buildScheduleJson(JsonDocument &doc) {
+  JsonArray arr = doc.createNestedArray("schedule");
+  for (uint8_t i = 0; i < scheduleCount; i++) {
+    JsonObject obj = arr.createNestedObject();
+    if (schedule[i].name[0] != '\0') {
+      obj["name"] = schedule[i].name;
+    }
+    obj["enabled"] = schedule[i].enabled;
+    obj["type"] = kScheduleTypeLabels[static_cast<uint8_t>(schedule[i].type)];
+
+    // String-Werte muessen kopiert werden (Arduino String erzwingt bei ArduinoJson v6
+    // eine Kopie in den Dokument-Pool) - anders als bei statischen Literalen (kShortcutLabels,
+    // kWeekdayLabels) waeren lokale char-Puffer hier ein Dangling-Pointer-Risiko, sobald die
+    // Schleife die naechste Iteration erreicht (siehe Phase-14-Erfahrung mit main/programs/state).
+    char timeBuf[6];
+    snprintf(timeBuf, sizeof(timeBuf), "%02u:%02u", schedule[i].hour, schedule[i].minute);
+    obj["time"] = String(timeBuf);
+
+    if (schedule[i].type == ConfigStore::ScheduleType::WEEKLY) {
+      JsonArray weekdaysArr = obj.createNestedArray("weekdays");
+      for (uint8_t w = 0; w < 7; w++) {
+        if (schedule[i].weekdaysMask & (1 << w)) {
+          weekdaysArr.add(kWeekdayLabels[w]);
+        }
+      }
+    }
+    if (schedule[i].type == ConfigStore::ScheduleType::ONCE) {
+      char dateBuf[11];
+      snprintf(dateBuf, sizeof(dateBuf), "%04u-%02u-%02u", schedule[i].year, schedule[i].month, schedule[i].day);
+      obj["date"] = String(dateBuf);
+    }
+    obj["program"] = schedule[i].program;
+  }
+  doc["enabled"] = scheduleGlobalEnabled;
+}
+
+void saveScheduleFile() {
+  StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
+  buildScheduleJson(doc);
+
+  File file = SPIFFS.open(kSchedulePath, FILE_WRITE);
+  if (!file) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht schreibbar.");
+    return;
+  }
+  serializeJson(doc, file);
+  file.close();
+}
+
+void loadScheduleFile() {
+  scheduleCount = 0;
+  scheduleGlobalEnabled = true;
+  if (!SPIFFS.exists(kSchedulePath)) {
+    return;  // kein gespeicherter Zeitplan -> leere Liste bleibt aktiv
+  }
+
+  File file = SPIFFS.open(kSchedulePath, FILE_READ);
+  if (!file) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht lesbar.");
+    return;
+  }
+
+  StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
+  const DeserializationError err = deserializeJson(doc, file);
+  file.close();
+  if (err) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: JSON-Fehler in schedule.json: %s",
+                 err.c_str());
+    return;
+  }
+
+  JsonArrayConst arr = doc["schedule"];
+  uint8_t i = 0;
+  for (JsonObjectConst obj : arr) {
+    if (i >= ConfigStore::kMaxScheduleEntries) {
+      break;
+    }
+    const char *name = obj["name"] | "";
+    strncpy(schedule[i].name, name, ConfigStore::kAliasMaxLength);
+    schedule[i].name[ConfigStore::kAliasMaxLength] = '\0';
+
+    const char *program = obj["program"] | "";
+    strncpy(schedule[i].program, program, ConfigStore::kAliasMaxLength);
+    schedule[i].program[ConfigStore::kAliasMaxLength] = '\0';
+
+    schedule[i].enabled = obj["enabled"] | true;
+
+    ConfigStore::ScheduleType type = ConfigStore::ScheduleType::DAILY;
+    if (!parseScheduleType(obj["type"] | "", &type)) {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
+                   "ConfigStore: ungueltiger type in schedule.json Eintrag %u, uebersprungen.", i);
+      continue;
+    }
+    schedule[i].type = type;
+
+    uint8_t hour = 0;
+    uint8_t minute = 0;
+    if (!parseTimeString(obj["time"] | "", &hour, &minute)) {
+      Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
+                   "ConfigStore: ungueltige time in schedule.json Eintrag %u, uebersprungen.", i);
+      continue;
+    }
+    schedule[i].hour = hour;
+    schedule[i].minute = minute;
+
+    schedule[i].weekdaysMask = 0;
+    if (type == ConfigStore::ScheduleType::WEEKLY) {
+      JsonArrayConst weekdaysArr = obj["weekdays"];
+      for (JsonVariantConst wd : weekdaysArr) {
+        const uint8_t bit = parseWeekdayLabel(wd.as<const char *>());
+        if (bit != 0xFF) {
+          schedule[i].weekdaysMask |= (1 << bit);
+        }
+      }
+    }
+
+    schedule[i].year = 0;
+    schedule[i].month = 0;
+    schedule[i].day = 0;
+    if (type == ConfigStore::ScheduleType::ONCE) {
+      uint16_t year = 0;
+      uint8_t month = 0;
+      uint8_t day = 0;
+      if (!parseDateString(obj["date"] | "", &year, &month, &day)) {
+        Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
+                     "ConfigStore: ungueltiges date in schedule.json Eintrag %u, uebersprungen.", i);
+        continue;
+      }
+      schedule[i].year = year;
+      schedule[i].month = month;
+      schedule[i].day = day;
+    }
+
+    i++;
+  }
+  scheduleCount = i;
+  scheduleGlobalEnabled = doc["enabled"] | true;
+}
+
 }  // namespace
 
 void ConfigStore::begin() {
@@ -233,6 +483,7 @@ void ConfigStore::begin() {
   }
   load();
   loadProgramsFile();
+  loadScheduleFile();
 }
 
 uint16_t ConfigStore::getValveTime(uint8_t index) {
@@ -404,5 +655,131 @@ uint8_t ConfigStore::getProgramIndexForShortcut(uint8_t shortcut) {
 size_t ConfigStore::programsToJson(char *buffer, size_t bufferSize) {
   StaticJsonDocument<kProgramsJsonCapacity> doc;
   buildProgramsJson(doc);
+  return serializeJson(doc, buffer, bufferSize);
+}
+
+uint8_t ConfigStore::getProgramIndexForName(const char *name) {
+  if (name == nullptr) {
+    return 0;
+  }
+  for (uint8_t p = 0; p < programCount; p++) {
+    if (strcmp(programs[p].name, name) == 0) {
+      return p + 1;
+    }
+  }
+  return 0;
+}
+
+void ConfigStore::setSchedule(const ScheduleInput *entries, uint8_t count) {
+  if (count > kMaxScheduleEntries) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
+                 "ConfigStore: %u Zeitplan-Eintraege angefragt, nur %u erlaubt - Rest wird ignoriert.", count,
+                 kMaxScheduleEntries);
+    count = kMaxScheduleEntries;
+  }
+  for (uint8_t i = 0; i < count; i++) {
+    strncpy(schedule[i].name, entries[i].name, kAliasMaxLength);
+    schedule[i].name[kAliasMaxLength] = '\0';
+    strncpy(schedule[i].program, entries[i].program, kAliasMaxLength);
+    schedule[i].program[kAliasMaxLength] = '\0';
+    schedule[i].enabled = entries[i].enabled;
+    schedule[i].type = entries[i].type;
+    schedule[i].hour = entries[i].hour;
+    schedule[i].minute = entries[i].minute;
+    schedule[i].weekdaysMask = entries[i].weekdaysMask;
+    schedule[i].year = entries[i].year;
+    schedule[i].month = entries[i].month;
+    schedule[i].day = entries[i].day;
+  }
+  scheduleCount = count;
+  saveScheduleFile();
+}
+
+uint8_t ConfigStore::getScheduleCount() {
+  return scheduleCount;
+}
+
+const char *ConfigStore::getScheduleName(uint8_t index) {
+  if (index >= scheduleCount) {
+    return "";
+  }
+  return schedule[index].name;
+}
+
+bool ConfigStore::getScheduleEnabled(uint8_t index) {
+  if (index >= scheduleCount) {
+    return false;
+  }
+  return schedule[index].enabled;
+}
+
+ConfigStore::ScheduleType ConfigStore::getScheduleType(uint8_t index) {
+  if (index >= scheduleCount) {
+    return ScheduleType::DAILY;
+  }
+  return schedule[index].type;
+}
+
+uint8_t ConfigStore::getScheduleHour(uint8_t index) {
+  if (index >= scheduleCount) {
+    return 0;
+  }
+  return schedule[index].hour;
+}
+
+uint8_t ConfigStore::getScheduleMinute(uint8_t index) {
+  if (index >= scheduleCount) {
+    return 0;
+  }
+  return schedule[index].minute;
+}
+
+uint8_t ConfigStore::getScheduleWeekdaysMask(uint8_t index) {
+  if (index >= scheduleCount) {
+    return 0;
+  }
+  return schedule[index].weekdaysMask;
+}
+
+uint16_t ConfigStore::getScheduleYear(uint8_t index) {
+  if (index >= scheduleCount) {
+    return 0;
+  }
+  return schedule[index].year;
+}
+
+uint8_t ConfigStore::getScheduleMonth(uint8_t index) {
+  if (index >= scheduleCount) {
+    return 0;
+  }
+  return schedule[index].month;
+}
+
+uint8_t ConfigStore::getScheduleDay(uint8_t index) {
+  if (index >= scheduleCount) {
+    return 0;
+  }
+  return schedule[index].day;
+}
+
+const char *ConfigStore::getScheduleProgram(uint8_t index) {
+  if (index >= scheduleCount) {
+    return "";
+  }
+  return schedule[index].program;
+}
+
+bool ConfigStore::getScheduleGlobalEnabled() {
+  return scheduleGlobalEnabled;
+}
+
+void ConfigStore::setScheduleGlobalEnabled(bool enabled) {
+  scheduleGlobalEnabled = enabled;
+  saveScheduleFile();
+}
+
+size_t ConfigStore::scheduleToJson(char *buffer, size_t bufferSize) {
+  StaticJsonDocument<kScheduleJsonCapacity> doc;
+  buildScheduleJson(doc);
   return serializeJson(doc, buffer, bufferSize);
 }

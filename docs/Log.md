@@ -237,11 +237,6 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
   - Aufraeum-Funktion (Arbeitstitel `main/schedule/cleanup`) zum gezielten Entfernen abgelaufener `once`-Eintraege auf Anfrage, ergaenzt aber ersetzt nicht das "liegen lassen"-Standardverhalten.
 - Rein Design-/Dokumentationsstand, noch keine Codeaenderung. Details in `docs/spec/15-wochenplan.md`, `docs/requirements.md` (Entscheidungshistorie).
 
-## Offene Punkte / nächste Schritte
-
-- Phase 15 (Zeitplan/Scheduler): Design-Entwurf abgestimmt (siehe oben), Umsetzung noch nicht begonnen — offene Detailfragen siehe `docs/spec/15-wochenplan.md`.
-- Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt.
-
 ### Phase 15 — Feldreferenz fuer den Zeitplan verfeinert
 
 - Kurz diskutiert, ob `name` gleichzeitig die Programm-Referenz sein koennte (spart ein Feld) - verworfen: dann koennte ein Eintrag nicht mehr eindeutig sein UND trotzdem zweimal dasselbe Programm referenzieren (z. B. "Rasen" taeglich + zusaetzlich dienstags).
@@ -263,3 +258,18 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Da ueberschneidende Zeitplan-Eintraege bewusst erlaubt sind und ueber "erster in Listen-Reihenfolge gewinnt" automatisch aufgeloest werden (siehe Eintrag oben), gibt es dafuer keinen Fehlerfall zu melden - das eigens angedachte Topic `main/schedule/settingsError` wird nicht gebraucht.
 - Allgemeine Konfigurationsfehler (z. B. ungueltiger `program`-Name) laufen stattdessen ueber den bereits bestehenden generischen Kanal `diagnostics/lastError`, wie ueberall sonst im Projekt.
 - Details in `docs/spec/15-wochenplan.md`, Abschnitt "Verworfen".
+
+### Phase 15 — Zeitplan/Scheduler umgesetzt und getestet
+
+- `ConfigStore`: neue Datei `/schedule.json`, `kMaxScheduleEntries=16`, `kScheduleJsonCapacity=4096`. `ScheduleType`-Enum (DAILY/WEEKLY/ONCE), `ScheduleInput`-Struct + `setSchedule()` (Bulk-Replace analog `setPrograms()`), Getter je Eintrag (0-basiert, kein von aussen ansprechbarer Identifikator noetig - main/schedule/set ersetzt immer die komplette Liste). Neue `getProgramIndexForName()` fuer die Programm-Referenz per Name. Zeit/Datum-Strings ("HH:MM"/"YYYY-MM-DD") werden beim Serialisieren ueber Arduino `String` statt lokaler `char`-Puffer ausgegeben, um denselben Dangling-Pointer-Fehler wie bei den `shortcut`-Strings (Phase 14) von vornherein zu vermeiden.
+- `MqttManager`: `main/schedule/set`/`state` (Bulk), `main/schedule/cmd` (globaler ON/OFF-Schalter, Convenience analog `main/program/cmd`), `main/schedule/cleanup` (entfernt abgelaufene "once"-Eintraege). Ungueltige Einzeleintraege werden uebersprungen + geloggt, nicht die ganze Anfrage abgelehnt.
+- **Scheduler-Tick** (`checkSchedule()`): minuetlicher Pruefloop ueber die komplette Liste, laeuft unconditional in `MqttManager::loop()` neben Ventil-Tick/Diagnostics (unabhaengig von WLAN/MQTT). Deaktiviert sich selbst ohne verlaessliche Echtzeit (neue `Logger::isRealTimeEnabled()`-Abfrage). Bei Match: `applyProgram()` (per Name aufgeloest) + `startSequence()` - derselbe Pfad wie `main/cmd ON`.
+- **Stack-Vorsorge**: `kScheduleJsonCapacity` (4096 Byte) ist jetzt der puffer-bestimmende Fall (groesser als `kProgramsJsonCapacity`). `SET_LOOP_TASK_STACK_SIZE` in `main.cpp` von 16 KB auf 32 KB verdoppelt, um denselben Stack-Overflow-Bug wie bei Phase 14 von vornherein zu vermeiden (RAM-Headroom reichlich vorhanden).
+- **Getestet** (automatisiert per Python/paho-mqtt, ad-hoc-Skript): Bulk-Set aller drei Trigger-Typen, globaler Schalter, Einzelvalidierung (5 gemischte Eintraege, nur der gueltige bleibt), Cleanup-Funktion (nur abgelaufene `once`-Eintraege entfernt), und ein **echter Zeit-Test**: Trigger 2 Minuten in der Zukunft gesetzt, ~130s gewartet, feuerte exakt zur Minute (Programm automatisch angewendet, Sequenz gestartet). Alle Faelle bestanden, siehe `docs/testing.md`.
+- Bewusst zurueckgestellt, nicht Teil dieser Umsetzung: Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am naechsten Trigger (braucht eine separate "naechster faelliger Trigger"-Berechnung mit Wiederkehr-Mathematik), sowie jede Touch-UI-Anbindung fuer den Zeitplan (siehe Backlog-Idee in `docs/spec/13-touch-ui.md`).
+
+## Offene Punkte / nächste Schritte
+
+- Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Zeitplan-Trigger (Phase 15, Merker), inkl. der dafür nötigen „nächster fälliger Trigger"-Berechnung — bewusst zurückgestellt, kein Termin.
+- Touch-UI-Anbindung für den Zeitplan (Anzeige/Bedienung am Display) — reine Backlog-Idee (Untermenü-Struktur), nicht eingeplant, siehe `docs/spec/13-touch-ui.md`.
+- Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt — mit Phase 15 sind jetzt alle geräteinternen Phasen (00–09, 11–15) fertig, Phase 10 ist der einzige verbleibende Punkt der ursprünglichen Phasenliste.
