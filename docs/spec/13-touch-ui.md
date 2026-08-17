@@ -79,3 +79,14 @@ Ausführlich interaktiv auf Hardware getestet und über viele Runden direkt am G
 - Erweiterung auf 16 Ventile (V0–V15) — eigene, noch nicht begonnene Phase (siehe oben).
 - Touch-UI-Bedienung für den Zeitplan (Phase 15) — weiterhin nicht umgesetzt, keine „Timer“-Unterseite (siehe Absatz oben, Begründung für den Verzicht).
 - Feinschliff der Statuszeilen-/Button-Höhen („kann später nochmal hübsch gemacht werden“, Nutzer-Aussage) — funktional fertig, rein kosmetisch noch nicht final.
+
+### Nachtrag (2026-08-17): Nachjustierungen nach dem ersten Hardware-Test
+
+Beim interaktiven Testen der Programme-Unterseite fielen vier Punkte auf, direkt behoben:
+
+- Buttontext bei keinem gewählten Programm von „Kein Programm gewählt“ auf „Kein Programm“ gekürzt (passte nicht in den Button).
+- **Verhaltensänderung**: `applyProgram(0)` („Kein Programm“ wählen) setzt jetzt zusätzlich alle `auto`-Flags (`V1`–`V5`) explizit auf `false` zurück — vorher blieb der `auto`-Zustand des zuletzt aktiven Programms an den Ventilen hängen, obwohl die Anzeige „Kein Programm“ zeigte (Nutzer-Feedback: „sonst bleibt das letzte Programm stehen“). Betrifft `MqttManager::applyProgram()`, gilt für Touch **und** MQTT (`main/program/cmd 0`).
+- Programme-Button wird während einer laufenden Automatik-Sequenz gesperrt (`LV_STATE_DISABLED`, `LV_OBJ_FLAG_CLICKABLE` entfernt) — ein Programmwechsel mitten im Lauf hätte sonst zu inkonsistentem Zustand geführt („das gibt sonst Murks“).
+- Alle Touch-Buttons (START, Ventilmatrix `V1`–`V5`, Programme, `<`/`>`/OK/Abbrechen) zeigen jetzt beim Antippen (`LV_STATE_PRESSED`) kurz Weiß als Trefferfeedback (`addPressHighlight()`-Helfer) — vorher war nicht erkennbar, ob ein Touch überhaupt registriert wurde.
+
+Auf Hardware getestet und vom Nutzer bestätigt („schaut gut aus, erledigt“).

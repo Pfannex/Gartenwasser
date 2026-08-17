@@ -594,8 +594,10 @@ void handleConfigSet(const char *payloadStr) {
 // Kernfunktion (Phase 14): wendet Programm `programIndex` (1-basiert) an, indem fuer jedes im
 // Programm enthaltene Feld dieselben applyTimeValue()/applyAutoValue()-Kernfunktionen wie
 // main/config/set aufgerufen werden (siehe docs/spec/14-programme.md, Kernentscheidung 3).
-// `programIndex == 0` loescht nur die Auswahl, ohne Ventile anzufassen. Wiederverwendet von
-// main/program/cmd und dem Key "activeProgram" in main/programs/set.
+// `programIndex == 0` loescht die Auswahl UND setzt alle auto-Flags zurueck (Nachtrag
+// 2026-08-17) - sonst bliebe der auto-Zustand des zuletzt aktiven Programms an den Ventilen
+// haengen, obwohl die Anzeige "Kein Programm" zeigt. Wiederverwendet von main/program/cmd
+// und dem Key "activeProgram" in main/programs/set.
 void applyProgram(uint8_t programIndex) {
   if (programIndex != 0) {
     if (programIndex > ConfigStore::getProgramCount()) {
@@ -609,6 +611,10 @@ void applyProgram(uint8_t programIndex) {
       if (ConfigStore::programHasAuto(programIndex, v)) {
         applyAutoValue(v, ConfigStore::getProgramAuto(programIndex, v));
       }
+    }
+  } else {
+    for (uint8_t v = 1; v <= 5; v++) {
+      applyAutoValue(v, false);
     }
   }
   ConfigStore::setActiveProgram(programIndex);

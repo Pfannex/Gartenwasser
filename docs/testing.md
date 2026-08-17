@@ -102,6 +102,10 @@ Interaktiv getestet: jede Layout-/Funktionsänderung wurde gebaut, geflasht und 
 | 10 | Statuszeile: manuelles Ventil | Beim Schalten eines Ventils per Matrix-Tap (außerhalb der Sequenz) zeigt Zeile 1 „MANUELL“, Zeile 2 den Alias-Namen | Bestätigt am Gerät | ✅ |
 | 11 | `P1`–`P4` entfernt | Keine physischen Shortcut-Buttons mehr vorhanden, Programme nur noch über die neue Unterseite erreichbar | Bestätigt am Gerät | ✅ |
 | 12 | 32 Programme statt 8 | `ConfigStore::kMaxPrograms` auf 32 angehoben, kein Funktionstest mit tatsächlich 32 Programmen durchgeführt | Nicht mit voller Anzahl getestet | ⚠️ nur Code-Review |
+| 13 | 5 Programme laden + durchblättern | Per MQTT 5 Programme gesetzt (je ein Ventil auf `auto`+1 Min.), am Gerät in der Programme-Unterseite durchgeblättert | Bestätigt am Gerät („werden korrekt geladen!“) | ✅ |
+| 14 | „Kein Programm“ setzt `auto` aller Ventile zurück | `main/program/cmd 0` (bzw. OK auf „Kein Programm“) → alle `V{n}/auto/state` gehen auf `OFF`, nicht nur die Auswahl-Anzeige | Bestätigt per MQTT-Abfrage (`V1`–`V5` alle `OFF`) | ✅ |
+| 15 | Programme-Button gesperrt während Automatik | Bei laufender Sequenz ist der Programme-Button nicht mehr antippbar (`LV_STATE_DISABLED`) | Bestätigt am Gerät | ✅ |
+| 16 | Press-Feedback aller Touch-Buttons | START, Ventilmatrix, Programme, `<`/`>`/OK/Abbrechen werden beim Antippen kurz weiß | Bestätigt am Gerät | ✅ |
 
 **Nicht Teil dieser Testrunde**: Zeitplan (Phase 15) manueller Hardware-Test — stand als Merker aus, wurde bewusst auf „nach dem HMI-Umbau“ verschoben und ist damit jetzt als Nächstes fällig (siehe `docs/Log.md`, „Offene Punkte“).
 

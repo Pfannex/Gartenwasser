@@ -264,6 +264,14 @@ void toDisplayAscii(const char *utf8, char *out, size_t outSize) {
   out[o] = '\0';
 }
 
+// Faerbt einen Button beim Antippen (LV_STATE_PRESSED) hell ein, unabhaengig von seiner
+// sonstigen (teils dynamisch wechselnden) Hintergrundfarbe - reines visuelles Feedback,
+// damit auf einen Blick erkennbar ist, ob der Touch getroffen hat (Nutzer-Feedback
+// 2026-08-17: "dann sieht man ob man den Button erwischt hat").
+void addPressHighlight(lv_obj_t *btn) {
+  lv_obj_set_style_bg_color(btn, lv_color_hex(0xFFFFFF), LV_STATE_PRESSED);
+}
+
 // Ventil-Matrixzelle (V1..V5): schaltet direkt per V{n}/cmd (siehe
 // MqttManager::requestValveCmd()) - identisches Verhalten wie MQTT (waehrend die
 // Automatik laeuft, wird ein manuelles ON ignoriert, siehe applyValveCmd()). V0
@@ -443,11 +451,21 @@ void refreshStatusLine() {
 // Programme-Button (Hauptseite): zeigt das aktive Programm als eigenen Buttontext
 // (ersetzt die fruehere separate Anzeigezeile) - liest ConfigStore::getActiveProgram()
 // direkt, egal ob die Auswahl per Touch (Programme-Unterseite), MQTT main/program/cmd
-// oder main/programs/set zustande kam.
+// oder main/programs/set zustande kam. Waehrend die Automatik laeuft, wird der Button
+// gesperrt (disabled + nicht klickbar) - ein Programmwechsel mitten in einer laufenden
+// Sequenz wuerde sonst Chaos anrichten (Nutzer-Feedback 2026-08-17).
 void refreshProgramsButtonLabel() {
+  if (Sequencer::isRunning()) {
+    lv_obj_add_state(programsButton, LV_STATE_DISABLED);
+    lv_obj_clear_flag(programsButton, LV_OBJ_FLAG_CLICKABLE);
+  } else {
+    lv_obj_clear_state(programsButton, LV_STATE_DISABLED);
+    lv_obj_add_flag(programsButton, LV_OBJ_FLAG_CLICKABLE);
+  }
+
   const uint8_t active = ConfigStore::getActiveProgram();
   if (active == 0) {
-    lv_label_set_text(programsButtonLabel, "Kein Programm gewaehlt");
+    lv_label_set_text(programsButtonLabel, "Kein Programm");
   } else {
     char nameAscii[40];
     toDisplayAscii(ConfigStore::getProgramName(active), nameAscii, sizeof(nameAscii));
@@ -484,6 +502,7 @@ void setupUi() {
   lv_obj_set_size(mainButton, kDisplayWidth - kSideMargin, kMainButtonHeight);
   lv_obj_align(mainButton, LV_ALIGN_TOP_MID, 0, kMainButtonY);
   lv_obj_add_event_cb(mainButton, mainButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  addPressHighlight(mainButton);
   mainButtonLabel = lv_label_create(mainButton);
   lv_obj_center(mainButtonLabel);
 
@@ -505,6 +524,7 @@ void setupUi() {
       if (i >= 1) {
         lv_obj_add_event_cb(valveCells[i], valveCellEventHandler, LV_EVENT_CLICKED,
                              reinterpret_cast<void *>(static_cast<uintptr_t>(i)));
+        addPressHighlight(valveCells[i]);
       }
       valveCellLabels[i] = lv_label_create(valveCells[i]);
       char text[4];
@@ -529,6 +549,7 @@ void setupUi() {
   lv_obj_set_size(programsButton, kDisplayWidth - kSideMargin, kProgramsButtonHeight);
   lv_obj_align(programsButton, LV_ALIGN_TOP_MID, 0, kProgramsButtonY);
   lv_obj_add_event_cb(programsButton, programsButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  addPressHighlight(programsButton);
   programsButtonLabel = lv_label_create(programsButton);
   lv_obj_center(programsButtonLabel);
 
@@ -598,6 +619,7 @@ void setupProgramScreen() {
   lv_obj_set_size(prevButton, 80, 54);
   lv_obj_align(prevButton, LV_ALIGN_TOP_LEFT, 4, 150);
   lv_obj_add_event_cb(prevButton, programPrevButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  addPressHighlight(prevButton);
   lv_obj_t *prevButtonLabel = lv_label_create(prevButton);
   lv_label_set_text(prevButtonLabel, "<");
   lv_obj_center(prevButtonLabel);
@@ -606,6 +628,7 @@ void setupProgramScreen() {
   lv_obj_set_size(nextButton, 80, 54);
   lv_obj_align(nextButton, LV_ALIGN_TOP_RIGHT, -4, 150);
   lv_obj_add_event_cb(nextButton, programNextButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  addPressHighlight(nextButton);
   lv_obj_t *nextButtonLabel = lv_label_create(nextButton);
   lv_label_set_text(nextButtonLabel, ">");
   lv_obj_center(nextButtonLabel);
@@ -617,6 +640,7 @@ void setupProgramScreen() {
   lv_obj_align(cancelButton, LV_ALIGN_BOTTOM_MID, 0, -6);
   lv_obj_set_style_bg_color(cancelButton, lv_color_hex(0x444444), 0);
   lv_obj_add_event_cb(cancelButton, programCancelButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  addPressHighlight(cancelButton);
   lv_obj_t *cancelButtonLabel = lv_label_create(cancelButton);
   lv_label_set_text(cancelButtonLabel, "Abbrechen");
   lv_obj_center(cancelButtonLabel);
@@ -626,6 +650,7 @@ void setupProgramScreen() {
   lv_obj_align_to(okButton, cancelButton, LV_ALIGN_OUT_TOP_MID, 0, -6);
   lv_obj_set_style_bg_color(okButton, lv_color_hex(0x444444), 0);
   lv_obj_add_event_cb(okButton, programOkButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  addPressHighlight(okButton);
   lv_obj_t *okButtonLabel = lv_label_create(okButton);
   lv_label_set_text(okButtonLabel, "OK");
   lv_obj_center(okButtonLabel);
