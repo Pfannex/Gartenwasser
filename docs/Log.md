@@ -249,3 +249,11 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Ergebnis: eigenes `program`-Feld (Name-Referenz, darf sich ueber mehrere Eintraege wiederholen, keine Eindeutigkeitspflicht) bleibt bestehen, `name` ist optional und rein kosmetisch.
 - Vollstaendige Feldreferenz-Tabelle (Ebene/Pflicht/Werte/Bedeutung je Key) sowie 5 zusaetzliche Beispiele (Mehrfachnutzung eines Programms, pausierter Einzeleintrag, minimaler Eintrag ohne `name`, komplett pausierter Zeitplan, mehrere Wochentage in einem Eintrag) in `docs/spec/15-wochenplan.md` ergaenzt.
 - Rein Design-/Dokumentationsstand, noch keine Codeaenderung.
+
+### Phase 15 — Scheduler-Mechanik erlaeutert (Merker 2 aufgeloest)
+
+- Mechanik festgelegt: minuetlicher Prueflauf ueber die komplette `schedule`-Liste (kein Timer pro Eintrag), analog zum bestehenden sekuendlichen Ventil-Tick in `MqttManager::loop()` - `lastCheckedMinute` merken, bei Minutenwechsel einmal die ganze Liste durchgehen, dadurch garantiert genau einmal pro Minute ausgewertet.
+- Match-Logik pro Eintrag (daily/weekly/once) faehrt beim Treffer denselben Startpfad wie `main/cmd ON` (`startSequence()`, inkl. Programm-Pflicht + Reapply aus Phase 14).
+- Nebenbei die "gleichzeitige Trigger"-Frage aufgeloest: `startSequence()` prueft schon `Sequencer::isRunning()`, daher gewinnt bei zwei Treffern in derselben Minute automatisch der erste in Array-Reihenfolge, kein neuer Code noetig.
+- Klar abgegrenzt von einer zweiten, separaten Funktion "naechster faelliger Trigger" (Wiederkehr-Mathematik fuer daily/weekly) - die wird fuer den Kollisions-Hinweis (Merker 1) noch gebraucht, ist aber nicht Teil des einfachen Minuten-Checks.
+- Details in `docs/spec/15-wochenplan.md`, Kernentscheidung 4. Rein Design-Klaerung, noch keine Codeaenderung.
