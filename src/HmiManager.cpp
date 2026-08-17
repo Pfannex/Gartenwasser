@@ -165,36 +165,68 @@ void touchpadRead(lv_indev_drv_t *drv, lv_indev_data_t *data) {
   }
 }
 
-// --- Touch-UI: Automatik-Toggle & Ventil-Statusanzeige ----------------------
+// --- Touch-UI: Start/Stop-Toggle & Ventil-Statusanzeige ---------------------
 // Liest den Zustand direkt aus ValveController/Sequencer (kein MQTT-Umweg fuer
 // die lokale Anzeige); der Toggle-Button loest ueber MqttManager::requestMainCmd()
 // denselben Pfad wie main/cmd per MQTT aus (inkl. aller Publishes, keine
 // Sonderlogik), siehe docs/spec/13-touch-ui.md.
 
 constexpr uint8_t kValveCount = 6;  // V0..V5, siehe ValveController::kValveCount
-constexpr uint8_t kProgramButtonCount = 4;  // P1..P4, wenden das Programm mit passendem "shortcut" an
+
+// Ventil-Statusmatrix (Phase 16): 4x4 Anzeigefelder, V0..V5 belegen die ersten 6
+// (zeilenweise), der Rest bleibt als reiner Platzhalter sichtbar - Testaufbau fuer
+// eine spaetere Erweiterung auf 16 Ventile (volle MCP23017-Kapazitaet), siehe
+// docs/spec/13-touch-ui.md. V1..V5 sind per Tap direkt schaltbar (V{n}/cmd,
+// siehe valveCellEventHandler()); V0 hat wie bei MQTT keinen eigenen cmd
+// (Kopplung an V1-V5, siehe MqttManager) und bleibt ohne Funktion.
+constexpr uint8_t kMatrixCols = 4;
+constexpr uint8_t kMatrixRows = 4;
+constexpr uint8_t kMatrixCellCount = kMatrixCols * kMatrixRows;
+
 constexpr unsigned long kUiRefreshIntervalMs = 250;
-constexpr unsigned long kProgramHintDurationMs = 2000;  // Anzeigedauer fuer "P{n} nicht konfiguriert!"
+constexpr unsigned long kProgramHintDurationMs = 2000;  // Anzeigedauer fuer "Kein Programm vorgewaehlt!"
 
-// Layout: Titel + AUTO/OFF-Button oben (bis y=76), darunter Ventil-Liste/
-// Programm-Buttons, die Statuszeile nimmt als Fussleiste die komplette
-// verbleibende Hoehe unten ein.
-constexpr lv_coord_t kContentTopY = 84;
-constexpr lv_coord_t kValveRowHeight = 30;
-constexpr lv_coord_t kProgramButtonStep = 40;
-constexpr lv_coord_t kStatusBoxHeight = 64;
+// Layout: graue Titelzeile + START/STOP-Button oben, darunter die Ventil-Statusmatrix,
+// direkt darunter der Programme-Button (zeigt das aktive Programm als Buttontext), den
+// Rest nimmt die zweizeilige Statuszeile als Fussleiste ein (Box-Position fix an der
+// unteren Displaykante, nur der Text darin sitzt hoeher - siehe statusLine1/2 in setupUi()).
+constexpr lv_coord_t kHeaderHeight = 26;
+constexpr lv_coord_t kMainButtonY = 30;
+constexpr lv_coord_t kMainButtonHeight = 34;
+constexpr lv_coord_t kMatrixTopY = 70;
+constexpr lv_coord_t kMatrixCellSize = 38;
+constexpr lv_coord_t kMatrixCellGap = 4;
+constexpr lv_coord_t kMatrixLeftX = 4;
+constexpr lv_coord_t kProgramsButtonY = 236;
+constexpr lv_coord_t kProgramsButtonHeight = 34;  // gleichmaessig mit START aufgeteilt
+constexpr lv_coord_t kStatusBoxHeight = 42;  // START/Programme leicht gekuerzt (37->34), damit die
+                                              // Statuszeile mehr Hoehe fuer weiter oben sitzenden
+                                              // Text hat, ohne den Text stark ins Negative zu schieben.
+constexpr lv_coord_t kStatusBoxBottomMargin = 4;  // Abstand zur unteren Displaykante
+constexpr lv_coord_t kSideMargin = 8;  // volle Breite = kDisplayWidth - kSideMargin
 
+lv_obj_t *mainScreen = nullptr;
 lv_obj_t *mainButton = nullptr;
 lv_obj_t *mainButtonLabel = nullptr;
-lv_obj_t *statusLabel = nullptr;
-lv_obj_t *valveLeds[kValveCount] = {nullptr};
-lv_obj_t *valveNameLabels[kValveCount] = {nullptr};
-lv_obj_t *programButtons[kProgramButtonCount] = {nullptr};
+lv_obj_t *valveCells[kMatrixCellCount] = {nullptr};
+lv_obj_t *valveCellLabels[kMatrixCellCount] = {nullptr};
+lv_obj_t *programsButton = nullptr;
+lv_obj_t *programsButtonLabel = nullptr;
+lv_obj_t *statusBox = nullptr;
+lv_obj_t *statusLine1 = nullptr;
+lv_obj_t *statusLine2 = nullptr;
 unsigned long lastUiRefreshMs = 0;
 
-// Transienter Hinweis "P{n} nicht konfiguriert!" nach Druck auf einen Button ohne
-// gebundenes Programm - blendet sich nach kProgramHintDurationMs von selbst wieder aus
-// (0 = kein aktiver Hinweis), siehe refreshStatusLine().
+// Programme-Unterseite (Phase 16): eigener LVGL-Screen zum Durchblaettern aller
+// Programme (</>), OK wendet nur an (identisch main/program/cmd), startet nichts -
+// siehe docs/spec/13-touch-ui.md.
+lv_obj_t *programScreen = nullptr;
+lv_obj_t *programNameLabel = nullptr;
+uint8_t browseProgramIndex = 0;  // 0 = "Kein Programm", 1..getProgramCount() = Programm-Index
+
+// Transienter Hinweis "Kein Programm vorgewaehlt!" bei START ohne aktives Programm -
+// blendet sich nach kProgramHintDurationMs von selbst wieder aus (0 = kein aktiver
+// Hinweis), siehe refreshStatusLine().
 char programHintText[24] = "";
 unsigned long programHintUntilMs = 0;
 
@@ -232,6 +264,19 @@ void toDisplayAscii(const char *utf8, char *out, size_t outSize) {
   out[o] = '\0';
 }
 
+// Ventil-Matrixzelle (V1..V5): schaltet direkt per V{n}/cmd (siehe
+// MqttManager::requestValveCmd()) - identisches Verhalten wie MQTT (waehrend die
+// Automatik laeuft, wird ein manuelles ON ignoriert, siehe applyValveCmd()). V0
+// bekommt bewusst keinen Handler (kein eigener cmd, siehe kMatrixCols-Kommentar).
+void valveCellEventHandler(lv_event_t *e) {
+  if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
+    return;
+  }
+  const uint8_t index = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(e)));
+  const bool targetOn = !ValveController::getValve(index);
+  MqttManager::requestValveCmd(index, targetOn);
+}
+
 void mainButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
@@ -247,231 +292,343 @@ void mainButtonEventHandler(lv_event_t *e) {
   MqttManager::requestMainCmd(startingSequence);
 }
 
-// P1-P4 (Phase 13/14): wendet das Programm an, dessen "shortcut"-Feld dem gedrueckten
-// Button entspricht - ueber MqttManager::requestProgramByShortcut(), analog zu
-// requestMainCmd() (kein MQTT-Umweg). Der sichtbare Checked-State der Buttons wird
-// nicht hier gesetzt, sondern periodisch in refreshProgramButtons() aus dem tatsaechlichen
-// ConfigStore::getActiveProgram() abgeleitet - so bleibt die Anzeige korrekt, auch wenn
-// die Auswahl ueber MQTT (main/program/cmd, main/programs/set) geaendert wird.
-// Ist keinem Programm dieser Shortcut zugeordnet, wird nichts angewendet, sondern nur
-// ein kurzer Hinweis in der Statuszeile eingeblendet. Ist das gebundene Programm bereits
-// aktiv, wird es abgewaehlt (Toggle-Verhalten, wie main/program/cmd 0).
-void programButtonEventHandler(lv_event_t *e) {
+void refreshProgramNameLabel() {
+  char nameAscii[40];
+  if (browseProgramIndex == 0) {
+    lv_label_set_text(programNameLabel, "Kein Programm");
+    return;
+  }
+  toDisplayAscii(ConfigStore::getProgramName(browseProgramIndex), nameAscii, sizeof(nameAscii));
+  lv_label_set_text(programNameLabel, nameAscii);
+}
+
+// Programme-Button (Hauptseite): oeffnet die Unterseite, startend beim aktuell aktiven
+// Programm (0 = "Kein Programm"), damit </> von dort aus weiterblaettern.
+void programsButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  const uint8_t index = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(e)));
-  const uint8_t shortcut = index + 1;
-  const uint8_t boundProgram = ConfigStore::getProgramIndexForShortcut(shortcut);
-  if (boundProgram == 0) {
-    snprintf(programHintText, sizeof(programHintText), "P%u nicht konfiguriert!", shortcut);
-    programHintUntilMs = millis() + kProgramHintDurationMs;
+  browseProgramIndex = ConfigStore::getActiveProgram();
+  refreshProgramNameLabel();
+  lv_scr_load(programScreen);
+}
+
+void programPrevButtonEventHandler(lv_event_t *e) {
+  if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
+  const uint8_t count = ConfigStore::getProgramCount();
+  browseProgramIndex = (browseProgramIndex == 0) ? count : browseProgramIndex - 1;
+  refreshProgramNameLabel();
+}
+
+void programNextButtonEventHandler(lv_event_t *e) {
+  if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
+    return;
+  }
+  const uint8_t count = ConfigStore::getProgramCount();
+  browseProgramIndex = (browseProgramIndex >= count) ? 0 : browseProgramIndex + 1;
+  refreshProgramNameLabel();
+}
+
+// OK: wendet nur das durchblaetterte Programm an (identisch main/program/cmd), startet
+// nichts - der Start bleibt bewusst ein separater Schritt ueber START auf der Hauptseite.
+void programOkButtonEventHandler(lv_event_t *e) {
+  if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
+    return;
+  }
+  MqttManager::requestProgramSelect(browseProgramIndex);
   programHintUntilMs = 0;  // frischer Programmwechsel/-abwahl verdraengt einen evtl. sichtbaren Hinweis
-  if (boundProgram == ConfigStore::getActiveProgram()) {
-    MqttManager::requestProgramClear();
+  lv_scr_load(mainScreen);
+}
+
+void programCancelButtonEventHandler(lv_event_t *e) {
+  if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  MqttManager::requestProgramByShortcut(shortcut);
+  lv_scr_load(mainScreen);
 }
 
 void refreshMainButton() {
   const bool running = Sequencer::isRunning();
-  lv_label_set_text(mainButtonLabel, running ? "OFF" : "AUTO");
+  lv_label_set_text(mainButtonLabel, running ? "STOP" : "START");
   lv_obj_set_style_bg_color(mainButton, running ? lv_color_hex(0xAA0000) : lv_color_hex(0x008800), 0);
 }
 
-// Ventile als runde Status-Indikatoren (radio-button-artig): gruen = AUS, rot = AN.
-// Ventile mit auto=OFF werden im AUS-Zustand gedimmt (dunkelgrau) dargestellt, um
-// sichtbar zu machen, dass sie nicht Teil der Automatik-Sequenz sind - sobald
-// manuell eingeschaltet, wieder ganz normal (rot). V0 hat kein eigenes
-// Automatik-Flag und wird nie gedimmt.
+// Ventil-Statusmatrix: gruen = auto AN + state AUS, dunkelgrau = auto AUS + state AUS,
+// rot = state AN (ueberschreibt die anderen Faelle - macht das aktive Ventil bereits
+// ausreichend sichtbar, kein zusaetzlicher Rahmen noetig). V0 hat kein eigenes
+// Automatik-Flag und wird nie gedimmt. Die Zellen sind Buttons (Backlog-Test, ob sie
+// gut antippbar sind), aber (noch) ohne Funktion - siehe docs/spec/13-touch-ui.md.
 void refreshValveStatus() {
-  const bool sequenceRunning = Sequencer::isRunning();
-  const uint8_t activeValve = sequenceRunning ? Sequencer::getActiveValve() : 0;
+  const lv_color_t dimGray = lv_color_hex(0x555555);
 
   for (uint8_t i = 0; i < kValveCount; i++) {
     const bool on = ValveController::getValve(i);
     const bool dimmed = (i != 0) && !on && !ValveController::getAuto(i);
-    const lv_color_t dimGray = lv_color_hex(0x555555);
-
-    lv_led_set_color(valveLeds[i], on ? lv_color_hex(0xFF0000) : (dimmed ? dimGray : lv_color_hex(0x00CC00)));
-
-    char text[4];
-    snprintf(text, sizeof(text), "V%u", i);
-    lv_label_set_text(valveNameLabels[i], text);
-
-    lv_color_t textColor;
-    if (dimmed) {
-      textColor = dimGray;
-    } else if (sequenceRunning && activeValve == i) {
-      // Aktives Sequenz-Ventil zusaetzlich hervorheben (siehe docs/spec/13-touch-ui.md, Test 4).
-      textColor = lv_color_hex(0xFFFF00);
-    } else {
-      textColor = lv_color_white();
-    }
-    lv_obj_set_style_text_color(valveNameLabels[i], textColor, 0);
+    lv_obj_set_style_bg_color(valveCells[i], on ? lv_color_hex(0xCC0000) : (dimmed ? dimGray : lv_color_hex(0x00AA00)),
+                               0);
   }
 }
 
-// Spiegelt den Checked-State der P1-P4-Buttons aus dem tatsaechlichen aktiven Programm
-// (ConfigStore::getActiveProgram()) - laeuft an, egal ob die Auswahl per Touch, MQTT
-// main/program/cmd oder main/programs/set zustande kam (kein lokaler Klick-Zustand).
-void refreshProgramButtons() {
-  const uint8_t active = ConfigStore::getActiveProgram();
-  for (uint8_t i = 0; i < kProgramButtonCount; i++) {
-    const uint8_t boundProgram = ConfigStore::getProgramIndexForShortcut(i + 1);
-    const bool checked = (active != 0) && (boundProgram == active);
-    if (checked) {
-      lv_obj_add_state(programButtons[i], LV_STATE_CHECKED);
-    } else {
-      lv_obj_clear_state(programButtons[i], LV_STATE_CHECKED);
-    }
-  }
-}
-
-// Formatiert "<Alias oder V{n}>  mm:ss[ +N weitere]" fuer die Statuszeile.
-void formatValveActivity(char *out, size_t outSize, uint8_t valveIndex, uint8_t extraCount) {
-  char aliasAscii[40];
-  toDisplayAscii(ValveController::getAlias(valveIndex), aliasAscii, sizeof(aliasAscii));
-  const uint16_t remaining = ValveTimer::getRemainingSeconds(valveIndex);
-  char extra[16] = "";
-  if (extraCount > 0) {
-    snprintf(extra, sizeof(extra), " +%u weitere", extraCount);
-  }
-  if (aliasAscii[0] != '\0') {
-    snprintf(out, outSize, "%s  %02u:%02u%s", aliasAscii, remaining / 60, remaining % 60, extra);
-  } else {
-    snprintf(out, outSize, "V%u  %02u:%02u%s", valveIndex, remaining / 60, remaining % 60, extra);
-  }
-}
-
-// Statuszeile: zeigt an, was das Geraet gerade tut - in Prioritaet
-// Fehler > transienter Programm-Hinweis (2s) > laufende Automatik > manuell
-// laufende Ventile > gewaehltes Programm > "MANUELL" (kein Programm gewaehlt).
-// Der Hinweis steht bewusst
-// ueber "laufende Automatik": er wird genau beim Start ausgeloest (siehe
-// mainButtonEventHandler()), zu dem Zeitpunkt ist die Sequenz bereits aktiv -
-// mit niedrigerer Prioritaet waere er sofort wieder verdeckt.
+// Statuszeile (2 Zeilen), Fussleiste: Zeile 1 in Prioritaet I2C-Fehler (roter
+// Hintergrund, gelbe Schrift - deutlich auffaelliger als der Rest) > transienter
+// Programm-Hinweis (2s, orange) > waehrend die Automatik laeuft "V{n} mm:ss | mm:ss"
+// (aktives Ventil | Restlaufzeit der gesamten Sequenz, gelb) > manuell (per Matrix-Tap)
+// geschaltetes Ventil "MANUELL" (hellblau) > sonst leer. Zeile 2 zeigt dazu jeweils den
+// Alias-Namen des betroffenen Ventils (nur bei den beiden Ventil-Faellen, sonst leer) -
+// ValveTimer liefert fuer noch ausstehende (nicht gestartete) Ventile bereits deren
+// volle konfigurierte Zeit, daher genuegt fuer "gesamt" die Summe ueber aktives +
+// wartende Ventile (Sequencer::getPendingValve()).
 void refreshStatusLine() {
-  char text[64];
-  lv_color_t color = lv_color_white();
+  char line1[40];
+  char line2[40] = "";
+  lv_color_t color1 = lv_color_white();
+  lv_color_t boxColor = lv_color_hex(0x333333);  // wie die graue Kopfzeile
 
   if (!Diagnostics::isI2cOk()) {
-    snprintf(text, sizeof(text), "I2C-Fehler!");
-    color = lv_color_hex(0xFF3333);
+    snprintf(line1, sizeof(line1), "I2C-Fehler!");
+    color1 = lv_color_hex(0xFFFF00);
+    boxColor = lv_color_hex(0xCC0000);
   } else if (millis() < programHintUntilMs) {
-    snprintf(text, sizeof(text), "%s", programHintText);
-    color = lv_color_hex(0xFF8800);  // Hinweis-Orange, unterscheidet sich von Fehler-Rot/Programm-Blau
+    snprintf(line1, sizeof(line1), "%s", programHintText);
+    color1 = lv_color_hex(0xFF8800);
   } else if (Sequencer::isRunning()) {
-    formatValveActivity(text, sizeof(text), Sequencer::getActiveValve(), 0);
-    color = lv_color_hex(0xFFFF00);  // wie die Hervorhebung des aktiven Ventils
+    const uint8_t activeValve = Sequencer::getActiveValve();
+    const uint16_t activeRemaining = ValveTimer::getRemainingSeconds(activeValve);
+    uint32_t totalRemaining = activeRemaining;
+    const uint8_t pendingCount = Sequencer::getPendingCount();
+    for (uint8_t i = 0; i < pendingCount; i++) {
+      totalRemaining += ValveTimer::getRemainingSeconds(Sequencer::getPendingValve(i));
+    }
+    snprintf(line1, sizeof(line1), "V%u  %02u:%02u | %02u:%02u", activeValve, activeRemaining / 60,
+             activeRemaining % 60, static_cast<unsigned>(totalRemaining / 60),
+             static_cast<unsigned>(totalRemaining % 60));
+    color1 = lv_color_hex(0xFFFF00);
+
+    char aliasAscii[40];
+    toDisplayAscii(ValveController::getAlias(activeValve), aliasAscii, sizeof(aliasAscii));
+    if (aliasAscii[0] != '\0') {
+      snprintf(line2, sizeof(line2), "%s", aliasAscii);
+    }
   } else {
-    uint8_t runningCount = 0;
-    uint8_t firstRunning = 0;
+    // Manuell (per Matrix-Tap) geschaltetes Ventil, ausserhalb einer Automatik-Sequenz -
+    // erstes laufende Ventil in V1..V5-Reihenfolge, falls mehrere gleichzeitig an sind.
+    uint8_t manualValve = 0;
     for (uint8_t i = 1; i <= 5; i++) {
       if (ValveController::getValve(i)) {
-        if (runningCount == 0) {
-          firstRunning = i;
-        }
-        runningCount++;
+        manualValve = i;
+        break;
       }
     }
-    if (runningCount > 0) {
-      formatValveActivity(text, sizeof(text), firstRunning, runningCount - 1);
-      color = lv_color_hex(0x33CCFF);  // manuell (nicht Teil der Automatik-Sequenz)
-    } else {
-      const uint8_t activeProgram = ConfigStore::getActiveProgram();
-      if (activeProgram != 0) {
-        char nameAscii[40];
-        toDisplayAscii(ConfigStore::getProgramName(activeProgram), nameAscii, sizeof(nameAscii));
-        snprintf(text, sizeof(text), "Programm: %s", nameAscii);
-        color = lv_color_hex(0x66CCFF);
-      } else {
-        // Kein Programm gewaehlt: main/cmd ON ist blockiert (siehe MqttManager::startSequence()),
-        // "Bereit" waere hier irrefuehrend - MANUELL beschreibt den tatsaechlichen Modus
-        // (Ventile direkt schaltbar, aber keine Automatik moeglich), bleibt neutral/grau wie zuvor.
-        snprintf(text, sizeof(text), "MANUELL");
-        color = lv_color_hex(0x888888);
+    if (manualValve != 0) {
+      snprintf(line1, sizeof(line1), "MANUELL");
+      color1 = lv_color_hex(0x33CCFF);
+      char aliasAscii[40];
+      toDisplayAscii(ValveController::getAlias(manualValve), aliasAscii, sizeof(aliasAscii));
+      if (aliasAscii[0] != '\0') {
+        snprintf(line2, sizeof(line2), "%s", aliasAscii);
       }
+    } else {
+      line1[0] = '\0';
     }
   }
 
-  lv_label_set_text(statusLabel, text);
-  lv_obj_set_style_text_color(statusLabel, color, 0);
+  lv_obj_set_style_bg_color(statusBox, boxColor, 0);
+  lv_label_set_text(statusLine1, line1);
+  lv_obj_set_style_text_color(statusLine1, color1, 0);
+  lv_label_set_text(statusLine2, line2);
+}
+
+// Programme-Button (Hauptseite): zeigt das aktive Programm als eigenen Buttontext
+// (ersetzt die fruehere separate Anzeigezeile) - liest ConfigStore::getActiveProgram()
+// direkt, egal ob die Auswahl per Touch (Programme-Unterseite), MQTT main/program/cmd
+// oder main/programs/set zustande kam.
+void refreshProgramsButtonLabel() {
+  const uint8_t active = ConfigStore::getActiveProgram();
+  if (active == 0) {
+    lv_label_set_text(programsButtonLabel, "Kein Programm gewaehlt");
+  } else {
+    char nameAscii[40];
+    toDisplayAscii(ConfigStore::getProgramName(active), nameAscii, sizeof(nameAscii));
+    lv_label_set_text(programsButtonLabel, nameAscii);
+  }
 }
 
 /**
- * @brief Baut die Touch-UI auf: Automatik-Toggle + Statuszeile + Ventil-Statusanzeige.
+ * @brief Baut die Touch-UI-Hauptseite auf: Titel, START/STOP-Button, Ventil-
+ *        Statusmatrix (V1..V5 direkt schaltbar), Programme-Button (zeigt das
+ *        aktive Programm), zweizeilige Statuszeile als Fussleiste.
  */
 void setupUi() {
-  lv_obj_t *screen = lv_scr_act();
-  lv_obj_set_style_bg_color(screen, lv_color_black(), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
+  mainScreen = lv_scr_act();
+  lv_obj_set_style_bg_color(mainScreen, lv_color_black(), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(mainScreen, LV_OPA_COVER, LV_PART_MAIN);
 
-  lv_obj_t *title = lv_label_create(screen);
+  // Titelzeile grau hinterlegt, wie die Menuezeile der Programme-Unterseite.
+  lv_obj_t *headerBar = lv_obj_create(mainScreen);
+  lv_obj_clear_flag(headerBar, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_size(headerBar, kDisplayWidth, kHeaderHeight);
+  lv_obj_align(headerBar, LV_ALIGN_TOP_MID, 0, 0);
+  lv_obj_set_style_radius(headerBar, 0, 0);
+  lv_obj_set_style_border_width(headerBar, 0, 0);
+  lv_obj_set_style_bg_color(headerBar, lv_color_hex(0x333333), 0);
+  lv_obj_set_style_bg_opa(headerBar, LV_OPA_COVER, 0);
+
+  lv_obj_t *title = lv_label_create(headerBar);
   lv_label_set_text(title, "Gartenwasser");
   lv_obj_set_style_text_color(title, lv_color_white(), 0);
-  lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 8);
+  lv_obj_center(title);
 
-  mainButton = lv_btn_create(screen);
-  lv_obj_set_size(mainButton, kDisplayWidth - 20, 44);
-  lv_obj_align(mainButton, LV_ALIGN_TOP_MID, 0, 32);
+  mainButton = lv_btn_create(mainScreen);
+  lv_obj_set_size(mainButton, kDisplayWidth - kSideMargin, kMainButtonHeight);
+  lv_obj_align(mainButton, LV_ALIGN_TOP_MID, 0, kMainButtonY);
   lv_obj_add_event_cb(mainButton, mainButtonEventHandler, LV_EVENT_CLICKED, nullptr);
   mainButtonLabel = lv_label_create(mainButton);
   lv_obj_center(mainButtonLabel);
 
-  // Statuszeile als eigene Fussleiste ganz unten, abgesetzt mit dunkelgrauem
-  // Hintergrund, nutzt die komplette verbleibende Hoehe unterhalb der
-  // Ventil-/Programm-Spalten.
-  lv_obj_t *statusBox = lv_obj_create(screen);
+  // Ventil-Statusmatrix: 4x4 Felder, V0..V5 auf die ersten 6 (zeilenweise), der Rest
+  // bleibt als Platzhalter fuer eine spaetere Erweiterung sichtbar (dunkler Rahmen,
+  // kein Fuellstand). V1..V5 sind per Tap direkt schaltbar, V0 ohne Handler (siehe
+  // valveCellEventHandler()).
+  for (uint8_t i = 0; i < kMatrixCellCount; i++) {
+    const uint8_t row = i / kMatrixCols;
+    const uint8_t col = i % kMatrixCols;
+    const lv_coord_t x = kMatrixLeftX + col * (kMatrixCellSize + kMatrixCellGap);
+    const lv_coord_t y = kMatrixTopY + row * (kMatrixCellSize + kMatrixCellGap);
+
+    if (i < kValveCount) {
+      valveCells[i] = lv_btn_create(mainScreen);
+      lv_obj_set_size(valveCells[i], kMatrixCellSize, kMatrixCellSize);
+      lv_obj_align(valveCells[i], LV_ALIGN_TOP_LEFT, x, y);
+      lv_obj_set_style_radius(valveCells[i], 4, 0);
+      if (i >= 1) {
+        lv_obj_add_event_cb(valveCells[i], valveCellEventHandler, LV_EVENT_CLICKED,
+                             reinterpret_cast<void *>(static_cast<uintptr_t>(i)));
+      }
+      valveCellLabels[i] = lv_label_create(valveCells[i]);
+      char text[4];
+      snprintf(text, sizeof(text), "V%u", i);
+      lv_label_set_text(valveCellLabels[i], text);
+      lv_obj_set_style_text_color(valveCellLabels[i], lv_color_white(), 0);
+      lv_obj_center(valveCellLabels[i]);
+    } else {
+      // Reservierte Zelle (kuenftige Erweiterung) - kein Fuellstand, nur schwacher Rahmen.
+      valveCells[i] = lv_obj_create(mainScreen);
+      lv_obj_clear_flag(valveCells[i], LV_OBJ_FLAG_SCROLLABLE);
+      lv_obj_set_size(valveCells[i], kMatrixCellSize, kMatrixCellSize);
+      lv_obj_align(valveCells[i], LV_ALIGN_TOP_LEFT, x, y);
+      lv_obj_set_style_radius(valveCells[i], 4, 0);
+      lv_obj_set_style_bg_opa(valveCells[i], LV_OPA_TRANSP, 0);
+      lv_obj_set_style_border_width(valveCells[i], 1, 0);
+      lv_obj_set_style_border_color(valveCells[i], lv_color_hex(0x333333), 0);
+    }
+  }
+
+  programsButton = lv_btn_create(mainScreen);
+  lv_obj_set_size(programsButton, kDisplayWidth - kSideMargin, kProgramsButtonHeight);
+  lv_obj_align(programsButton, LV_ALIGN_TOP_MID, 0, kProgramsButtonY);
+  lv_obj_add_event_cb(programsButton, programsButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  programsButtonLabel = lv_label_create(programsButton);
+  lv_obj_center(programsButtonLabel);
+
+  // Statuszeile, abgesetzt mit dunkelgrauem Hintergrund, an der unteren Displaykante
+  // verankert (kStatusBoxBottomMargin) - die Box-Position bleibt fix, nur der Text
+  // darin sitzt weiter oben (statusLine1/2-Offsets unten).
+  statusBox = lv_obj_create(mainScreen);
   lv_obj_clear_flag(statusBox, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_size(statusBox, kDisplayWidth, kStatusBoxHeight);
-  lv_obj_align(statusBox, LV_ALIGN_BOTTOM_MID, 0, 0);
+  lv_obj_align(statusBox, LV_ALIGN_BOTTOM_MID, 0, -kStatusBoxBottomMargin);
   lv_obj_set_style_radius(statusBox, 0, 0);
   lv_obj_set_style_border_width(statusBox, 0, 0);
-  lv_obj_set_style_bg_color(statusBox, lv_color_hex(0x1A1A1A), 0);
+  lv_obj_set_style_bg_color(statusBox, lv_color_hex(0x333333), 0);
   lv_obj_set_style_bg_opa(statusBox, LV_OPA_COVER, 0);
-  lv_obj_set_style_pad_all(statusBox, 6, 0);
 
-  statusLabel = lv_label_create(statusBox);
-  lv_obj_set_width(statusLabel, kDisplayWidth - 16);
-  lv_label_set_long_mode(statusLabel, LV_LABEL_LONG_WRAP);
-  lv_obj_set_style_text_align(statusLabel, LV_TEXT_ALIGN_CENTER, 0);
-  lv_obj_center(statusLabel);
+  statusLine1 = lv_label_create(statusBox);
+  lv_obj_set_width(statusLine1, kDisplayWidth - 16);
+  lv_obj_set_style_text_align(statusLine1, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_align(statusLine1, LV_ALIGN_TOP_MID, 0, -9);
 
-  for (uint8_t i = 0; i < kValveCount; i++) {
-    const lv_coord_t y = kContentTopY + i * kValveRowHeight;
-
-    valveLeds[i] = lv_led_create(screen);
-    lv_obj_set_size(valveLeds[i], 16, 16);
-    lv_obj_align(valveLeds[i], LV_ALIGN_TOP_LEFT, 10, y);
-    lv_led_set_brightness(valveLeds[i], 255);
-
-    valveNameLabels[i] = lv_label_create(screen);
-    lv_obj_align(valveNameLabels[i], LV_ALIGN_TOP_LEFT, 34, y);
-  }
-
-  for (uint8_t i = 0; i < kProgramButtonCount; i++) {
-    programButtons[i] = lv_btn_create(screen);
-    lv_obj_add_flag(programButtons[i], LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_set_size(programButtons[i], 56, 34);
-    lv_obj_align(programButtons[i], LV_ALIGN_TOP_RIGHT, -8, kContentTopY + i * kProgramButtonStep);
-    lv_obj_add_event_cb(programButtons[i], programButtonEventHandler, LV_EVENT_CLICKED,
-                         reinterpret_cast<void *>(static_cast<uintptr_t>(i)));
-
-    char label[4];
-    snprintf(label, sizeof(label), "P%u", i + 1);
-    lv_obj_t *programButtonLabel = lv_label_create(programButtons[i]);
-    lv_label_set_text(programButtonLabel, label);
-    lv_obj_center(programButtonLabel);
-  }
+  statusLine2 = lv_label_create(statusBox);
+  lv_obj_set_width(statusLine2, kDisplayWidth - 16);
+  lv_obj_set_style_text_align(statusLine2, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_style_text_color(statusLine2, lv_color_hex(0xAAAAAA), 0);
+  lv_obj_align(statusLine2, LV_ALIGN_TOP_MID, 0, 9);
 
   refreshMainButton();
-  refreshStatusLine();
   refreshValveStatus();
-  refreshProgramButtons();
+  refreshStatusLine();
+  refreshProgramsButtonLabel();
+}
+
+/**
+ * @brief Baut die Programme-Unterseite auf: </> blaettert durch alle Programme
+ *        (inkl. virtuellem Eintrag "Kein Programm"), OK wendet nur an (kein Start),
+ *        Abbrechen kehrt ohne Aenderung zurueck. Siehe docs/spec/13-touch-ui.md.
+ */
+void setupProgramScreen() {
+  programScreen = lv_obj_create(NULL);
+  lv_obj_set_style_bg_color(programScreen, lv_color_black(), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(programScreen, LV_OPA_COVER, LV_PART_MAIN);
+
+  // Menuezeile grau hinterlegt, hebt sich vom schwarzen Hintergrund ab.
+  lv_obj_t *headerBar = lv_obj_create(programScreen);
+  lv_obj_clear_flag(headerBar, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_size(headerBar, kDisplayWidth, 30);
+  lv_obj_align(headerBar, LV_ALIGN_TOP_MID, 0, 0);
+  lv_obj_set_style_radius(headerBar, 0, 0);
+  lv_obj_set_style_border_width(headerBar, 0, 0);
+  lv_obj_set_style_bg_color(headerBar, lv_color_hex(0x333333), 0);
+  lv_obj_set_style_bg_opa(headerBar, LV_OPA_COVER, 0);
+
+  lv_obj_t *title = lv_label_create(headerBar);
+  lv_label_set_text(title, "Programm waehlen");
+  lv_obj_set_style_text_color(title, lv_color_white(), 0);
+  lv_obj_center(title);
+
+  programNameLabel = lv_label_create(programScreen);
+  lv_obj_set_width(programNameLabel, kDisplayWidth - 32);
+  lv_label_set_long_mode(programNameLabel, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_align(programNameLabel, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_style_text_color(programNameLabel, lv_color_white(), 0);
+  lv_obj_align(programNameLabel, LV_ALIGN_TOP_MID, 0, 60);
+
+  // </> auf ca. halbe Displaybreite vergroessert, fuer bessere Treffsicherheit.
+  lv_obj_t *prevButton = lv_btn_create(programScreen);
+  lv_obj_set_size(prevButton, 80, 54);
+  lv_obj_align(prevButton, LV_ALIGN_TOP_LEFT, 4, 150);
+  lv_obj_add_event_cb(prevButton, programPrevButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  lv_obj_t *prevButtonLabel = lv_label_create(prevButton);
+  lv_label_set_text(prevButtonLabel, "<");
+  lv_obj_center(prevButtonLabel);
+
+  lv_obj_t *nextButton = lv_btn_create(programScreen);
+  lv_obj_set_size(nextButton, 80, 54);
+  lv_obj_align(nextButton, LV_ALIGN_TOP_RIGHT, -4, 150);
+  lv_obj_add_event_cb(nextButton, programNextButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  lv_obj_t *nextButtonLabel = lv_label_create(nextButton);
+  lv_label_set_text(nextButtonLabel, ">");
+  lv_obj_center(nextButtonLabel);
+
+  // OK/Abbrechen untereinander, unten buendig (Cancel ganz unten, OK direkt darueber),
+  // volle Breite, beide grau (keine Gruen/Rot-Signalfarbe mehr).
+  lv_obj_t *cancelButton = lv_btn_create(programScreen);
+  lv_obj_set_size(cancelButton, kDisplayWidth - kSideMargin, 40);
+  lv_obj_align(cancelButton, LV_ALIGN_BOTTOM_MID, 0, -6);
+  lv_obj_set_style_bg_color(cancelButton, lv_color_hex(0x444444), 0);
+  lv_obj_add_event_cb(cancelButton, programCancelButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  lv_obj_t *cancelButtonLabel = lv_label_create(cancelButton);
+  lv_label_set_text(cancelButtonLabel, "Abbrechen");
+  lv_obj_center(cancelButtonLabel);
+
+  lv_obj_t *okButton = lv_btn_create(programScreen);
+  lv_obj_set_size(okButton, kDisplayWidth - kSideMargin, 40);
+  lv_obj_align_to(okButton, cancelButton, LV_ALIGN_OUT_TOP_MID, 0, -6);
+  lv_obj_set_style_bg_color(okButton, lv_color_hex(0x444444), 0);
+  lv_obj_add_event_cb(okButton, programOkButtonEventHandler, LV_EVENT_CLICKED, nullptr);
+  lv_obj_t *okButtonLabel = lv_label_create(okButton);
+  lv_label_set_text(okButtonLabel, "OK");
+  lv_obj_center(okButtonLabel);
 }
 
 }  // namespace
@@ -505,8 +662,10 @@ void HmiManager::begin() {
   indev_drv.read_cb = touchpadRead;
   lv_indev_drv_register(&indev_drv);
 
-  // UI aufbauen und einmalig rendern
+  // UI aufbauen (Haupt- + Programme-Seite) und einmalig rendern
   setupUi();
+  setupProgramScreen();
+  lv_scr_load(mainScreen);
   lv_timer_handler();
 }
 
@@ -517,8 +676,8 @@ void HmiManager::loop() {
   if (now - lastUiRefreshMs >= kUiRefreshIntervalMs) {
     lastUiRefreshMs = now;
     refreshMainButton();
-    refreshStatusLine();
     refreshValveStatus();
-    refreshProgramButtons();
+    refreshStatusLine();
+    refreshProgramsButtonLabel();
   }
 }

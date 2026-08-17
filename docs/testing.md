@@ -84,6 +84,27 @@ Automatisiert per Python/paho-mqtt gegen den echten Broker getestet (Skript ad h
 
 Testzustand danach vollständig zurückgesetzt (Sequenz gestoppt, Test-Zeitplan geleert, Programmwahl zurückgesetzt). Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Trigger bewusst noch nicht umgesetzt (siehe `docs/spec/15-wochenplan.md`, „Noch nicht umgesetzt") — daher auch nicht getestet.
 
+## Touch-UI-Neugestaltung (Nachtrag zu Phase 13) — 2026-08-17
+
+Interaktiv getestet: jede Layout-/Funktionsänderung wurde gebaut, geflasht und direkt am Gerät begutachtet (kein automatisiertes Skript, reine UI/Bedienbarkeits-Prüfung) — Kernfunktionen bestätigt, Feinschliff der Abstände/Textposition bewusst als kosmetisch offen gelassen (siehe `docs/spec/13-touch-ui.md`, Nachtrag).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | START/STOP-Button | Funktion unverändert zu vorherigem AUTO/OFF-Button, nur Beschriftung geändert | Bestätigt am Gerät | ✅ |
+| 2 | Ventil-Statusmatrix, Farblogik | Grün/Dunkelgrau/Rot-Logik (auto/state) unverändert in der neuen 4×4-Matrix sichtbar, `V0` nie gedimmt | Bestätigt am Gerät | ✅ |
+| 3 | Ventile per Matrix-Tap schalten | `V1`–`V5` antippen schaltet direkt (`V{n}/cmd`), inkl. Sperre für manuelles ON während laufender Automatik; `V0` ohne Reaktion | Bestätigt am Gerät | ✅ |
+| 4 | Programme-Button zeigt aktives Programm | Buttontext wechselt korrekt bei Auswahl über Touch, MQTT `main/program/cmd` und `main/programs/set` | Bestätigt am Gerät | ✅ |
+| 5 | Programme-Unterseite: Blättern | `<`/`>` blättern durch alle geladenen Programme inkl. „Kein Programm“, startet beim Öffnen immer beim aktiven Programm | Bestätigt am Gerät | ✅ |
+| 6 | Programme-Unterseite: OK wendet nur an | OK wählt das durchgeblätterte Programm, startet **nicht** automatisch — Start bleibt separater Schritt auf der Hauptseite | Bestätigt am Gerät | ✅ |
+| 7 | Programme-Unterseite: Abbrechen | Kehrt ohne Änderung der Programmwahl zur Hauptseite zurück | Bestätigt am Gerät | ✅ |
+| 8 | Statuszeile: Fehler | I2C-Fehler zeigt roten Hintergrund + gelbe Schrift (nicht selbst provoziert, Logik code-seitig verifiziert) | Nicht am Gerät provoziert, nur Code-Review | ⚠️ noch nicht hardware-verifiziert |
+| 9 | Statuszeile: laufende Automatik | Zeile 1 „`V{n} mm:ss \| mm:ss`“ (Ventil-Restlaufzeit \| Sequenz-Restlaufzeit gesamt), Zeile 2 Alias-Name | Bestätigt am Gerät | ✅ |
+| 10 | Statuszeile: manuelles Ventil | Beim Schalten eines Ventils per Matrix-Tap (außerhalb der Sequenz) zeigt Zeile 1 „MANUELL“, Zeile 2 den Alias-Namen | Bestätigt am Gerät | ✅ |
+| 11 | `P1`–`P4` entfernt | Keine physischen Shortcut-Buttons mehr vorhanden, Programme nur noch über die neue Unterseite erreichbar | Bestätigt am Gerät | ✅ |
+| 12 | 32 Programme statt 8 | `ConfigStore::kMaxPrograms` auf 32 angehoben, kein Funktionstest mit tatsächlich 32 Programmen durchgeführt | Nicht mit voller Anzahl getestet | ⚠️ nur Code-Review |
+
+**Nicht Teil dieser Testrunde**: Zeitplan (Phase 15) manueller Hardware-Test — stand als Merker aus, wurde bewusst auf „nach dem HMI-Umbau“ verschoben und ist damit jetzt als Nächstes fällig (siehe `docs/Log.md`, „Offene Punkte“).
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

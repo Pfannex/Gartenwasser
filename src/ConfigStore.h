@@ -19,19 +19,19 @@ class ConfigStore {
   /// main/config/set|state teilen sich diese Konstante).
   static constexpr size_t kJsonCapacity = 768;
 
-  /// Maximale Anzahl Bewaesserungsprogramme (Phase 14).
-  static constexpr uint8_t kMaxPrograms = 8;
+  /// Maximale Anzahl Bewaesserungsprogramme (Phase 14, ab Phase 16 auf 32 angehoben -
+  /// die Touch-UI durchblaettert sie in der "Programme"-Unterseite statt fixer P1-P4-Buttons).
+  static constexpr uint8_t kMaxPrograms = 32;
 
   /// Puffer-/Speicherpool-Groesse fuer die programs-JSON (SPIFFS-Persistenz und
   /// main/programs/set|state teilen sich diese Konstante).
-  static constexpr size_t kProgramsJsonCapacity = 2048;
+  static constexpr size_t kProgramsJsonCapacity = 8192;
 
   /// Ein (Teil-)Eintrag zum Setzen eines Programms ueber setPrograms(). `time`/`autoFlag`
   /// sind nur gueltig, wenn das zugehoerige `timeSet[i]`/`autoSet[i]` gesetzt ist (Index 1..5,
   /// 0 unbenutzt) - Programme sind Teilmengen wie main/config/set, siehe docs/spec/14-programme.md.
   struct ProgramInput {
     const char *name;
-    uint8_t shortcut;  ///< 0 = keiner, 1..4 = P1..P4 (Touch-UI-Button-Bindung, Phase 13).
     uint16_t time[6];
     bool timeSet[6];
     bool autoFlag[6];
@@ -86,12 +86,6 @@ class ConfigStore {
   /// Aktuell gewaehltes Programm, 1-basiert (0 = keins). Persistiert in /programs.json.
   static uint8_t getActiveProgram();
   static void setActiveProgram(uint8_t programIndex);
-
-  /// Programm-Index (1-basiert), dessen `shortcut`-Feld dem physischen Button `shortcut`
-  /// (1..4 fuer P1..P4) entspricht - bei Duplikaten gewinnt der erste Treffer in
-  /// Array-Reihenfolge (siehe docs/spec/14-programme.md, Kernentscheidung 8). 0, wenn
-  /// kein Programm diesen Shortcut hat.
-  static uint8_t getProgramIndexForShortcut(uint8_t shortcut);
 
   /// Serialisiert programs+activeProgram als JSON (main/programs/state-Struktur). Liefert
   /// die Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler.

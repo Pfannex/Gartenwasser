@@ -24,13 +24,14 @@
 #include "Logger.h"
 
 // Default-Stack der Arduino-loopTask (8192 Byte) reicht nicht mehr: main/programs/set
-// (Phase 14) verarbeitet mehrere StaticJsonDocument<2048>/Puffer gleichzeitig auf dem
+// (Phase 14) verarbeitet mehrere StaticJsonDocument<N>/Puffer gleichzeitig auf dem
 // Stack (handleMqttMessage -> handleProgramsSet), das fuehrte zu einem "Stack protection
 // fault" (Guru Meditation Error). RAM-Headroom ist reichlich vorhanden (siehe Log.md,
-// Speicher-Check Phase 12), daher grosszuegig verdoppelt statt die JSON-Puffer zu verkleinern.
-// Phase 15 (Zeitplan) hat main/schedule/set auf kScheduleJsonCapacity=4096 angehoben (groesser
-// als programs.json) - nochmal verdoppelt statt die knapp bemessenen 16 KB zu riskieren.
-SET_LOOP_TASK_STACK_SIZE(32 * 1024);
+// Speicher-Check Phase 12), daher grosszuegig bemessen statt die JSON-Puffer zu verkleinern.
+// Phase 16 (Touch-UI-Umbau) hat kMaxPrograms 8->32 angehoben, kProgramsJsonCapacity damit
+// auf 8192 (jetzt groesster Payload, vorher schedule.json mit 4096) - nochmal verdoppelt
+// statt die knapp bemessenen 32 KB zu riskieren.
+SET_LOOP_TASK_STACK_SIZE(64 * 1024);
 
 void setup() {
   Serial.begin(115200);

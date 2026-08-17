@@ -25,8 +25,9 @@ Lokale Bedienung/Anzeige direkt am Gerät, ergänzend zur MQTT/Home-Assistant-St
 ## Betroffene Dateien
 
 - `src/HmiManager.h`, `src/HmiManager.cpp`
-- `src/MqttManager.h`, `src/MqttManager.cpp` (neue `requestMainCmd()`, wie in vorherigen Phasen nicht in der ursprünglichen Liste, aber notwendig; Nachtrag 2026-08-16: `requestProgramByShortcut()`, `requestProgramClear()`, Programm-Pflicht in `startSequence()`)
-- `src/ConfigStore.h/.cpp` (Nachtrag 2026-08-16: `getProgramIndexForShortcut()`)
+- `src/MqttManager.h`, `src/MqttManager.cpp` (neue `requestMainCmd()`, wie in vorherigen Phasen nicht in der ursprünglichen Liste, aber notwendig; Nachtrag 2026-08-16: `requestProgramByShortcut()`, `requestProgramClear()`, Programm-Pflicht in `startSequence()`; Nachtrag 2026-08-17: beide durch `requestProgramSelect()` ersetzt, neue `requestValveCmd()`, `handleValveCmd()`-Kernlogik nach `applyValveCmd()` extrahiert)
+- `src/ConfigStore.h/.cpp` (Nachtrag 2026-08-16: `getProgramIndexForShortcut()`; Nachtrag 2026-08-17: `getProgramIndexForShortcut()` und das `shortcut`-Feld wieder entfernt, `kMaxPrograms` 8→32)
+- `src/main.cpp` (Nachtrag 2026-08-17: `SET_LOOP_TASK_STACK_SIZE` 32→64 KB)
 
 ## Test
 
@@ -49,22 +50,32 @@ Lokale Bedienung/Anzeige direkt am Gerät, ergänzend zur MQTT/Home-Assistant-St
 - Zusätzlich, im selben Zug umgesetzt: `main/cmd ON` (Touch **und** MQTT) startet nur noch, wenn ein Programm gewählt ist — siehe `docs/spec/07-automatik-sequenz.md`, Nachtrag. Ohne Programm zeigt der Touch-`AUTO`-Button einen Hinweis „Kein Programm vorgewählt!“ (2 s, orange), startet aber nichts.
 - Getestet interaktiv auf Hardware (Nutzer bedient Display, Ergebnis per Live-MQTT-Mitschnitt/gezielten Abfragen gegengeprüft) — siehe `docs/testing.md`.
 
-## Backlog-Idee (2026-08-16): Untermenü-Struktur statt fester Buttons
+## Nachtrag (2026-08-17): Touch-UI komplett neu gestaltet, `P1`–`P4` entfernt
 
-Noch nicht eingeplant, reine Notiz für später — aktuell begrenzen feste `P1`–`P4`-Buttons die Touch-Auswahl auf 4 gebundene Programme (von bis zu 8 möglichen), und es gibt noch keine Display-Bedienung für den Zeitplan (Phase 15, „Timer“). Idee: Hauptseite mit Untermenüs statt alles auf einer Seite:
+Die Backlog-Idee oben (Untermenü-Struktur) wurde aufgegriffen und umgesetzt, aber im Zuschnitt angepasst: der „Timer“-Teil (Zeitplan-Bedienung am Display) wurde bewusst verworfen (kein sinnvoller Kalender auf 172×320px, Zeitplan-Einträge haben seit dem Entfernen des `name`-Felds ohnehin keinen sprechenden Titel mehr), stattdessen gibt es nur eine „Programme“-Unterseite. Auslöser war ein mehrstufiger Design-Dialog (Programm-Anzahl-Limit hinterfragt, 16-Ventil-Erweiterung angedacht dann auf eigene Phase verschoben, Web-Interface als eigenes Backlog-Thema abgegrenzt) sowie anschließend viele Runden Feintuning direkt am Gerät.
 
-- **Hauptseite**
-  - Button „Programme“ (→ Untermenü)
-  - Anzeige aktives Programm
-  - Button „Timer“ (→ Untermenü)
-  - Anzeige aktiver Timer
-- **Untermenü „Programme“**
-  - Buttons „<“/„>“ zum rollierenden Durchblättern aller Programme (nicht auf 4 begrenzt)
-  - Anzeige Programmname
-  - Buttons „OK“/„Abbrechen“
-- **Untermenü „Timer“** (Zeitplan, Phase 15)
-  - Buttons „<“/„>“ zum rollierenden Durchblättern der Zeitplan-Einträge
-  - Anzeige Eintragsname
-  - Buttons „OK“/„Abbrechen“
+**Hauptseite** (`setupUi()`):
+- Graue Titelzeile „Gartenwasser“ (rein statisch, wie eine Kopfzeile — keine Status-Funktion mehr, siehe Statuszeile unten).
+- START/STOP-Toggle-Button, volle Breite, reduzierte Höhe — Beschriftung/Funktion unverändert zu vorher (`MqttManager::requestMainCmd()`), nur der Name „AUTO“→„START“ geändert.
+- **Ventil-Statusmatrix**: 4×4 Anzeigefelder (`kMatrixCols`×`kMatrixRows`) statt der früheren vertikalen `lv_led`-Liste. `V0`–`V5` belegen zeilenweise die ersten 6 Zellen, die restlichen 10 bleiben als reine Platzhalter sichtbar (dünner grauer Rahmen, kein Füllstand) — Testaufbau für eine mögliche spätere Erweiterung auf 16 Ventile (volle MCP23017-Kapazität), die aber **nicht** Teil dieser Umsetzung ist (eigene, noch nicht begonnene Phase; betrifft u. a. `MqttManager::parseValveTopic()`, das aktuell einstellige Ventilnummern annimmt). Farblogik unverändert: grün = `auto`-ON + state-OFF, dunkelgrau = `auto`-OFF + state-OFF, rot = state-ON (überschreibt die anderen Fälle). Der früher zusätzliche gelbe Rahmen fürs aktive Sequenz-Ventil wurde entfernt (rot allein reicht als Hervorhebung).
+  - `V1`–`V5` sind als `lv_btn` angelegt und **funktional**: Antippen schaltet das Ventil direkt per `V{n}/cmd` — neue `MqttManager::requestValveCmd(uint8_t index, bool on)`, ruft dieselbe Kernlogik wie `handleValveCmd()` auf (`applyValveCmd()`, aus dem bisherigen `handleValveCmd()` extrahiert), inkl. der bestehenden Sperre „manuelles ON während laufender Automatik wird ignoriert“. `V0` bleibt ohne Klick-Handler (hat wie bei MQTT keinen eigenen `cmd`, siehe V0-Kopplung).
+- **Programme-Button**: direkt unter der Matrix, volle Breite. Zeigt als eigener Buttontext das aktuell aktive Programm (`refreshProgramsButtonLabel()`) — ersetzt die früheren `P1`–`P4`-Buttons komplett. Öffnet per Klick die neue Programme-Unterseite (`lv_scr_load()`, LVGL-Multi-Screen-Navigation — architektonisch neu für dieses Projekt).
+- **Statuszeile** (zweizeilige Fußleiste, dunkelgrauer Hintergrund `0x333333` wie die Titelzeile, im Fehlerfall roter Hintergrund + gelbe Schrift statt nur roter Text): Zeile 1 in Priorität I2C-Fehler > transienter Programm-Hinweis (2 s, orange) > laufende Automatik-Sequenz „`V{n} mm:ss | mm:ss`“ (aktives Ventil | Restlaufzeit gesamt, gelb) > manuell (per Matrix-Tap) geschaltetes Ventil „MANUELL“ (hellblau) > sonst leer. Zeile 2 zeigt dazu jeweils den Alias-Namen des betroffenen Ventils.
 
-Setzt Phase 15 (Zeitplan) voraus, um sinnvoll zu sein („Timer“-Untermenü braucht `schedule`-Einträge). Würde die aktuelle, mit Phase 13/14 gebaute Ein-Seiten-Struktur (feste Buttons, permanente Statuszeile) grundlegend ersetzen — bei Umsetzung gegen den dann aktuellen Funktionsumfang neu bewerten, nicht blind übernehmen.
+**Programme-Unterseite** (`setupProgramScreen()`, neuer LVGL-Screen):
+- Graue Menüzeile „Programm wählen“ oben (wie die Hauptseiten-Titelzeile).
+- `<`/`>`-Buttons (ca. halbe Displaybreite, gut treffbar) blättern durch **alle** Programme inkl. eines virtuellen Eintrags „Kein Programm“ (Index 0) — startet beim Öffnen immer beim aktuell aktiven Programm.
+- OK (wendet das durchgeblätterte Programm nur an, **startet nichts** — Start bleibt bewusst ein separater Schritt über START auf der Hauptseite) und Abbrechen (verwirft die Auswahl) — beide volle Breite, untereinander, unten bündig, grau statt grün/rot.
+- Neue `MqttManager::requestProgramSelect(uint8_t programIndex)` (ersetzt `requestProgramByShortcut()`/`requestProgramClear()`) — wendet ein Programm per Index an (0 = abwählen), unabhängig von Shortcuts.
+
+**`ConfigStore`**: `kMaxPrograms` 8→32 (nicht mehr auf 4 Touch-Buttons limitiert), `kProgramsJsonCapacity` 2048→8192. Das `shortcut`-Feld (Programme, `"P1"`–`"P4"`) wurde komplett entfernt — sein einziger Zweck war die `P1`–`P4`-Button-Bindung, mit deren Wegfall war es totes Konzept (Struct-Feld, JSON-Serialisierung/-Parsing, Duplikat-Prüfung in `setPrograms()`, `getProgramIndexForShortcut()` — alles entfernt statt nur ungenutzt liegen gelassen).
+
+**`main.cpp`**: `SET_LOOP_TASK_STACK_SIZE` 32→64 KB (größeres `kProgramsJsonCapacity` ist jetzt der puffer-bestimmende Fall, vorher `schedule.json`).
+
+Ausführlich interaktiv auf Hardware getestet und über viele Runden direkt am Gerät nachjustiert (Layout/Abstände/Textposition) — siehe `docs/testing.md`.
+
+**Bewusst zurückgestellt / Backlog**:
+- Web-Interface zur vollständigen Geräte-Konfiguration (komfortables Editieren von Programmen/Zeitplänen) — eigene, noch nicht begonnene Phase, Touch-UI bleibt bewusst nur für schnelle Vor-Ort-Bedienung zuständig.
+- Erweiterung auf 16 Ventile (V0–V15) — eigene, noch nicht begonnene Phase (siehe oben).
+- Touch-UI-Bedienung für den Zeitplan (Phase 15) — weiterhin nicht umgesetzt, keine „Timer“-Unterseite (siehe Absatz oben, Begründung für den Verzicht).
+- Feinschliff der Statuszeilen-/Button-Höhen („kann später nochmal hübsch gemacht werden“, Nutzer-Aussage) — funktional fertig, rein kosmetisch noch nicht final.

@@ -23,13 +23,13 @@ bool isConnected();
 /// Sonderlogik gegenueber dem MQTT-Pfad.
 void requestMainCmd(bool on);
 
-/// Wendet das Programm an, dessen "shortcut"-Feld dem physischen Button `shortcut`
-/// entspricht (1..4 fuer P1..P4) - fuer die Touch-UI-Buttons (Phase 13/14), kein
-/// MQTT-Umweg. Kein Effekt (nur Log-Eintrag), wenn kein Programm diesen Shortcut hat.
-void requestProgramByShortcut(uint8_t shortcut);
+/// Wendet Programm `programIndex` (1-basiert, 0 = keins/abwaehlen) an - identisch zu
+/// main/program/cmd, aber ohne MQTT-Umweg. Fuer die Touch-UI-Programme-Unterseite
+/// (Phase 16), die per </>-Buttons durch alle Programme blaettert.
+void requestProgramSelect(uint8_t programIndex);
 
-/// Loescht die Programm-Auswahl (identisch zu main/program/cmd 0) - fasst keine Ventile
-/// an. Fuer die Touch-UI: erneutes Druecken eines bereits aktiven Programm-Buttons.
-void requestProgramClear();
+/// Schaltet Ventil `index` (1..5) direkt (identisch V{n}/cmd MQTT-Befehl), ohne
+/// MQTT-Umweg - fuer die Touch-UI-Ventilmatrix (Phase 16).
+void requestValveCmd(uint8_t index, bool on);
 
 }  // namespace MqttManager

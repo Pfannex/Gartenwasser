@@ -156,7 +156,7 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Iterativ verfeinert auf Nutzer-Feedback: Ventile mit `auto=OFF` werden im AUS-Zustand dunkelgrau gedimmt (springen bei manueller Einschaltung normal auf Rot); Alias-Anzeige aus der kompakten Ventil-Liste wieder entfernt (Platz für P1–P4), aber in der Statuszeile für das aktive/laufende Ventil wieder aufgenommen; Umlaute im eingebauten LVGL-Font nicht darstellbar → lokale ASCII-Transliteration (nur Anzeige, MQTT/`ConfigStore` bleiben UTF-8).
 - Getestet auf Hardware, vom Nutzer bestätigt ("sieht klasse aus").
 
-## Offene Punkte / nächste Schritte
+## 2026-08-16
 
 ### Phase 14 — Design fuer Bewaesserungsprogramme abgestimmt
 
@@ -275,8 +275,27 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Auf Hardware verifiziert: Eintraege ohne `name` funktionieren unveraendert korrekt (Bulk-Set/State-Roundtrip getestet).
 - Details in `docs/spec/15-wochenplan.md`, Abschnitt "Nachtrag".
 
+## 2026-08-17
+
+### Touch-UI komplett neu gestaltet, `P1`–`P4`/`shortcut` entfernt
+
+- Mehrstufiger Design-Dialog vor der Umsetzung: Programm-Anzahl-Limit (nur 4 `P1`–`P4`-Buttons von bis zu 8 möglichen Programmen) hinterfragt → `ConfigStore::kMaxPrograms` 8→32 angehoben. Idee einer 2×8-Ventilanzeige (volle MCP23017-Kapazität) aufgekommen, dabei ein konkretes technisches Risiko identifiziert (`MqttManager::parseValveTopic()` nimmt aktuell einstellige Ventilnummern an, würde bei `V10`–`V15` brechen) — Entscheidung: Erweiterung auf 16 Ventile als eigene, separate, noch nicht begonnene Phase, nicht Teil dieses Umbaus, genau wie ein geplantes Web-Interface zur vollständigen Geräte-Konfiguration (Touch-UI bleibt bewusst nur für schnelle Vor-Ort-Bedienung zuständig, Web-UI wird die eigentliche Editier-Oberfläche).
+- Ursprünglich angedachte „Timer“-Unterseite (Zeitplan-Bedienung am Display, siehe Backlog-Idee vom 2026-08-16) verworfen — kein sinnvoller Kalender auf 172×320px, und Zeitplan-Einträge haben seit dem Entfernen des `name`-Felds ohnehin keinen sprechenden Titel mehr zum Durchblättern.
+- Eigene Korrektur während des Designs: ich hatte vorgeschlagen, dass OK in der Programme-Unterseite das Programm sowohl auswählt **als auch startet** (kombiniert). Nutzer korrigierte das explizit: „das soll nicht so sein, erst Programm auswählen, dann von der Hauptseite mit START starten“ — OK wendet seitdem nur an, Start bleibt ein bewusst separater Schritt.
+- **Umsetzung**:
+  - `ConfigStore`: `kMaxPrograms` 8→32, `kProgramsJsonCapacity` 2048→8192. `shortcut`-Feld (Struct, JSON-Serialisierung/-Parsing, Duplikat-Prüfung, `getProgramIndexForShortcut()`) komplett entfernt statt nur ungenutzt gelassen — sein einziger Zweck (P1-P4-Bindung) entfiel mit den Buttons.
+  - `MqttManager`: `requestProgramByShortcut()`/`requestProgramClear()` durch ein generisches `requestProgramSelect(uint8_t programIndex)` ersetzt (0 = abwählen). Neue `requestValveCmd(uint8_t, bool)` — `handleValveCmd()`s Kernlogik nach `applyValveCmd()` extrahiert, für die jetzt funktionale Ventilmatrix ohne MQTT-Umweg wiederverwendet.
+  - `main.cpp`: `SET_LOOP_TASK_STACK_SIZE` 32→64 KB (das gewachsene `kProgramsJsonCapacity` ist jetzt der puffer-bestimmende Fall, vorher `schedule.json`).
+  - `HmiManager`: komplette Neugestaltung. Hauptseite: graue statische Titelzeile, START/STOP-Button (voller Breite, reduzierte Höhe), 4×4-Ventil-Statusmatrix (`V0`–`V5` belegt, Rest Platzhalter für die spätere 16-Ventil-Option, `V1`–`V5` per Tap direkt schaltbar über `requestValveCmd()`, `V0` ohne Handler wie bei MQTT), Programme-Button darunter (zeigt aktives Programm als Buttontext), zweizeilige Statuszeile als Fußleiste (Fehler rot/gelb > Programm-Hinweis orange > laufende Sequenz gelb > „MANUELL“ hellblau bei manuellem Ventil, jeweils mit Alias-Name in Zeile 2). Neue Programme-Unterseite als zweiter LVGL-Screen (`lv_scr_load()`, architektonisch neu für dieses Projekt) mit `<`/`>`-Blättern durch alle Programme inkl. virtuellem „Kein Programm“-Eintrag, OK/Abbrechen.
+- **Iteratives Feintuning direkt am Gerät** (viele Build-Flash-Test-Runden): gelber Rahmen ums aktive Ventil entfernt (Rot allein reicht), Statuszeilen-Hintergrund an die Titelzeilen-Farbe angeglichen, Fehleranzeige auf rot/gelb umgestellt, Button-/Box-Höhen und Textposition mehrfach nachjustiert (START/Programme-Button aktuell gleich hoch, Statuszeilen-Text bewusst mit negativem Offset weiter oben positioniert). Nutzer-Fazit: funktional fertig, Feinschliff der Abstände „vielleicht nochmal später hübsch machen“ — bewusst als kosmetisch offen gelassen, kein Blocker.
+- Getestet interaktiv auf Hardware (Build→Flash→Sichtprüfung je Änderung), siehe `docs/testing.md`. Dokumentation nachgezogen: `docs/spec/13-touch-ui.md` (Nachtrag), `docs/requirements.md` (Touch-UI-Abschnitt + Entscheidungshistorie + Programme-Beispiel ohne `shortcut`), `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
+- Zeitplan (Phase 15) manuell am Gerät testen — Merker des Nutzers vom 2026-08-16, bewusst auf „nach dem HMI-Umbau“ verschoben; der HMI-Umbau ist jetzt fertig, damit als Nächstes fällig.
 - Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Zeitplan-Trigger (Phase 15, Merker), inkl. der dafür nötigen „nächster fälliger Trigger"-Berechnung — bewusst zurückgestellt, kein Termin.
-- Touch-UI-Anbindung für den Zeitplan (Anzeige/Bedienung am Display) — reine Backlog-Idee (Untermenü-Struktur), nicht eingeplant, siehe `docs/spec/13-touch-ui.md`.
+- Touch-UI-Anbindung für den Zeitplan (Anzeige/Bedienung am Display) — weiterhin nicht umgesetzt (siehe `docs/spec/13-touch-ui.md`, Nachtrag 2026-08-17: „Timer“-Unterseite bewusst verworfen, kein Ersatzkonzept eingeplant).
+- Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
+- Web-Interface zur vollständigen Geräte-Konfiguration (Programme/Zeitplan komfortabel editieren) — eigene, noch nicht begonnene Phase.
+- Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt — mit Phase 15 sind jetzt alle geräteinternen Phasen (00–09, 11–15) fertig, Phase 10 ist der einzige verbleibende Punkt der ursprünglichen Phasenliste.

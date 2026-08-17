@@ -30,7 +30,6 @@ uint16_t maxTimeMinutes = kDefaultMaxTimeMinutes;
 // Programme sind Teilmengen wie main/config/set, siehe docs/spec/14-programme.md.
 struct StoredProgram {
   char name[ConfigStore::kAliasMaxLength + 1];
-  uint8_t shortcut;  // 0 = keiner, 1..4 = P1..P4
   uint16_t time[6];
   bool autoFlag[6];
   uint8_t timeSetMask;
@@ -40,11 +39,6 @@ struct StoredProgram {
 StoredProgram programs[ConfigStore::kMaxPrograms];
 uint8_t programCount = 0;
 uint8_t activeProgram = 0;
-
-// String-Label je Shortcut-Wert (1..4), Index 0 ungenutzt. Literale mit statischer
-// Speicherdauer - unbedenklich als const char* in ein JsonDocument zu schreiben
-// (kein Dangling-Pointer-Risiko wie bei einem lokalen Stack-Puffer je Schleifendurchlauf).
-constexpr const char *kShortcutLabels[5] = {"", "P1", "P2", "P3", "P4"};
 
 // Ein gespeicherter Zeitplan-Eintrag (Phase 15). `weekdaysMask` (Bit 0=Montag..6=Sonntag)
 // nur bei type=WEEKLY relevant, `year`/`month`/`day` nur bei type=ONCE - siehe
@@ -65,8 +59,8 @@ StoredScheduleEntry schedule[ConfigStore::kMaxScheduleEntries];
 uint8_t scheduleCount = 0;
 bool scheduleGlobalEnabled = true;
 
-// Kurzform je Wochentag (Bit-Index 0=Montag..6=Sonntag), statische Speicherdauer wie
-// kShortcutLabels - sicher als const char* in ein JsonDocument zu schreiben.
+// Kurzform je Wochentag (Bit-Index 0=Montag..6=Sonntag), statische Speicherdauer -
+// sicher als const char* in ein JsonDocument zu schreiben.
 constexpr const char *kWeekdayLabels[7] = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"};
 constexpr const char *kScheduleTypeLabels[3] = {"daily", "weekly", "once"};
 
@@ -77,16 +71,6 @@ bool parseProgramValveKey(const char *key, uint8_t *outIndex) {
   }
   *outIndex = static_cast<uint8_t>(key[1] - '0');
   return true;
-}
-
-// Wandelt "P1".."P4" in 1..4 um, alles andere (falscher String, fehlend) liefert 0
-// (kein Shortcut) - wird beim Laden nicht abgelehnt, siehe docs/spec/14-programme.md,
-// Kernentscheidung 8.
-uint8_t parseShortcutLabel(const char *value) {
-  if (value == nullptr || value[0] != 'P' || value[1] < '1' || value[1] > '4' || value[2] != '\0') {
-    return 0;
-  }
-  return static_cast<uint8_t>(value[1] - '0');
 }
 
 // Wandelt "mon".."sun" in den Bit-Index 0..6 um, 0xFF bei unbekanntem Wert.
@@ -244,9 +228,6 @@ void buildProgramsJson(JsonDocument &doc) {
   for (uint8_t p = 0; p < programCount; p++) {
     JsonObject obj = arr.createNestedObject();
     obj["name"] = programs[p].name;
-    if (programs[p].shortcut >= 1 && programs[p].shortcut <= 4) {
-      obj["shortcut"] = kShortcutLabels[programs[p].shortcut];
-    }
     JsonObject time = obj.createNestedObject("time");
     JsonObject autoFlags = obj.createNestedObject("auto");
     for (uint8_t i = 1; i <= 5; i++) {
@@ -307,7 +288,6 @@ void loadProgramsFile() {
     const char *name = obj["name"] | "";
     strncpy(programs[p].name, name, ConfigStore::kAliasMaxLength);
     programs[p].name[ConfigStore::kAliasMaxLength] = '\0';
-    programs[p].shortcut = parseShortcutLabel(obj["shortcut"] | "");
     programs[p].timeSetMask = 0;
     programs[p].autoSetMask = 0;
 
@@ -342,9 +322,9 @@ void buildScheduleJson(JsonDocument &doc) {
     obj["type"] = kScheduleTypeLabels[static_cast<uint8_t>(schedule[i].type)];
 
     // String-Werte muessen kopiert werden (Arduino String erzwingt bei ArduinoJson v6
-    // eine Kopie in den Dokument-Pool) - anders als bei statischen Literalen (kShortcutLabels,
-    // kWeekdayLabels) waeren lokale char-Puffer hier ein Dangling-Pointer-Risiko, sobald die
-    // Schleife die naechste Iteration erreicht (siehe Phase-14-Erfahrung mit main/programs/state).
+    // eine Kopie in den Dokument-Pool) - anders als bei statischen Literalen (kWeekdayLabels)
+    // waeren lokale char-Puffer hier ein Dangling-Pointer-Risiko, sobald die Schleife die
+    // naechste Iteration erreicht (siehe Phase-14-Erfahrung mit main/programs/state).
     char timeBuf[6];
     snprintf(timeBuf, sizeof(timeBuf), "%02u:%02u", schedule[i].hour, schedule[i].minute);
     obj["time"] = String(timeBuf);
@@ -548,7 +528,6 @@ void ConfigStore::setPrograms(const ProgramInput *entries, uint8_t count) {
   for (uint8_t p = 0; p < count; p++) {
     strncpy(programs[p].name, entries[p].name, kAliasMaxLength);
     programs[p].name[kAliasMaxLength] = '\0';
-    programs[p].shortcut = entries[p].shortcut;
     programs[p].timeSetMask = 0;
     programs[p].autoSetMask = 0;
     for (uint8_t i = 1; i <= 5; i++) {
@@ -563,24 +542,6 @@ void ConfigStore::setPrograms(const ProgramInput *entries, uint8_t count) {
     }
   }
   programCount = count;
-
-  // Duplikat-Erkennung (siehe docs/spec/14-programme.md, Kernentscheidung 8): wird
-  // nicht abgelehnt (widerspraeche dem "ganzes Array ersetzen"-Prinzip), nur geloggt -
-  // getProgramIndexForShortcut() liefert bei Duplikaten den ersten Treffer.
-  for (uint8_t p = 0; p < programCount; p++) {
-    if (programs[p].shortcut == 0) {
-      continue;
-    }
-    for (uint8_t q = p + 1; q < programCount; q++) {
-      if (programs[q].shortcut == programs[p].shortcut) {
-        // Kurz gehalten, damit die Meldung im 96-Byte-lastError-Puffer (inkl. Zeitstempel-
-        // Praefix) nicht abgeschnitten wird (siehe Diagnostics::lastError).
-        Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "Shortcut P%u doppelt belegt!",
-                     programs[p].shortcut);
-      }
-    }
-  }
-
   saveProgramsFile();
 }
 
@@ -630,18 +591,6 @@ uint8_t ConfigStore::getActiveProgram() {
 void ConfigStore::setActiveProgram(uint8_t programIndex) {
   activeProgram = programIndex;
   saveProgramsFile();
-}
-
-uint8_t ConfigStore::getProgramIndexForShortcut(uint8_t shortcut) {
-  if (shortcut < 1 || shortcut > 4) {
-    return 0;
-  }
-  for (uint8_t p = 0; p < programCount; p++) {
-    if (programs[p].shortcut == shortcut) {
-      return p + 1;
-    }
-  }
-  return 0;
 }
 
 size_t ConfigStore::programsToJson(char *buffer, size_t bufferSize) {

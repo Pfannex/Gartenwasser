@@ -419,14 +419,9 @@ void handleMainCmd(const char *payloadStr) {
   }
 }
 
-void handleValveCmd(uint8_t index, const char *payloadStr) {
-  bool targetOn = false;
-  if (!parseOnOffPayload(payloadStr, &targetOn)) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Payload '%s' fuer V%u/cmd", payloadStr,
-                 index);
-    return;
-  }
-
+// Kernlogik ohne Payload-Parsing, wiederverwendet von MqttManager::requestValveCmd()
+// (Touch-UI-Ventilmatrix, Phase 16, kein MQTT-Umweg).
+void applyValveCmd(uint8_t index, bool targetOn) {
   // Waehrend die Automatik laeuft: manuelles ON ignorieren (siehe
   // docs/spec/07-automatik-sequenz.md); manuelles OFF des aktiven Ventils
   // wird angenommen und stoesst den naechsten Schritt der Sequenz an.
@@ -444,6 +439,16 @@ void handleValveCmd(uint8_t index, const char *payloadStr) {
       armIdleValve(index);  // normaler manueller Stopp: sofort wieder auf `time` armiert
     }
   }
+}
+
+void handleValveCmd(uint8_t index, const char *payloadStr) {
+  bool targetOn = false;
+  if (!parseOnOffPayload(payloadStr, &targetOn)) {
+    Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Payload '%s' fuer V%u/cmd", payloadStr,
+                 index);
+    return;
+  }
+  applyValveCmd(index, targetOn);
 }
 
 // Kernlogik ohne Payload-Parsing, wiederverwendet von main/config/set
@@ -623,15 +628,6 @@ void handleProgramCmd(const char *payloadStr) {
   applyProgram(static_cast<uint8_t>(value));
 }
 
-// Wandelt "P1".."P4" in 1..4 um, alles andere (falscher String, fehlend) liefert 0
-// (kein Shortcut) - wird nicht abgelehnt, siehe docs/spec/14-programme.md, Kernentscheidung 8.
-uint8_t parseProgramShortcut(const char *value) {
-  if (value == nullptr || value[0] != 'P' || value[1] < '1' || value[1] > '4' || value[2] != '\0') {
-    return 0;
-  }
-  return static_cast<uint8_t>(value[1] - '0');
-}
-
 // main/programs/set: "programs" ersetzt das komplette Array (kein Feld-Merge einzelner
 // Programme, siehe docs/spec/14-programme.md, Kernentscheidung 5), "activeProgram" wendet
 // die Auswahl an (identisch zu main/program/cmd, ueber applyProgram()). Beide optional.
@@ -655,7 +651,6 @@ void handleProgramsSet(const char *payloadStr) {
       }
       ConfigStore::ProgramInput &entry = entries[count];
       entry.name = obj["name"] | "";
-      entry.shortcut = parseProgramShortcut(obj["shortcut"] | "");
       for (uint8_t i = 0; i < 6; i++) {
         entry.timeSet[i] = false;
         entry.autoSet[i] = false;
@@ -1223,16 +1218,10 @@ void MqttManager::requestMainCmd(bool on) {
   }
 }
 
-void MqttManager::requestProgramByShortcut(uint8_t shortcut) {
-  const uint8_t programIndex = ConfigStore::getProgramIndexForShortcut(shortcut);
-  if (programIndex == 0) {
-    Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "P%u: kein Programm mit diesem Shortcut hinterlegt.",
-                 shortcut);
-    return;
-  }
+void MqttManager::requestProgramSelect(uint8_t programIndex) {
   applyProgram(programIndex);
 }
 
-void MqttManager::requestProgramClear() {
-  applyProgram(0);
+void MqttManager::requestValveCmd(uint8_t index, bool on) {
+  applyValveCmd(index, on);
 }
