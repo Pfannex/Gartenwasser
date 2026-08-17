@@ -6,7 +6,7 @@
 
 ## Phasen-Übersicht
 
-Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (die bleibt als stabiler Datei-Bezeichner erhalten). Priorisierung (2026-08-15): Phase 10 (Home Assistant, externe Integration) bewusst ans Ende gestellt — zuerst alles geräteintern (Phasen 11–15) fertigstellen, siehe `requirements.md`, Entscheidungshistorie.
+Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (die bleibt als stabiler Datei-Bezeichner erhalten). Priorisierung (2026-08-15, erneut bestätigt 2026-08-17): Phase 10 (Home Assistant, externe Integration) bewusst ans Ende gestellt — zuerst alles geräteintern (Phasen 11–15) fertigstellen. Das Web-Interface (Phasen 16–21) wurde nachträglich davor eingeordnet, nicht danach wie ursprünglich geplant — Auslöser: die Touch-UI-Zeitplanbedienung wurde verworfen (Display zu klein), Zeitplan-Bearbeitung soll stattdessen komfortabel im Browser laufen. Siehe `requirements.md`, Entscheidungshistorie.
 
 | Phase | Thema | Status |
 |---|---|---|
@@ -24,5 +24,11 @@ Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (
 | [12](spec/12-aufraeumen.md) | Aufräumen/Refactoring | ✅ (Regressionstest: alle 10 Checklistenpunkte bestanden) |
 | [13](spec/13-touch-ui.md) | Touch-UI (Automatik-Toggle & Statusanzeige) | ✅ |
 | [14](spec/14-programme.md) | Bewässerungsprogramme (`main/program/cmd`/`state`) | ✅ |
-| [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | ✅ (Kollisions-Hinweis noch offen) |
+| [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | ✅ |
+| [16](spec/16-webif-fundament.md) | Web-Interface: Fundament & Architekturentscheidung | 📋 |
+| [17](spec/17-webif-dashboard.md) | Web-Interface: Status-Dashboard (read-only) | 📋 |
+| [18](spec/18-webif-konfiguration.md) | Web-Interface: Konfiguration bearbeiten | 📋 |
+| [19](spec/19-webif-programme.md) | Web-Interface: Programme verwalten | 📋 |
+| [20](spec/20-webif-zeitplan.md) | Web-Interface: Zeitplan verwalten | 📋 |
+| [21](spec/21-webif-ota.md) | Web-Interface: Firmware-Update (OTA) | 📋 |
 | [10](spec/10-ha-discovery.md) | Home Assistant MQTT-Discovery | 📋 (zurückgestellt — externe Integration, ganz zum Schluss) |
