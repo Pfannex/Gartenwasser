@@ -420,7 +420,7 @@ void handleMainCmd(const char *payloadStr) {
 }
 
 // Kernlogik ohne Payload-Parsing, wiederverwendet von MqttManager::requestValveCmd()
-// (Touch-UI-Ventilmatrix, Phase 16, kein MQTT-Umweg).
+// (Touch-UI-Ventilmatrix, Touch-UI-Neugestaltung, kein MQTT-Umweg).
 void applyValveCmd(uint8_t index, bool targetOn) {
   // Waehrend die Automatik laeuft: manuelles ON ignorieren (siehe
   // docs/spec/07-automatik-sequenz.md); manuelles OFF des aktiven Ventils

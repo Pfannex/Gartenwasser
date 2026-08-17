@@ -26,6 +26,7 @@ const char *sourceToString(Logger::Source source) {
     case Logger::Source::MQTT:   return "MQTT ";
     case Logger::Source::I2C:    return "I2C  ";
     case Logger::Source::HMI:    return "HMI  ";
+    case Logger::Source::WEB:    return "WEB  ";
     case Logger::Source::SYSTEM: return "SYS  ";
   }
   return "?????";

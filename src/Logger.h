@@ -15,7 +15,7 @@
 class Logger {
  public:
   enum class Type : uint8_t { ERROR, INFO, DEBUG, PUB, SUB };
-  enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, SYSTEM };
+  enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, WEB, SYSTEM };
 
   using ErrorCallback = void (*)(const char *message);
 

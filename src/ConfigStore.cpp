@@ -1,7 +1,7 @@
 #include "ConfigStore.h"
 
 #include <ArduinoJson.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -156,7 +156,7 @@ bool parseDateString(const char *value, uint16_t *outYear, uint8_t *outMonth, ui
   return true;
 }
 
-// Baut die JSON-Struktur (identisch fuer SPIFFS-Persistenz und main/config/state).
+// Baut die JSON-Struktur (identisch fuer LittleFS-Persistenz und main/config/state).
 void buildJson(JsonDocument &doc) {
   JsonObject time = doc.createNestedObject("time");
   JsonObject autoFlags = doc.createNestedObject("auto");
@@ -176,7 +176,7 @@ void save() {
   StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
   buildJson(doc);
 
-  File file = SPIFFS.open(kConfigPath, FILE_WRITE);
+  File file = LittleFS.open(kConfigPath, FILE_WRITE);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: Datei zum Schreiben nicht oeffenbar.");
     return;
@@ -186,11 +186,11 @@ void save() {
 }
 
 void load() {
-  if (!SPIFFS.exists(kConfigPath)) {
+  if (!LittleFS.exists(kConfigPath)) {
     return;  // keine gespeicherte Konfiguration -> Defaults bleiben aktiv
   }
 
-  File file = SPIFFS.open(kConfigPath, FILE_READ);
+  File file = LittleFS.open(kConfigPath, FILE_READ);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: Datei zum Lesen nicht oeffenbar.");
     return;
@@ -248,7 +248,7 @@ void saveProgramsFile() {
   StaticJsonDocument<ConfigStore::kProgramsJsonCapacity> doc;
   buildProgramsJson(doc);
 
-  File file = SPIFFS.open(kProgramsPath, FILE_WRITE);
+  File file = LittleFS.open(kProgramsPath, FILE_WRITE);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: programs.json nicht schreibbar.");
     return;
@@ -260,11 +260,11 @@ void saveProgramsFile() {
 void loadProgramsFile() {
   programCount = 0;
   activeProgram = 0;
-  if (!SPIFFS.exists(kProgramsPath)) {
+  if (!LittleFS.exists(kProgramsPath)) {
     return;  // keine gespeicherten Programme -> leere Liste bleibt aktiv
   }
 
-  File file = SPIFFS.open(kProgramsPath, FILE_READ);
+  File file = LittleFS.open(kProgramsPath, FILE_READ);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: programs.json nicht lesbar.");
     return;
@@ -351,7 +351,7 @@ void saveScheduleFile() {
   StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
   buildScheduleJson(doc);
 
-  File file = SPIFFS.open(kSchedulePath, FILE_WRITE);
+  File file = LittleFS.open(kSchedulePath, FILE_WRITE);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht schreibbar.");
     return;
@@ -363,11 +363,11 @@ void saveScheduleFile() {
 void loadScheduleFile() {
   scheduleCount = 0;
   scheduleGlobalEnabled = true;
-  if (!SPIFFS.exists(kSchedulePath)) {
+  if (!LittleFS.exists(kSchedulePath)) {
     return;  // kein gespeicherter Zeitplan -> leere Liste bleibt aktiv
   }
 
-  File file = SPIFFS.open(kSchedulePath, FILE_READ);
+  File file = LittleFS.open(kSchedulePath, FILE_READ);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht lesbar.");
     return;
@@ -449,8 +449,8 @@ void loadScheduleFile() {
 }  // namespace
 
 void ConfigStore::begin() {
-  if (!SPIFFS.begin(true)) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: SPIFFS-Mount fehlgeschlagen.");
+  if (!LittleFS.begin(true)) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: LittleFS-Mount fehlgeschlagen.");
     return;
   }
   load();

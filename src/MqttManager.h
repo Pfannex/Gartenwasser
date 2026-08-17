@@ -25,11 +25,13 @@ void requestMainCmd(bool on);
 
 /// Wendet Programm `programIndex` (1-basiert, 0 = keins/abwaehlen) an - identisch zu
 /// main/program/cmd, aber ohne MQTT-Umweg. Fuer die Touch-UI-Programme-Unterseite
-/// (Phase 16), die per </>-Buttons durch alle Programme blaettert.
+/// (Touch-UI-Neugestaltung, siehe docs/spec/13-touch-ui.md), die per </>-Buttons
+/// durch alle Programme blaettert.
 void requestProgramSelect(uint8_t programIndex);
 
 /// Schaltet Ventil `index` (1..5) direkt (identisch V{n}/cmd MQTT-Befehl), ohne
-/// MQTT-Umweg - fuer die Touch-UI-Ventilmatrix (Phase 16).
+/// MQTT-Umweg - fuer die Touch-UI-Ventilmatrix (Touch-UI-Neugestaltung, siehe
+/// docs/spec/13-touch-ui.md).
 void requestValveCmd(uint8_t index, bool on);
 
 }  // namespace MqttManager

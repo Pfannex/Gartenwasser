@@ -20,6 +20,7 @@
 #include "Sequencer.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
+#include "WebManager.h"
 #include "WifiManager.h"
 #include "Logger.h"
 
@@ -28,7 +29,7 @@
 // Stack (handleMqttMessage -> handleProgramsSet), das fuehrte zu einem "Stack protection
 // fault" (Guru Meditation Error). RAM-Headroom ist reichlich vorhanden (siehe Log.md,
 // Speicher-Check Phase 12), daher grosszuegig bemessen statt die JSON-Puffer zu verkleinern.
-// Phase 16 (Touch-UI-Umbau) hat kMaxPrograms 8->32 angehoben, kProgramsJsonCapacity damit
+// Die Touch-UI-Neugestaltung hat kMaxPrograms 8->32 angehoben, kProgramsJsonCapacity damit
 // auf 8192 (jetzt groesster Payload, vorher schedule.json mit 4096) - nochmal verdoppelt
 // statt die knapp bemessenen 32 KB zu riskieren.
 SET_LOOP_TASK_STACK_SIZE(64 * 1024);
@@ -41,7 +42,7 @@ void setup() {
   Serial.println();
   Serial.println("------------------------------------------------------------");
 
-  // So frueh wie moeglich, damit auch fruehe Boot-Fehler (SPIFFS, WLAN, ...)
+  // So frueh wie moeglich, damit auch fruehe Boot-Fehler (LittleFS, WLAN, ...)
   // in diagnostics/lastError landen (siehe Logger::setErrorCallback()).
   Diagnostics::begin();
 
@@ -53,6 +54,10 @@ void setup() {
 
   // MQTT-Client konfigurieren (nicht blockierend, siehe MqttManager::loop())
   MqttManager::begin();
+
+  // Web-Interface (Phase 16): async, kein loop()-Aufruf noetig - setzt gemountetes
+  // LittleFS voraus (siehe ConfigStore::begin() oben) und WLAN (siehe WifiManager oben).
+  WebManager::begin();
 
   // Display/Touch/LVGL initialisieren (startet dabei auch den I2C-Bus)
   HmiManager::begin();

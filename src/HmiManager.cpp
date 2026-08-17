@@ -173,7 +173,7 @@ void touchpadRead(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 
 constexpr uint8_t kValveCount = 6;  // V0..V5, siehe ValveController::kValveCount
 
-// Ventil-Statusmatrix (Phase 16): 4x4 Anzeigefelder, V0..V5 belegen die ersten 6
+// Ventil-Statusmatrix (Touch-UI-Neugestaltung): 4x4 Anzeigefelder, V0..V5 belegen die ersten 6
 // (zeilenweise), der Rest bleibt als reiner Platzhalter sichtbar - Testaufbau fuer
 // eine spaetere Erweiterung auf 16 Ventile (volle MCP23017-Kapazitaet), siehe
 // docs/spec/13-touch-ui.md. V1..V5 sind per Tap direkt schaltbar (V{n}/cmd,
@@ -217,7 +217,7 @@ lv_obj_t *statusLine1 = nullptr;
 lv_obj_t *statusLine2 = nullptr;
 unsigned long lastUiRefreshMs = 0;
 
-// Programme-Unterseite (Phase 16): eigener LVGL-Screen zum Durchblaettern aller
+// Programme-Unterseite (Touch-UI-Neugestaltung): eigener LVGL-Screen zum Durchblaettern aller
 // Programme (</>), OK wendet nur an (identisch main/program/cmd), startet nichts -
 // siehe docs/spec/13-touch-ui.md.
 lv_obj_t *programScreen = nullptr;

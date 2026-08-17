@@ -113,6 +113,19 @@ Interaktiv getestet: jede Layout-/Funktionsänderung wurde gebaut, geflasht und 
 
 **Nicht Teil dieser Testrunde**: Zeitplan (Phase 15) manueller Hardware-Test — stand als Merker aus, wurde bewusst auf „nach dem HMI-Umbau“ verschoben und ist damit jetzt als Nächstes fällig (siehe `docs/Log.md`, „Offene Punkte“).
 
+## Phase 16 — Web-Interface-Fundament — 2026-08-17
+
+Auf Hardware getestet (Build→Flash→curl/Browser-Prüfung je Änderung).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Seite lädt über Geräte-IP | `http://<IP>/`, `/index.html`, `/style.css` per `curl` geprüft | HTTP 200, korrekter Inhalt | ✅ |
+| 2 | Flash-Größen-Checkpoint | Vorher/Nachher-Vergleich `pio run`-Ausgabe | 41,5 % → 43,2 % (≈+50 KB, deutlich unter der Schätzung) | ✅ |
+| 3 | Persistenz-Regression (SPIFFS→LittleFS) | Alias-Wert per MQTT gesetzt, Hardware-Reset (`esptool --after hard-reset`), Wert erneut abgefragt | Wert korrekt erhalten geblieben | ✅ |
+| 4 | `uploadfs`-Kompatibilität | `pio run --target uploadfs` geschriebene Dateien nach Boot per `curl` geprüft | **Fehlgeschlagen** — Dateien nach erstem Boot nicht mehr vorhanden (Formatinkompatibilität `mklittlefs`/Laufzeit-Mount) | ❌ → Workaround umgesetzt (Firmware schreibt Dateien selbst), siehe `docs/spec/16-webif-fundament.md` |
+
+**Nebenbefund**: die SPIFFS→LittleFS-Umformatierung hat die zu diesem Zeitpunkt gesetzten Testdaten (5 Programme, 1 Zeitplan-Eintrag, Config-Werte) gelöscht — nicht vorher angekündigt, im Nachhinein vom Nutzer als unkritisch bestätigt (reine Testdaten dieser Session).
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

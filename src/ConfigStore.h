@@ -1,7 +1,7 @@
 /**
  * @file    ConfigStore.h
  * @brief   Persistenz der Einstellwerte (config.json: Ventil-Laufzeiten/Automatik/Alias/maxTime;
- *          programs.json: Bewaesserungsprogramme, Phase 14) im SPIFFS. Siehe docs/requirements.md,
+ *          programs.json: Bewaesserungsprogramme, Phase 14) im LittleFS. Siehe docs/requirements.md,
  *          Abschnitt "Konfiguration" (config/programs/schedule als getrennte Bereiche).
  */
 
@@ -15,15 +15,16 @@ class ConfigStore {
   /// Maximale Laenge (ohne Nullterminator) fuer einen Ventil-Alias bzw. Programmnamen.
   static constexpr size_t kAliasMaxLength = 32;
 
-  /// Puffer-/Speicherpool-Groesse fuer die config-JSON (SPIFFS-Persistenz und
+  /// Puffer-/Speicherpool-Groesse fuer die config-JSON (LittleFS-Persistenz und
   /// main/config/set|state teilen sich diese Konstante).
   static constexpr size_t kJsonCapacity = 768;
 
-  /// Maximale Anzahl Bewaesserungsprogramme (Phase 14, ab Phase 16 auf 32 angehoben -
-  /// die Touch-UI durchblaettert sie in der "Programme"-Unterseite statt fixer P1-P4-Buttons).
+  /// Maximale Anzahl Bewaesserungsprogramme (Phase 14, mit der Touch-UI-Neugestaltung auf
+  /// 32 angehoben - die Touch-UI durchblaettert sie in der "Programme"-Unterseite statt
+  /// fixer P1-P4-Buttons, siehe docs/spec/13-touch-ui.md).
   static constexpr uint8_t kMaxPrograms = 32;
 
-  /// Puffer-/Speicherpool-Groesse fuer die programs-JSON (SPIFFS-Persistenz und
+  /// Puffer-/Speicherpool-Groesse fuer die programs-JSON (LittleFS-Persistenz und
   /// main/programs/set|state teilen sich diese Konstante).
   static constexpr size_t kProgramsJsonCapacity = 8192;
 
@@ -40,7 +41,7 @@ class ConfigStore {
 
   ConfigStore() = delete;
 
-  /// Mountet SPIFFS und laedt /config.json + /programs.json (falls vorhanden), sonst gelten Defaultwerte.
+  /// Mountet LittleFS und laedt /config.json + /programs.json (falls vorhanden), sonst gelten Defaultwerte.
   static void begin();
 
   /// Konfigurierte Laufzeit in Minuten fuer Ventil `index` (1..5).
@@ -101,7 +102,7 @@ class ConfigStore {
   /// Maximale Anzahl Zeitplan-Eintraege.
   static constexpr uint8_t kMaxScheduleEntries = 16;
 
-  /// Puffer-/Speicherpool-Groesse fuer die schedule-JSON (SPIFFS-Persistenz und
+  /// Puffer-/Speicherpool-Groesse fuer die schedule-JSON (LittleFS-Persistenz und
   /// main/schedule/set|state teilen sich diese Konstante).
   static constexpr size_t kScheduleJsonCapacity = 4096;
 
