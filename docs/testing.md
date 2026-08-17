@@ -84,6 +84,10 @@ Automatisiert per Python/paho-mqtt gegen den echten Broker getestet (Skript ad h
 
 Testzustand danach vollständig zurückgesetzt (Sequenz gestoppt, Test-Zeitplan geleert, Programmwahl zurückgesetzt). Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Trigger bewusst noch nicht umgesetzt (siehe `docs/spec/15-wochenplan.md`, „Noch nicht umgesetzt") — daher auch nicht getestet.
 
+### Erneuter Trigger-Test nach der Touch-UI-Neugestaltung — 2026-08-17
+
+Nach dem kompletten HMI-Umbau (`shortcut`-Feld entfernt, `kMaxPrograms` 32) nochmal end-to-end auf Hardware verifiziert, dass der Scheduler mit dem neuen Programm-Bestand weiterhin sauber funktioniert: `once`-Eintrag auf `18:00` (5 Minuten in der Zukunft) gesetzt, referenziert Programm „V1" (eines der 5 zu diesem Zeitpunkt geladenen Testprogramme, siehe oben, „5 Programme laden + durchblättern"). Trigger feuerte pünktlich, Programm „V1" wurde angewendet (`main/program/state` zeigte `{"index":1,"name":"V1"}`), Sequenz lief die konfigurierte 1 Minute durch und beendete sich danach selbstständig (`main/state` zurück auf `OFF`). Vom Nutzer am Display live mitverfolgt und bestätigt („sauber angelaufen"). PASS ✅.
+
 ## Touch-UI-Neugestaltung (Nachtrag zu Phase 13) — 2026-08-17
 
 Interaktiv getestet: jede Layout-/Funktionsänderung wurde gebaut, geflasht und direkt am Gerät begutachtet (kein automatisiertes Skript, reine UI/Bedienbarkeits-Prüfung) — Kernfunktionen bestätigt, Feinschliff der Abstände/Textposition bewusst als kosmetisch offen gelassen (siehe `docs/spec/13-touch-ui.md`, Nachtrag).

@@ -299,9 +299,12 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Alle Touch-Buttons (START, Ventilmatrix, Programme, `<`/`>`/OK/Abbrechen) zeigen jetzt beim Antippen kurz Weiß als Trefferfeedback (`addPressHighlight()`, neuer Helfer in `HmiManager.cpp`) — vorher keine sichtbare Rückmeldung, ob ein Touch registriert wurde.
 - Auf Hardware getestet und vom Nutzer bestätigt („schaut gut aus, erledigt“). Details siehe `docs/spec/13-touch-ui.md`, Nachtrag, und `docs/testing.md`.
 
+### Zeitplan (Phase 15) nach dem HMI-Umbau erneut auf Hardware verifiziert
+
+- Merker vom 2026-08-16 aufgelöst: `once`-Eintrag 5 Minuten in der Zukunft (`18:00`) gesetzt, referenziert Programm „V1" (eines der 5 an diesem Tag geladenen Testprogramme). Trigger feuerte pünktlich, Programm korrekt angewendet, Sequenz lief die konfigurierte Minute durch und beendete sich selbstständig — vom Nutzer live am Display verfolgt und bestätigt („sauber angelaufen, das können wir abhaken!"). Bestätigt, dass der Scheduler nach den `shortcut`-Entfernung/`kMaxPrograms`-Änderungen weiterhin korrekt mit dem Programm-Bestand zusammenspielt. Details siehe `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
-- Zeitplan (Phase 15) manuell am Gerät testen — Merker des Nutzers vom 2026-08-16, bewusst auf „nach dem HMI-Umbau“ verschoben; der HMI-Umbau ist jetzt fertig, damit als Nächstes fällig.
 - Kollisions-Hinweis bei manuellem `main/cmd ON` nahe am nächsten Zeitplan-Trigger (Phase 15, Merker), inkl. der dafür nötigen „nächster fälliger Trigger"-Berechnung — bewusst zurückgestellt, kein Termin.
 - Touch-UI-Anbindung für den Zeitplan (Anzeige/Bedienung am Display) — weiterhin nicht umgesetzt (siehe `docs/spec/13-touch-ui.md`, Nachtrag 2026-08-17: „Timer“-Unterseite bewusst verworfen, kein Ersatzkonzept eingeplant).
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
