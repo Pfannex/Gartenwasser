@@ -55,8 +55,10 @@
             <Publication topic="gartenwasser/main/programs/set"/>
             <Publication topic="gartenwasser/main/program/cmd"/>
 
-            <!-- main: Zeitplan (Phase 15, geplant) -->
+            <!-- main: Zeitplan -->
             <Publication topic="gartenwasser/main/schedule/set"/>
+            <Publication topic="gartenwasser/main/schedule/cmd"/>
+            <Publication topic="gartenwasser/main/schedule/cleanup"/>
 
             <!-- LWT -->
             <Subscription createTab="true" qos="0" topic="gartenwasser/availability" scriptFile=""/>
