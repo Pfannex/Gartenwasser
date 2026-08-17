@@ -107,13 +107,15 @@ Beispiel: Rasen jeden Tag 21:00 Uhr (täglicher Trigger, Programm „Rasen"), Be
 
 - **Kollisions-Hinweis bei manuellem `main/cmd ON`** (Touch **und** MQTT): läuft eine manuell gestartete Sequenz voraussichtlich noch, wenn der nächste Zeitplan-Trigger fällig wird (`main/remainingTotal` würde über den nächsten geplanten Start hinausreichen), soll ein Hinweis erfolgen — nicht blockierend, nur Information (passt zum bisherigen Stil: Hinweis statt Verhinderung, siehe `docs/spec/13-touch-ui.md`). Braucht die oben beschriebene separate „nächster Trigger"-Berechnung. Anzeige vermutlich Touch-Statuszeile (transienter Hinweis) + `lastError`/Log für den MQTT-Fall — Details bei Umsetzung.
 - **Aufräum-Funktion für abgelaufene `once`-Einträge**: ein Topic (Arbeitstitel `main/schedule/cleanup`, genaue Benennung noch offen) entfernt alle Einträge, die nie wieder auslösen können (abgelaufene `once`-Termine). Kein Automatismus — bewusst nur auf Anfrage, damit „warum ist mein Eintrag weg“ nicht überrascht. Ergänzt (löst aber nicht ab) das oben entschiedene „liegen lassen“-Verhalten: abgelaufene Einträge bleiben standardmäßig informativ stehen, können aber bei Bedarf gezielt aufgeräumt werden.
-- **Eigenes Fehler-Topic für die Zeitplan-Validierung** (Arbeitstitel `main/schedule/settingsError`): für kollidierende Trigger (jetzt oben mechanisch geklärt: kein Fehler im engeren Sinne, sondern durch die Verarbeitungsreihenfolge automatisch aufgelöst — evtl. trotzdem meldenswert, damit der Nutzer merkt, dass zwei Einträge sich potenziell überschneiden) und allgemeine Konfigurationsfehler beim Verarbeiten von `main/schedule/set` — eigener, schedule-spezifischer Kanal statt (oder zusätzlich zu) dem generischen `diagnostics/lastError`. Exakte Abgrenzung zu `lastError` (ersetzt es für Schedule-Fehler oder ergänzt es?) noch zu klären.
+### Verworfen
+
+- **Eigenes Fehler-Topic `main/schedule/settingsError`** (2026-08-16 verworfen): ursprünglich für kollidierende Trigger und allgemeine Konfigurationsfehler angedacht. Da überschneidende Einträge bewusst erlaubt sind und über „erster in Listen-Reihenfolge gewinnt" automatisch aufgelöst werden (siehe Mechanik oben) — kein Fehlerfall, nichts zu melden. Allgemeine Konfigurationsfehler (z. B. ungültiger `program`-Name) laufen stattdessen über den bereits bestehenden generischen Kanal `diagnostics/lastError`, wie überall sonst im Projekt (kein neues Topic nötig).
 
 ### Noch offene Fragen
 
-- Exaktes Verhalten, wenn ein `program`-Name in einem Zeitplan-Eintrag auf kein existierendes Programm mehr zeigt.
+- Exaktes Verhalten, wenn ein `program`-Name in einem Zeitplan-Eintrag auf kein existierendes Programm mehr zeigt (Log-Meldung über `diagnostics/lastError`, siehe „Verworfen" oben).
 - Verhältnis zu manuellem `main/cmd ON`/`OFF` während eines geplant ausgelösten Laufs — vermutlich identisch zur bestehenden Regel „manuelles Aus wird angenommen, Sequenz macht weiter" (siehe `docs/requirements.md`), plus der Kollisions-Hinweis oben.
-- Exakte Topic-Benennung für die Cleanup-Funktion und für `settingsError`.
+- Exakte Topic-Benennung für die Cleanup-Funktion.
 - Genaue Berechnung/Implementierung der „nächster fälliger Trigger"-Funktion (Wiederkehr-Mathematik für `daily`/`weekly`).
 
 ## Zweck des Eintrags

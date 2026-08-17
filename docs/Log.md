@@ -257,3 +257,9 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Nebenbei die "gleichzeitige Trigger"-Frage aufgeloest: `startSequence()` prueft schon `Sequencer::isRunning()`, daher gewinnt bei zwei Treffern in derselben Minute automatisch der erste in Array-Reihenfolge, kein neuer Code noetig.
 - Klar abgegrenzt von einer zweiten, separaten Funktion "naechster faelliger Trigger" (Wiederkehr-Mathematik fuer daily/weekly) - die wird fuer den Kollisions-Hinweis (Merker 1) noch gebraucht, ist aber nicht Teil des einfachen Minuten-Checks.
 - Details in `docs/spec/15-wochenplan.md`, Kernentscheidung 4. Rein Design-Klaerung, noch keine Codeaenderung.
+
+### Phase 15 — Merker 1 (settingsError-Topic) verworfen
+
+- Da ueberschneidende Zeitplan-Eintraege bewusst erlaubt sind und ueber "erster in Listen-Reihenfolge gewinnt" automatisch aufgeloest werden (siehe Eintrag oben), gibt es dafuer keinen Fehlerfall zu melden - das eigens angedachte Topic `main/schedule/settingsError` wird nicht gebraucht.
+- Allgemeine Konfigurationsfehler (z. B. ungueltiger `program`-Name) laufen stattdessen ueber den bereits bestehenden generischen Kanal `diagnostics/lastError`, wie ueberall sonst im Projekt.
+- Details in `docs/spec/15-wochenplan.md`, Abschnitt "Verworfen".
