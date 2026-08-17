@@ -449,7 +449,14 @@ void loadScheduleFile() {
 }  // namespace
 
 void ConfigStore::begin() {
-  if (!LittleFS.begin(true)) {
+  // Bewusst ohne Auto-Format (kein "true"): auf Hardware verifiziert, dass ein per
+  // `pio run --target uploadfs` (mklittlefs) geschriebenes Image beim Mount mit
+  // formatOnFail=true faelschlich als ungueltig erkannt und automatisch neu formatiert
+  // wurde - dabei gingen sowohl die Web-Dateien als auch die persistierte Konfiguration
+  // verloren. Mit formatOnFail=false mountet dasselbe Image dagegen sauber. Kehrseite:
+  // eine wirklich leere/neue Partition (nie per uploadfs beschrieben) muss einmalig
+  // per uploadfs vorbereitet werden, sonst schlaegt der Mount hier fehl (siehe Log unten).
+  if (!LittleFS.begin(false)) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: LittleFS-Mount fehlgeschlagen.");
     return;
   }

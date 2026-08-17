@@ -1,6 +1,6 @@
 # Phase 16 — Web-Interface: Fundament & Architekturentscheidung
 
-**Status:** ✅ Erledigt & getestet (Grundgerüst; `uploadfs`-Workaround siehe unten, vor Phase 17 zu lösen)
+**Status:** ✅ Erledigt & getestet
 
 ## Ziel
 
@@ -33,24 +33,25 @@ Technisches und architektonisches Fundament für das Web-Interface, bevor in den
 ## Umsetzung (2026-08-17)
 
 - `ESPAsyncWebServer` + `AsyncTCP` als neue Abhängigkeit (`platformio.ini`, über den aktiv gepflegten `ESP32Async`-Fork, da der ursprüngliche `me-no-dev`-Namensraum unmaintained ist) — De-facto-Standard für nicht-blockierende ESP32-Webserver, passt zum durchgehaltenen Non-Blocking-Prinzip des Projekts. Dank Architekturentscheidung B beschränkt sich `WebManager` rein auf statisches File-Serving — keine REST-Endpoints, kein JSON-Bridging zu `ConfigStore`/`MqttManager`.
-- Dateisystem-Wechsel `SPIFFS` → `LittleFS`: `board_build.filesystem = littlefs` in `platformio.ini`, `ConfigStore` komplett auf `LittleFS.h` umgestellt (11 Fundstellen, `#include` + alle `SPIFFS.`-Aufrufe). Persistenz-Regression geprüft: Laufzeit-Schreiben/Lesen funktioniert nachweislich zuverlässig (Alias-Wert per MQTT gesetzt, überlebt Reboot).
-- **Bekannte Einschränkung, noch nicht sauber gelöst**: `pio run --target uploadfs` (nutzt `mklittlefs`) erzeugt ein LittleFS-Image, das der arduino-esp32-3.x-Laufzeit-Mount beim ersten Boot nicht als gültig erkennt und automatisch neu formatiert — die vorab geschriebenen Dateien (`data/index.html`, `data/style.css`) waren danach weg (auf Hardware verifiziert). **Workaround**: `WebManager.cpp` bettet den Inhalt beider Dateien als `PROGMEM`-Strings direkt in die Firmware ein und schreibt sie beim ersten Boot selbst nach LittleFS (`writeFileIfMissing()`, idempotent) — nutzt denselben Laufzeit-Schreibmechanismus, der sich als zuverlässig erwiesen hat. `data/` bleibt als Referenz-Quelltext im Repo, muss aber händisch synchron zu den eingebetteten Strings gehalten werden. **Skaliert nicht** auf die deutlich größeren Dateien ab Phase 17 (Alpine.js, `mqtt.js`) — das `uploadfs`/`mklittlefs`-Formatproblem muss vorher richtig gelöst werden (siehe „Offene Punkte" in `docs/Log.md`).
-- Das nebenbei aufgetretene Datenverlust-Ereignis (siehe Test unten) betraf ausschließlich Testdaten dieser Session (5 Testprogramme, ein Zeitplan-Eintrag) und wurde vom Nutzer als unkritisch eingestuft.
+- Dateisystem-Wechsel `SPIFFS` → `LittleFS`: `board_build.filesystem = littlefs` in `platformio.ini`, `ConfigStore` komplett auf `LittleFS.h` umgestellt (11 Fundstellen, `#include` + alle `SPIFFS.`-Aufrufe).
+- **Bug gefunden und behoben**: `pio run --target uploadfs` (nutzt `mklittlefs`) erzeugt ein gültiges LittleFS-Image, aber `LittleFS.begin(true)` (Auto-Format bei Mount-Problemen) erkannte es beim ersten Boot fälschlich als ungültig und formatierte automatisch neu — dabei gingen sowohl die per `uploadfs` geschriebenen Web-Dateien als auch die bereits persistierte Konfiguration (Testprogramme, Zeitplan) verloren. **Ursache war die falsche Annahme, ein Auto-Format sei die sichere Voreinstellung** — tatsächlich war genau das der Datenvernichter. Per gezielter Diagnose isoliert: mit `LittleFS.begin(false)` (kein Auto-Format) mountet dasselbe `uploadfs`-Image sauber, alle Dateien sofort sichtbar. **Fix**: `ConfigStore::begin()` nutzt jetzt dauerhaft `LittleFS.begin(false)`. Kehrseite: eine wirklich leere, nie per `uploadfs` beschriebene Partition muss einmalig vorbereitet werden, sonst schlägt der Mount fehl (loggt `"LittleFS-Mount fehlgeschlagen"`) — für dieses Projekt (ein einzelnes, bereits mehrfach geflashtes Gerät) eine unkritische Einschränkung.
+- Persistenz mit dem finalen Fix erneut verifiziert: Laufzeit-Schreiben/Lesen über LittleFS funktioniert zuverlässig (Alias-Wert per MQTT gesetzt, überlebt Reboot), und die per `uploadfs` bereitgestellten Web-Dateien sind nach jedem Boot korrekt vorhanden — `data/` ist damit die alleinige Quelle für die Web-Dateien, kein Duplikat/Workaround in der Firmware nötig.
 - Neue `Logger::Source::WEB` ergänzt (Nutzerwunsch) — eigene Log-Kategorie `WEB  ` für `WebManager`, analog zu `WIFI `/`MQTT `/`I2C  `/`HMI  `.
 - Dashboard-Cards-CSS-Tokens (`data/style.css`) als gemeinsame Grundlage abgelegt.
 
 ## Betroffene Dateien
 
 - `platformio.ini` (neue `lib_deps`: `AsyncTCP`, `ESPAsyncWebServer`; `board_build.filesystem = littlefs`)
-- `src/WebManager.h/.cpp` (neu)
+- `src/WebManager.h/.cpp` (neu, reines File-Serving)
 - `src/main.cpp` (Einbindung `WebManager::begin()`, kein `loop()`-Aufruf nötig — vollständig async)
-- `src/ConfigStore.h/.cpp` (`SPIFFS.h`→`LittleFS.h`, alle Dateizugriffe umgestellt)
+- `src/ConfigStore.h/.cpp` (`SPIFFS.h`→`LittleFS.h`, alle Dateizugriffe umgestellt, `LittleFS.begin(false)` statt `begin(true)`)
 - `src/Logger.h/.cpp` (neue `Source::WEB`)
-- `data/index.html`, `data/style.css` (neu, aktuell nur Referenz — siehe `uploadfs`-Einschränkung oben)
+- `data/index.html`, `data/style.css` (neu, alleinige Quelle — via `uploadfs` ausgeliefert)
 
 ## Test / Ergebnis
 
-1. Seite lädt im Browser über die Geräte-IP (`http://192.168.10.33/`) — `index.html`/`style.css` liefern HTTP 200 mit korrektem Inhalt. ✅
-2. Flash-Größen-Checkpoint: 41,5 % → 43,2 % (≈+50 KB durch `ESPAsyncWebServer`+`AsyncTCP`+`LittleFS`) — deutlich weniger als die grob geschätzten 200–300 KB, reichlich Marge für die Folgephasen. ✅
-3. Persistenz-Regressionstest (Laufzeit-Schreiben/Lesen über LittleFS): Alias-Wert per MQTT gesetzt, Reboot ausgelöst, Wert korrekt erhalten geblieben. ✅
-4. **Nebenbefund**: einmaliger Datenverlust der zu diesem Zeitpunkt gesetzten Testdaten (Programme, Zeitplan, Config-Defaults) durch die SPIFFS→LittleFS-Umformatierung — vorher nicht explizit angekündigt, im Nachhinein als unkritisch bestätigt (reine Testdaten). Für künftige Dateisystem-/Partitions-Änderungen als Lehre festgehalten: vorher ausdrücklich ankündigen, auch wenn die betroffenen Daten nur Testdaten sind.
+1. Seite lädt im Browser über die Geräte-IP (`http://192.168.10.33/`) — `index.html`/`style.css` liefern HTTP 200 mit korrektem Inhalt, per `uploadfs` ausgeliefert (kein Firmware-Embedding). ✅
+2. Flash-Größen-Checkpoint: 41,5 % → 43,1 % (≈+45 KB durch `ESPAsyncWebServer`+`AsyncTCP`+`LittleFS`) — deutlich weniger als die grob geschätzten 200–300 KB, reichlich Marge für die Folgephasen. ✅
+3. Persistenz-Regressionstest (Laufzeit-Schreiben/Lesen über LittleFS, mit dem finalen `begin(false)`-Fix): Alias-Wert per MQTT gesetzt, Reboot ausgelöst, Wert korrekt erhalten geblieben. ✅
+4. `uploadfs`-Kompatibilität mit `begin(false)`: Image frisch hochgeladen, Reboot, Web-Dateien sofort korrekt ausgeliefert — kein Reformat, keine verlorenen Dateien. ✅
+5. **Nebenbefund während der Fehlersuche**: das ursprüngliche `begin(true)`-Verhalten hatte einmalig die zu diesem Zeitpunkt gesetzten Testdaten (5 Testprogramme, ein Zeitplan-Eintrag) gelöscht — vorher nicht explizit angekündigt, im Nachhinein als unkritisch bestätigt (reine Testdaten). Für künftige Dateisystem-/Partitions-Änderungen als Lehre festgehalten: vorher ausdrücklich ankündigen, auch wenn die betroffenen Daten nur Testdaten sind.

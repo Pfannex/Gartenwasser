@@ -120,11 +120,13 @@ Auf Hardware getestet (Build→Flash→curl/Browser-Prüfung je Änderung).
 | # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
 |---|---|---|---|---|
 | 1 | Seite lädt über Geräte-IP | `http://<IP>/`, `/index.html`, `/style.css` per `curl` geprüft | HTTP 200, korrekter Inhalt | ✅ |
-| 2 | Flash-Größen-Checkpoint | Vorher/Nachher-Vergleich `pio run`-Ausgabe | 41,5 % → 43,2 % (≈+50 KB, deutlich unter der Schätzung) | ✅ |
+| 2 | Flash-Größen-Checkpoint | Vorher/Nachher-Vergleich `pio run`-Ausgabe | 41,5 % → 43,1 % (≈+45 KB, deutlich unter der Schätzung) | ✅ |
 | 3 | Persistenz-Regression (SPIFFS→LittleFS) | Alias-Wert per MQTT gesetzt, Hardware-Reset (`esptool --after hard-reset`), Wert erneut abgefragt | Wert korrekt erhalten geblieben | ✅ |
-| 4 | `uploadfs`-Kompatibilität | `pio run --target uploadfs` geschriebene Dateien nach Boot per `curl` geprüft | **Fehlgeschlagen** — Dateien nach erstem Boot nicht mehr vorhanden (Formatinkompatibilität `mklittlefs`/Laufzeit-Mount) | ❌ → Workaround umgesetzt (Firmware schreibt Dateien selbst), siehe `docs/spec/16-webif-fundament.md` |
+| 4 | `uploadfs`-Kompatibilität (1. Versuch, `LittleFS.begin(true)`) | `pio run --target uploadfs` geschriebene Dateien nach Boot per `curl` geprüft | **Fehlgeschlagen** — Dateien nach erstem Boot nicht mehr vorhanden (Auto-Format erkannte gültiges Image fälschlich als ungültig) | ❌ Bug gefunden |
+| 5 | `uploadfs`-Kompatibilität (Fix, `LittleFS.begin(false)`) | Frisches `uploadfs`-Image, Reboot, `curl`-Prüfung wiederholt | Dateien sofort korrekt vorhanden, kein Reformat | ✅ Bug behoben |
+| 6 | Persistenz-Regression, erneut mit finalem Fix | Alias-Wert per MQTT gesetzt, Reboot, Wert erneut abgefragt | Wert korrekt erhalten geblieben | ✅ |
 
-**Nebenbefund**: die SPIFFS→LittleFS-Umformatierung hat die zu diesem Zeitpunkt gesetzten Testdaten (5 Programme, 1 Zeitplan-Eintrag, Config-Werte) gelöscht — nicht vorher angekündigt, im Nachhinein vom Nutzer als unkritisch bestätigt (reine Testdaten dieser Session).
+**Nebenbefund**: der ursprüngliche `LittleFS.begin(true)`-Versuch (Prüfpunkt 4) hat die zu diesem Zeitpunkt gesetzten Testdaten (5 Programme, 1 Zeitplan-Eintrag, Config-Werte) gelöscht — nicht vorher angekündigt, im Nachhinein vom Nutzer als unkritisch bestätigt (reine Testdaten dieser Session). Mit dem finalen Fix (`begin(false)`) tritt dieses Problem nicht mehr auf.
 
 ## Frühere Phasen (2–13)
 
