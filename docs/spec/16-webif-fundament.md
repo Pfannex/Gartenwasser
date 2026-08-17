@@ -14,7 +14,7 @@ Technisches und architektonisches Fundament für das Web-Interface, bevor in den
 ## Ressourcen-Check (2026-08-17, vorab durchgeführt)
 
 - Flash: `app0`-Partition 3 MB, aktuell 41,5 % belegt (≈1,31 MB). Partitionstabelle (`partitions.csv`) hat bereits eine vollständige Dual-OTA-Auslegung (`app0`/`app1`, je 3 MB, `otadata`) — keine Änderung für Phase 21 nötig.
-- `spiffs`-Partition: 1,875 MB, aktuell fast leer (nur die drei kleinen Config-JSONs) — ausreichend Platz für das komplette Web-Interface-Bundle.
+- `spiffs`-Partition (ursprünglich, siehe Nachtrag unten für die spätere Aufteilung in `webfs`/`config`): 1,875 MB, aktuell fast leer (nur die drei kleinen Config-JSONs) — ausreichend Platz für das komplette Web-Interface-Bundle.
 - RAM: 320 KB, aktuell 34,6 % belegt (≈114 KB frei... genauer: ≈214 KB frei).
 - Grobe Schätzung für den gesamten Web-Interface-Umfang (Phasen 16–21): ≈1,7 MB von 3 MB (≈56 %) — reichlich Marge. Größter einzelner Sprung erwartet direkt in dieser Phase (Webserver-Bibliotheken erstmals einkompiliert) — **Checkpoint: Flash-Größe nach Abschluss dieser Phase gegenprüfen.**
 
@@ -42,9 +42,10 @@ Technisches und architektonisches Fundament für das Web-Interface, bevor in den
 ## Betroffene Dateien
 
 - `platformio.ini` (neue `lib_deps`: `AsyncTCP`, `ESPAsyncWebServer`; `board_build.filesystem = littlefs`)
-- `src/WebManager.h/.cpp` (neu, reines File-Serving)
+- `partitions.csv` (aufgeteilt in `webfs`/`config`, siehe Nachtrag)
+- `src/WebManager.h/.cpp` (neu, reines File-Serving, mountet `webfs`)
 - `src/main.cpp` (Einbindung `WebManager::begin()`, kein `loop()`-Aufruf nötig — vollständig async)
-- `src/ConfigStore.h/.cpp` (`SPIFFS.h`→`LittleFS.h`, alle Dateizugriffe umgestellt, `LittleFS.begin(false)` statt `begin(true)`)
+- `src/ConfigStore.h/.cpp` (`SPIFFS.h`→`LittleFS.h`, eigene `fs::LittleFSFS`-Instanz `configFs` auf der `config`-Partition)
 - `src/Logger.h/.cpp` (neue `Source::WEB`)
 - `data/index.html`, `data/style.css` (neu, alleinige Quelle — via `uploadfs` ausgeliefert)
 
@@ -55,3 +56,17 @@ Technisches und architektonisches Fundament für das Web-Interface, bevor in den
 3. Persistenz-Regressionstest (Laufzeit-Schreiben/Lesen über LittleFS, mit dem finalen `begin(false)`-Fix): Alias-Wert per MQTT gesetzt, Reboot ausgelöst, Wert korrekt erhalten geblieben. ✅
 4. `uploadfs`-Kompatibilität mit `begin(false)`: Image frisch hochgeladen, Reboot, Web-Dateien sofort korrekt ausgeliefert — kein Reformat, keine verlorenen Dateien. ✅
 5. **Nebenbefund während der Fehlersuche**: das ursprüngliche `begin(true)`-Verhalten hatte einmalig die zu diesem Zeitpunkt gesetzten Testdaten (5 Testprogramme, ein Zeitplan-Eintrag) gelöscht — vorher nicht explizit angekündigt, im Nachhinein als unkritisch bestätigt (reine Testdaten). Für künftige Dateisystem-/Partitions-Änderungen als Lehre festgehalten: vorher ausdrücklich ankündigen, auch wenn die betroffenen Daten nur Testdaten sind.
+
+## Nachtrag (2026-08-17): Partition für Konfiguration von Web-Dateien getrennt
+
+Auch mit dem `begin(false)`-Fix blieb ein strukturelles Problem: `config.json`/`programs.json`/`schedule.json` lagen auf **derselben** Partition wie die Web-Dateien. Da `pio run --target uploadfs` immer die **komplette** Zielpartition überschreibt, löschte jedes Dashboard-Update (während der laufenden Entwicklung der Phasen 17+) die persistierte Konfiguration erneut — auf Hardware zweimal reproduziert, vom Nutzer bemerkt („Programme und Namen sind wieder flöten gegangen“).
+
+**Fix**: `partitions.csv` in zwei Partitionen aufgeteilt (Gesamtgröße unverändert, 1,875 MB):
+- `webfs` (1,75 MB, Subtype `spiffs`, **vor** `config` gelistet) — wird von `pio run --target uploadfs` bespielt (PlatformIO wählt automatisch die erste Partition mit Subtype `spiffs`/`fat`/`littlefs`).
+- `config` (128 KB, Subtype `0x40` — bewusst **kein** `spiffs`/`fat`/`littlefs`, damit `uploadfs` diese Partition nie automatisch trifft) — ausschließlich für `ConfigStore`.
+
+`ConfigStore` mountet jetzt eine eigene `fs::LittleFSFS`-Instanz (`configFs`) auf die `config`-Partition (per Partitions-Label, nicht global). `WebManager` mountet weiterhin die globale `LittleFS`-Instanz, jetzt explizit auf die `webfs`-Partition. Da `uploadfs` die `config`-Partition nie mehr anfasst, ist dort wieder `LittleFS.begin(true)` (Auto-Format) sicher und korrekt — der ursprüngliche Bug betraf ausschließlich das Zusammenspiel aus Auto-Format **und** einer von `mklittlefs` beschriebenen Partition, was für `config` jetzt strukturell ausgeschlossen ist.
+
+**Einmaliger Übergang**: die Repartitionierung selbst verschiebt die Grenzen beider Partitionen, wodurch die zu dem Zeitpunkt gesetzten Testdaten kein letztes Mal überlebten (angekündigt, unkritisch) — danach erneut gesetzt und per echtem `uploadfs`-Testlauf verifiziert, dass sie jetzt dauerhaft erhalten bleiben.
+
+Details siehe `partitions.csv`, `src/ConfigStore.cpp` (`configFs`), `src/WebManager.cpp`.

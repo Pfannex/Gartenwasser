@@ -1,5 +1,5 @@
-/* Gartenwasser Web-Interface - "Dashboard Cards" Design-Tokens (Phase 16)
- * Basis fuer alle Folgephasen (17-20). Farblogik deckungsgleich mit der
+/* Gartenwasser Web-Interface - "Dashboard Cards" Design-Tokens (Phase 16),
+ * Hauptseiten-Layout (Phase 17, Redesign). Farblogik deckungsgleich mit der
  * Touch-UI-Ventilmatrix (gruen=auto/idle, dunkelgrau=aus, rot=laeuft).
  */
 
@@ -23,7 +23,7 @@
   :root {
     --bg: #10161A;
     --surface: #171F23;
-    --surface-sunken: #10161A;
+    --surface-sunken: #1B2327;
     --text: #E7EEEC;
     --text-muted: #93A29D;
     --border: #2A3438;
@@ -44,54 +44,9 @@ body {
   color: var(--text);
   font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
-  padding: 0 16px 48px;
-  max-width: 480px;
-  margin: 0 auto;
 }
 
-.header-bar {
-  background: var(--surface-sunken);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin: 16px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.header-bar h1 { margin: 0; font-size: 20px; }
-
-.valve-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.valve-tile {
-  aspect-ratio: 1;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: var(--shadow);
-}
-.valve-tile[data-state="running"] { background: var(--state-running); }
-.valve-tile[data-state="auto"] { background: var(--state-auto); }
-.valve-tile[data-state="idle"] { background: var(--state-idle); }
-
-.valve-alias {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.page { max-width: 980px; margin: 0 auto; padding: 0 20px 56px; }
 
 h1, h2, h3 {
   font-weight: 650;
@@ -103,22 +58,23 @@ h1, h2, h3 {
 p { margin: 0 0 8px; color: var(--text-muted); }
 
 .card {
-  background: var(--surface-sunken);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
   box-shadow: var(--shadow);
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 10px;
+  gap: 5px;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
-  padding: 4px 10px;
+  padding: 5px 11px 5px 8px;
 }
+.chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .chip[data-state="running"] { background: var(--state-running); }
 .chip[data-state="auto"] { background: var(--state-auto); }
 .chip[data-state="idle"] { background: var(--state-idle); }
@@ -135,3 +91,113 @@ button {
   color: var(--text);
 }
 button.primary { background: var(--accent); color: var(--accent-ink); }
+button.ghost {
+  font-size: 12.5px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  cursor: not-allowed;
+}
+
+/* ---------- Kopfzeile / Navigation ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--accent); color: var(--accent-ink);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; flex: none;
+}
+.brand h1 { margin: 0; font-size: 17px; font-weight: 700; }
+
+nav.tabs { display: flex; gap: 4px; }
+nav.tabs a {
+  font-size: 13.5px; font-weight: 600; text-decoration: none;
+  color: var(--text-muted); padding: 7px 12px; border-radius: 8px;
+}
+nav.tabs a.active { background: var(--surface-sunken); color: var(--text); }
+nav.tabs a.soon { opacity: .5; cursor: default; pointer-events: none; }
+nav.tabs a.soon::after { content: " (bald)"; font-weight: 400; font-size: 11px; }
+
+.status-chips { display: flex; gap: 6px; }
+
+/* ---------- Hero: Start/Stop + Live-Status ---------- */
+.hero {
+  display: flex; align-items: center; gap: 24px;
+  padding: 22px 26px; flex-wrap: wrap;
+}
+.hero-btn {
+  flex: none; width: 128px; height: 128px; border-radius: 50%;
+  border: none; cursor: pointer; font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; box-shadow: var(--shadow);
+  background: var(--state-auto); color: #fff;
+  transition: background .15s ease;
+}
+.hero-btn[data-running="true"] { background: var(--state-running); }
+.hero-btn .icon { font-size: 26px; line-height: 1; }
+.hero-btn .label { font-size: 15px; font-weight: 700; letter-spacing: .03em; }
+
+.hero-info { flex: 1; min-width: 220px; }
+.hero-info .headline { font-size: 19px; font-weight: 700; margin-bottom: 6px; text-wrap: balance; color: var(--text); }
+.hero-info .meta { font-size: 13.5px; color: var(--text-muted); }
+
+.program-tag { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+.program-tag b { color: var(--text); font-weight: 700; }
+
+.meta-row { font-size: 13.5px; color: var(--text-muted); margin-top: 10px; }
+.meta-row b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+.progress-track {
+  margin-top: 6px; height: 6px; border-radius: 999px;
+  background: var(--surface-sunken); overflow: hidden;
+}
+.progress-fill { height: 100%; background: var(--state-running); border-radius: 999px; transition: width .3s ease; }
+.progress-fill.total { background: var(--accent); }
+
+/* ---------- Ventilraster ---------- */
+h2 {
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-muted); margin: 28px 0 12px;
+}
+
+.valve-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 620px) { .valve-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.valve-card { padding: 16px; text-align: center; }
+.valve-card.reserved { border-style: dashed; box-shadow: none; opacity: .55; }
+.valve-dot {
+  width: 46px; height: 46px; border-radius: 12px; margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 14px; font-family: ui-monospace, monospace;
+}
+.valve-dot[data-state="running"] { background: var(--state-running); }
+.valve-dot[data-state="auto"] { background: var(--state-auto); }
+.valve-dot[data-state="idle"] { background: var(--state-idle); }
+.valve-name { font-size: 14px; font-weight: 650; margin-bottom: 2px; color: var(--text); }
+.valve-meta { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.valve-card.reserved .valve-meta { font-style: italic; }
+
+/* ---------- Fussbereich: Programm + Diagnostics ---------- */
+.footer-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .footer-grid { grid-template-columns: 1fr; } }
+
+.footer-card { padding: 18px 20px; }
+.footer-card .row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.footer-card .row-head span:first-child { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
+
+.program-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.program-detail { font-size: 13px; color: var(--text-muted); }
+
+.diag-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin-bottom: 6px; color: var(--text); }
+.diag-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--state-idle); }
+.diag-dot.ok { background: var(--state-auto); }
+.diag-dot.error { background: var(--state-running); }
+.diag-row .label { color: var(--text-muted); }

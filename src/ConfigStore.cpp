@@ -9,6 +9,13 @@
 
 namespace {
 
+// Eigene LittleFS-Instanz auf einer eigenen Partition ("config", siehe partitions.csv) -
+// getrennt von der "webfs"-Partition, die WebManager per `pio run --target uploadfs`
+// bespielt. Verhindert, dass ein Dashboard-Update (uploadfs ueberschreibt die komplette
+// Zielpartition) die persistierte Konfiguration mitloescht (siehe docs/spec/16-webif-
+// fundament.md fuer den urspruenglichen, mit gemeinsamer Partition aufgetretenen Bug).
+fs::LittleFSFS configFs;
+
 constexpr const char *kConfigPath = "/config.json";
 constexpr const char *kProgramsPath = "/programs.json";
 constexpr const char *kSchedulePath = "/schedule.json";
@@ -176,7 +183,7 @@ void save() {
   StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
   buildJson(doc);
 
-  File file = LittleFS.open(kConfigPath, FILE_WRITE);
+  File file = configFs.open(kConfigPath, FILE_WRITE);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: Datei zum Schreiben nicht oeffenbar.");
     return;
@@ -186,11 +193,11 @@ void save() {
 }
 
 void load() {
-  if (!LittleFS.exists(kConfigPath)) {
+  if (!configFs.exists(kConfigPath)) {
     return;  // keine gespeicherte Konfiguration -> Defaults bleiben aktiv
   }
 
-  File file = LittleFS.open(kConfigPath, FILE_READ);
+  File file = configFs.open(kConfigPath, FILE_READ);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: Datei zum Lesen nicht oeffenbar.");
     return;
@@ -248,7 +255,7 @@ void saveProgramsFile() {
   StaticJsonDocument<ConfigStore::kProgramsJsonCapacity> doc;
   buildProgramsJson(doc);
 
-  File file = LittleFS.open(kProgramsPath, FILE_WRITE);
+  File file = configFs.open(kProgramsPath, FILE_WRITE);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: programs.json nicht schreibbar.");
     return;
@@ -260,11 +267,11 @@ void saveProgramsFile() {
 void loadProgramsFile() {
   programCount = 0;
   activeProgram = 0;
-  if (!LittleFS.exists(kProgramsPath)) {
+  if (!configFs.exists(kProgramsPath)) {
     return;  // keine gespeicherten Programme -> leere Liste bleibt aktiv
   }
 
-  File file = LittleFS.open(kProgramsPath, FILE_READ);
+  File file = configFs.open(kProgramsPath, FILE_READ);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: programs.json nicht lesbar.");
     return;
@@ -351,7 +358,7 @@ void saveScheduleFile() {
   StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
   buildScheduleJson(doc);
 
-  File file = LittleFS.open(kSchedulePath, FILE_WRITE);
+  File file = configFs.open(kSchedulePath, FILE_WRITE);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht schreibbar.");
     return;
@@ -363,11 +370,11 @@ void saveScheduleFile() {
 void loadScheduleFile() {
   scheduleCount = 0;
   scheduleGlobalEnabled = true;
-  if (!LittleFS.exists(kSchedulePath)) {
+  if (!configFs.exists(kSchedulePath)) {
     return;  // kein gespeicherter Zeitplan -> leere Liste bleibt aktiv
   }
 
-  File file = LittleFS.open(kSchedulePath, FILE_READ);
+  File file = configFs.open(kSchedulePath, FILE_READ);
   if (!file) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht lesbar.");
     return;
@@ -449,14 +456,15 @@ void loadScheduleFile() {
 }  // namespace
 
 void ConfigStore::begin() {
-  // Bewusst ohne Auto-Format (kein "true"): auf Hardware verifiziert, dass ein per
-  // `pio run --target uploadfs` (mklittlefs) geschriebenes Image beim Mount mit
-  // formatOnFail=true faelschlich als ungueltig erkannt und automatisch neu formatiert
-  // wurde - dabei gingen sowohl die Web-Dateien als auch die persistierte Konfiguration
-  // verloren. Mit formatOnFail=false mountet dasselbe Image dagegen sauber. Kehrseite:
-  // eine wirklich leere/neue Partition (nie per uploadfs beschrieben) muss einmalig
-  // per uploadfs vorbereitet werden, sonst schlaegt der Mount hier fehl (siehe Log unten).
-  if (!LittleFS.begin(false)) {
+  // Eigene Partition "config" (siehe partitions.csv) - komplett getrennt von "webfs",
+  // die WebManager per `pio run --target uploadfs` bespielt. Dadurch kann ein Dashboard-
+  // Update (uploadfs ueberschreibt immer die komplette Zielpartition) die persistierte
+  // Konfiguration nicht mehr mitloeschen (siehe docs/spec/16-webif-fundament.md fuer den
+  // Bug, der bei gemeinsamer Partition auftrat). Auto-Format hier bewusst wieder aktiv
+  // (anders als seinerzeit bei der gemeinsamen Partition): "config" wird von uploadfs nie
+  // beschrieben, ein Mount-Fehlschlag bedeutet hier also eine wirklich leere/neue
+  // Partition, fuer die Auto-Format das korrekte, sichere Verhalten ist.
+  if (!configFs.begin(true, "/config", 10, "config")) {
     Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: LittleFS-Mount fehlgeschlagen.");
     return;
   }

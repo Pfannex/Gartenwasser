@@ -10,46 +10,91 @@
   <script defer src="alpine.min.js"></script>
 </head>
 <body x-data="dashboard()">
-  <div class="header-bar">
-    <h1>Gartenwasser</h1>
-    <div>
-      <span class="chip" :data-state="connected ? 'auto' : 'running'" x-text="connected ? 'Verbunden' : 'Getrennt'"></span>
-      <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'" x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a class="active" href="#">Status</a>
+        <a class="soon" href="#">Konfiguration</a>
+        <a class="soon" href="#">Programme</a>
+        <a class="soon" href="#">Zeitplan</a>
+      </nav>
+      <div class="status-chips">
+        <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
+        <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'"><span class="dot"></span><span x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span></span>
+      </div>
     </div>
-  </div>
 
-  <div class="card">
-    <p>Ventile</p>
+    <div class="card hero">
+      <button class="hero-btn" :data-running="sequenceRunning">
+        <span class="icon" x-text="sequenceRunning ? '■' : '▶'"></span>
+        <span class="label" x-text="sequenceRunning ? 'STOP' : 'START'"></span>
+      </button>
+      <div class="hero-info">
+        <template x-if="activeProgramName">
+          <div class="program-tag">Programm: <b x-text="activeProgramName"></b></div>
+        </template>
+        <div class="headline" x-text="heroHeadline()"></div>
+        <template x-if="sequenceRunning">
+          <div>
+            <div class="meta-row">
+              <span>Restlaufzeit Ventil <b x-text="activeValveRemaining()"></b></span>
+              <div class="progress-track"><div class="progress-fill" :style="`width: ${valveProgressPercent()}%`"></div></div>
+            </div>
+            <div class="meta-row">
+              <span>Restlaufzeit Sequenz <b x-text="remainingTotal"></b></span>
+              <div class="progress-track"><div class="progress-fill total" :style="`width: ${sequenceProgressPercent()}%`"></div></div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <h2>Ventile</h2>
     <div class="valve-grid">
       <template x-for="v in valves" :key="v.index">
-        <div>
-          <div class="valve-tile" :data-state="valveState(v)" x-text="'V' + v.index"></div>
-          <div class="valve-alias" x-text="v.alias || ''"></div>
+        <div class="card valve-card">
+          <div class="valve-dot" :data-state="valveState(v)" x-text="'V' + v.index"></div>
+          <div class="valve-name" x-text="v.alias || ('V' + v.index)"></div>
+          <div class="valve-meta" x-text="valveMeta(v)"></div>
         </div>
       </template>
+      <div class="card valve-card reserved">
+        <div class="valve-dot" data-state="idle">V6</div>
+        <div class="valve-name">—</div>
+        <div class="valve-meta">reserviert</div>
+      </div>
+      <div class="card valve-card reserved">
+        <div class="valve-dot" data-state="idle">V7</div>
+        <div class="valve-name">—</div>
+        <div class="valve-meta">reserviert</div>
+      </div>
+    </div>
+
+    <h2>Übersicht</h2>
+    <div class="footer-grid">
+      <div class="card footer-card">
+        <div class="row-head">
+          <span>Aktives Programm</span>
+          <button class="ghost" title="Folgt in Phase 19">Ändern</button>
+        </div>
+        <div class="program-name" x-text="activeProgramName || 'Kein Programm gewählt'"></div>
+        <div class="program-detail" x-text="programDetail()"></div>
+      </div>
+      <div class="card footer-card">
+        <div class="row-head"><span>Diagnostics</span></div>
+        <div class="diag-row">
+          <span class="diag-dot" :class="i2cStatus === 'ok' ? 'ok' : 'error'"></span>
+          <span class="label">I2C-Bus</span>&nbsp;<b x-text="i2cStatus"></b>
+        </div>
+        <div class="diag-row">
+          <span class="label">Letzter Fehler</span>&nbsp;<span x-text="lastError || 'keiner'"></span>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="card" style="margin-top: 12px;">
-    <template x-if="sequenceRunning">
-      <p>
-        Automatik läuft: <strong x-text="activeValve"></strong> ·
-        Restlaufzeit gesamt <strong x-text="remainingTotal"></strong>
-      </p>
-    </template>
-    <template x-if="!sequenceRunning">
-      <p>
-        Automatik inaktiv
-        <template x-if="activeProgramName"><span> · Programm: <strong x-text="activeProgramName"></strong></span></template>
-      </p>
-    </template>
-  </div>
-
-  <template x-if="i2cStatus !== 'ok'">
-    <div class="card" style="margin-top: 12px;">
-      <p><strong style="color: var(--state-running);">I2C-Fehler</strong></p>
-      <p x-text="lastError"></p>
-    </div>
-  </template>
 </body>
 </html>

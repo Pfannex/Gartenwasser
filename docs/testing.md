@@ -142,6 +142,20 @@ Broker-seitiger WebSocket-Listener vom Nutzer eingerichtet und verifiziert (`ss 
 
 Vom Nutzer bestätigt: „ja, alles wie geplant!!“.
 
+## Config/Web-Dateien-Partitionstrennung — 2026-08-17
+
+Auslöser: `uploadfs`-Läufe während der Hauptseiten-Redesign-Iteration löschten wiederholt die persistierte Konfiguration (`config.json`/`programs.json`/`schedule.json` lagen auf derselben Partition wie die Web-Dateien). Fix: `partitions.csv` in `webfs`/`config` aufgeteilt.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Partitionierung korrekt geflasht | `pio run -t upload -v` — Flash-Adressen von `bootloader.bin`/`partitions.bin`/`firmware.bin` geprüft | Alle drei Regionen (inkl. neuer Partitionstabelle) korrekt geschrieben | ✅ |
+| 2 | `uploadfs` trifft nur `webfs` | Flash-Adressbereich der `uploadfs`-Ausgabe geprüft | `0x610000`–`0x7cffff` (= `webfs`), `config`-Partition (`0x7D0000`+) unberührt | ✅ |
+| 3 | Boot nach Repartitionierung | Seriellen Boot-Log geprüft | Kein Mount-Fehler, beide Partitionen (`config` via Auto-Format, `webfs` via bestehendes Image) erfolgreich gemountet | ✅ |
+| 4 | Web-Dateien weiterhin ausgeliefert | `/`, `/index.html`, `/style.css`, `/app.js`, `/mqtt.min.js`, `/alpine.min.js` per `curl` | HTTP 200, korrekte Inhalte | ✅ |
+| 5 | **Entscheidender Test**: Config übersteht `uploadfs` | Testdaten (5 Programme, 6 Aliase inkl. Umlaute) gesetzt, `pio run -t uploadfs` erneut ausgeführt, Daten per MQTT erneut abgefragt | Programme und Aliase vollständig und korrekt erhalten geblieben | ✅ |
+
+Einmaliger Nebeneffekt der Repartitionierung selbst (Partitionsgrenzen verschieben sich): Testdaten gingen ein letztes Mal verloren, danach erneut gesetzt — ab jetzt bleiben sie bei jedem künftigen `uploadfs`-Lauf erhalten.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.
