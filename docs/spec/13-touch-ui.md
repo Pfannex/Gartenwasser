@@ -77,8 +77,9 @@ Ausführlich interaktiv auf Hardware getestet und über viele Runden direkt am G
 **Bewusst zurückgestellt / Backlog**:
 - Web-Interface zur vollständigen Geräte-Konfiguration (komfortables Editieren von Programmen/Zeitplänen) — eigene, noch nicht begonnene Phase, Touch-UI bleibt bewusst nur für schnelle Vor-Ort-Bedienung zuständig.
 - Erweiterung auf 16 Ventile (V0–V15) — eigene, noch nicht begonnene Phase (siehe oben).
-- Touch-UI-Bedienung für den Zeitplan (Phase 15) — weiterhin nicht umgesetzt, keine „Timer“-Unterseite (siehe Absatz oben, Begründung für den Verzicht).
 - Feinschliff der Statuszeilen-/Button-Höhen („kann später nochmal hübsch gemacht werden“, Nutzer-Aussage) — funktional fertig, rein kosmetisch noch nicht final.
+
+**Endgültig verworfen (2026-08-17)**: Touch-UI-Bedienung für den Zeitplan (Phase 15, „Timer“-Unterseite) — nicht nur zurückgestellt, sondern komplett gestrichen. Begründung (Nutzer): das 172×320px-Display ist dafür zu klein. Zeitplan-Bearbeitung bleibt vollständig dem geplanten Web-Interface vorbehalten.
 
 ### Nachtrag (2026-08-17): Nachjustierungen nach dem ersten Hardware-Test
 

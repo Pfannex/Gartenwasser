@@ -309,10 +309,14 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Der bereits vorhandene `Sequencer::isRunning()`-Guard in `startSequence()` (siehe Phase-15-Kernentscheidung 4, „gleichzeitige Trigger") deckt die eigentliche Sicherheitsanforderung ohnehin schon vollständig ab — nicht nur für zwei gleichzeitig fällige Zeitplan-Einträge, sondern genauso für einen manuellen Start waehrend eines geplanten Laufs und umgekehrt: „wer zuerst kommt, malt zuerst" (Nutzer-Bestätigung), der zweite Versuch wird abgewiesen und geloggt (`"main/cmd ON ignoriert (Automatik laeuft bereits)."`).
 - Details/Aktualisierung in `docs/spec/15-wochenplan.md` (Abschnitt „Verworfen", Status-Zeile bereinigt) und `docs/requirements.md` (Entscheidungshistorie).
 
+### Touch-UI-Zeitplanbedienung endgültig verworfen
+
+- Nutzerentscheidung: das 172×320px-Display ist für eine Zeitplan-Bedienung zu klein — keine „Timer"-Unterseite, auch nicht in reduzierter Form. Zeitplan-Bearbeitung bleibt vollständig dem geplanten Web-Interface vorbehalten. Details siehe `docs/spec/13-touch-ui.md`, Abschnitt „Endgültig verworfen".
+- Damit sind alle Backlog-Punkte der ursprünglichen Touch-UI-Untermenü-Idee (siehe Eintrag vom 2026-08-16) entweder umgesetzt (Programme-Unterseite) oder bewusst verworfen (Timer-Unterseite).
+
 ## Offene Punkte / nächste Schritte
 
-- Touch-UI-Anbindung für den Zeitplan (Anzeige/Bedienung am Display) — weiterhin nicht umgesetzt (siehe `docs/spec/13-touch-ui.md`, Nachtrag 2026-08-17: „Timer“-Unterseite bewusst verworfen, kein Ersatzkonzept eingeplant).
+- **Web-Interface zur vollständigen Geräte-Konfiguration** (Programme/Zeitplan komfortabel editieren) — eigene, noch nicht begonnene Phase, ab jetzt der nächste Arbeitsschritt (Nutzerentscheidung 2026-08-17: **vor** Phase 10 einordnen, nicht danach wie ursprünglich in der Phasenliste).
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
-- Web-Interface zur vollständigen Geräte-Konfiguration (Programme/Zeitplan komfortabel editieren) — eigene, noch nicht begonnene Phase.
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
-- Phase 10 (Home Assistant MQTT-Discovery) bewusst ans Ende der Bearbeitungsreihenfolge gestellt — mit Phase 15 sind jetzt alle geräteinternen Phasen (00–09, 11–15) fertig, Phase 10 ist der einzige verbleibende Punkt der ursprünglichen Phasenliste.
+- Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt nur noch durch das neu vorgezogene Web-Interface aufgeschoben, danach der letzte Punkt der ursprünglichen Phasenliste.
