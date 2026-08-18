@@ -19,7 +19,10 @@ class Logger {
   // vorher faelschlich unter I2C mitgelaufen, das jetzt ausschliesslich Bus-Gesundheit meint
   // (Scan, MCP23017-Erreichbarkeit). SEQ: Automatik-Sequenz-Lebenszyklus (AutomaticController), vorher
   // komplett ungeloggt.
-  enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, WEB, SYSTEM, VALVE, SEQ };
+  // OTA (2026-08-18 ergaenzt, Phase 21): Firmware-/Dateisystem-Updates, unabhaengig vom
+  // Uebertragungsweg (WebIF-Upload, spaeter ArduinoOTA) - damit beide Wege im Log gleich
+  // erkennbar sind, nicht als WEB bzw. eine dritte Quelle.
+  enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, WEB, SYSTEM, VALVE, SEQ, OTA };
 
   using ErrorCallback = void (*)(const char *message);
   using LineCallback = void (*)(const char *line);

@@ -307,6 +307,20 @@ Nutzer-Feedback in zwei Runden (Screenshot 1: abgeschnittene Zeile wirkt „kapu
 | 4 | Keine Regression | Kompletter `test_livelog_pubsub.py`-Lauf nach dem zweiten Flash | Alle 4 Prüfpunkte weiterhin PASS (keine `Unbekanntes Topic`-Fehlzeilen, PUB/SUB/Rausch-Filter korrekt) | ✅ |
 | 5 | RAM-Headroom | `pio run` Size-Report verglichen | RAM-Nutzung 48,3% → 61,2% (exakt wie vorab anhand der Puffergrößen berechnet und dem Nutzer zur Entscheidung vorgelegt) | ✅ |
 
+## Phase 21 (WebIF-Teil) — Firmware-/Dateisystem-Update per Browser-Upload — 2026-08-18
+
+End-to-End-Tests direkt gegen die echten PlatformIO-Build-Artefakte (`firmware.bin`, `littlefs.bin`), per `curl`/`paho-mqtt` (Live-Log-Mitschnitt parallel zum Upload). Ein echter Bug dabei gefunden und behoben (siehe `docs/spec/21-webif-ota.md`).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Build/Link | `pio run` nach Einbinden von `<Update.h>` | Kein Kompilierfehler, RAM/Flash praktisch unverändert | ✅ |
+| 2 | Dateisystem-Upload, Integrität | `curl -F filesystem=@littlefs.bin .../api/ota/filesystem`, `Update.md5String()` im Live-Log mit lokalem `md5sum littlefs.bin` verglichen | MD5 identisch (`f5f321fe...`) — Übertragung byte-genau korrekt | ✅ |
+| 3 | Bug: kein Neustart nach Upload | Nach Schritt 2: `curl .../index.html` | `HTTP 404` für alle Pfade, kein neuer Boot-Eintrag im Live-Log — Ursache: `WebIF::loop()` nie in `main.cpp` eingehängt, `ESP.restart()` lief daher nie | ❌ (vor Fix, Ursache gefunden) |
+| 4 | Fix verifiziert: Dateisystem | Nach Ergänzen von `WebIF::loop();` in `main.cpp`, gleicher Testlauf | Neustart erfolgt, `curl .../index.html` → `HTTP 200`, neue Seite (inkl. „Update“-Tab) korrekt ausgeliefert | ✅ |
+| 5 | Firmware-Upload, Integrität + Neustart | `curl -F firmware=@firmware.bin .../api/ota/firmware`, MD5 verglichen, danach Live-Log auf neue Boot-Sequenz geprüft | MD5 identisch (`e6edb823...`/`60c3767d...` je nach Testlauf), vollständige neue Boot-Sequenz (WLAN/MQTT-Reconnect, alle State-Publishes) im Live-Log sichtbar | ✅ |
+| 6 | Partitionsschutz (config) | Kein gezielter Test nötig — durch `esp_partition_find_first(..., ESP_PARTITION_SUBTYPE_DATA_SPIFFS, ...)` strukturell ausgeschlossen (`config` hat SubType `0x40`, nicht `spiffs`) | Programme/Zeitplan/Konfiguration blieben über alle Testläufe hinweg unverändert erhalten | ✅ |
+| 7 | Wiederherstellung während der Fehlersuche | Serielles `pio run --target uploadfs`/`upload` als bekannt guter Rückfallpunkt zwischen den Testrunden | Gerät jederzeit in funktionierenden Zustand zurückgeholt, kein Datenverlust | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

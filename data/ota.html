@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gartenwasser – Update</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="ota.js"></script>
+  <script defer src="alpine.min.js"></script>
+</head>
+<body x-data="ota()">
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a href="index.html">Status</a>
+        <a href="konfiguration.html">Konfiguration</a>
+        <a href="programme.html">Programme</a>
+        <a href="zeitplan.html">Zeitplan</a>
+        <a href="log.html">Log</a>
+        <a class="active" href="#">Update</a>
+      </nav>
+    </div>
+
+    <h2>Update</h2>
+    <p class="hint">Firmware und Web-Dateisystem werden getrennt aktualisiert, unabhängig voneinander. Beide Dateien entstehen beim Bauen des Projekts (PlatformIO). Nach einem erfolgreichen Update startet das Gerät automatisch neu.</p>
+
+    <div class="ota-grid">
+      <div class="card ota-card">
+        <h3>Firmware</h3>
+        <p class="ota-desc">Der eigentliche Programmcode (<code>firmware.bin</code>).</p>
+        <input type="file" x-ref="firmwareInput" accept=".bin" @change="firmwareFile = $event.target.files[0] || null" :disabled="firmwareStatus === 'uploading'" />
+        <button type="button" class="btn-primary" :disabled="!firmwareFile || firmwareStatus === 'uploading'" @click="upload('firmware')">
+          <span x-text="firmwareStatus === 'uploading' ? 'Wird hochgeladen …' : 'Firmware hochladen'"></span>
+        </button>
+        <div class="progress-track" x-show="firmwareStatus === 'uploading'">
+          <div class="progress-fill total" :style="`width: ${firmwareProgress}%`"></div>
+        </div>
+        <p class="ota-status ota-status-success" x-show="firmwareStatus === 'success'">Firmware aktualisiert. Gerät startet neu …</p>
+        <p class="ota-status ota-status-error" x-show="firmwareStatus === 'error'" x-text="firmwareError"></p>
+      </div>
+
+      <div class="card ota-card">
+        <h3>Web-Dateisystem</h3>
+        <p class="ota-desc">Die Web-Oberfläche selbst (HTML/CSS/JS, <code>littlefs.bin</code>). Persönliche Einstellungen (Programme, Zeitplan, Konfiguration) sind auf einer eigenen Partition gespeichert und bleiben unberührt.</p>
+        <input type="file" x-ref="filesystemInput" accept=".bin" @change="filesystemFile = $event.target.files[0] || null" :disabled="filesystemStatus === 'uploading'" />
+        <button type="button" class="btn-primary" :disabled="!filesystemFile || filesystemStatus === 'uploading'" @click="upload('filesystem')">
+          <span x-text="filesystemStatus === 'uploading' ? 'Wird hochgeladen …' : 'Dateisystem hochladen'"></span>
+        </button>
+        <div class="progress-track" x-show="filesystemStatus === 'uploading'">
+          <div class="progress-fill total" :style="`width: ${filesystemProgress}%`"></div>
+        </div>
+        <p class="ota-status ota-status-success" x-show="filesystemStatus === 'success'">Dateisystem aktualisiert. Gerät startet neu …</p>
+        <p class="ota-status ota-status-error" x-show="filesystemStatus === 'error'" x-text="filesystemError"></p>
+      </div>
+    </div>
+
+    <div class="card ota-reload-card" x-show="firmwareStatus === 'success' || filesystemStatus === 'success'">
+      <p>Der Neustart dauert wenige Sekunden. Danach diese Seite neu laden:</p>
+      <button type="button" class="btn-secondary" @click="location.reload()">Seite neu laden</button>
+    </div>
+  </div>
+</body>
+</html>

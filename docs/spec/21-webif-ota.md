@@ -1,28 +1,60 @@
 # Phase 21 — Web-Interface: Firmware-Update (OTA)
 
-**Status:** 📋 Geplant
+**Status:** ✅ Erledigt & getestet (WebIF-Upload) — PlatformIO/ArduinoOTA folgt als zweiter Teil
 
 ## Ziel
 
-Firmware-Updates über die Weboberfläche statt per USB/`esptool`. Bewusst als letzte Web-Interface-Phase eingeordnet — höchstes Risiko (Brick-Gefahr bei fehlgeschlagenem Update), unabhängig vom Rest des Web-Interfaces, soll erst kommen, wenn Phasen 16–20 stabil laufen.
+OTA-Updates ohne serielle Verbindung, aus zwei unabhängigen Blickwinkeln:
 
-## Voraussetzungen
+1. **Wichtigster Teil (Nutzer-Priorität)**: eine WebIF-Seite, über die eine neue Firmware **ohne Entwicklungsumgebung** bereitgestellt werden kann — z. B. für andere Nutzer des Geräts, die kein PlatformIO installiert haben.
+2. Der eigene Entwicklungs-Workflow (`pio run --target upload`/`uploadfs` über WLAN statt Kabel) — separater zweiter Teil, siehe „Offene Punkte" unten.
 
-- Phase 16 (liefert `ESPAsyncWebServer`) ✅
-- Partitionstabelle (`partitions.csv`) hat bereits eine vollständige Dual-OTA-Auslegung (`app0`/`app1`, je 3 MB, `otadata`) — keine Änderung nötig, siehe Ressourcen-Check in `docs/spec/16-webif-fundament.md`.
+## Design-Entscheidungen (vorab abgestimmt)
 
-## Umsetzung (geplant)
+- **Zwei getrennte Uploads statt eines gebündelten Archivs** (Nutzer schlug ein `.tar` vor, im Gespräch verworfen): PlatformIO erzeugt Firmware (`firmware.bin`) und Dateisystem (`littlefs.bin`) ohnehin als zwei separate Build-Artefakte. Ein eigener Tar-Parser auf dem ESP32 wäre reiner Mehraufwand ohne Gegenwert, und während der gesamten bisherigen Entwicklung wurde so gut wie nie beides gleichzeitig aktualisiert (`uploadfs` bei reinen Web-Änderungen, `upload` bei reinen Firmware-Änderungen) — ein Bundle hätte das unnötig gekoppelt.
+- **Bewusste Ausnahme von Architektur B** (`docs/spec/16-webif-fundament.md`, „Browser spricht für Live-Daten direkt per MQTT-over-WebSocket, ESP32 liefert nur statische Dateien"): der Upload selbst braucht einen echten `HTTP POST`-Endpunkt, da MQTT-Payloads im Projekt auf wenige KB gedeckelt sind (`kMaxJsonPayloadSize`), Firmware/Dateisystem aber 1–2 MB groß sind.
+- **Kein gebündeltes `ElegantOTA`** (ursprünglich in der Phase-16-Grobplanung als Platzhalter genannt, siehe `docs/requirements.md`) — stattdessen zwei schlanke, selbst geschriebene Endpunkte direkt auf der bereits vorhandenen ESP32-`Update`-Bibliothek, passend zur bestehenden Codebasis (keine zusätzliche Abhängigkeit).
+- **Partitionsschutz kommt automatisch**: `Update.begin(size, U_SPIFFS)` sucht die Zielpartition per `SubType == spiffs` (das ist exakt `webfs`, siehe `partitions.csv`) — die separate `config`-Partition (persönliche Einstellungen: `config.json`/`programs.json`/`schedule.json`) hat einen anderen SubType (`0x40`) und wird dadurch nie getroffen. Kein Extra-Code nötig, um Nutzereinstellungen vor einem Update zu schützen.
+- **Keine Authentifizierung**, **kein automatisches Rollback** bei einer fehlgeschlagenen neuen Firmware (bräuchte ESP-IDF „App Rollback", zusätzlicher Umfang) — bewusst einfach gehalten für die erste Version, passend zum bisherigen Sicherheitsniveau des Projekts (weder MQTT noch Web haben Auth). Im Fehlerfall bleibt der serielle Reflash als Fallback.
 
-- `ElegantOTA` (Library) an `ESPAsyncWebServer` andocken — fertige Upload-Seite + Endpoint (Fortschrittsanzeige, Verifizierung, Reboot), statt `Update.h` von Hand zu bedienen.
-- Flash-Größen-Check vor Beginn dieser Phase (kumulativ aus den Checkpoints der Phasen 16–20) — Ziel: deutliche Marge zum 3-MB-Limit eines einzelnen `app`-Slots.
+## Umsetzung
 
-## Betroffene Dateien (voraussichtlich)
+- **`Logger`**: neue `Source::OTA` — Firmware-/Dateisystem-Updates werden damit unabhängig vom Übertragungsweg (WebIF-Upload, später ArduinoOTA) einheitlich geloggt statt als `WEB` oder eine dritte, uneinheitliche Quelle.
+- **`WebIF.cpp`**: zwei neue Routen `POST /api/ota/firmware` (`U_FLASH`, Ziel: jeweils inaktiver `app0`/`app1`-Slot, automatisch von `Update` ermittelt) und `POST /api/ota/filesystem` (`U_SPIFFS`, Ziel: `webfs`). Gemeinsame Kernlogik (`handleOtaChunk()`) verarbeitet die Chunks aus `ESPAsyncWebServer`s `onFileUpload`-Callback, schreibt sie per `Update.write()`, loggt Start/Erfolg (inkl. `Update.md5String()` zur Integritätsprüfung) und Fehler. Vor dem Dateisystem-Update wird `LittleFS.end()` aufgerufen (die `webfs`-Partition ist zur Laufzeit gemountet) — ein Remount ist nicht nötig, da nach einem erfolgreichen Update ohnehin neu gestartet wird.
+- **Verzögerter Neustart**: `ESP.restart()` läuft nicht direkt im Upload-Callback, sondern über ein Flag, das `WebIF::loop()` (neu, alle 3 Verwaltungsfunktionen bekamen bereits eine `loop()`, WebIF bisher nicht) nach 500 ms auswertet — sonst droht die HTTP-Erfolgsantwort verloren zu gehen, weil die TCP-Verbindung durch den Neustart schon weg ist, bevor `AsyncTCP` sie tatsächlich rausgeschickt hat.
+- **Neue Seite `data/ota.html`/`data/ota.js`**: zwei Karten (Firmware/Dateisystem), je Datei-Auswahl + Upload-Button + Fortschrittsbalken (`XMLHttpRequest.upload.onprogress`) + Status-Text. Bewusst **ohne** MQTT-Verbindung (einzige Seite ohne `mqtt.min.js`) — die Seite spricht ausschließlich mit dem eigenen Webserver des Geräts, eine zusätzliche WebSocket-Verbindung wäre hier nur unnötige Komplexität während eines ohnehin sensiblen Vorgangs.
+- **Navigation**: neuer Tab „Update" auf allen sechs Seiten ergänzt.
+- **`data/style.css`**: `.ota-grid`/`.ota-card`/`.ota-desc`/`.ota-status(-success/-error)`/`.ota-reload-card`, erste Verwendung von `h3` im Projekt (Kartenüberschrift).
 
-- `platformio.ini` (neue `lib_deps`: `ElegantOTA`)
-- `src/WebManager.h/.cpp`
+## Bug gefunden und behoben: Gerät startete nach OTA-Update nicht neu
 
-## Test (geplant)
+Erster End-to-End-Test über `curl` ergab HTTP 200 und ein exakt passendes `Update.md5String()` (identisch zum lokal berechneten MD5 der hochgeladenen Datei) — die Übertragung war also byte-genau korrekt. Trotzdem lieferte der Webserver danach nur noch `404` für alle Pfade, und nach einem Firmware-Update passierte serverseitig gar nichts sichtbar Neues.
 
-1. Firmware-Binary über die Weboberfläche hochladen → Gerät verifiziert, rebootet, läuft mit neuer Version.
-2. Absichtlich fehlerhafte/unvollständige Datei hochladen → wird abgelehnt, altes Firmware-Image bleibt unangetastet und bootfähig.
-3. Nach erfolgreichem Update: Persistenz (`config`/`programs`/`schedule`) unverändert erhalten (SPIFFS/LittleFS-Partition ist von der App-OTA unabhängig).
+**Root Cause**: `WebIF::loop()` wurde zwar implementiert, aber **nie in `main.cpp`s `loop()` eingehängt** — der Neustart-Timer wurde dadurch nie ausgewertet, `ESP.restart()` also nie aufgerufen. Für das Dateisystem-Update bedeutete das: `LittleFS.end()` (im Upload-Callback aufgerufen) blieb dauerhaft unmounted, ohne dass je ein Neustart die frisch geschriebenen Daten neu mountete — daher die 404-Flut trotz korrekt geschriebener Daten. Für die Firmware bedeutete es: `esp_ota_set_boot_partition()` (intern von `Update.end()` aufgerufen) hatte den Boot-Slot zwar umgestellt, aber ohne Neustart lief die alte Firmware einfach weiter.
+
+**Fix**: `WebIF::loop();` in `main.cpp`s `loop()` ergänzt (ein Einzeiler). Kein Problem mit der eigentlichen Schreib-/Übertragungslogik — die war die ganze Zeit korrekt, wie die MD5-Übereinstimmung schon vor dem Fix zeigte.
+
+## Betroffene Dateien
+
+- `src/Logger.h`/`.cpp` (neue `Source::OTA`)
+- `src/WebIF.h`/`.cpp` (Upload-Endpunkte, `loop()`)
+- `src/main.cpp` (`WebIF::loop()` eingehängt)
+- `data/ota.html`/`data/ota.js` (neu)
+- `data/index.html`, `data/konfiguration.html`, `data/programme.html`, `data/zeitplan.html`, `data/log.html` (Navigation)
+- `data/style.css` (Update-Seiten-Stile)
+- `data/log.js` (`LOG_SOURCES` um `OTA` ergänzt)
+
+## Test / Ergebnis
+
+1. **Build/Link**: `Update`-Bibliothek bindet sauber ein, keine Kompilierfehler, RAM/Flash praktisch unverändert. ✅
+2. **Dateisystem-OTA, byte-genau** (`curl -F filesystem=@littlefs.bin http://.../api/ota/filesystem`): `Update.md5String()` im Live-Log identisch zum lokal berechneten MD5 der Quelldatei. ✅
+3. **Bug reproduziert**: kein Neustart nach Upload, Live-Log zeigte keine neue Boot-Sequenz, Webserver lieferte danach nur `404`. ❌ (vor Fix, Ursache: fehlendes `WebIF::loop()` in `main.cpp`)
+4. **Fix verifiziert**: nach Ergänzen von `WebIF::loop();` — Dateisystem-Upload gefolgt von echtem Neustart, `curl http://.../index.html` → `HTTP 200`, Seiteninhalt (inkl. neuem „Update"-Tab) korrekt ausgeliefert. ✅
+5. **Firmware-OTA End-to-End**: `curl -F firmware=@firmware.bin http://.../api/ota/firmware` → MD5-Übereinstimmung, danach vollständige neue Boot-Sequenz im Live-Log (WLAN/MQTT-Reconnect, alle State-Publishes) — Gerät läuft nachweislich auf der per OTA übertragenen Firmware. ✅
+6. Zwischenzeitlich per seriellem `uploadfs` auf bekannt guten Stand zurückgesetzt, um während der Fehlersuche nicht in einem kaputten Zustand zu bleiben (Dateisystem war durch das damals fehlende `WebIF::loop()` dauerhaft unmounted). ✅
+
+## Offene Punkte
+
+- **PlatformIO/ArduinoOTA** (zweiter Teil dieser Phase, siehe Ziel oben): `pio run --target upload`/`uploadfs` über WLAN statt Kabel, via `ArduinoOTA`-Bibliothek + zusätzlichem `[env:...-ota]` in `platformio.ini` — noch nicht begonnen.
+- Kein automatisches Rollback bei nicht-bootender Firmware (bewusst zurückgestellt, siehe „Design-Entscheidungen" oben).
+- Keine Authentifizierung auf den Upload-Endpunkten (bewusst zurückgestellt, siehe oben).

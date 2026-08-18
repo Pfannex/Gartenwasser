@@ -31,6 +31,7 @@ const char *sourceToString(Logger::Source source) {
     case Logger::Source::SYSTEM: return "SYS  ";
     case Logger::Source::VALVE:  return "VALVE";
     case Logger::Source::SEQ:    return "SEQ  ";
+    case Logger::Source::OTA:    return "OTA  ";
   }
   return "?????";
 }

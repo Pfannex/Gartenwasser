@@ -78,4 +78,5 @@ void loop() {
   WiFiController::loop();
   MQTT::loop();
   HMI::loop();
+  WebIF::loop();
 }

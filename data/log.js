@@ -11,7 +11,7 @@ const MAX_LOG_LINES = 500; // eigene Seite, mehr Platz/Kontext als die vorherige
 // nur main/remainingTotal und V{n}/time/remaining werden dort gezielt herausgefiltert
 // (Sekundentakt waehrend der Automatik, reines Rauschen ohne Zusatzinfo).
 const LOG_TYPES = ["ERROR", "INFO", "DEBUG", "PUB", "SUB"];
-const LOG_SOURCES = ["WIFI", "MQTT", "I2C", "HMI", "WEB", "SYS", "VALVE", "SEQ"];
+const LOG_SOURCES = ["WIFI", "MQTT", "I2C", "HMI", "WEB", "SYS", "VALVE", "SEQ", "OTA"];
 
 function livelog() {
   return {
