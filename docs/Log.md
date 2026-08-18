@@ -493,6 +493,14 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Erster echter espota-Testlauf direkt nach einem frischen seriellen Flash schlug mit "No response from device" fehl - vermutlich zu knappes Timing (mDNS/UDP-Listener war da noch nicht vollstaendig bereit). Mit einem `pyserial`-Skript live mitgeschnitten (Reset per DTR/RTS-Toggle, dann `espota`-Upload waehrend eine parallele Sitzung die serielle Ausgabe live mitliest): beim Retry auf einem bereits laufenden Geraet einwandfrei - 100%-Fortschritt, `Result: OK`/`Success`, sauberer Neustart (Reset-Grund `SW_CPU`), danach normale Boot-/MQTT-Sequenz mit korrekter Version. Kein Code-Bug, nur eine Timing-Frage beim allerersten Versuch.
 - Damit ist Phase 21 (beide Teile) vollstaendig abgeschlossen.
 
+### Automatischer Build-Zaehler ergaenzt
+
+- Auf Nutzerwunsch: eine Build-Nummer, die bei jedem Build automatisch um 1 hochzaehlt (z.B. "00001"), zusaetzlich zur manuell gepflegten `kFirmwareVersion`.
+- `build_number.txt` (versioniert, ein einzelner Integer) wird von `tools/increment_build_number.py` - als PlatformIO-`extra_scripts`-Pre-Build-Hook - bei jedem Build hochgezaehlt, daraus `include/BuildNumber.h` (`kBuildNumber`, 5-stellig) generiert. Die Header-Datei selbst ist reines Build-Artefakt, nicht versioniert (`.gitignore`).
+- `diagnostics/version` zeigt seither die Kombination, genau wie vom Nutzer gewuenscht: "V0.8.0.0 Build 00004" (Beispiel). Boot-Log-Zeile ebenso angepasst.
+- Auf Hardware verifiziert: Build-Nummer zaehlt bei jedem `pio run` korrekt hoch, kommt korrekt kombiniert im Live-Log/MQTT an.
+- Hinweis fuer spaeter: ein `pio run` ohne `-e` baut beide Environments (Serial + OTA, siehe oben) und zaehlt dadurch zweimal hoch - kein Fehler, nur bei exakter Zaehlung zu beachten.
+
 ## Offene Punkte / nächste Schritte
 
 - Merker: bei einem spaeteren Anlass einen Hardware-Status RAM/Flash im Dashboard ergaenzen (urspruenglicher Merker fuer Phase 21, noch nicht umgesetzt).

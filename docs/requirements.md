@@ -265,6 +265,8 @@ Zweiter Teil, `src/OTA.h`/`.cpp`: `ArduinoOTA`-Bibliothek für den eigenen Dev-W
 
 `include/Version.h` (`kFirmwareVersion`) + retained Topic `diagnostics/version` + Anzeige im Web-Dashboard dienen als eindeutiger Nachweis, dass ein Update tatsächlich übernommen wurde — für beide OTA-Wege.
 
+**Nachtrag (2026-08-18): automatischer Build-Zähler.** `build_number.txt` (versioniert, ein Integer) wird von `tools/increment_build_number.py` — als PlatformIO-`extra_scripts`-Pre-Build-Hook eingebunden — bei jedem Build um 1 hochgezählt und daraus `include/BuildNumber.h` (`kBuildNumber`, 5-stellig, z. B. `"00004"`) generiert; die Header-Datei selbst ist reines Build-Artefakt (`.gitignore`). `diagnostics/version` zeigt seither `"<kFirmwareVersion> Build <kBuildNumber>"` (z. B. `"V0.8.0.0 Build 00004"`), ebenso die Boot-Log-Zeile. `kFirmwareVersion` bleibt weiterhin manuell gepflegt, nur die Build-Nummer läuft automatisch mit. Ein `pio run` ohne `-e` baut beide Environments (siehe oben) und zählt dadurch zweimal hoch — kein Fehler, nur bei genauer Zählung zu beachten.
+
 ## Home-Assistant-MQTT-Discovery (Phase 10, geplant)
 
 Alle Discovery-Configs teilen sich ein `device`-Objekt (`identifiers: ["gartenwasser"]`, Name „Gartenbewässerung“, Hersteller „Pf@nne“) und referenzieren `gartenwasser/availability` (online/offline), damit alle Entities auf einer Geräteseite in Home Assistant gebündelt sind.

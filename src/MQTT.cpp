@@ -15,6 +15,7 @@
 #include "ValveController.h"
 #include "ValveTimer.h"
 #include "Version.h"
+#include "BuildNumber.h"
 #include "WiFiController.h"
 #include "secrets.h"
 
@@ -346,7 +347,11 @@ void publishLastError(const char *text) {
 }
 
 void publishVersion() {
-  publishAndLog(kVersionTopic, kFirmwareVersion, true);
+  // kBuildNumber (include/BuildNumber.h) wird bei jedem Build automatisch erzeugt
+  // (tools/increment_build_number.py) - kFirmwareVersion bleibt weiterhin manuell gepflegt.
+  char payload[48];
+  snprintf(payload, sizeof(payload), "%s Build %s", kFirmwareVersion, kBuildNumber);
+  publishAndLog(kVersionTopic, payload, true);
 }
 
 // Sicherheitskritisch im weiteren Sinne (Fehlererkennung soll auch ohne MQTT
