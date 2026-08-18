@@ -29,7 +29,11 @@ class Logger {
   // (ein `char[kMaxLineLength]` pro Zeile) garantiert genauso gross dimensioniert wie das,
   // was hier tatsaechlich hineinpasst (Nachtrag 2026-08-18: vorher zwei unabhaengige "224"-
   // Literale in Logger.cpp/MqttManager.cpp, nur zufaellig gleich - siehe Log.md).
-  static constexpr size_t kMaxLineLength = 560;
+  // 560->1088 (2026-08-18, zweite Runde): main/programs/state (604 Byte bei 5 Programmen)
+  // wurde mit 560 noch abgeschnitten, Live-Log-Pretty-Print schlug dafuer fehl - auf
+  // Nutzerentscheidung hin angehoben (deckt ca. 8-9 Programme, volles Auschoepfen von
+  // kMaxPrograms=32 waere RAM-seitig nicht vertretbar, siehe Log.md).
+  static constexpr size_t kMaxLineLength = 1088;
 
   Logger() = delete;
 

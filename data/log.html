@@ -109,8 +109,8 @@
                     </template>
                     <template x-if="l.jsonPretty">
                       <div>
-                        <span x-text="l.jsonTopic + ' ='"></span>
-                        <pre class="log-json" x-text="l.jsonPretty"></pre>
+                        <span x-text="l.jsonTopic + ' =' + (l.jsonTruncated ? ' (gekürzt)' : '')"></span>
+                        <pre class="log-json" :class="l.jsonTruncated ? 'log-json-truncated' : ''" x-text="l.jsonPretty"></pre>
                       </div>
                     </template>
                   </td>

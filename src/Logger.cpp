@@ -85,13 +85,16 @@ void Logger::log(Type type, Source source, const char *message) {
 }
 
 void Logger::logf(Type type, Source source, const char *format, ...) {
-  // Nachtrag 2026-08-18: 192->512 Byte, damit z.B. "topic = payload" fuer main/config/state
-  // (JSON-Publish, siehe MqttManager::publishAndLog()) nicht mehr mitten im String abgeschnitten
-  // wird - Grund war urspruenglich das Pretty-Print im Live-Log, das abgeschnittenes JSON nicht
-  // parsen kann. main/programs/state/schedule/state (potenziell mehrere KB) bleiben trotzdem
-  // teils abgeschnitten, dafuer waere ein Zeilenformat grundsaetzlich der falsche Ansatz.
+  // Nachtrag 2026-08-18: 192->512->1024 Byte, damit z.B. "topic = payload" fuer
+  // main/config/state und main/programs/state (JSON-Publish, siehe
+  // MqttManager::publishAndLog()) nicht mehr mitten im String abgeschnitten wird - Grund war
+  // urspruenglich das Pretty-Print im Live-Log, das abgeschnittenes JSON nicht parsen kann.
+  // 1024 deckt main/programs/state bis ca. 8-9 Programme ab (5 Programme = 604 Byte
+  // Gesamtzeile); volles Auschoepfen von kMaxPrograms=32 (potenziell mehrere KB) waere
+  // RAM-seitig nicht vertretbar, dafuer waere ein Zeilenformat grundsaetzlich der falsche
+  // Ansatz - bleibt dann sauber abgeschnitten (Live-Log-Fallback auf Rohtext).
   // Bewusst kleiner als kMaxLineLength, um Platz fuer Zeitstempel/CLASS/TYPE-Praefix zu lassen.
-  char buffer[512];
+  char buffer[1024];
   va_list args;
   va_start(args, format);
   vsnprintf(buffer, sizeof(buffer), format, args);

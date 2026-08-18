@@ -72,6 +72,7 @@ function livelog() {
         message,
         jsonTopic: json ? json.topic : null,
         jsonPretty: json ? json.pretty : null,
+        jsonTruncated: json ? json.truncated : false,
       });
       if (this.logLines.length > MAX_LOG_LINES) this.logLines.shift();
       this.$nextTick(() => {
@@ -82,10 +83,12 @@ function livelog() {
 
     // PUB/SUB-Zeilen haben die Form "topic = payload" (siehe MqttManager::publishAndLog()/
     // handleMqttMessage()). Wenn der Payload-Teil wie JSON aussieht ('{'/'[' als erstes
-    // Zeichen), wird er pretty-printed dargestellt statt als Einzeiler. Grosse Payloads
-    // (main/programs/state, main/schedule/state) landen wegen der 192-Byte-Formatierpuffer-
-    // Grenze in Logger::logf() teils abgeschnitten im Log - JSON.parse schlaegt dann einfach
-    // fehl und die Zeile bleibt als Rohtext stehen (kein Sonderfall noetig).
+    // Zeichen), wird er im Code-Kasten dargestellt statt als Einzeiler - bei gueltigem JSON
+    // eingerueckt (pretty), bei ungueltigem (z.B. abgeschnittenem main/programs/state/
+    // schedule/state - potenziell mehrere KB gross, passen auch mit dem vergroesserten
+    // Logger-Puffer nicht immer komplett rein) als Rohtext mit "(gekuerzt)"-Hinweis - sieht
+    // sonst wie eine kaputte Darstellung aus statt einer bewussten Grenze (Nutzer-Feedback
+    // 2026-08-18: "klappt nur teilweise", der reine Fliesstext-Fallback wirkte kaputt).
     parseJsonMessage(message) {
       const sep = message.indexOf(" = ");
       if (sep === -1) return null;
@@ -93,9 +96,9 @@ function livelog() {
       const value = message.slice(sep + 3).trim();
       if (value[0] !== "{" && value[0] !== "[") return null;
       try {
-        return { topic, pretty: JSON.stringify(JSON.parse(value), null, 2) };
+        return { topic, pretty: JSON.stringify(JSON.parse(value), null, 2), truncated: false };
       } catch (e) {
-        return null;
+        return { topic, pretty: value, truncated: true };
       }
     },
 

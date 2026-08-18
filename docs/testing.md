@@ -295,6 +295,18 @@ Frontend-Logik (`parseJsonMessage()` in `data/log.js`) vorab per `node -e` gegen
 | 4 | Keine Regression durch die größeren Puffer | Kompletter `test_livelog_pubsub.py`-Lauf (Auto-Toggle, Programmwahl, Automatik-Start/-Stopp, 404) | 111 Live-Log-Zeilen, keine `Unbekanntes Topic`-Fehlzeilen, PUB (45)/SUB (6) korrekt, Rausch-Filter weiterhin aktiv | ✅ |
 | 5 | RAM-Headroom | `pio run` Size-Report vor/nach dem Puffer-Fix verglichen | RAM-Nutzung 40,1% → 48,3% (+26,9 KB, wie erwartet für 80 Zeilen × 336 Byte Differenz), Flash nahezu unverändert | ✅ |
 
+## Live-Log: main/programs/state vollständig + zweite Pufferrunde — 2026-08-18
+
+Nutzer-Feedback in zwei Runden (Screenshot 1: abgeschnittene Zeile wirkt „kaputt“; Screenshot 2: „programs/state ist nicht pretty print dargestellt!“) führte zu einer zweiten, größeren Pufferrunde.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Payload-Größe gemessen | `main/programs/state`/`main/schedule/state` retained abgefragt, Längen verglichen | `main/programs/state` (5 Testprogramme): 604 Byte Gesamtzeile — bereits über dem 560-Byte-Puffer. `main/schedule/state` (0 Einträge): 65 Byte | ✅ (Diagnose) |
+| 2 | Truncated-JSON-Kasten (Zwischenschritt) | `parseJsonMessage()` liefert jetzt auch bei fehlgeschlagenem Parse ein Ergebnis (`truncated: true`), Darstellung im Browser geprüft | Abgeschnittene Zeilen erscheinen im `.log-json`-Kasten mit gestricheltem Rand + „(gekürzt)“-Hinweis statt umgebrochenem Fließtext | ✅ (vom Nutzer als „nicht das Ziel“ zurückgemeldet — eigentliches Problem blieb die Truncation) |
+| 3 | main/programs/state vollständig nach Puffer-Fix | `Logger::logf()` 512→1024 Byte, `Logger::kMaxLineLength` 560→1088 Byte geflasht, `main/programs/state` erneut angefordert | Live-Log-Zeile (629 Zeichen) byte-identisch zum retained Wert, `json.loads()` erfolgreich, 5 Programme korrekt erkannt | ✅ |
+| 4 | Keine Regression | Kompletter `test_livelog_pubsub.py`-Lauf nach dem zweiten Flash | Alle 4 Prüfpunkte weiterhin PASS (keine `Unbekanntes Topic`-Fehlzeilen, PUB/SUB/Rausch-Filter korrekt) | ✅ |
+| 5 | RAM-Headroom | `pio run` Size-Report verglichen | RAM-Nutzung 48,3% → 61,2% (exakt wie vorab anhand der Puffergrößen berechnet und dem Nutzer zur Entscheidung vorgelegt) | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

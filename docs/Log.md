@@ -453,6 +453,13 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - RAM-Mehrbedarf: 80 Zeilen x 336 Byte Differenz = 26,9 KB (RAM-Nutzung 40,1% -> 48,3%, Headroom weiterhin reichlich).
 - Auf Hardware verifiziert: `main/config/state` kommt jetzt vollstaendig im Live-Log an (305 statt vorher 216 Zeichen Zeilenlaenge, Byte-Vergleich mit dem retained MQTT-Wert deckungsgleich). Kompletter `test_livelog_pubsub.py`-Regressionslauf (111 Zeilen, Auto-Toggle/Programmwahl/Automatik-Start-Stopp/404) weiterhin PASS - keine Pufferkonflikte durch die groesseren Puffer.
 
+### Nachtrag: Truncated-JSON-Fallback + zweite Pufferrunde (512/560 -> 1024/1088 Byte)
+
+- Nutzer-Feedback nach dem ersten Screenshot: die abgeschnittene `main/programs/state`-Zeile fiel auf reinen Fliesstext zurueck und wirkte "kaputt" (unschoen umgebrochen, kein erkennbarer Zusammenhang zum sauber eingerueckten `main/config/state` direkt darueber). Erster Fix: auch ungueltiges (abgeschnittenes) JSON im selben `.log-json`-Kasten darstellen, nur ohne Einrueckung + gestricheltem statt durchgezogenem Rand + "(gekuerzt)"-Hinweis (`data/log.js`: `parseJsonMessage()` liefert jetzt immer ein Ergebnis, sobald der Wert mit `{`/`[` beginnt, mit `truncated`-Flag statt `null` bei fehlgeschlagenem Parse).
+- Zweiter Nutzer-Screenshot: das war nicht das eigentliche Ziel - "programs/state ist nicht pretty print dargestellt!". Tatsaechliches Problem blieb die Pufferbegrenzung, keine Darstellungsfrage. Groesse gemessen: `main/programs/state` braucht bei 5 Testprogrammen bereits 604 Byte (Topic+Payload), `main/schedule/state` nur 65 Byte (aktuell keine Eintraege). Nutzerentscheidung nach Ruecksprache mit konkreten RAM-Zahlen (1024/1088 Byte empfohlen, deckt ca. 8-9 Programme, +41 KB RAM; 2048/2112 Byte waere mit +121 KB / ~86% RAM-Nutzung zu riskant gewesen): **1024/1088 Byte**.
+- `Logger::logf()`-Puffer 512->1024 Byte, `Logger::kMaxLineLength` 560->1088 Byte. RAM-Nutzung 48,3% -> 61,2% (exakt wie vorab berechnet).
+- Auf Hardware verifiziert: `main/programs/state` (5 Programme, 629 Zeichen Live-Log-Zeile) kommt jetzt vollstaendig an, ist byte-identisch zum retained MQTT-Wert und laesst sich vollstaendig parsen (`json.loads` erfolgreich, 5 Programme erkannt). Kompletter `test_livelog_pubsub.py`-Regressionslauf weiterhin PASS. Bei weiterem Wachstum der Programmliste (>~8-9 Programme, je nach Namens-/Alias-Laenge) faellt die Darstellung wieder sauber auf den gestrichelten "(gekuerzt)"-Kasten zurueck statt kaputtem JSON.
+
 ## Offene Punkte / nächste Schritte
 
 - **Phase 21 (Web-Interface: OTA)** — danach dran, letzte Phase des vorgezogenen Web-Interface-Blocks. Merker: dabei auch einen Hardware-Status RAM/Flash ergänzen.
