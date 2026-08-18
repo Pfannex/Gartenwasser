@@ -275,6 +275,17 @@ h2 {
 .log-table tr + tr td { border-top: 1px solid var(--border); }
 .log-empty-cell { text-align: left; font-style: italic; color: var(--text-muted); }
 
+/* JSON-Pretty-Print in der Event-Spalte (2026-08-18) - Payload eines PUB/SUB mit JSON-Wert
+   (main/config/state, main/programs/state, ...) wird eingerueckt statt als Einzeiler gezeigt.
+   max-height + eigenes Scrollen, damit ein grosser main/programs/state-Burst die Tabellenzeile
+   nicht beliebig aufblaeht. */
+.log-json {
+  margin: 4px 0 0; padding: 6px 8px; max-height: 220px; overflow-y: auto;
+  background: var(--surface-sunken); border: 1px solid var(--border); border-radius: 7px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 11.5px; line-height: 1.5;
+  color: var(--text); white-space: pre;
+}
+
 .col-filter-menu {
   position: absolute; top: 100%; left: 0; margin-top: 4px; min-width: 140px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px;

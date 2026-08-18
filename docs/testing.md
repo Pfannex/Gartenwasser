@@ -283,6 +283,18 @@ Letzte Runde der Datei-für-Datei-Review (`MqttManager.cpp`, `HmiManager.cpp`, `
 | 3 | Keine Regression | Ausgangszustand (`V1/time` auf ursprünglichen Wert, Programm auf 0) danach wiederhergestellt, kompletter Mitschnitt (70 Zeilen) auf Auffälligkeiten geprüft | Alle erwarteten PUB/SUB/VALVE/SYS-Zeilen vorhanden, keine Fehlzeilen | ✅ |
 | 4 | Build/Boot nach `HmiManager.cpp`-Änderung | `pio run --target upload`, Gerät bootet | Kein Build-Fehler, Display funktioniert nach dem Flash normal weiter (kein Fehlerfall aufgetreten, `gfx->begin()` liefert im Normalfall `true`) | ✅ |
 
+## Live-Log: JSON-Pretty-Print + Log-Zeilen-Puffer vergrößert — 2026-08-18
+
+Frontend-Logik (`parseJsonMessage()` in `data/log.js`) vorab per `node -e` gegen eine echte mitgeschnittene `main/config/state`-Zeile (inkl. Umlaute in Alias-Werten) verifiziert, danach Firmware-Änderung (Puffergrößen) auf Hardware getestet.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Frontend-Parsing/Pretty-Print-Logik | `node -e` mit realer `main/config/state`-Zeile (inkl. Umlauten in Alias-Werten) gegen `parseJsonMessage()`-Äquivalent | `JSON.parse()` erfolgreich, `JSON.stringify(..., null, 2)` liefert korrekt eingerücktes Ergebnis inkl. Umlaute | ✅ |
+| 2 | Truncation-Diagnose (vor dem Puffer-Fix) | `main/config/state` (247 Byte JSON) angefordert, mit dem retained MQTT-Wert verglichen | Live-Log-Zeile bei 216 Zeichen abgeschnitten (`"Sprenger Seit`, mitten im String) — `Logger::logf()`s 192-Byte-Puffer als Ursache bestätigt | ❌ (vor Fix, Ursache bestätigt) |
+| 3 | Truncation behoben | Gleicher Test nach Flash von `Logger::logf()` 192→512 Byte / `Logger::log()` 224→560 Byte (`Logger::kMaxLineLength`) | `main/config/state` kommt vollständig an (305 Zeichen Zeilenlänge, Payload deckungsgleich mit dem retained Wert) | ✅ |
+| 4 | Keine Regression durch die größeren Puffer | Kompletter `test_livelog_pubsub.py`-Lauf (Auto-Toggle, Programmwahl, Automatik-Start/-Stopp, 404) | 111 Live-Log-Zeilen, keine `Unbekanntes Topic`-Fehlzeilen, PUB (45)/SUB (6) korrekt, Rausch-Filter weiterhin aktiv | ✅ |
+| 5 | RAM-Headroom | `pio run` Size-Report vor/nach dem Puffer-Fix verglichen | RAM-Nutzung 40,1% → 48,3% (+26,9 KB, wie erwartet für 80 Zeilen × 336 Byte Differenz), Flash nahezu unverändert | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

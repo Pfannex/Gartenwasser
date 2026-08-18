@@ -147,9 +147,12 @@ void publishAndLog(const char *topic, const char *payload, bool retained) {
 // bekaeman ohne diesen Puffer beim Oeffnen der Log-Seite nur kuenftige Zeilen zu sehen -
 // per replayLogBuffer() liefert das Geraet stattdessen auf Anfrage (diagnostics/
 // livelog/replay) den kompletten aktuellen Puffer nach. Aeltester Eintrag faellt raus,
-// wenn der Puffer voll ist (80 * 224 Byte ~= 18 KB, RAM-Headroom reichlich vorhanden).
+// wenn der Puffer voll ist (80 * Logger::kMaxLineLength Byte ~= 44 KB, RAM-Headroom
+// reichlich vorhanden). Zeilengroesse bewusst identisch zu Logger::kMaxLineLength statt
+// eines eigenen Literals - sonst genau die Art von Bug, die einmal V{n}/auto/state
+// abgeschnitten hat (siehe kTopicBufferSize-Kommentar oben).
 constexpr uint8_t kLogBufferCapacity = 80;
-char logBuffer[kLogBufferCapacity][224];
+char logBuffer[kLogBufferCapacity][Logger::kMaxLineLength];
 uint8_t logBufferCount = 0;
 uint8_t logBufferStart = 0;
 // Wie viele der zuletzt gepufferten Zeilen noch nicht live publiziert wurden - siehe

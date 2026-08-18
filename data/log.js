@@ -61,19 +61,42 @@ function livelog() {
     // einzelnen Leerzeichens noetig, sonst schlaegt das Parsen bei den meisten Zeilen fehl.
     appendLogLine(raw) {
       const m = raw.match(/^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/);
+      const message = m ? m[4] : raw;
+      const json = this.parseJsonMessage(message);
       this.logLines.push({
         id: this.logIdCounter++,
         raw,
         time: m ? m[1] : "",
         source: m ? m[2].trim() : "",
         type: m ? m[3].trim() : "",
-        message: m ? m[4] : raw,
+        message,
+        jsonTopic: json ? json.topic : null,
+        jsonPretty: json ? json.pretty : null,
       });
       if (this.logLines.length > MAX_LOG_LINES) this.logLines.shift();
       this.$nextTick(() => {
         const el = this.$refs.logView;
         if (el) el.scrollTop = el.scrollHeight;
       });
+    },
+
+    // PUB/SUB-Zeilen haben die Form "topic = payload" (siehe MqttManager::publishAndLog()/
+    // handleMqttMessage()). Wenn der Payload-Teil wie JSON aussieht ('{'/'[' als erstes
+    // Zeichen), wird er pretty-printed dargestellt statt als Einzeiler. Grosse Payloads
+    // (main/programs/state, main/schedule/state) landen wegen der 192-Byte-Formatierpuffer-
+    // Grenze in Logger::logf() teils abgeschnitten im Log - JSON.parse schlaegt dann einfach
+    // fehl und die Zeile bleibt als Rohtext stehen (kein Sonderfall noetig).
+    parseJsonMessage(message) {
+      const sep = message.indexOf(" = ");
+      if (sep === -1) return null;
+      const topic = message.slice(0, sep);
+      const value = message.slice(sep + 3).trim();
+      if (value[0] !== "{" && value[0] !== "[") return null;
+      try {
+        return { topic, pretty: JSON.stringify(JSON.parse(value), null, 2) };
+      } catch (e) {
+        return null;
+      }
     },
 
     toggleType(type) {

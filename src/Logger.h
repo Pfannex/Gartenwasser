@@ -24,6 +24,13 @@ class Logger {
   using ErrorCallback = void (*)(const char *message);
   using LineCallback = void (*)(const char *line);
 
+  // Maximale Laenge einer formatierten Log-Zeile (inkl. Zeitstempel/CLASS/TYPE-Praefix,
+  // exkl. Nullterminator) - oeffentlich, damit MqttManager seinen Live-Log-Ringpuffer
+  // (ein `char[kMaxLineLength]` pro Zeile) garantiert genauso gross dimensioniert wie das,
+  // was hier tatsaechlich hineinpasst (Nachtrag 2026-08-18: vorher zwei unabhaengige "224"-
+  // Literale in Logger.cpp/MqttManager.cpp, nur zufaellig gleich - siehe Log.md).
+  static constexpr size_t kMaxLineLength = 560;
+
   Logger() = delete;
 
   static void log(Type type, Source source, const char *message);

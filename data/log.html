@@ -30,7 +30,7 @@
     </div>
 
     <h2>Live-Log</h2>
-    <p class="hint">Jede Log-Zeile des Geräts live mitgelesen (außer MQTT-Publish/Subscribe-Verkehr) — inklusive der Boot-Sequenz, die beim Verbinden nachgeliefert wird.</p>
+    <p class="hint">Jede Log-Zeile des Geräts live mitgelesen, inklusive MQTT-Publish/Subscribe-Verkehr und der Boot-Sequenz, die beim Verbinden nachgeliefert wird.</p>
     <div class="card log-card">
       <template x-if="logLines.length > 0">
         <table class="log-table log-table-head">
@@ -103,7 +103,17 @@
                   <td class="col-time" x-text="l.time"></td>
                   <td x-text="l.source"></td>
                   <td x-text="l.type"></td>
-                  <td class="col-event" x-text="l.message"></td>
+                  <td class="col-event">
+                    <template x-if="!l.jsonPretty">
+                      <span x-text="l.message"></span>
+                    </template>
+                    <template x-if="l.jsonPretty">
+                      <div>
+                        <span x-text="l.jsonTopic + ' ='"></span>
+                        <pre class="log-json" x-text="l.jsonPretty"></pre>
+                      </div>
+                    </template>
+                  </td>
                 </tr>
               </template>
             </tbody>
