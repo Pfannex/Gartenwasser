@@ -1,0 +1,130 @@
+// Gartenwasser Web-Interface - Live-Log (Nachtrag 2026-08-18)
+// Architektur B (siehe docs/spec/16-webif-fundament.md): eigene MQTT-over-WebSocket-
+// Verbindung wie die anderen Seiten, aber schlank - abonniert bewusst nur die zwei Topics,
+// die diese Seite tatsaechlich braucht (kein "gartenwasser/#" wie beim Dashboard).
+
+const BROKER_WS_URL = "ws://192.168.1.123:9001/mqtt";
+const TOPIC_PREFIX = "gartenwasser/";
+const MAX_LOG_LINES = 500; // eigene Seite, mehr Platz/Kontext als die vorherige Dashboard-Karte
+
+// PUB/SUB erreichen diagnostic/livelog nie (Logger::log() filtert sie bereits raus, siehe
+// MqttManager::onLoggerLine()) - deshalb hier nicht als Filter-Option gefuehrt.
+const LOG_TYPES = ["ERROR", "INFO", "DEBUG"];
+const LOG_SOURCES = ["WIFI", "MQTT", "I2C", "HMI", "WEB", "SYS", "VALVE", "SEQ"];
+
+function livelog() {
+  return {
+    connected: false,
+    deviceOnline: false,
+    logLines: [],
+    logIdCounter: 0,
+    logTypes: LOG_TYPES,
+    logSources: LOG_SOURCES,
+    // Leer = keine Einschraenkung (alles sichtbar) - ausgewaehlte Chips schraenken auf genau
+    // diese Werte ein (Facetten-Filter, nicht Ausschluss-Toggle: "nichts gedrueckt" zeigt
+    // alles, "einen Typ gedrueckt" zeigt nur noch diesen).
+    activeTypes: {},
+    activeSources: {},
+    searchText: "",
+    sourceMenuOpen: false,
+    typeMenuOpen: false,
+    eventSearchActive: false,
+
+    init() {
+      this.client = mqtt.connect(BROKER_WS_URL);
+      this.client.on("connect", () => {
+        this.connected = true;
+        this.client.subscribe(TOPIC_PREFIX + "diagnostic/livelog");
+        this.client.subscribe(TOPIC_PREFIX + "availability");
+        // Kein Retain auf diagnostic/livelog (reiner Stream) - ohne diese Anfrage saehe eine
+        // frisch geoeffnete Log-Seite nur kuenftige Zeilen, nichts von vorher.
+        this.client.publish(TOPIC_PREFIX + "diagnostic/livelog/replay", "1");
+      });
+      this.client.on("close", () => {
+        this.connected = false;
+      });
+      this.client.on("message", (topic, payload) => this.handleMessage(topic.slice(TOPIC_PREFIX.length), payload.toString()));
+    },
+
+    handleMessage(topic, payload) {
+      if (topic === "diagnostic/livelog") {
+        this.appendLogLine(payload);
+      } else if (topic === "availability") {
+        this.deviceOnline = payload === "online";
+      }
+    },
+
+    // "hh:mm:ss:mmm CLASS TYPE message" (siehe Logger::log()) - CLASS/TYPE sind auf 5 Zeichen
+    // leerzeichenaufgefuellt (z.B. "I2C  ", "INFO "), zwischen den Feldern stehen dadurch
+    // unterschiedlich viele Leerzeichen (Fuellzeichen + Trennzeichen) - \s+ statt eines
+    // einzelnen Leerzeichens noetig, sonst schlaegt das Parsen bei den meisten Zeilen fehl.
+    appendLogLine(raw) {
+      const m = raw.match(/^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/);
+      this.logLines.push({
+        id: this.logIdCounter++,
+        raw,
+        time: m ? m[1] : "",
+        source: m ? m[2].trim() : "",
+        type: m ? m[3].trim() : "",
+        message: m ? m[4] : raw,
+      });
+      if (this.logLines.length > MAX_LOG_LINES) this.logLines.shift();
+      this.$nextTick(() => {
+        const el = this.$refs.logView;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+    },
+
+    toggleType(type) {
+      if (this.activeTypes[type]) delete this.activeTypes[type];
+      else this.activeTypes[type] = true;
+    },
+
+    toggleSource(source) {
+      if (this.activeSources[source]) delete this.activeSources[source];
+      else this.activeSources[source] = true;
+    },
+
+    toggleSourceMenu() {
+      this.sourceMenuOpen = !this.sourceMenuOpen;
+      this.typeMenuOpen = false;
+    },
+
+    toggleTypeMenu() {
+      this.typeMenuOpen = !this.typeMenuOpen;
+      this.sourceMenuOpen = false;
+    },
+
+    // Event-Spaltenkopf wird bei Klick zum Sucheingabefeld (ersetzt die frueher separate
+    // Suchleiste ueber der Tabelle). Beim Verlassen des Feldes (Blur) klappt es wieder auf
+    // eine Beschriftung zu - "Event", falls kein Suchbegriff aktiv ist, sonst "Eventfilter:
+    // <Begriff>" (weiterhin anklickbar, um den Filter zu bearbeiten).
+    activateEventSearch() {
+      this.eventSearchActive = true;
+      this.$nextTick(() => {
+        if (this.$refs.eventSearchInput) this.$refs.eventSearchInput.focus();
+      });
+    },
+
+    clearEventSearch() {
+      this.searchText = "";
+      this.eventSearchActive = false;
+    },
+
+    // Spaltenkopf-Filter (Quelle/Typ, Mehrfachauswahl per Checkbox-Liste, Facetten-Prinzip:
+    // leere Auswahl = keine Einschraenkung) + Freitextsuche (Volltext auf die Rohzeile)
+    // kombiniert - unabhaengig voneinander, das Suchfeld bleibt beim Filtern unveraendert.
+    // Jeder Tastendruck im Suchfeld wertet das ueber Alpines Reaktivitaet automatisch neu aus.
+    visibleLines() {
+      const query = this.searchText.trim().toLowerCase();
+      const typeFilterActive = Object.keys(this.activeTypes).length > 0;
+      const sourceFilterActive = Object.keys(this.activeSources).length > 0;
+      return this.logLines.filter((l) => {
+        if (typeFilterActive && !this.activeTypes[l.type]) return false;
+        if (sourceFilterActive && !this.activeSources[l.source]) return false;
+        if (query && !l.raw.toLowerCase().includes(query)) return false;
+        return true;
+      });
+    },
+  };
+}

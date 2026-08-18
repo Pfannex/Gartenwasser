@@ -411,9 +411,19 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Auf Hardware verifiziert: alle betroffenen Aktionspfade funktionieren nach der Umstellung weiterhin normal (Ventil, Konfiguration speichern, Programm anwenden, Automatik start/stop), keine Regressionen.
 - Details siehe `docs/requirements.md`, Abschnitt „Log-Format", Nachtrag 2026-08-18.
 
+### Live-Log im Web-Interface umgesetzt
+
+- `Logger::setLineCallback()` (neuer Hook, Muster identisch zu `setErrorCallback()`) reicht jede Zeile ausser `PUB`/`SUB` an `MqttManager` weiter, das sie roh per `mqttClient.publish()` auf `gartenwasser/diagnostic/livelog` publiziert (nicht retained, bewusst nicht ueber `publishAndLog()` - sonst Rueckkopplung durch erneut geloggte PUB-Eintraege).
+- Immer aktiver 80-Zeilen-Ringpuffer in `MqttManager` + Replay (automatisch nach jedem Connect, zusaetzlich auf Anfrage ueber `gartenwasser/diagnostic/livelog/replay`) - ohne Retain saehe ein neu verbundener Web-Client sonst nur kuenftige Zeilen, nichts von vorher.
+- Erste Version als Dashboard-Karte, nach Nutzer-Feedback "nach dem Wechsel der Seite ist das Log leer" durch die Puffer-/Replay-Logik geloest, dann auf eine eigene Seite `data/log.html`/`data/log.js` umgezogen (eigener Nav-Tab "Log", damit ist die Hauptnavigation aller fuenf Seiten komplett aktiv).
+- Tabellenansicht (Zeit/Quelle/Typ/Event) statt loser Textzeilen. Quelle/Typ als Spaltenkopf-Dropdown mit Checkliste, Mehrfachauswahl nach Facetten-Prinzip (leere Auswahl = alles sichtbar) - nach einer Runde korrigiert, urspruenglich als Ausschluss-Toggle mit allem-aktiv-Default gebaut, vom Nutzer als unerwartet zurueckgemeldet.
+- Event-Spalte wird per Klick zum Sucheingabefeld (ersetzt eine anfaenglich separate Suchleiste), filtert live, klappt nach Verlassen zu einem Label "Eventfilter: *Begriff*" zusammen (mit Lösch-Button), Autokorrektur/-vervollstaendigung am Feld deaktiviert.
+- Drei CSS-Bugs unterwegs gefunden und behoben (alle durch Nutzer-Screenshots aufgedeckt): `overflow:hidden` auf der Karte schnitt Filter-Dropdowns ab; Kopf-/Koerpertabelle mussten strukturell getrennt werden, da ein schrumpfender Scrollbereich (Filterung) das Dropdown sonst ebenfalls abschnitt; geerbtes `text-transform: uppercase` der Spaltenkoepfe verfaelschte den angezeigten (nicht den gespeicherten) Suchbegriff (`0x` -> `0X`).
+- Auf Hardware verifiziert: keine PUB/SUB-Leckage, keine Flut/Rueckkopplung, Boot-Sequenz wird nach echtem Reset korrekt nachgeliefert. Details siehe `docs/spec/17-webif-dashboard.md`, Nachtrag, `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
-- **Live-Log-Karte fürs Web-Dashboard** — als Nächstes dran: die zugrundeliegende Logging-Überarbeitung ist erledigt (siehe oben), jetzt fehlt noch die eigentliche MQTT-Weiterleitung (`Logger::setLineCallback()`, analog `setErrorCallback()`, bewusst über rohes `mqttClient.publish()` statt `publishAndLog()` um eine Rückkopplung über erneut geloggte `PUB`-Einträge zu vermeiden — `PUB`/`SUB` werden generell nicht weitergeleitet) sowie die Dashboard-Karte (scrollend, nach Type eingefärbt, live-only ohne Verlauf/Ringpuffer).
+- **Logging-Umfang-Brainstorming** — als Nächstes dran, auf Nutzerwunsch: gemeinsam durchgehen, was inhaltlich noch geloggt werden sollte (über die reine Struktur-Überarbeitung oben hinaus) - noch nicht begonnen.
 - **Phase 21 (Web-Interface: OTA)** — danach dran, letzte Phase des vorgezogenen Web-Interface-Blocks.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.

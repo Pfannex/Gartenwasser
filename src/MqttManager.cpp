@@ -30,6 +30,13 @@ constexpr const char *kMainActiveValveTopic = "gartenwasser/main/activeValve";
 constexpr const char *kMainRemainingTotalTopic = "gartenwasser/main/remainingTotal";
 constexpr const char *kI2cStatusTopic = "gartenwasser/diagnostics/i2cStatus";
 constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
+// Live-Log (Nachtrag 2026-08-18): jede Logger-Zeile ausser PUB/SUB, siehe
+// Logger::setLineCallback(). Bewusst nicht retained (reiner Live-Stream, kein Verlauf
+// beim Verbinden) und bewusst singular "diagnostic" statt "diagnostics" (Nutzervorgabe).
+constexpr const char *kLiveLogTopic = "gartenwasser/diagnostic/livelog";
+// Anfrage-Topic: beliebiger Payload loest replayLogBuffer() aus - fuer Web-Clients, die die
+// Log-Seite oeffnen und sonst (kein Retain) nur ab diesem Zeitpunkt neue Zeilen saehen.
+constexpr const char *kLiveLogReplayTopic = "gartenwasser/diagnostic/livelog/replay";
 // V0 hat keinen cmd/time/auto, aber einen Alias - eigenes Topic statt ueber
 // parseValveTopic() (das ist bewusst auf V1..V5 begrenzt).
 constexpr const char *kV0AliasSetTopic = "gartenwasser/V0/alias/set";
@@ -132,6 +139,52 @@ bool parseOnOffPayload(const char *payloadStr, bool *outOn) {
 void publishAndLog(const char *topic, const char *payload, bool retained) {
   mqttClient.publish(topic, payload, retained);
   Logger::logf(Logger::Type::PUB, Logger::Source::MQTT, "%s = %s", topic, payload);
+}
+
+// Ringpuffer der letzten Log-Zeilen (immer aktiv, nicht nur waehrend einer Trennung) -
+// main/diagnostic/livelog ist bewusst nicht retained (siehe kLiveLogTopic), MQTT-Retain
+// haette hier ohnehin nur die jeweils letzte Zeile behalten, kein Verlauf. Web-Clients
+// bekaeman ohne diesen Puffer beim Oeffnen der Log-Seite nur kuenftige Zeilen zu sehen -
+// per replayLogBuffer() liefert das Geraet stattdessen auf Anfrage (main/diagnostic/
+// livelog/replay) den kompletten aktuellen Puffer nach. Aeltester Eintrag faellt raus,
+// wenn der Puffer voll ist (80 * 224 Byte ~= 18 KB, RAM-Headroom reichlich vorhanden).
+constexpr uint8_t kLogBufferCapacity = 80;
+char logBuffer[kLogBufferCapacity][224];
+uint8_t logBufferCount = 0;
+uint8_t logBufferStart = 0;
+
+void appendToLogBuffer(const char *line) {
+  const uint8_t writeIndex = (logBufferStart + logBufferCount) % kLogBufferCapacity;
+  strncpy(logBuffer[writeIndex], line, sizeof(logBuffer[writeIndex]) - 1);
+  logBuffer[writeIndex][sizeof(logBuffer[writeIndex]) - 1] = '\0';
+  if (logBufferCount < kLogBufferCapacity) {
+    logBufferCount++;
+  } else {
+    logBufferStart = (logBufferStart + 1) % kLogBufferCapacity;  // aeltesten Eintrag verwerfen
+  }
+}
+
+// Live-Log-Weiterleitung (Logger::setLineCallback(), Nachtrag 2026-08-18): bewusst rohes
+// mqttClient.publish() statt publishAndLog() - letzteres wuerde selbst wieder eine PUB-Zeile
+// erzeugen und damit eine Rueckkopplung ausloesen (weitergeleitete Zeile -> neue PUB-Zeile ->
+// wird auch weitergeleitet -> ...). PUB/SUB erreichen diese Funktion ohnehin nie, siehe
+// Logger::log() (dort bereits gefiltert). Jede Zeile landet immer im Ringpuffer, zusaetzlich
+// sofort live publiziert, wenn gerade eine Verbindung besteht.
+void onLoggerLine(const char *line) {
+  appendToLogBuffer(line);
+  if (mqttClient.connected()) {
+    mqttClient.publish(kLiveLogTopic, line, false);
+  }
+}
+
+// Sendet den kompletten aktuellen Ringpuffer erneut raus - einerseits automatisch nach jedem
+// erfolgreichen (Re-)Connect (holt eine Verbindungsluecke nach, z.B. die Boot-Sequenz vor dem
+// allerersten Connect), andererseits auf Anfrage eines Web-Clients (main/diagnostic/livelog/
+// replay), der die Log-Seite gerade erst geoeffnet hat und sonst nur kuenftige Zeilen saehe.
+void replayLogBuffer() {
+  for (uint8_t i = 0; i < logBufferCount; i++) {
+    mqttClient.publish(kLiveLogTopic, logBuffer[(logBufferStart + i) % kLogBufferCapacity], false);
+  }
 }
 
 void publishValveState(uint8_t index, bool on) {
@@ -1091,6 +1144,10 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
     handleScheduleCleanup();
     return;
   }
+  if (strcmp(topic, kLiveLogReplayTopic) == 0) {
+    replayLogBuffer();
+    return;
+  }
 
   uint8_t valveIndex = 0;
   if (parseValveTopic(topic, kCmdSuffix, &valveIndex)) {
@@ -1142,6 +1199,7 @@ void tickValveTimers() {
 bool connectToBroker() {
   const bool ok = mqttClient.connect(MQTT_CLIENT_ID, kAvailabilityTopic, kAvailabilityQos, true, kOfflinePayload);
   if (ok) {
+    replayLogBuffer();  // Verbindungsluecke nachholen, vor der ersten "echten" Zeile danach
     Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "Verbunden.");
     publishAndLog(kAvailabilityTopic, kOnlinePayload, true);
     mqttClient.subscribe(kMainCmdTopic);
@@ -1152,6 +1210,7 @@ bool connectToBroker() {
     mqttClient.subscribe(kScheduleSetTopic);
     mqttClient.subscribe(kScheduleCmdTopic);
     mqttClient.subscribe(kScheduleCleanupTopic);
+    mqttClient.subscribe(kLiveLogReplayTopic);
     for (uint8_t i = 1; i <= 5; i++) {
       char cmdTopic[kTopicBufferSize];
       char timeSetTopic[kTopicBufferSize];
@@ -1200,6 +1259,7 @@ void MqttManager::begin() {
   // Default (256 Byte) reicht nicht fuer die JSON-Topics (main/config/*, main/programs/*).
   // main/programs/set|state (Phase 14, bis zu kMaxPrograms Eintraege) ist der groesste Fall.
   mqttClient.setBufferSize(static_cast<uint16_t>(kMaxJsonPayloadSize));
+  Logger::setLineCallback(&onLoggerLine);
 }
 
 void MqttManager::loop() {

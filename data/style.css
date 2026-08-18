@@ -211,6 +211,81 @@ h2 {
 .diag-dot.error { background: var(--state-running); }
 .diag-row .label { color: var(--text-muted); }
 
+/* ---------- Live-Log ---------- */
+/* Kein overflow:hidden auf .log-card: das wuerde die Spaltenkopf-Filter-Dropdowns
+   abschneiden, egal an welchem Nachfahren sie haengen (jeder Vorfahre mit overflow:hidden
+   clippt absolut positionierte Kindelemente). Stattdessen runden nur die jeweils aeussersten
+   Kindelemente die passenden Ecken. */
+.log-card { padding: 0; }
+.log-view {
+  max-height: 280px; overflow-y: auto;
+  background: var(--surface-sunken);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.log-empty { padding: 12px 16px; font-size: 12.5px; color: var(--text-muted); font-style: italic; }
+.log-view-full { max-height: 70vh; }
+
+/* Kopf- und Koerper-Tabelle bewusst getrennt (statt einer Tabelle mit position:sticky
+   im thead): der Koerper liegt in .log-view (scrollt, hoehe schwankt mit der Zeilenzahl
+   nach Filterung) - ein Spaltenkopf-Dropdown dort drin wuerde vom schrumpfenden
+   Scrollbereich abgeschnitten. Beide Tabellen teilen sich dieselben Spaltenbreiten
+   (identische <colgroup>-Klassen), dadurch bleiben die Spalten optisch ausgerichtet. */
+.log-table {
+  width: 100%; border-collapse: collapse; table-layout: fixed;
+  font-family: ui-monospace, monospace; font-size: 12px;
+}
+.log-table .col-time { width: 108px; }
+.log-table .col-filterable { width: 90px; }
+.log-table .col-event { width: auto; }
+.log-table-head th:first-child { border-top-left-radius: var(--radius); }
+.log-table-head th:last-child { border-top-right-radius: var(--radius); }
+.log-table th {
+  text-align: left; padding: 8px 10px; background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border);
+  font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-muted);
+}
+.log-table th.col-filterable { position: relative; cursor: pointer; user-select: none; }
+.log-table th.col-filterable:hover { color: var(--text); }
+.log-table th.col-filterable.has-filter { color: var(--accent); }
+.log-table th.col-filterable::after { content: " ▾"; font-size: 9px; }
+.log-table th.col-searchable { cursor: pointer; }
+.log-table th.col-searchable:hover { color: var(--text); }
+.log-table th.col-searchable.has-filter { color: var(--accent); }
+.log-search-inline {
+  width: 100%; font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: normal;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 8px;
+}
+.log-search-label { text-transform: none; letter-spacing: normal; }
+.event-search-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.event-search-row > span:first-child, .event-search-row > input { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.log-search-clear {
+  flex: none; width: 18px; height: 18px; border-radius: 50%; border: none; padding: 0;
+  background: var(--surface-sunken); color: var(--text-muted); font-size: 10px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.log-search-clear:hover { background: var(--state-running); color: #fff; }
+.log-table td { padding: 5px 10px; vertical-align: top; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }
+.log-table td.col-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.log-table tr[data-type="ERROR"] td { color: var(--state-running); font-weight: 600; }
+.log-table tr[data-type="INFO"] td { color: var(--text); }
+.log-table tr + tr td { border-top: 1px solid var(--border); }
+.log-empty-cell { text-align: left; font-style: italic; color: var(--text-muted); }
+
+.col-filter-menu {
+  position: absolute; top: 100%; left: 0; margin-top: 4px; min-width: 140px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: var(--shadow); padding: 6px; z-index: 20;
+  display: flex; flex-direction: column; gap: 2px;
+  text-transform: none; letter-spacing: normal; font-weight: 600;
+}
+.col-filter-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 7px; font-size: 12px; color: var(--text); cursor: pointer; }
+.col-filter-item:hover { background: var(--surface-sunken); }
+.col-filter-item input { cursor: pointer; }
+
 /* ---------- Konfigurationsseite (Phase 18) ---------- */
 p.hint { font-size: 12.5px; color: var(--text-muted); margin: -6px 0 16px; }
 

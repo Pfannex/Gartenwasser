@@ -22,6 +22,7 @@ class Logger {
   enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, WEB, SYSTEM, VALVE, SEQ };
 
   using ErrorCallback = void (*)(const char *message);
+  using LineCallback = void (*)(const char *line);
 
   Logger() = delete;
 
@@ -43,4 +44,11 @@ class Logger {
   /// (unformatierten) Meldung aufgerufen wird - Grundlage fuer diagnostics/lastError
   /// (Diagnostics), ohne dass Logger die Diagnostics-Klasse kennen muss.
   static void setErrorCallback(ErrorCallback callback);
+
+  /// Registriert einen Callback, der bei jeder Log-Zeile ausser PUB/SUB mit der komplett
+  /// formatierten Zeile (wie auf Serial) aufgerufen wird - Grundlage fuer diagnostic/livelog
+  /// (MqttManager), ohne dass Logger MqttManager kennen muss. PUB/SUB sind bewusst
+  /// ausgenommen: sonst wuerde das Weiterleiten selbst wieder eine neue PUB-Zeile erzeugen
+  /// (Rueckkopplung), ausserdem waeren sie durch den Sekundentakt der Automatik viel zu haeufig.
+  static void setLineCallback(LineCallback callback);
 };

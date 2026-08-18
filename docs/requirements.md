@@ -170,9 +170,12 @@ gartenwasser/          |        |                    |
 │       ├── state      | ja     | JSON               | Aktueller Gesamtstand von schedule (retained)
 │       ├── cmd        | nein   | ON|OFF             | Globaler Ein/Aus-Schalter (Convenience, analog main/program/cmd)
 │       └── cleanup    | nein   | beliebig           | Entfernt abgelaufene "once"-Einträge (Einmalbefehl)
-└── diagnostics/       |        |                    |
-    ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
-    └── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
+├── diagnostics/       |        |                    |
+│   ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
+│   └── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
+└── diagnostic/        |        |                    | bewusst Singular (Nutzervorgabe), inkonsistent zu "diagnostics" oben
+    └── livelog        | nein   | Log-Zeile (Text)   | jede Logger-Zeile ausser PUB/SUB, siehe Log-Format unten
+        └── replay     | nein   | beliebig           | Einmalbefehl: kompletten aktuellen Log-Ringpuffer erneut senden
 ```
 
 ## Zugangsdaten
@@ -225,6 +228,15 @@ Beispiel: `00:00:01:909 I2C   INFO  I2C-Scan gestartet...`
 - **Bewusst nicht lösbar** (technische Grenze, keine Lücke): Web-Dashboard-Aktionen lassen sich nicht von generischen externen MQTT-Clients unterscheiden — der Browser spricht bei Architektur B direkt und identisch zu jedem anderen MQTT-Client mit dem Broker (siehe `docs/spec/16-webif-fundament.md`). Beide erzeugen bereits heute vollständige `SUB`-Log-Einträge für jede eingehende Nachricht — eine Unterscheidung bräuchte eine Payload-Markierung, die die MQTT-Kompatibilität mit Home Assistant/Skripten bräche, daher bewusst nicht umgesetzt.
 - Alle Pub/Sub-Events waren bereits vollständig abgedeckt (`publishAndLog()` als einzige Publish-Stelle, `handleMqttMessage()` loggt jede eingehende Nachricht) — kein Handlungsbedarf.
 - Auf Hardware verifiziert: alle betroffenen Aktionspfade (Ventil manuell, Konfiguration speichern, Programm anwenden, Automatik starten/stoppen) funktionieren nach der Umstellung weiterhin normal, keine Regressionen.
+
+**Nachtrag (2026-08-18): Live-Log im Web-Interface umgesetzt.** Direkt im Anschluss an die Logging-Überarbeitung oben: jede Log-Zeile ausser `PUB`/`SUB` erreicht jetzt per neuem `Logger::setLineCallback()`-Hook (identisches Muster zu `setErrorCallback()`) einen Callback in `MqttManager`, der die fertig formatierte Zeile roh per `mqttClient.publish()` auf `gartenwasser/diagnostic/livelog` weiterreicht (bewusst **nicht** über `publishAndLog()` — das würde selbst wieder eine `PUB`-Zeile erzeugen und eine Rückkopplung auslösen). `PUB`/`SUB` sind an der Quelle (`Logger::log()`) bereits ausgeschlossen — sowohl wegen der Rückkopplungsgefahr als auch, weil sie durch den Sekundentakt der Automatik ohnehin viel zu häufig wären.
+
+- **Ringpuffer (80 Zeilen, immer aktiv)**: jede Zeile landet zusätzlich in einem Ringpuffer in `MqttManager`. Grund: `diagnostic/livelog` ist bewusst nicht retained (reiner Stream, MQTT-Retain hielte ohnehin nur die letzte Zeile) — ohne Puffer sähe ein Web-Client nur Zeilen ab dem Moment des eigenen Verbindens, nichts von vorher (z. B. die komplette Boot-Sequenz).
+- **Automatischer Replay** nach jedem erfolgreichen Broker-Connect (`connectToBroker()`) holt eine Verbindungslücke nach (Boot, oder ein späterer WLAN-/MQTT-Ausfall).
+- **Anfrage-Replay** auf `gartenwasser/diagnostic/livelog/replay` (beliebiger Payload) — für Web-Clients, die die Log-Seite öffnen, während das Gerät schon länger verbunden ist und sonst (kein Retain) leer bliebe.
+- **Neue eigenständige Web-Seite `data/log.html`/`data/log.js`** (eigener Navigation-Tab „Log“) statt einer Dashboard-Karte — Tabellenansicht (Zeit/Quelle/Typ/Event), Quelle/Typ als Spaltenkopf-Dropdown mit Mehrfachauswahl (Facetten-Prinzip: leere Auswahl = keine Einschränkung), Event-Spalte wird per Klick zum Live-Suchfeld (`Eventfilter: *Begriff*`-Label nach Verlassen, mit Lösch-Button, Enter verlässt das Feld wie ein Klick daneben).
+- Drei CSS-Bugs dabei gefunden und behoben: (1) `overflow: hidden` auf der äußeren Karte schnitt die Filter-Dropdowns ab, unabhängig davon, an welchem Nachfahren sie hingen — behoben durch gezieltes Eckenabrunden der jeweils äußersten Kindelemente statt eines pauschalen `overflow: hidden`. (2) Kopf- und Körpertabelle wurden getrennt (statt `position: sticky` im `thead` innerhalb des scrollenden Bereichs), da ein schrumpfender Scrollbereich (weniger Zeilen nach Filterung) das Dropdown sonst mit abschnitt. (3) Das geerbte `text-transform: uppercase` der Spaltenkopf-Beschriftungen verfälschte versehentlich auch den eingetippten Freitext-Suchbegriff in der Anzeige (`0x` → `0X`) — der gespeicherte Wert war die ganze Zeit korrekt, nur die Anzeige betroffen, per gezieltem `text-transform: none` auf das Such-Label behoben.
+- Auf Hardware verifiziert: keine `PUB`/`SUB`-Einträge im Live-Log, keine Flut/Rückkopplung, Boot-Puffer und Anfrage-Replay liefern korrekt nach, Filter/Suche funktionieren wie vorgesehen. Details siehe `docs/spec/17-webif-dashboard.md`, Nachtrag, `docs/testing.md`.
 
 ## Home-Assistant-MQTT-Discovery (Phase 10, geplant)
 

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gartenwasser – Log</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="mqtt.min.js"></script>
+  <script src="log.js"></script>
+  <script defer src="alpine.min.js"></script>
+</head>
+<body x-data="livelog()">
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a href="index.html">Status</a>
+        <a href="konfiguration.html">Konfiguration</a>
+        <a href="programme.html">Programme</a>
+        <a href="zeitplan.html">Zeitplan</a>
+        <a class="active" href="#">Log</a>
+      </nav>
+      <div class="status-chips">
+        <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
+        <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'"><span class="dot"></span><span x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span></span>
+      </div>
+    </div>
+
+    <h2>Live-Log</h2>
+    <p class="hint">Jede Log-Zeile des Geräts live mitgelesen (außer MQTT-Publish/Subscribe-Verkehr) — inklusive der Boot-Sequenz, die beim Verbinden nachgeliefert wird.</p>
+    <div class="card log-card">
+      <template x-if="logLines.length > 0">
+        <table class="log-table log-table-head">
+          <colgroup>
+            <col class="col-time" /><col class="col-filterable" /><col class="col-filterable" /><col class="col-event" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="col-time">Zeit</th>
+              <th class="col-filterable" :class="Object.keys(activeSources).length ? 'has-filter' : ''" @click.stop="toggleSourceMenu()">
+                Quelle
+                <div class="col-filter-menu" x-show="sourceMenuOpen" @click.outside="sourceMenuOpen = false" @click.stop>
+                  <template x-for="s in logSources" :key="s">
+                    <label class="col-filter-item">
+                      <input type="checkbox" :checked="!!activeSources[s]" @change="toggleSource(s)" />
+                      <span x-text="s"></span>
+                    </label>
+                  </template>
+                </div>
+              </th>
+              <th class="col-filterable" :class="Object.keys(activeTypes).length ? 'has-filter' : ''" @click.stop="toggleTypeMenu()">
+                Typ
+                <div class="col-filter-menu" x-show="typeMenuOpen" @click.outside="typeMenuOpen = false" @click.stop>
+                  <template x-for="t in logTypes" :key="t">
+                    <label class="col-filter-item">
+                      <input type="checkbox" :checked="!!activeTypes[t]" @change="toggleType(t)" />
+                      <span x-text="t"></span>
+                    </label>
+                  </template>
+                </div>
+              </th>
+              <th class="col-event col-searchable" :class="searchText ? 'has-filter' : ''" @click="!eventSearchActive && activateEventSearch()">
+                <template x-if="eventSearchActive">
+                  <span class="event-search-row">
+                    <input type="text" class="log-search-inline" x-model="searchText" x-ref="eventSearchInput"
+                           placeholder="Suchen …" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"
+                           @click.stop @blur="eventSearchActive = false" @keydown.enter="$el.blur()" />
+                    <button type="button" class="log-search-clear" x-show="searchText" @mousedown.prevent @click.stop="clearEventSearch()">✕</button>
+                  </span>
+                </template>
+                <template x-if="!eventSearchActive && !searchText">
+                  <span>Event</span>
+                </template>
+                <template x-if="!eventSearchActive && searchText">
+                  <span class="event-search-row">
+                    <span class="log-search-label" x-text="`Eventfilter: *${searchText}*`"></span>
+                    <button type="button" class="log-search-clear" @click.stop="clearEventSearch()">✕</button>
+                  </span>
+                </template>
+              </th>
+            </tr>
+          </thead>
+        </table>
+      </template>
+      <div class="log-view log-view-full" x-ref="logView">
+        <template x-if="logLines.length === 0">
+          <div class="log-empty">Noch keine Log-Zeilen empfangen …</div>
+        </template>
+        <template x-if="logLines.length > 0">
+          <table class="log-table log-table-body">
+            <colgroup>
+              <col class="col-time" /><col class="col-filterable" /><col class="col-filterable" /><col class="col-event" />
+            </colgroup>
+            <tbody>
+              <template x-if="visibleLines().length === 0">
+                <tr><td colspan="4" class="log-empty-cell">Keine Zeilen für die aktuellen Filter.</td></tr>
+              </template>
+              <template x-for="l in visibleLines()" :key="l.id">
+                <tr :data-type="l.type">
+                  <td class="col-time" x-text="l.time"></td>
+                  <td x-text="l.source"></td>
+                  <td x-text="l.type"></td>
+                  <td class="col-event" x-text="l.message"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -8,6 +8,7 @@ namespace {
 
 bool realTimeEnabled = false;
 Logger::ErrorCallback errorCallback = nullptr;
+Logger::LineCallback lineCallback = nullptr;
 
 const char *typeToString(Logger::Type type) {
   switch (type) {
@@ -64,13 +65,22 @@ void Logger::setErrorCallback(ErrorCallback callback) {
   errorCallback = callback;
 }
 
+void Logger::setLineCallback(LineCallback callback) {
+  lineCallback = callback;
+}
+
 void Logger::log(Type type, Source source, const char *message) {
   char timestamp[16];
   currentTimestamp(timestamp, sizeof(timestamp));
-  Serial.printf("%s %s %s %s\n", timestamp, sourceToString(source), typeToString(type), message);
+  char line[224];
+  snprintf(line, sizeof(line), "%s %s %s %s", timestamp, sourceToString(source), typeToString(type), message);
+  Serial.println(line);
 
   if (type == Type::ERROR && errorCallback != nullptr) {
     errorCallback(message);
+  }
+  if (type != Type::PUB && type != Type::SUB && lineCallback != nullptr) {
+    lineCallback(line);
   }
 }
 

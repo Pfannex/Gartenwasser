@@ -229,6 +229,35 @@ Rein browserseitige Erweiterung (`app.js`/`index.html`), keine Firmware-Änderun
 
 Vom Nutzer bestätigt: „Passt alles“.
 
+## Logging-Überarbeitung (Vorstufe zum Live-Log) — 2026-08-18
+
+Firmware-Änderung, primär per Liveness-Check verifiziert (Fokus: keine Abstürze/Hänger durch die neuen Logging-Aufrufe in bislang stummen Modulen).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Ventil manuell (`Source::VALVE`) | `V1/cmd ON`/`OFF` | Gerät reagiert normal, `V1/state` korrekt | ✅ |
+| 2 | Konfiguration speichern (`ConfigStore`-Erfolgslogging) | `V1/time/set` | `V1/time/state` korrekt übernommen | ✅ |
+| 3 | Programm anwenden | `main/program/cmd 1` | `main/program/state` korrekt | ✅ |
+| 4 | Automatik start/stop (`Source::SEQ`) | `main/cmd ON`/`OFF` | `main/state` korrekt beide Richtungen | ✅ |
+| 5 | Wiederherstellung | ursprüngliche Werte erneut gesetzt | Exakt wiederhergestellt | ✅ |
+
+## Live-Log im Web-Interface — 2026-08-18
+
+Mehrstufig entwickelt (Dashboard-Karte → eigene Seite → Tabelle mit Filtern), über viele Runden mit Nutzer-Screenshots verifiziert.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Keine PUB/SUB-Leckage, keine Flut | Gemischte Aktionen (Ventil, Config, Programm, Automatik) 8s lang ausgelöst, `diagnostic/livelog` mitgeschnitten | 38 Zeilen, keine einzige `PUB`/`SUB`, keine Rückkopplung | ✅ |
+| 2 | Boot-Puffer wird nachgeliefert | Echter Hardware-Reset (`esptool --after hard-reset`), `diagnostic/livelog` mitgeschnitten | I2C-Scan/WLAN/Setup-Zeilen korrekt in chronologischer Reihenfolge vor "MQTT Verbunden." | ✅ |
+| 3 | Anfrage-Replay ohne frische Verbindungslücke | 5s Ruhephase, dann `diagnostic/livelog/replay` gesendet | Kompletter aktueller Puffer korrekt erhalten | ✅ |
+| 4 | Web: eigene Log-Seite, Navigation | Seite geöffnet, Tab „Log“ geprüft | Eigenständige Seite, Tabellenansicht, Boot-Sequenz sichtbar | ✅ |
+| 5 | Quelle-/Typ-Filter (Facetten-Prinzip) | I2C-Filter aktiviert | Nach Bugfix (Regex-Parsing, dann Ausschluss- statt Einschluss-Logik) korrekt nur I2C-Zeilen | ✅ nach 2 Korrekturen |
+| 6 | Filter-Dropdown nicht abgeschnitten | Quelle-Dropdown bei reduzierter Zeilenzahl geöffnet | Nach Bugfix (`overflow:hidden` auf Karte, dann Kopf-/Körpertabelle getrennt) vollständig sichtbar | ✅ nach 2 Korrekturen |
+| 7 | Event-Sucheingabe | Klick auf „Event“, Text eingegeben, Feld verlassen | Live-Filterung, Label „Eventfilter: *Begriff*“, Groß-/Kleinschreibung nach CSS-Fix (`text-transform`) korrekt erhalten | ✅ nach 2 Korrekturen |
+| 8 | Lösch-Button, Enter-Verhalten | × geklickt, Enter im Suchfeld gedrückt | Filter zurückgesetzt bzw. Feld verlassen wie bei Klick daneben | ✅ |
+
+Vom Nutzer abschließend bestätigt: „sehr geil, läuft jetzt perfekt!“.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.
