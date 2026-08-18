@@ -51,3 +51,9 @@ Vor der Umsetzung ein visueller Vorschlag vorgelegt (gleiche „Dashboard Cards�
 3. **Im Browser** (Nutzer): Liste, Bearbeiten/Anlegen/Löschen/Aktivieren funktionieren, Deckelungs-Warnung erscheint korrekt. Ein Detail nachjustiert (siehe „Design“ oben: Aktionsleiste blendet sich im Bearbeitungsmodus jetzt aus). Danach bestätigt: „sieht gut aus“.
 
 Direkt im Anschluss ergab eine Nutzerfrage („macht eine separate Konfigurationsseite für `time`/`auto` überhaupt noch Sinn, wenn Programme das ohnehin überschreiben?“) eine grössere Konsistenz-Überarbeitung über Phase 14/17/18/13 hinweg (manuelle Änderungen setzen jetzt auf „MANUELL“ zurück, Automatik nur noch über Programme) — Details siehe `docs/spec/14-programme.md`, Nachtrag 2026-08-18.
+
+## Nachtrag (2026-08-18): Mobiler Layout-Bug behoben, Feld-Labels ergänzt
+
+- **Bug**: auf schmalen Viewports (`max-width: 620px`) überlappte der Automatik-Schalter das Laufzeit-Feld in den Ventil-Zeilen des Editors. Ursache: `.valve-row` definierte im Mobile-Breakpoint nur 2 CSS-Grid-Spalten für die 4 enthaltenen Elemente (Badge, Name, Laufzeit-Gruppe, Switch) — Grid-Auto-Flow platzierte sie zeilenweise zu zweit, wodurch die deutlich breitere Laufzeit-Gruppe in der 40px schmalen ersten Spalte landete. Fix: eigene volle Zeile für die Laufzeit-Gruppe per `grid-template-areas`.
+- **Fehlende Labels**: im direkten Vergleich mit der Zeitplan-Seite (jedes Feld dort beschriftet) fehlten „Automatik“ über dem Switch und „Laufzeit“ über dem Zeit-Feld — auf Desktop noch durch die Spaltenposition erschließbar, nach dem Mobile-Fix (eigene Zeile) nicht mehr selbsterklärend. Beide Labels ergänzt, im bestehenden `.field-col label`-Stil, unconditional (nicht nur mobil) für Konsistenz zwischen den Breakpoints.
+- Betrifft `data/programme.html` (beide Editor-Blöcke) und `data/style.css`. Kein Firmware-Eingriff. Vom Nutzer auf dem Handy bestätigt: „sieht besser aus“ (Overlap-Fix), „sieht gut aus“ (Labels).

@@ -316,10 +316,33 @@ input.time-exceeded { color: var(--state-warning); font-weight: 700; }
   border-top: 1px solid var(--border);
 }
 .valve-row:first-of-type { border-top: none; }
-@media (max-width: 620px) { .valve-row { grid-template-columns: 40px 1fr; row-gap: 10px; } }
+@media (max-width: 620px) {
+  /* Bug (2026-08-18): mit nur 2 Spalten platziert Grid-Auto-Flow die 4 Items zeilenweise
+     zu 2 - Laufzeit-Gruppe (Zahlenfeld + "min" + ggf. Cap-Hinweis, braucht deutlich mehr
+     als 40px) landete dabei in der schmalen ersten Spalte und ueberlappte den Switch in
+     Spalte 2. Fix: eigene Zeile fuer die Laufzeit-Gruppe per grid-template-areas, volle
+     Breite unter Badge+Name+Switch. */
+  .valve-row {
+    grid-template-columns: 40px 1fr auto;
+    grid-template-areas: "badge name switch" ". laufzeit laufzeit";
+    row-gap: 10px;
+  }
+  .valve-badge { grid-area: badge; }
+  .valve-row-name { grid-area: name; }
+  .switch-col { grid-area: switch; }
+  .laufzeit-col { grid-area: laufzeit; align-items: flex-end; }
+}
 
 .field-col label { display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 4px; }
 .laufzeit-group { display: flex; align-items: center; gap: 6px; }
+
+/* Labels ueber Laufzeit-Feld und Automatik-Switch (2026-08-18) - vorher standen beide ohne
+   Beschriftung da, auf Desktop noch durch die Spaltenposition erschliessbar, auf Mobile
+   (eigene Zeile nach dem Ueberlapp-Fix oben) nicht mehr selbsterklaerend. */
+.laufzeit-col { display: flex; flex-direction: column; gap: 4px; }
+.laufzeit-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+.switch-col { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.switch-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
 
 .switch {
   position: relative; width: 42px; height: 24px; border-radius: 12px;

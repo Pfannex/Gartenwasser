@@ -59,12 +59,18 @@
                 <div class="valve-row">
                   <div class="valve-badge" :data-state="editDraft.auto['V' + n] ? 'auto' : 'idle'" x-text="'V' + n"></div>
                   <div class="valve-row-name" x-text="valveName(n)"></div>
-                  <div class="laufzeit-group">
-                    <input type="number" min="1" x-model.number="editDraft.time['V' + n]" :disabled="!editDraft.auto['V' + n]" :class="isCapped('V' + n) ? 'time-exceeded' : ''" />
-                    <span class="unit">min</span>
-                    <span class="cap-note" x-show="isCapped('V' + n)" x-text="'→ ' + maxTime + ' min effektiv'"></span>
+                  <div class="laufzeit-col">
+                    <span class="laufzeit-label">Laufzeit</span>
+                    <div class="laufzeit-group">
+                      <input type="number" min="1" x-model.number="editDraft.time['V' + n]" :disabled="!editDraft.auto['V' + n]" :class="isCapped('V' + n) ? 'time-exceeded' : ''" />
+                      <span class="unit">min</span>
+                      <span class="cap-note" x-show="isCapped('V' + n)" x-text="'→ ' + maxTime + ' min effektiv'"></span>
+                    </div>
                   </div>
-                  <div class="switch" :data-on="editDraft.auto['V' + n]" @click="editDraft.auto['V' + n] = !editDraft.auto['V' + n]"></div>
+                  <div class="switch-col">
+                    <span class="switch-label">Automatik</span>
+                    <div class="switch" :data-on="editDraft.auto['V' + n]" @click="editDraft.auto['V' + n] = !editDraft.auto['V' + n]"></div>
+                  </div>
                 </div>
               </template>
               <div class="editor-footer">
@@ -93,12 +99,18 @@
               <div class="valve-row">
                 <div class="valve-badge" :data-state="editDraft.auto['V' + n] ? 'auto' : 'idle'" x-text="'V' + n"></div>
                 <div class="valve-row-name" x-text="valveName(n)"></div>
-                <div class="laufzeit-group">
-                  <input type="number" min="1" x-model.number="editDraft.time['V' + n]" :disabled="!editDraft.auto['V' + n]" :class="isCapped('V' + n) ? 'time-exceeded' : ''" />
-                  <span class="unit">min</span>
-                  <span class="cap-note" x-show="isCapped('V' + n)" x-text="'→ ' + maxTime + ' min effektiv'"></span>
+                <div class="laufzeit-col">
+                  <span class="laufzeit-label">Laufzeit</span>
+                  <div class="laufzeit-group">
+                    <input type="number" min="1" x-model.number="editDraft.time['V' + n]" :disabled="!editDraft.auto['V' + n]" :class="isCapped('V' + n) ? 'time-exceeded' : ''" />
+                    <span class="unit">min</span>
+                    <span class="cap-note" x-show="isCapped('V' + n)" x-text="'→ ' + maxTime + ' min effektiv'"></span>
+                  </div>
                 </div>
-                <div class="switch" :data-on="editDraft.auto['V' + n]" @click="editDraft.auto['V' + n] = !editDraft.auto['V' + n]"></div>
+                <div class="switch-col">
+                  <span class="switch-label">Automatik</span>
+                  <div class="switch" :data-on="editDraft.auto['V' + n]" @click="editDraft.auto['V' + n] = !editDraft.auto['V' + n]"></div>
+                </div>
               </div>
             </template>
             <div class="editor-footer">

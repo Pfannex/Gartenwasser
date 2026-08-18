@@ -439,10 +439,16 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Auf Hardware verifiziert (`test_program_logging.py`): Programm anwenden + anschliessende manuelle Zeitaenderung erzeugen beide neuen Zeilen korrekt und an der richtigen Stelle im Live-Log, keine Regressionen, Ausgangszustand wiederhergestellt.
 - Damit ist die im Brainstorming begonnene Datei-fuer-Datei-Review aller `.cpp`-Dateien abgeschlossen.
 
+### Mobiler Layout-Bug Programme-Seite behoben, Feld-Labels ergaenzt
+
+- Der am 2026-08-18 gemeldete Bug (Automatik-Schalter ueberlappt das Laufzeit-Feld bei schmalen Viewports) war ein CSS-Grid-Problem: `.valve-row` hatte im `max-width: 620px`-Breakpoint nur 2 Spalten fuer 4 Elemente (Badge, Name, Laufzeit-Gruppe, Switch) definiert - Grid-Auto-Flow platzierte sie zeilenweise zu zweit, wodurch die deutlich breitere Laufzeit-Gruppe in der 40px schmalen ersten Spalte landete und in den Switch daneben lief. Fix: eigene Zeile fuer die Laufzeit-Gruppe per `grid-template-areas`, volle Breite unter Badge/Name/Switch. Vom Nutzer auf dem Handy bestaetigt: „sieht besser aus".
+- Direkt danach zwei fehlende Feld-Labels nachgezogen (Nutzer-Beobachtung im Vergleich zur Zeitplan-Seite, die fuer jedes Feld ein Label hat): „Automatik" ueber dem Switch, „Laufzeit" ueber dem Zeit-Feld - beide im bestehenden `.field-col label`-Stil (klein, Grossbuchstaben, gedaempfte Farbe), unconditional (nicht nur mobil), fuer Konsistenz zwischen Breakpoints. Vom Nutzer bestaetigt: „sieht gut aus".
+- Betrifft `data/programme.html` (beide Editor-Bloecke: bestehendes Programm bearbeiten + neues Programm anlegen) und `data/style.css`. Kein Firmware-Eingriff, nur `uploadfs`.
+
 ## Offene Punkte / nächste Schritte
 
-- Mobiler Layout-Bug auf der Programme-Seite: Automatik-Schalter überlappt das Laufzeit-Label bei schmalen Viewports — als „im Anschluss“ zurückgestellt, noch nicht behoben.
 - **Phase 21 (Web-Interface: OTA)** — danach dran, letzte Phase des vorgezogenen Web-Interface-Blocks. Merker: dabei auch einen Hardware-Status RAM/Flash ergänzen.
+- Merker: JSON-Log-Einträge im Live-Log (z. B. `main/config/state`, `main/programs/state`, `main/schedule/state`) mit Pretty-Print statt als rohe Einzeiler in der Event-Spalte darstellen — noch nicht begonnen.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste. Zu pruefen bei der Umsetzung: die geplante `V{n}_auto`-Switch-Entity (siehe Abschnitt „Home-Assistant-MQTT-Discovery" oben) trifft jetzt auf die neue Regel „`auto` nur ueber Programme, jede direkte Aenderung loest MANUELL aus" - HA-seitiges Umschalten waere dann ein Programm-Abwahl-Trigger, nicht nur ein Flag-Toggle; ggf. bei Phase 10 nochmal bewusst gegenchecken, ob die Entity so wie geplant sinnvoll bleibt.
