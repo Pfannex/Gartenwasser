@@ -7,7 +7,7 @@ const BROKER_WS_URL = "ws://192.168.1.123:9001/mqtt";
 const TOPIC_PREFIX = "gartenwasser/";
 const MAX_LOG_LINES = 500; // eigene Seite, mehr Platz/Kontext als die vorherige Dashboard-Karte
 
-// PUB/SUB erreichen diagnostic/livelog nie (Logger::log() filtert sie bereits raus, siehe
+// PUB/SUB erreichen diagnostics/livelog nie (Logger::log() filtert sie bereits raus, siehe
 // MqttManager::onLoggerLine()) - deshalb hier nicht als Filter-Option gefuehrt.
 const LOG_TYPES = ["ERROR", "INFO", "DEBUG"];
 const LOG_SOURCES = ["WIFI", "MQTT", "I2C", "HMI", "WEB", "SYS", "VALVE", "SEQ"];
@@ -34,11 +34,11 @@ function livelog() {
       this.client = mqtt.connect(BROKER_WS_URL);
       this.client.on("connect", () => {
         this.connected = true;
-        this.client.subscribe(TOPIC_PREFIX + "diagnostic/livelog");
+        this.client.subscribe(TOPIC_PREFIX + "diagnostics/livelog");
         this.client.subscribe(TOPIC_PREFIX + "availability");
-        // Kein Retain auf diagnostic/livelog (reiner Stream) - ohne diese Anfrage saehe eine
+        // Kein Retain auf diagnostics/livelog (reiner Stream) - ohne diese Anfrage saehe eine
         // frisch geoeffnete Log-Seite nur kuenftige Zeilen, nichts von vorher.
-        this.client.publish(TOPIC_PREFIX + "diagnostic/livelog/replay", "1");
+        this.client.publish(TOPIC_PREFIX + "diagnostics/livelog/replay", "1");
       });
       this.client.on("close", () => {
         this.connected = false;
@@ -47,7 +47,7 @@ function livelog() {
     },
 
     handleMessage(topic, payload) {
-      if (topic === "diagnostic/livelog") {
+      if (topic === "diagnostics/livelog") {
         this.appendLogLine(payload);
       } else if (topic === "availability") {
         this.deviceOnline = payload === "online";

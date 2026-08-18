@@ -32,11 +32,11 @@ constexpr const char *kI2cStatusTopic = "gartenwasser/diagnostics/i2cStatus";
 constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
 // Live-Log (Nachtrag 2026-08-18): jede Logger-Zeile ausser PUB/SUB, siehe
 // Logger::setLineCallback(). Bewusst nicht retained (reiner Live-Stream, kein Verlauf
-// beim Verbinden) und bewusst singular "diagnostic" statt "diagnostics" (Nutzervorgabe).
-constexpr const char *kLiveLogTopic = "gartenwasser/diagnostic/livelog";
+// beim Verbinden).
+constexpr const char *kLiveLogTopic = "gartenwasser/diagnostics/livelog";
 // Anfrage-Topic: beliebiger Payload loest replayLogBuffer() aus - fuer Web-Clients, die die
 // Log-Seite oeffnen und sonst (kein Retain) nur ab diesem Zeitpunkt neue Zeilen saehen.
-constexpr const char *kLiveLogReplayTopic = "gartenwasser/diagnostic/livelog/replay";
+constexpr const char *kLiveLogReplayTopic = "gartenwasser/diagnostics/livelog/replay";
 // V0 hat keinen cmd/time/auto, aber einen Alias - eigenes Topic statt ueber
 // parseValveTopic() (das ist bewusst auf V1..V5 begrenzt).
 constexpr const char *kV0AliasSetTopic = "gartenwasser/V0/alias/set";
@@ -142,10 +142,10 @@ void publishAndLog(const char *topic, const char *payload, bool retained) {
 }
 
 // Ringpuffer der letzten Log-Zeilen (immer aktiv, nicht nur waehrend einer Trennung) -
-// main/diagnostic/livelog ist bewusst nicht retained (siehe kLiveLogTopic), MQTT-Retain
+// diagnostics/livelog ist bewusst nicht retained (siehe kLiveLogTopic), MQTT-Retain
 // haette hier ohnehin nur die jeweils letzte Zeile behalten, kein Verlauf. Web-Clients
 // bekaeman ohne diesen Puffer beim Oeffnen der Log-Seite nur kuenftige Zeilen zu sehen -
-// per replayLogBuffer() liefert das Geraet stattdessen auf Anfrage (main/diagnostic/
+// per replayLogBuffer() liefert das Geraet stattdessen auf Anfrage (diagnostics/
 // livelog/replay) den kompletten aktuellen Puffer nach. Aeltester Eintrag faellt raus,
 // wenn der Puffer voll ist (80 * 224 Byte ~= 18 KB, RAM-Headroom reichlich vorhanden).
 constexpr uint8_t kLogBufferCapacity = 80;
@@ -179,7 +179,7 @@ void onLoggerLine(const char *line) {
 
 // Sendet den kompletten aktuellen Ringpuffer erneut raus - einerseits automatisch nach jedem
 // erfolgreichen (Re-)Connect (holt eine Verbindungsluecke nach, z.B. die Boot-Sequenz vor dem
-// allerersten Connect), andererseits auf Anfrage eines Web-Clients (main/diagnostic/livelog/
+// allerersten Connect), andererseits auf Anfrage eines Web-Clients (diagnostics/livelog/
 // replay), der die Log-Seite gerade erst geoeffnet hat und sonst nur kuenftige Zeilen saehe.
 void replayLogBuffer() {
   for (uint8_t i = 0; i < logBufferCount; i++) {

@@ -247,9 +247,9 @@ Mehrstufig entwickelt (Dashboard-Karte → eigene Seite → Tabelle mit Filtern)
 
 | # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
 |---|---|---|---|---|
-| 1 | Keine PUB/SUB-Leckage, keine Flut | Gemischte Aktionen (Ventil, Config, Programm, Automatik) 8s lang ausgelöst, `diagnostic/livelog` mitgeschnitten | 38 Zeilen, keine einzige `PUB`/`SUB`, keine Rückkopplung | ✅ |
-| 2 | Boot-Puffer wird nachgeliefert | Echter Hardware-Reset (`esptool --after hard-reset`), `diagnostic/livelog` mitgeschnitten | I2C-Scan/WLAN/Setup-Zeilen korrekt in chronologischer Reihenfolge vor "MQTT Verbunden." | ✅ |
-| 3 | Anfrage-Replay ohne frische Verbindungslücke | 5s Ruhephase, dann `diagnostic/livelog/replay` gesendet | Kompletter aktueller Puffer korrekt erhalten | ✅ |
+| 1 | Keine PUB/SUB-Leckage, keine Flut | Gemischte Aktionen (Ventil, Config, Programm, Automatik) 8s lang ausgelöst, `diagnostics/livelog` mitgeschnitten | 38 Zeilen, keine einzige `PUB`/`SUB`, keine Rückkopplung | ✅ |
+| 2 | Boot-Puffer wird nachgeliefert | Echter Hardware-Reset (`esptool --after hard-reset`), `diagnostics/livelog` mitgeschnitten | I2C-Scan/WLAN/Setup-Zeilen korrekt in chronologischer Reihenfolge vor "MQTT Verbunden." | ✅ |
+| 3 | Anfrage-Replay ohne frische Verbindungslücke | 5s Ruhephase, dann `diagnostics/livelog/replay` gesendet | Kompletter aktueller Puffer korrekt erhalten | ✅ |
 | 4 | Web: eigene Log-Seite, Navigation | Seite geöffnet, Tab „Log“ geprüft | Eigenständige Seite, Tabellenansicht, Boot-Sequenz sichtbar | ✅ |
 | 5 | Quelle-/Typ-Filter (Facetten-Prinzip) | I2C-Filter aktiviert | Nach Bugfix (Regex-Parsing, dann Ausschluss- statt Einschluss-Logik) korrekt nur I2C-Zeilen | ✅ nach 2 Korrekturen |
 | 6 | Filter-Dropdown nicht abgeschnitten | Quelle-Dropdown bei reduzierter Zeilenzahl geöffnet | Nach Bugfix (`overflow:hidden` auf Karte, dann Kopf-/Körpertabelle getrennt) vollständig sichtbar | ✅ nach 2 Korrekturen |
