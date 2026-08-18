@@ -1,7 +1,7 @@
 #include "ValveController.h"
 
-#include "ConfigStore.h"
-#include "I2CManager.h"
+#include "FileSystem.h"
+#include "I2C.h"
 #include "Logger.h"
 
 namespace {
@@ -19,7 +19,7 @@ uint8_t portBState = 0x00;
 
 void ValveController::begin() {
   portBState = 0x00;
-  I2CManager::writeRegister(I2CManager::kMcp23017Addr, kGpioB, portBState);
+  I2C::writeRegister(I2C::kMcp23017Addr, kGpioB, portBState);
 }
 
 void ValveController::setValve(uint8_t index, bool on) {
@@ -34,7 +34,7 @@ void ValveController::setValve(uint8_t index, bool on) {
   } else {
     portBState &= ~(1 << bit);
   }
-  I2CManager::writeRegister(I2CManager::kMcp23017Addr, kGpioB, portBState);
+  I2C::writeRegister(I2C::kMcp23017Addr, kGpioB, portBState);
   Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u %s", index, on ? "ON" : "OFF");
 }
 
@@ -55,19 +55,19 @@ bool ValveController::anyIrrigationValveActive() {
 }
 
 bool ValveController::getAuto(uint8_t index) {
-  return ConfigStore::getValveAuto(index);
+  return FileSystem::getValveAuto(index);
 }
 
 void ValveController::setAuto(uint8_t index, bool on) {
-  ConfigStore::setValveAuto(index, on);
+  FileSystem::setValveAuto(index, on);
   Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u Automatik %s", index, on ? "EIN" : "AUS");
 }
 
 const char *ValveController::getAlias(uint8_t index) {
-  return ConfigStore::getValveAlias(index);
+  return FileSystem::getValveAlias(index);
 }
 
 void ValveController::setAlias(uint8_t index, const char *alias) {
-  ConfigStore::setValveAlias(index, alias);
+  FileSystem::setValveAlias(index, alias);
   Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u Alias '%s' gesetzt", index, alias);
 }

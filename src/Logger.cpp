@@ -87,7 +87,7 @@ void Logger::log(Type type, Source source, const char *message) {
 void Logger::logf(Type type, Source source, const char *format, ...) {
   // Nachtrag 2026-08-18: 192->512->1024 Byte, damit z.B. "topic = payload" fuer
   // main/config/state und main/programs/state (JSON-Publish, siehe
-  // MqttManager::publishAndLog()) nicht mehr mitten im String abgeschnitten wird - Grund war
+  // MQTT::publishAndLog()) nicht mehr mitten im String abgeschnitten wird - Grund war
   // urspruenglich das Pretty-Print im Live-Log, das abgeschnittenes JSON nicht parsen kann.
   // 1024 deckt main/programs/state bis ca. 8-9 Programme ab (5 Programme = 604 Byte
   // Gesamtzeile); volles Auschoepfen von kMaxPrograms=32 (potenziell mehrere KB) waere

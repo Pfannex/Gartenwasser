@@ -17,14 +17,14 @@ Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (
 | [04](spec/04-ventile-mqtt.md) | Ventile per MQTT (`cmd`/`state`, V0-Kopplung) | ✅ |
 | [05](spec/05-laufzeit-restlaufzeit.md) | Laufzeit & Restlaufzeit je Ventil | ✅ |
 | [06](spec/06-automatik-flag.md) | Automatik-Flag je Ventil | ✅ |
-| [07](spec/07-automatik-sequenz.md) | Automatik-Sequenz (`main/cmd`, Sequencer) | ✅ |
+| [07](spec/07-automatik-sequenz.md) | Automatik-Sequenz (`main/cmd`, `AutomaticController`) | ✅ |
 | [08](spec/08-diagnostics.md) | Diagnostics (`i2cStatus`, `lastError`) | ✅ |
 | [09](spec/09-alias.md) | Alias je Ventil (inkl. V0, `set`, Persistenz) | ✅ |
 | [11](spec/11-sammelbefehle.md) | Konfiguration per JSON (`main/config/set`/`state`) | ✅ |
 | [12](spec/12-aufraeumen.md) | Aufräumen/Refactoring | ✅ (Regressionstest: alle 10 Checklistenpunkte bestanden) |
 | [13](spec/13-touch-ui.md) | Touch-UI (Automatik-Toggle & Statusanzeige) | ✅ |
 | [14](spec/14-programme.md) | Bewässerungsprogramme (`main/program/cmd`/`state`) | ✅ |
-| [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + Sequencer) | ✅ |
+| [15](spec/15-wochenplan.md) | Zeitplan / Scheduler (Tages- & Wochenplan auf Programme + `AutomaticController`) | ✅ |
 | [16](spec/16-webif-fundament.md) | Web-Interface: Fundament & Architekturentscheidung | ✅ |
 | [17](spec/17-webif-dashboard.md) | Web-Interface: Status-Dashboard (read-only) | ✅ |
 | [18](spec/18-webif-konfiguration.md) | Web-Interface: Konfiguration bearbeiten | ✅ |

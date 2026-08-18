@@ -1,6 +1,6 @@
 /**
  * @file    ValveTimer.h
- * @brief   Countdown der Restlaufzeit je Ventil (V1-V5), Werte aus ConfigStore.
+ * @brief   Countdown der Restlaufzeit je Ventil (V1-V5), Werte aus FileSystem.
  *
  * Ein Ventil, das nicht laeuft, zeigt als Restlaufzeit seine konfigurierte
  * effektive Laufzeit (min(time, maxTime)) - so ist auf einen Blick erkennbar,
@@ -20,7 +20,7 @@ class ValveTimer {
   /// Ventil laeuft nach Boot, siehe ValveController).
   static void begin();
 
-  /// Startet den Countdown fuer Ventil `index` (1..5) mit min(time, maxTime) aus ConfigStore.
+  /// Startet den Countdown fuer Ventil `index` (1..5) mit min(time, maxTime) aus FileSystem.
   static void start(uint8_t index);
 
   /// Setzt Ventil `index` auf die konfigurierte effektive Laufzeit zurueck (armiert) -

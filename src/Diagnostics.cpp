@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include "I2CManager.h"
+#include "I2C.h"
 #include "Logger.h"
 
 namespace {
@@ -28,7 +28,7 @@ void Diagnostics::begin() {
 }
 
 bool Diagnostics::checkI2cStatus() {
-  const bool reachable = I2CManager::isMcp23017Reachable();
+  const bool reachable = I2C::isMcp23017Reachable();
   if (reachable == i2cOk) {
     return false;
   }

@@ -3,25 +3,25 @@
  * @brief   Projekt "Gartenwasser" - Einstiegspunkt (Setup/Loop-Orchestrierung).
  *
  * Die eigentliche Logik steckt in eigenen Klassen (src/), main.cpp bleibt ein
- * schlanker Orchestrator: WifiManager (WLAN/NTP), MqttManager (MQTT-Verbindung
- * und komplette Ventil-/Automatik-/Config-Anbindung), HmiManager (Display/
- * Touch/LVGL), I2CManager (I2C-Bus, MCP23017), ValveController (Ventil-Ein-
- * gänge/Alias), ValveTimer (Restlaufzeit), Sequencer (Automatik-Ablauf),
- * ConfigStore (Persistenz), Diagnostics (i2cStatus/lastError), Logger.
+ * schlanker Orchestrator: WiFiController (WLAN/NTP), MQTT (MQTT-Verbindung
+ * und komplette Ventil-/Automatik-/Config-Anbindung), HMI (Display/
+ * Touch/LVGL), I2C (I2C-Bus, MCP23017), ValveController (Ventil-Ein-
+ * gänge/Alias), ValveTimer (Restlaufzeit), AutomaticController (Automatik-Ablauf),
+ * FileSystem (Persistenz), Diagnostics (i2cStatus/lastError), Logger.
  */
 
 #include <Arduino.h>
 
-#include "ConfigStore.h"
+#include "FileSystem.h"
 #include "Diagnostics.h"
-#include "HmiManager.h"
-#include "I2CManager.h"
-#include "MqttManager.h"
-#include "Sequencer.h"
+#include "HMI.h"
+#include "I2C.h"
+#include "MQTT.h"
+#include "AutomaticController.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
-#include "WebManager.h"
-#include "WifiManager.h"
+#include "WebIF.h"
+#include "WiFiController.h"
 #include "Logger.h"
 
 // Default-Stack der Arduino-loopTask (8192 Byte) reicht nicht mehr: main/programs/set
@@ -47,35 +47,35 @@ void setup() {
   Diagnostics::begin();
 
   // Persistente Konfiguration laden (time, auto, alias, maxTime)
-  ConfigStore::begin();
+  FileSystem::begin();
 
-  // WLAN verbinden, danach NTP synchronisieren (beides blockierend beim Boot, siehe WifiManager).
-  WifiManager::connectAndSyncTimeBlocking();
+  // WLAN verbinden, danach NTP synchronisieren (beides blockierend beim Boot, siehe WiFiController).
+  WiFiController::connectAndSyncTimeBlocking();
 
-  // MQTT-Client konfigurieren (nicht blockierend, siehe MqttManager::loop())
-  MqttManager::begin();
+  // MQTT-Client konfigurieren (nicht blockierend, siehe MQTT::loop())
+  MQTT::begin();
 
   // Web-Interface (Phase 16): async, kein loop()-Aufruf noetig - setzt gemountetes
-  // LittleFS voraus (siehe ConfigStore::begin() oben) und WLAN (siehe WifiManager oben).
-  WebManager::begin();
+  // LittleFS voraus (siehe FileSystem::begin() oben) und WLAN (siehe WiFiController oben).
+  WebIF::begin();
 
   // Display/Touch/LVGL initialisieren (startet dabei auch den I2C-Bus)
-  HmiManager::begin();
+  HMI::begin();
 
   // I2C-Bus scannen und MCP23017 vorbereiten
-  I2CManager::scan();
-  I2CManager::mcp23017Setup();
+  I2C::scan();
+  I2C::mcp23017Setup();
 
   // Ventile V0-V5 auf sicheren Grundzustand (AUS) setzen
   ValveController::begin();
   ValveTimer::begin();
-  Sequencer::begin();
+  AutomaticController::begin();
 
   Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "Setup abgeschlossen.");
 }
 
 void loop() {
-  WifiManager::loop();
-  MqttManager::loop();
-  HmiManager::loop();
+  WiFiController::loop();
+  MQTT::loop();
+  HMI::loop();
 }

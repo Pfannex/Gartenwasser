@@ -190,22 +190,24 @@ WLAN- und MQTT-Zugangsdaten liegen ausschließlich in `include/secrets.h` (nicht
 
 Die Firmware ist in eigenständige Klassen mit jeweils eigener `.h`/`.cpp`-Datei gegliedert (`src/`):
 
-| Klasse | Zuständigkeit | Status |
+| Klasse/Namespace | Zuständigkeit | Status |
 |---|---|---|
 | `Logger` | Einheitliches Log-Format für alle Subsysteme | ✅ Fertig |
-| `WifiManager` | WLAN-Verbindung, Reconnect, NTP-Sync beim Boot | ✅ Fertig |
-| `HmiManager` | Display (ST7789/SPI), Touch (AXS5106L/I2C), LVGL | ✅ Fertig |
-| `I2CManager` | I2C-Bus-Scan, generischer Register-Zugriff, MCP23017-Grundsetup | ✅ Fertig |
-| `MqttManager` | MQTT-Verbindung, `availability`/LWT, Publish/Subscribe-Helfer | ✅ Fertig |
+| `WiFiController` (Namespace) | WLAN-Verbindung, Reconnect, NTP-Sync beim Boot | ✅ Fertig |
+| `HMI` | Display (ST7789/SPI), Touch (AXS5106L/I2C), LVGL | ✅ Fertig |
+| `I2C` | I2C-Bus-Scan, generischer Register-Zugriff, MCP23017-Grundsetup | ✅ Fertig |
+| `MQTT` (Namespace) | MQTT-Verbindung, `availability`/LWT, Publish/Subscribe-Helfer | ✅ Fertig |
 | `ValveController` | Kapselt V0–V5 als MCP23017-Ausgänge (on/off/state) | ✅ Fertig |
 | `ValveTimer` | Laufzeit/Restlaufzeit je Ventil, `maxTime`-Obergrenze | ✅ Fertig |
-| `ConfigStore` | Persistenz in drei getrennten LittleFS-Dateien: `config.json` (`time`/`auto`/`alias`/`maxTime`), `programs.json` (Programme + `activeProgram`), `schedule.json` (Zeitplan), je eigene JSON-Serialisierung für `main/config`\|`programs`\|`schedule`/`state` | ✅ Fertig |
-| `Sequencer` | Automatik-Ablauf V1→V5 (`main/cmd`), Fortsetzung bei manuellem Aus/`maxTime` | ✅ Fertig |
-| `WebManager` | Web-Interface: liefert statische Dateien (LittleFS) per `ESPAsyncWebServer` aus, reines File-Serving (Architektur B) | ✅ Fertig (Dashboard, Phase 17) |
+| `FileSystem` | Persistenz in drei getrennten LittleFS-Dateien: `config.json` (`time`/`auto`/`alias`/`maxTime`), `programs.json` (Programme + `activeProgram`), `schedule.json` (Zeitplan), je eigene JSON-Serialisierung für `main/config`\|`programs`\|`schedule`/`state` | ✅ Fertig |
+| `AutomaticController` | Automatik-Ablauf V1→V5 (`main/cmd`), Fortsetzung bei manuellem Aus/`maxTime` | ✅ Fertig |
+| `WebIF` | Web-Interface: liefert statische Dateien (LittleFS) per `ESPAsyncWebServer` aus, reines File-Serving (Architektur B) | ✅ Fertig (Dashboard, Phase 17) |
 | `HaDiscovery` | Home-Assistant-MQTT-Discovery-Configs | 📋 Phase 10 |
 | `Diagnostics` | `i2cStatus`/`lastError` | ✅ Fertig |
 
-`main.cpp` bleibt ein schlanker Orchestrator (`setup()`/`loop()` ruft die Manager-Klassen auf).
+`main.cpp` bleibt ein schlanker Orchestrator (`setup()`/`loop()` ruft die einzelnen Klassen/Namespaces auf).
+
+**Nachtrag (2026-08-18): Dateien/Klassen umbenannt** (Datei-für-Datei-Review durch den Nutzer, `Manager`-Suffix durchgaengig entfernt): `ConfigStore`→`FileSystem`, `HmiManager`→`HMI`, `I2CManager`→`I2C`, `MqttManager`→`MQTT`, `Sequencer`→`AutomaticController`, `WebManager`→`WebIF`, `WifiManager`→`WiFiController` (nicht `WiFi` — Namenskollision mit dem globalen `WiFi`-Objekt des ESP32-Arduino-Cores, das `WifiManager.cpp` selbst nutzt). `Diagnostics`, `Logger`, `ValveController`, `ValveTimer`, `main.cpp` unveraendert. Rein mechanische Umbenennung (Dateien, Klassennamen, `#include`s, alle Aufrufstellen) ohne Logikaenderung, komplett auf Hardware regressionsgetestet (`test_livelog_pubsub.py`, weiterhin PASS). **Wichtig für Nachschlagewerke**: bereits bestehende, datierte Log-/Nachtrag-Eintraege in `docs/Log.md` und den `docs/spec/*.md`-Dateien verwenden weiterhin die zum jeweiligen Zeitpunkt gueltigen alten Namen (Änderungsprotokoll, nicht rückwirkend umgeschrieben) — nur diese Architektur-Tabelle wurde aktualisiert.
 
 ### Log-Format (`Logger`)
 

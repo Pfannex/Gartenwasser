@@ -1,6 +1,6 @@
 #include "ValveTimer.h"
 
-#include "ConfigStore.h"
+#include "FileSystem.h"
 #include "Logger.h"
 
 namespace {
@@ -9,8 +9,8 @@ namespace {
 uint16_t remainingSeconds[6] = {0};
 
 uint16_t effectiveSeconds(uint8_t index) {
-  const uint16_t timeMinutes = ConfigStore::getValveTime(index);
-  const uint16_t maxTimeMinutes = ConfigStore::getMaxTime();
+  const uint16_t timeMinutes = FileSystem::getValveTime(index);
+  const uint16_t maxTimeMinutes = FileSystem::getMaxTime();
   const uint16_t effectiveMinutes = timeMinutes < maxTimeMinutes ? timeMinutes : maxTimeMinutes;
   return effectiveMinutes * 60;
 }

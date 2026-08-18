@@ -1,4 +1,4 @@
-#include "ConfigStore.h"
+#include "FileSystem.h"
 
 #include <ArduinoJson.h>
 #include <LittleFS.h>
@@ -10,7 +10,7 @@
 namespace {
 
 // Eigene LittleFS-Instanz auf einer eigenen Partition ("config", siehe partitions.csv) -
-// getrennt von der "webfs"-Partition, die WebManager per `pio run --target uploadfs`
+// getrennt von der "webfs"-Partition, die WebIF per `pio run --target uploadfs`
 // bespielt. Verhindert, dass ein Dashboard-Update (uploadfs ueberschreibt die komplette
 // Zielpartition) die persistierte Konfiguration mitloescht (siehe docs/spec/16-webif-
 // fundament.md fuer den urspruenglichen, mit gemeinsamer Partition aufgetretenen Bug).
@@ -29,21 +29,21 @@ uint16_t valveTimeMinutes[6] = {0, kDefaultValveTimeMinutes, kDefaultValveTimeMi
                                  kDefaultValveTimeMinutes, kDefaultValveTimeMinutes};
 bool valveAuto[6] = {kDefaultValveAuto, kDefaultValveAuto, kDefaultValveAuto, kDefaultValveAuto,
                       kDefaultValveAuto, kDefaultValveAuto};
-char valveAlias[6][ConfigStore::kAliasMaxLength + 1] = {{0}};
+char valveAlias[6][FileSystem::kAliasMaxLength + 1] = {{0}};
 uint16_t maxTimeMinutes = kDefaultMaxTimeMinutes;
 
 // Ein gespeichertes Programm (Phase 14). `time`/`autoFlag` sind nur gueltig, wenn das
 // entsprechende Bit in `timeSetMask`/`autoSetMask` gesetzt ist (Bit i = Ventil i, 1..5) -
 // Programme sind Teilmengen wie main/config/set, siehe docs/spec/14-programme.md.
 struct StoredProgram {
-  char name[ConfigStore::kAliasMaxLength + 1];
+  char name[FileSystem::kAliasMaxLength + 1];
   uint16_t time[6];
   bool autoFlag[6];
   uint8_t timeSetMask;
   uint8_t autoSetMask;
 };
 
-StoredProgram programs[ConfigStore::kMaxPrograms];
+StoredProgram programs[FileSystem::kMaxPrograms];
 uint8_t programCount = 0;
 uint8_t activeProgram = 0;
 
@@ -51,9 +51,9 @@ uint8_t activeProgram = 0;
 // nur bei type=WEEKLY relevant, `year`/`month`/`day` nur bei type=ONCE - siehe
 // docs/spec/15-wochenplan.md.
 struct StoredScheduleEntry {
-  char program[ConfigStore::kAliasMaxLength + 1];
+  char program[FileSystem::kAliasMaxLength + 1];
   bool enabled;
-  ConfigStore::ScheduleType type;
+  FileSystem::ScheduleType type;
   uint8_t hour;
   uint8_t minute;
   uint8_t weekdaysMask;
@@ -62,7 +62,7 @@ struct StoredScheduleEntry {
   uint8_t day;
 };
 
-StoredScheduleEntry schedule[ConfigStore::kMaxScheduleEntries];
+StoredScheduleEntry schedule[FileSystem::kMaxScheduleEntries];
 uint8_t scheduleCount = 0;
 bool scheduleGlobalEnabled = true;
 
@@ -93,22 +93,22 @@ uint8_t parseWeekdayLabel(const char *value) {
   return 0xFF;
 }
 
-// Wandelt "daily"/"weekly"/"once" in ConfigStore::ScheduleType um, liefert false bei
+// Wandelt "daily"/"weekly"/"once" in FileSystem::ScheduleType um, liefert false bei
 // unbekanntem Wert (Aufrufer entscheidet, wie damit umgegangen wird).
-bool parseScheduleType(const char *value, ConfigStore::ScheduleType *outType) {
+bool parseScheduleType(const char *value, FileSystem::ScheduleType *outType) {
   if (value == nullptr) {
     return false;
   }
   if (strcmp(value, "daily") == 0) {
-    *outType = ConfigStore::ScheduleType::DAILY;
+    *outType = FileSystem::ScheduleType::DAILY;
     return true;
   }
   if (strcmp(value, "weekly") == 0) {
-    *outType = ConfigStore::ScheduleType::WEEKLY;
+    *outType = FileSystem::ScheduleType::WEEKLY;
     return true;
   }
   if (strcmp(value, "once") == 0) {
-    *outType = ConfigStore::ScheduleType::ONCE;
+    *outType = FileSystem::ScheduleType::ONCE;
     return true;
   }
   return false;
@@ -180,17 +180,17 @@ void buildJson(JsonDocument &doc) {
 }
 
 void save() {
-  StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kJsonCapacity> doc;
   buildJson(doc);
 
   File file = configFs.open(kConfigPath, FILE_WRITE);
   if (!file) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: Datei zum Schreiben nicht oeffenbar.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: Datei zum Schreiben nicht oeffenbar.");
     return;
   }
   serializeJson(doc, file);
   file.close();
-  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "ConfigStore: config.json gespeichert.");
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "FileSystem: config.json gespeichert.");
 }
 
 void load() {
@@ -200,15 +200,15 @@ void load() {
 
   File file = configFs.open(kConfigPath, FILE_READ);
   if (!file) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: Datei zum Lesen nicht oeffenbar.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: Datei zum Lesen nicht oeffenbar.");
     return;
   }
 
-  StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, file);
   file.close();
   if (err) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: JSON-Fehler beim Laden: %s", err.c_str());
+    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: JSON-Fehler beim Laden: %s", err.c_str());
     return;
   }
 
@@ -221,12 +221,12 @@ void load() {
     valveTimeMinutes[i] = time[key] | kDefaultValveTimeMinutes;
     valveAuto[i] = autoFlags[key] | kDefaultValveAuto;
     const char *aliasValue = alias[key] | kDefaultValveAlias;
-    strncpy(valveAlias[i], aliasValue, ConfigStore::kAliasMaxLength);
-    valveAlias[i][ConfigStore::kAliasMaxLength] = '\0';
+    strncpy(valveAlias[i], aliasValue, FileSystem::kAliasMaxLength);
+    valveAlias[i][FileSystem::kAliasMaxLength] = '\0';
   }
   const char *v0AliasValue = alias["V0"] | kDefaultValveAlias;
-  strncpy(valveAlias[0], v0AliasValue, ConfigStore::kAliasMaxLength);
-  valveAlias[0][ConfigStore::kAliasMaxLength] = '\0';
+  strncpy(valveAlias[0], v0AliasValue, FileSystem::kAliasMaxLength);
+  valveAlias[0][FileSystem::kAliasMaxLength] = '\0';
   maxTimeMinutes = doc["maxTime"] | kDefaultMaxTimeMinutes;
 }
 
@@ -253,17 +253,17 @@ void buildProgramsJson(JsonDocument &doc) {
 }
 
 void saveProgramsFile() {
-  StaticJsonDocument<ConfigStore::kProgramsJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kProgramsJsonCapacity> doc;
   buildProgramsJson(doc);
 
   File file = configFs.open(kProgramsPath, FILE_WRITE);
   if (!file) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: programs.json nicht schreibbar.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: programs.json nicht schreibbar.");
     return;
   }
   serializeJson(doc, file);
   file.close();
-  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "ConfigStore: programs.json gespeichert.");
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "FileSystem: programs.json gespeichert.");
 }
 
 void loadProgramsFile() {
@@ -275,15 +275,15 @@ void loadProgramsFile() {
 
   File file = configFs.open(kProgramsPath, FILE_READ);
   if (!file) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: programs.json nicht lesbar.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: programs.json nicht lesbar.");
     return;
   }
 
-  StaticJsonDocument<ConfigStore::kProgramsJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kProgramsJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, file);
   file.close();
   if (err) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: JSON-Fehler in programs.json: %s",
+    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: JSON-Fehler in programs.json: %s",
                  err.c_str());
     return;
   }
@@ -291,12 +291,12 @@ void loadProgramsFile() {
   JsonArrayConst arr = doc["programs"];
   uint8_t p = 0;
   for (JsonObjectConst obj : arr) {
-    if (p >= ConfigStore::kMaxPrograms) {
+    if (p >= FileSystem::kMaxPrograms) {
       break;
     }
     const char *name = obj["name"] | "";
-    strncpy(programs[p].name, name, ConfigStore::kAliasMaxLength);
-    programs[p].name[ConfigStore::kAliasMaxLength] = '\0';
+    strncpy(programs[p].name, name, FileSystem::kAliasMaxLength);
+    programs[p].name[FileSystem::kAliasMaxLength] = '\0';
     programs[p].timeSetMask = 0;
     programs[p].autoSetMask = 0;
 
@@ -338,7 +338,7 @@ void buildScheduleJson(JsonDocument &doc) {
     snprintf(timeBuf, sizeof(timeBuf), "%02u:%02u", schedule[i].hour, schedule[i].minute);
     obj["time"] = String(timeBuf);
 
-    if (schedule[i].type == ConfigStore::ScheduleType::WEEKLY) {
+    if (schedule[i].type == FileSystem::ScheduleType::WEEKLY) {
       JsonArray weekdaysArr = obj.createNestedArray("weekdays");
       for (uint8_t w = 0; w < 7; w++) {
         if (schedule[i].weekdaysMask & (1 << w)) {
@@ -346,7 +346,7 @@ void buildScheduleJson(JsonDocument &doc) {
         }
       }
     }
-    if (schedule[i].type == ConfigStore::ScheduleType::ONCE) {
+    if (schedule[i].type == FileSystem::ScheduleType::ONCE) {
       char dateBuf[11];
       snprintf(dateBuf, sizeof(dateBuf), "%04u-%02u-%02u", schedule[i].year, schedule[i].month, schedule[i].day);
       obj["date"] = String(dateBuf);
@@ -357,17 +357,17 @@ void buildScheduleJson(JsonDocument &doc) {
 }
 
 void saveScheduleFile() {
-  StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kScheduleJsonCapacity> doc;
   buildScheduleJson(doc);
 
   File file = configFs.open(kSchedulePath, FILE_WRITE);
   if (!file) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht schreibbar.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: schedule.json nicht schreibbar.");
     return;
   }
   serializeJson(doc, file);
   file.close();
-  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "ConfigStore: schedule.json gespeichert.");
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "FileSystem: schedule.json gespeichert.");
 }
 
 void loadScheduleFile() {
@@ -379,15 +379,15 @@ void loadScheduleFile() {
 
   File file = configFs.open(kSchedulePath, FILE_READ);
   if (!file) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: schedule.json nicht lesbar.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: schedule.json nicht lesbar.");
     return;
   }
 
-  StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kScheduleJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, file);
   file.close();
   if (err) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: JSON-Fehler in schedule.json: %s",
+    Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: JSON-Fehler in schedule.json: %s",
                  err.c_str());
     return;
   }
@@ -395,19 +395,19 @@ void loadScheduleFile() {
   JsonArrayConst arr = doc["schedule"];
   uint8_t i = 0;
   for (JsonObjectConst obj : arr) {
-    if (i >= ConfigStore::kMaxScheduleEntries) {
+    if (i >= FileSystem::kMaxScheduleEntries) {
       break;
     }
     const char *program = obj["program"] | "";
-    strncpy(schedule[i].program, program, ConfigStore::kAliasMaxLength);
-    schedule[i].program[ConfigStore::kAliasMaxLength] = '\0';
+    strncpy(schedule[i].program, program, FileSystem::kAliasMaxLength);
+    schedule[i].program[FileSystem::kAliasMaxLength] = '\0';
 
     schedule[i].enabled = obj["enabled"] | true;
 
-    ConfigStore::ScheduleType type = ConfigStore::ScheduleType::DAILY;
+    FileSystem::ScheduleType type = FileSystem::ScheduleType::DAILY;
     if (!parseScheduleType(obj["type"] | "", &type)) {
       Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
-                   "ConfigStore: ungueltiger type in schedule.json Eintrag %u, uebersprungen.", i);
+                   "FileSystem: ungueltiger type in schedule.json Eintrag %u, uebersprungen.", i);
       continue;
     }
     schedule[i].type = type;
@@ -416,14 +416,14 @@ void loadScheduleFile() {
     uint8_t minute = 0;
     if (!parseTimeString(obj["time"] | "", &hour, &minute)) {
       Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
-                   "ConfigStore: ungueltige time in schedule.json Eintrag %u, uebersprungen.", i);
+                   "FileSystem: ungueltige time in schedule.json Eintrag %u, uebersprungen.", i);
       continue;
     }
     schedule[i].hour = hour;
     schedule[i].minute = minute;
 
     schedule[i].weekdaysMask = 0;
-    if (type == ConfigStore::ScheduleType::WEEKLY) {
+    if (type == FileSystem::ScheduleType::WEEKLY) {
       JsonArrayConst weekdaysArr = obj["weekdays"];
       for (JsonVariantConst wd : weekdaysArr) {
         const uint8_t bit = parseWeekdayLabel(wd.as<const char *>());
@@ -436,13 +436,13 @@ void loadScheduleFile() {
     schedule[i].year = 0;
     schedule[i].month = 0;
     schedule[i].day = 0;
-    if (type == ConfigStore::ScheduleType::ONCE) {
+    if (type == FileSystem::ScheduleType::ONCE) {
       uint16_t year = 0;
       uint8_t month = 0;
       uint8_t day = 0;
       if (!parseDateString(obj["date"] | "", &year, &month, &day)) {
         Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
-                     "ConfigStore: ungueltiges date in schedule.json Eintrag %u, uebersprungen.", i);
+                     "FileSystem: ungueltiges date in schedule.json Eintrag %u, uebersprungen.", i);
         continue;
       }
       schedule[i].year = year;
@@ -458,9 +458,9 @@ void loadScheduleFile() {
 
 }  // namespace
 
-void ConfigStore::begin() {
+void FileSystem::begin() {
   // Eigene Partition "config" (siehe partitions.csv) - komplett getrennt von "webfs",
-  // die WebManager per `pio run --target uploadfs` bespielt. Dadurch kann ein Dashboard-
+  // die WebIF per `pio run --target uploadfs` bespielt. Dadurch kann ein Dashboard-
   // Update (uploadfs ueberschreibt immer die komplette Zielpartition) die persistierte
   // Konfiguration nicht mehr mitloeschen (siehe docs/spec/16-webif-fundament.md fuer den
   // Bug, der bei gemeinsamer Partition auftrat). Auto-Format hier bewusst wieder aktiv
@@ -468,7 +468,7 @@ void ConfigStore::begin() {
   // beschrieben, ein Mount-Fehlschlag bedeutet hier also eine wirklich leere/neue
   // Partition, fuer die Auto-Format das korrekte, sichere Verhalten ist.
   if (!configFs.begin(true, "/config", 10, "config")) {
-    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "ConfigStore: LittleFS-Mount fehlgeschlagen.");
+    Logger::log(Logger::Type::ERROR, Logger::Source::SYSTEM, "FileSystem: LittleFS-Mount fehlgeschlagen.");
     return;
   }
   load();
@@ -476,14 +476,14 @@ void ConfigStore::begin() {
   loadScheduleFile();
 }
 
-uint16_t ConfigStore::getValveTime(uint8_t index) {
+uint16_t FileSystem::getValveTime(uint8_t index) {
   if (index < 1 || index > 5) {
     return 0;
   }
   return valveTimeMinutes[index];
 }
 
-void ConfigStore::setValveTime(uint8_t index, uint16_t minutes) {
+void FileSystem::setValveTime(uint8_t index, uint16_t minutes) {
   if (index < 1 || index > 5) {
     return;
   }
@@ -491,23 +491,23 @@ void ConfigStore::setValveTime(uint8_t index, uint16_t minutes) {
   save();
 }
 
-uint16_t ConfigStore::getMaxTime() {
+uint16_t FileSystem::getMaxTime() {
   return maxTimeMinutes;
 }
 
-void ConfigStore::setMaxTime(uint16_t minutes) {
+void FileSystem::setMaxTime(uint16_t minutes) {
   maxTimeMinutes = minutes;
   save();
 }
 
-bool ConfigStore::getValveAuto(uint8_t index) {
+bool FileSystem::getValveAuto(uint8_t index) {
   if (index < 1 || index > 5) {
     return false;
   }
   return valveAuto[index];
 }
 
-void ConfigStore::setValveAuto(uint8_t index, bool on) {
+void FileSystem::setValveAuto(uint8_t index, bool on) {
   if (index < 1 || index > 5) {
     return;
   }
@@ -515,14 +515,14 @@ void ConfigStore::setValveAuto(uint8_t index, bool on) {
   save();
 }
 
-const char *ConfigStore::getValveAlias(uint8_t index) {
+const char *FileSystem::getValveAlias(uint8_t index) {
   if (index > 5) {
     return "";
   }
   return valveAlias[index];
 }
 
-void ConfigStore::setValveAlias(uint8_t index, const char *alias) {
+void FileSystem::setValveAlias(uint8_t index, const char *alias) {
   if (index > 5) {
     return;
   }
@@ -531,16 +531,16 @@ void ConfigStore::setValveAlias(uint8_t index, const char *alias) {
   save();
 }
 
-size_t ConfigStore::toJson(char *buffer, size_t bufferSize) {
+size_t FileSystem::toJson(char *buffer, size_t bufferSize) {
   StaticJsonDocument<kJsonCapacity> doc;
   buildJson(doc);
   return serializeJson(doc, buffer, bufferSize);
 }
 
-void ConfigStore::setPrograms(const ProgramInput *entries, uint8_t count) {
+void FileSystem::setPrograms(const ProgramInput *entries, uint8_t count) {
   if (count > kMaxPrograms) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
-                 "ConfigStore: %u Programme angefragt, nur %u erlaubt - Rest wird ignoriert.", count, kMaxPrograms);
+                 "FileSystem: %u Programme angefragt, nur %u erlaubt - Rest wird ignoriert.", count, kMaxPrograms);
     count = kMaxPrograms;
   }
   for (uint8_t p = 0; p < count; p++) {
@@ -563,61 +563,61 @@ void ConfigStore::setPrograms(const ProgramInput *entries, uint8_t count) {
   saveProgramsFile();
 }
 
-uint8_t ConfigStore::getProgramCount() {
+uint8_t FileSystem::getProgramCount() {
   return programCount;
 }
 
-const char *ConfigStore::getProgramName(uint8_t programIndex) {
+const char *FileSystem::getProgramName(uint8_t programIndex) {
   if (programIndex < 1 || programIndex > programCount) {
     return "";
   }
   return programs[programIndex - 1].name;
 }
 
-bool ConfigStore::programHasTime(uint8_t programIndex, uint8_t valveIndex) {
+bool FileSystem::programHasTime(uint8_t programIndex, uint8_t valveIndex) {
   if (programIndex < 1 || programIndex > programCount || valveIndex < 1 || valveIndex > 5) {
     return false;
   }
   return programs[programIndex - 1].timeSetMask & (1 << valveIndex);
 }
 
-uint16_t ConfigStore::getProgramTime(uint8_t programIndex, uint8_t valveIndex) {
+uint16_t FileSystem::getProgramTime(uint8_t programIndex, uint8_t valveIndex) {
   if (!programHasTime(programIndex, valveIndex)) {
     return 0;
   }
   return programs[programIndex - 1].time[valveIndex];
 }
 
-bool ConfigStore::programHasAuto(uint8_t programIndex, uint8_t valveIndex) {
+bool FileSystem::programHasAuto(uint8_t programIndex, uint8_t valveIndex) {
   if (programIndex < 1 || programIndex > programCount || valveIndex < 1 || valveIndex > 5) {
     return false;
   }
   return programs[programIndex - 1].autoSetMask & (1 << valveIndex);
 }
 
-bool ConfigStore::getProgramAuto(uint8_t programIndex, uint8_t valveIndex) {
+bool FileSystem::getProgramAuto(uint8_t programIndex, uint8_t valveIndex) {
   if (!programHasAuto(programIndex, valveIndex)) {
     return false;
   }
   return programs[programIndex - 1].autoFlag[valveIndex];
 }
 
-uint8_t ConfigStore::getActiveProgram() {
+uint8_t FileSystem::getActiveProgram() {
   return activeProgram;
 }
 
-void ConfigStore::setActiveProgram(uint8_t programIndex) {
+void FileSystem::setActiveProgram(uint8_t programIndex) {
   activeProgram = programIndex;
   saveProgramsFile();
 }
 
-size_t ConfigStore::programsToJson(char *buffer, size_t bufferSize) {
+size_t FileSystem::programsToJson(char *buffer, size_t bufferSize) {
   StaticJsonDocument<kProgramsJsonCapacity> doc;
   buildProgramsJson(doc);
   return serializeJson(doc, buffer, bufferSize);
 }
 
-uint8_t ConfigStore::getProgramIndexForName(const char *name) {
+uint8_t FileSystem::getProgramIndexForName(const char *name) {
   if (name == nullptr) {
     return 0;
   }
@@ -629,10 +629,10 @@ uint8_t ConfigStore::getProgramIndexForName(const char *name) {
   return 0;
 }
 
-void ConfigStore::setSchedule(const ScheduleInput *entries, uint8_t count) {
+void FileSystem::setSchedule(const ScheduleInput *entries, uint8_t count) {
   if (count > kMaxScheduleEntries) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::SYSTEM,
-                 "ConfigStore: %u Zeitplan-Eintraege angefragt, nur %u erlaubt - Rest wird ignoriert.", count,
+                 "FileSystem: %u Zeitplan-Eintraege angefragt, nur %u erlaubt - Rest wird ignoriert.", count,
                  kMaxScheduleEntries);
     count = kMaxScheduleEntries;
   }
@@ -652,83 +652,83 @@ void ConfigStore::setSchedule(const ScheduleInput *entries, uint8_t count) {
   saveScheduleFile();
 }
 
-uint8_t ConfigStore::getScheduleCount() {
+uint8_t FileSystem::getScheduleCount() {
   return scheduleCount;
 }
 
-bool ConfigStore::getScheduleEnabled(uint8_t index) {
+bool FileSystem::getScheduleEnabled(uint8_t index) {
   if (index >= scheduleCount) {
     return false;
   }
   return schedule[index].enabled;
 }
 
-ConfigStore::ScheduleType ConfigStore::getScheduleType(uint8_t index) {
+FileSystem::ScheduleType FileSystem::getScheduleType(uint8_t index) {
   if (index >= scheduleCount) {
     return ScheduleType::DAILY;
   }
   return schedule[index].type;
 }
 
-uint8_t ConfigStore::getScheduleHour(uint8_t index) {
+uint8_t FileSystem::getScheduleHour(uint8_t index) {
   if (index >= scheduleCount) {
     return 0;
   }
   return schedule[index].hour;
 }
 
-uint8_t ConfigStore::getScheduleMinute(uint8_t index) {
+uint8_t FileSystem::getScheduleMinute(uint8_t index) {
   if (index >= scheduleCount) {
     return 0;
   }
   return schedule[index].minute;
 }
 
-uint8_t ConfigStore::getScheduleWeekdaysMask(uint8_t index) {
+uint8_t FileSystem::getScheduleWeekdaysMask(uint8_t index) {
   if (index >= scheduleCount) {
     return 0;
   }
   return schedule[index].weekdaysMask;
 }
 
-uint16_t ConfigStore::getScheduleYear(uint8_t index) {
+uint16_t FileSystem::getScheduleYear(uint8_t index) {
   if (index >= scheduleCount) {
     return 0;
   }
   return schedule[index].year;
 }
 
-uint8_t ConfigStore::getScheduleMonth(uint8_t index) {
+uint8_t FileSystem::getScheduleMonth(uint8_t index) {
   if (index >= scheduleCount) {
     return 0;
   }
   return schedule[index].month;
 }
 
-uint8_t ConfigStore::getScheduleDay(uint8_t index) {
+uint8_t FileSystem::getScheduleDay(uint8_t index) {
   if (index >= scheduleCount) {
     return 0;
   }
   return schedule[index].day;
 }
 
-const char *ConfigStore::getScheduleProgram(uint8_t index) {
+const char *FileSystem::getScheduleProgram(uint8_t index) {
   if (index >= scheduleCount) {
     return "";
   }
   return schedule[index].program;
 }
 
-bool ConfigStore::getScheduleGlobalEnabled() {
+bool FileSystem::getScheduleGlobalEnabled() {
   return scheduleGlobalEnabled;
 }
 
-void ConfigStore::setScheduleGlobalEnabled(bool enabled) {
+void FileSystem::setScheduleGlobalEnabled(bool enabled) {
   scheduleGlobalEnabled = enabled;
   saveScheduleFile();
 }
 
-size_t ConfigStore::scheduleToJson(char *buffer, size_t bufferSize) {
+size_t FileSystem::scheduleToJson(char *buffer, size_t bufferSize) {
   StaticJsonDocument<kScheduleJsonCapacity> doc;
   buildScheduleJson(doc);
   return serializeJson(doc, buffer, bufferSize);

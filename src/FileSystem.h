@@ -1,5 +1,5 @@
 /**
- * @file    ConfigStore.h
+ * @file    FileSystem.h
  * @brief   Persistenz der Einstellwerte (config.json: Ventil-Laufzeiten/Automatik/Alias/maxTime;
  *          programs.json: Bewaesserungsprogramme, Phase 14) im LittleFS. Siehe docs/requirements.md,
  *          Abschnitt "Konfiguration" (config/programs/schedule als getrennte Bereiche).
@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-class ConfigStore {
+class FileSystem {
  public:
   /// Maximale Laenge (ohne Nullterminator) fuer einen Ventil-Alias bzw. Programmnamen.
   static constexpr size_t kAliasMaxLength = 32;
@@ -39,7 +39,7 @@ class ConfigStore {
     bool autoSet[6];
   };
 
-  ConfigStore() = delete;
+  FileSystem() = delete;
 
   /// Mountet LittleFS und laedt /config.json + /programs.json (falls vorhanden), sonst gelten Defaultwerte.
   static void begin();

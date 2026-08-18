@@ -17,7 +17,7 @@ class Logger {
   enum class Type : uint8_t { ERROR, INFO, DEBUG, PUB, SUB };
   // VALVE (2026-08-18 ergaenzt): tatsaechliche Ventilschaltungen (ValveController/ValveTimer) -
   // vorher faelschlich unter I2C mitgelaufen, das jetzt ausschliesslich Bus-Gesundheit meint
-  // (Scan, MCP23017-Erreichbarkeit). SEQ: Automatik-Sequenz-Lebenszyklus (Sequencer), vorher
+  // (Scan, MCP23017-Erreichbarkeit). SEQ: Automatik-Sequenz-Lebenszyklus (AutomaticController), vorher
   // komplett ungeloggt.
   enum class Source : uint8_t { WIFI, MQTT, I2C, HMI, WEB, SYSTEM, VALVE, SEQ };
 
@@ -25,10 +25,10 @@ class Logger {
   using LineCallback = void (*)(const char *line);
 
   // Maximale Laenge einer formatierten Log-Zeile (inkl. Zeitstempel/CLASS/TYPE-Praefix,
-  // exkl. Nullterminator) - oeffentlich, damit MqttManager seinen Live-Log-Ringpuffer
+  // exkl. Nullterminator) - oeffentlich, damit MQTT seinen Live-Log-Ringpuffer
   // (ein `char[kMaxLineLength]` pro Zeile) garantiert genauso gross dimensioniert wie das,
   // was hier tatsaechlich hineinpasst (Nachtrag 2026-08-18: vorher zwei unabhaengige "224"-
-  // Literale in Logger.cpp/MqttManager.cpp, nur zufaellig gleich - siehe Log.md).
+  // Literale in Logger.cpp/MQTT.cpp, nur zufaellig gleich - siehe Log.md).
   // 560->1088 (2026-08-18, zweite Runde): main/programs/state (604 Byte bei 5 Programmen)
   // wurde mit 560 noch abgeschnitten, Live-Log-Pretty-Print schlug dafuer fehl - auf
   // Nutzerentscheidung hin angehoben (deckt ca. 8-9 Programme, volles Auschoepfen von
@@ -58,9 +58,9 @@ class Logger {
 
   /// Registriert einen Callback, der bei JEDER Log-Zeile (inkl. PUB/SUB) mit der komplett
   /// formatierten Zeile (wie auf Serial) aufgerufen wird - Grundlage fuer diagnostics/livelog
-  /// (MqttManager), ohne dass Logger MqttManager kennen muss. Keine Rueckkopplungsgefahr durch
+  /// (MQTT), ohne dass Logger MQTT kennen muss. Keine Rueckkopplungsgefahr durch
   /// das Weiterleiten selbst, solange der Callback dafuer rohes MQTT-Publish statt einer
-  /// geloggten Publish-Funktion nutzt (2026-08-18 klargestellt, siehe MqttManager::
+  /// geloggten Publish-Funktion nutzt (2026-08-18 klargestellt, siehe MQTT::
   /// onLoggerLine()). Zu haeufige Einzeltopics (z.B. sekuendliche Restlaufzeit-Ticks) filtert
   /// bei Bedarf gezielt der Aufrufer selbst.
   static void setLineCallback(LineCallback callback);

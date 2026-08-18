@@ -1,4 +1,4 @@
-#include "Sequencer.h"
+#include "AutomaticController.h"
 
 #include "Logger.h"
 
@@ -13,13 +13,13 @@ bool running = false;
 
 }  // namespace
 
-void Sequencer::begin() {
+void AutomaticController::begin() {
   running = false;
   queueLength = 0;
   currentIndex = 0;
 }
 
-bool Sequencer::start(const uint8_t *valves, uint8_t count) {
+bool AutomaticController::start(const uint8_t *valves, uint8_t count) {
   if (count == 0) {
     return false;
   }
@@ -34,7 +34,7 @@ bool Sequencer::start(const uint8_t *valves, uint8_t count) {
   return true;
 }
 
-void Sequencer::stop() {
+void AutomaticController::stop() {
   if (running) {
     Logger::log(Logger::Type::INFO, Logger::Source::SEQ, "Automatik gestoppt");
   }
@@ -43,18 +43,18 @@ void Sequencer::stop() {
   currentIndex = 0;
 }
 
-bool Sequencer::isRunning() {
+bool AutomaticController::isRunning() {
   return running;
 }
 
-uint8_t Sequencer::getActiveValve() {
+uint8_t AutomaticController::getActiveValve() {
   if (!running || currentIndex >= queueLength) {
     return 0;
   }
   return queue[currentIndex];
 }
 
-uint8_t Sequencer::advance() {
+uint8_t AutomaticController::advance() {
   if (!running) {
     return 0;
   }
@@ -68,14 +68,14 @@ uint8_t Sequencer::advance() {
   return queue[currentIndex];
 }
 
-uint8_t Sequencer::getPendingCount() {
+uint8_t AutomaticController::getPendingCount() {
   if (!running || currentIndex + 1 >= queueLength) {
     return 0;
   }
   return queueLength - currentIndex - 1;
 }
 
-uint8_t Sequencer::getPendingValve(uint8_t offset) {
+uint8_t AutomaticController::getPendingValve(uint8_t offset) {
   const uint8_t idx = currentIndex + 1 + offset;
   if (idx >= queueLength) {
     return 0;

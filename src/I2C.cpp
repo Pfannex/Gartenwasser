@@ -1,4 +1,4 @@
-#include "I2CManager.h"
+#include "I2C.h"
 
 #include <Wire.h>
 
@@ -9,14 +9,14 @@ constexpr uint8_t kIodirB = 0x01;  ///< Richtungsregister Port B (1 = Eingang, 0
 constexpr uint8_t kGpioB = 0x13;   ///< Pegel-Register Port B
 }  // namespace
 
-void I2CManager::writeRegister(uint8_t addr, uint8_t reg, uint8_t value) {
+void I2C::writeRegister(uint8_t addr, uint8_t reg, uint8_t value) {
   Wire.beginTransmission(addr);
   Wire.write(reg);
   Wire.write(value);
   Wire.endTransmission();
 }
 
-void I2CManager::scan() {
+void I2C::scan() {
   Logger::log(Logger::Type::INFO, Logger::Source::I2C, "I2C-Scan gestartet...");
   uint8_t found = 0;
 
@@ -43,12 +43,12 @@ void I2CManager::scan() {
   }
 }
 
-void I2CManager::mcp23017Setup() {
+void I2C::mcp23017Setup() {
   writeRegister(kMcp23017Addr, kIodirB, 0x00);  // alle Ausgang
   writeRegister(kMcp23017Addr, kGpioB, 0x00);   // alle LOW
 }
 
-bool I2CManager::isMcp23017Reachable() {
+bool I2C::isMcp23017Reachable() {
   Wire.beginTransmission(kMcp23017Addr);
   return Wire.endTransmission() == 0;
 }

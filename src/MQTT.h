@@ -1,5 +1,5 @@
 /**
- * @file    MqttManager.h
+ * @file    MQTT.h
  * @brief   MQTT-Verbindungsaufbau (PubSubClient), LWT/availability, nicht-blockierendes Reconnect-Handling.
  */
 
@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-namespace MqttManager {
+namespace MQTT {
 
 /// Konfiguriert den MQTT-Client (Broker/Port aus secrets.h). Nicht blockierend.
 void begin();
@@ -34,4 +34,4 @@ void requestProgramSelect(uint8_t programIndex);
 /// docs/spec/13-touch-ui.md).
 void requestValveCmd(uint8_t index, bool on);
 
-}  // namespace MqttManager
+}  // namespace MQTT

@@ -27,11 +27,11 @@ class ValveController {
   static bool anyIrrigationValveActive();
 
   /// Automatik-Flag von Ventil `index` (1..5): Teilnahme an der Automatik-Sequenz (Phase 7).
-  /// Persistiert via ConfigStore, hat vorerst noch keine Funktion.
+  /// Persistiert via FileSystem, hat vorerst noch keine Funktion.
   static bool getAuto(uint8_t index);
   static void setAuto(uint8_t index, bool on);
 
-  /// Klartextname (Alias) von Ventil `index` (0=V0 .. 5=V5). Persistiert via ConfigStore.
+  /// Klartextname (Alias) von Ventil `index` (0=V0 .. 5=V5). Persistiert via FileSystem.
   static const char *getAlias(uint8_t index);
   static void setAlias(uint8_t index, const char *alias);
 };

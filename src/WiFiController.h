@@ -1,11 +1,11 @@
 /**
- * @file    WifiManager.h
+ * @file    WiFiController.h
  * @brief   WLAN-Verbindungsaufbau und nicht-blockierendes Reconnect-Handling.
  */
 
 #pragma once
 
-namespace WifiManager {
+namespace WiFiController {
 
 /// Startet die WLAN-Verbindung (Zugangsdaten aus secrets.h). Nicht blockierend.
 void begin();
@@ -21,4 +21,4 @@ bool isConnected();
 /// Echtzeit um (siehe Logger::enableRealTime()).
 void connectAndSyncTimeBlocking();
 
-}  // namespace WifiManager
+}  // namespace WiFiController

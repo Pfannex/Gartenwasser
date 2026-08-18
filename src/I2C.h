@@ -1,8 +1,8 @@
 /**
- * @file    I2CManager.h
+ * @file    I2C.h
  * @brief   I2C-Bus-Funktionen (Scan, Register-Zugriff, MCP23017-Grundsetup).
  * @note    Wire muss vor Aufruf dieser Funktionen bereits initialisiert sein
- *          (aktuell durch HmiManager::begin(), da Touch und MCP23017 sich den
+ *          (aktuell durch HMI::begin(), da Touch und MCP23017 sich den
  *          Bus teilen).
  */
 
@@ -10,11 +10,11 @@
 
 #include <cstdint>
 
-class I2CManager {
+class I2C {
  public:
   static constexpr uint8_t kMcp23017Addr = 0x20;  ///< I2C-Adresse bei A0-A2 = GND
 
-  I2CManager() = delete;
+  I2C() = delete;
 
   /// Durchsucht den I2C-Bus (Adressen 1-126) und prueft gezielt den MCP23017.
   static void scan();

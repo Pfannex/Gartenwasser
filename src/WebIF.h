@@ -1,5 +1,5 @@
 /**
- * @file    WebManager.h
+ * @file    WebIF.h
  * @brief   Async-Webserver (ESPAsyncWebServer), liefert das Web-Interface als statische
  *          Dateien aus LittleFS aus (Phase 16). Reines File-Serving - keine REST-Endpoints:
  *          der Browser spricht fuer Live-Daten direkt per MQTT-over-WebSocket mit dem
@@ -8,11 +8,11 @@
 
 #pragma once
 
-class WebManager {
+class WebIF {
  public:
-  WebManager() = delete;
+  WebIF() = delete;
 
   /// Startet den Webserver. Setzt voraus, dass LittleFS bereits gemountet ist
-  /// (siehe ConfigStore::begin(), muss vorher aufgerufen werden).
+  /// (siehe FileSystem::begin(), muss vorher aufgerufen werden).
   static void begin();
 };

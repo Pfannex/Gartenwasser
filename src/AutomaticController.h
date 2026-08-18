@@ -1,17 +1,17 @@
 /**
- * @file    Sequencer.h
+ * @file    AutomaticController.h
  * @brief   Reine Ablaufsteuerung fuer die Automatik-Sequenz (Warteschlange + Cursor).
  *          Kennt keine Ventile/MQTT - das Ein-/Ausschalten und Publizieren macht
- *          der Aufrufer (MqttManager), analog zu ValveTimer.
+ *          der Aufrufer (MQTT), analog zu ValveTimer.
  */
 
 #pragma once
 
 #include <cstdint>
 
-class Sequencer {
+class AutomaticController {
  public:
-  Sequencer() = delete;
+  AutomaticController() = delete;
 
   /// Setzt den Zustand zurueck (keine Sequenz aktiv). Fuer den Boot-Grundzustand.
   static void begin();

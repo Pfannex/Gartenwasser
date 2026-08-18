@@ -1,4 +1,4 @@
-#include "MqttManager.h"
+#include "MQTT.h"
 
 #include <ArduinoJson.h>
 #include <Arduino.h>
@@ -8,13 +8,13 @@
 #include <cstring>
 #include <ctime>
 
-#include "ConfigStore.h"
+#include "FileSystem.h"
 #include "Diagnostics.h"
 #include "Logger.h"
-#include "Sequencer.h"
+#include "AutomaticController.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
-#include "WifiManager.h"
+#include "WiFiController.h"
 #include "secrets.h"
 
 namespace {
@@ -74,8 +74,8 @@ constexpr size_t kTopicBufferSize = 48;
 // schedule.json ist mit bis zu kMaxScheduleEntries Eintraegen (Phase 15) inzwischen der
 // Puffer-bestimmende Fall, groesser als programs.json (Phase 14).
 constexpr size_t kMaxJsonPayloadSize =
-    ConfigStore::kScheduleJsonCapacity > ConfigStore::kProgramsJsonCapacity ? ConfigStore::kScheduleJsonCapacity
-                                                                             : ConfigStore::kProgramsJsonCapacity;
+    FileSystem::kScheduleJsonCapacity > FileSystem::kProgramsJsonCapacity ? FileSystem::kScheduleJsonCapacity
+                                                                             : FileSystem::kProgramsJsonCapacity;
 
 // Grenzen fuer time/set (Minuten). Obere Grenze ist ein grosszuegiger Sanity-Check,
 // die eigentliche Deckelung der effektiven Laufzeit erfolgt ueber maxTime (ValveTimer).
@@ -87,7 +87,7 @@ constexpr long kMaxValveTimeMinutes = 999;
 // ("laeuft lokal/autonom weiter").
 constexpr unsigned long kTickIntervalMs = 1000;
 
-// Analog zum Reconnect-Intervall aus WifiManager: kurz genug fuer zuegige
+// Analog zum Reconnect-Intervall aus WiFiController: kurz genug fuer zuegige
 // Wiederholung, lang genug, um den Broker nicht mit Verbindungsversuchen zu fluten.
 constexpr unsigned long kReconnectIntervalMs = 15000;
 
@@ -193,7 +193,7 @@ void onLoggerLine(const char *line) {
 // Publiziert alle seit dem letzten Aufruf gepufferten Log-Zeilen. WICHTIG: dies NIEMALS
 // direkt aus onLoggerLine()/Logger::log() heraus aufrufen, sondern nur von einer Stelle, die
 // garantiert ausserhalb eines eingehenden MQTT-Callbacks laeuft (hier: am Ende von
-// MqttManager::loop(), nach mqttClient.loop()). Grund: PubSubClient nutzt einen gemeinsamen
+// MQTT::loop(), nach mqttClient.loop()). Grund: PubSubClient nutzt einen gemeinsamen
 // internen Puffer fuer ein- und ausgehende Pakete; das an handleMqttMessage() uebergebene
 // `topic` zeigt vermutlich direkt in diesen Puffer. Ein publish() WAEHREND der Verarbeitung
 // einer eingehenden Nachricht ueberschreibt diesen Puffer und macht `topic` damit fuer die
@@ -258,7 +258,7 @@ void publishRemaining(uint8_t index, uint16_t seconds) {
 
 void publishMaxTime() {
   char payload[8];
-  snprintf(payload, sizeof(payload), "%u", ConfigStore::getMaxTime());
+  snprintf(payload, sizeof(payload), "%u", FileSystem::getMaxTime());
   publishAndLog(kMaxTimeTopic, payload, true);
 }
 
@@ -274,10 +274,10 @@ void publishAlias(uint8_t index, const char *alias) {
   publishAndLog(topic, alias, true);
 }
 
-// Laenge (siehe ConfigStore::kAliasMaxLength) und Steuerzeichen pruefen. UTF-8-
+// Laenge (siehe FileSystem::kAliasMaxLength) und Steuerzeichen pruefen. UTF-8-
 // Mehrbyte-Folgen (Umlaute etc., Bytes >= 0x80) sind ausdruecklich erlaubt.
 bool isValidAliasPayload(const char *payloadStr, size_t length) {
-  if (length > ConfigStore::kAliasMaxLength) {
+  if (length > FileSystem::kAliasMaxLength) {
     return false;
   }
   for (size_t i = 0; i < length; i++) {
@@ -292,8 +292,8 @@ bool isValidAliasPayload(const char *payloadStr, size_t length) {
 // als JSON, retained - bei jeder Aenderung (egal welches Topic) und nach
 // jedem (Re-)Connect (siehe docs/spec/11-sammelbefehle.md).
 void publishConfigState() {
-  char payload[ConfigStore::kJsonCapacity];
-  const size_t written = ConfigStore::toJson(payload, sizeof(payload));
+  char payload[FileSystem::kJsonCapacity];
+  const size_t written = FileSystem::toJson(payload, sizeof(payload));
   if (written == 0) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/state: Serialisierung fehlgeschlagen.");
     return;
@@ -304,13 +304,13 @@ void publishConfigState() {
 // Publiziert das aktuell gewaehlte Programm (Singular, kompakt), retained -
 // bei jeder Aenderung und nach jedem (Re-)Connect (siehe docs/spec/14-programme.md).
 void publishProgramState() {
-  const uint8_t active = ConfigStore::getActiveProgram();
+  const uint8_t active = FileSystem::getActiveProgram();
   StaticJsonDocument<96> doc;
   doc["index"] = active;
-  if (active == 0 || active > ConfigStore::getProgramCount()) {
+  if (active == 0 || active > FileSystem::getProgramCount()) {
     doc["name"] = nullptr;
   } else {
-    doc["name"] = ConfigStore::getProgramName(active);
+    doc["name"] = FileSystem::getProgramName(active);
   }
   char payload[96];
   serializeJson(doc, payload, sizeof(payload));
@@ -320,8 +320,8 @@ void publishProgramState() {
 // Publiziert die komplette Programme-Liste + activeProgram als JSON, retained -
 // bei jeder Aenderung (egal welches Topic) und nach jedem (Re-)Connect.
 void publishProgramsState() {
-  char payload[ConfigStore::kProgramsJsonCapacity];
-  const size_t written = ConfigStore::programsToJson(payload, sizeof(payload));
+  char payload[FileSystem::kProgramsJsonCapacity];
+  const size_t written = FileSystem::programsToJson(payload, sizeof(payload));
   if (written == 0) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/programs/state: Serialisierung fehlgeschlagen.");
     return;
@@ -365,15 +365,15 @@ void publishActiveValve(uint8_t index) {
 // Restzeit der Gesamtsequenz: Restlaufzeit des aktiven Ventils + effektive
 // Laufzeit (min(time, maxTime)) aller noch ausstehenden Ventile in der Warteschlange.
 uint32_t computeRemainingTotalSeconds() {
-  if (!Sequencer::isRunning()) {
+  if (!AutomaticController::isRunning()) {
     return 0;
   }
-  uint32_t total = ValveTimer::getRemainingSeconds(Sequencer::getActiveValve());
-  const uint8_t pendingCount = Sequencer::getPendingCount();
+  uint32_t total = ValveTimer::getRemainingSeconds(AutomaticController::getActiveValve());
+  const uint8_t pendingCount = AutomaticController::getPendingCount();
   for (uint8_t i = 0; i < pendingCount; i++) {
-    const uint8_t v = Sequencer::getPendingValve(i);
-    const uint16_t timeMinutes = ConfigStore::getValveTime(v);
-    const uint16_t maxTimeMinutes = ConfigStore::getMaxTime();
+    const uint8_t v = AutomaticController::getPendingValve(i);
+    const uint16_t timeMinutes = FileSystem::getValveTime(v);
+    const uint16_t maxTimeMinutes = FileSystem::getMaxTime();
     const uint16_t effectiveMinutes = timeMinutes < maxTimeMinutes ? timeMinutes : maxTimeMinutes;
     total += static_cast<uint32_t>(effectiveMinutes) * 60UL;
   }
@@ -439,7 +439,7 @@ void armAllValves() {
 // docs/spec/07-automatik-sequenz.md). Schaltet das naechste Ventil ein bzw.
 // beendet die Sequenz, wenn die Warteschlange erschoepft ist.
 void advanceSequence() {
-  const uint8_t next = Sequencer::advance();
+  const uint8_t next = AutomaticController::advance();
   if (next == 0) {
     publishMainState(false);
     publishActiveValve(0);
@@ -466,10 +466,10 @@ void applyProgram(uint8_t programIndex);
 // die Programmzuordnung (= "MANUELL" im UI, inkl. des bereits bestehenden Auto-Resets aus
 // applyProgram(0)) - Ventile lassen sich danach nur noch einzeln manuell schalten.
 void publishConfigStateAndClearProgram() {
-  const uint8_t previous = ConfigStore::getActiveProgram();
+  const uint8_t previous = FileSystem::getActiveProgram();
   if (previous != 0) {
     Logger::logf(Logger::Type::INFO, Logger::Source::MQTT,
-                 "MANUELL: Programm '%s' durch direkte Aenderung abgewaehlt.", ConfigStore::getProgramName(previous));
+                 "MANUELL: Programm '%s' durch direkte Aenderung abgewaehlt.", FileSystem::getProgramName(previous));
     applyProgram(0);  // publiziert config/program/programs-State bereits
   } else {
     publishConfigState();
@@ -477,12 +477,12 @@ void publishConfigStateAndClearProgram() {
 }
 
 void startSequence() {
-  if (Sequencer::isRunning()) {
+  if (AutomaticController::isRunning()) {
     Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "main/cmd ON ignoriert (Automatik laeuft bereits).");
     return;
   }
 
-  const uint8_t activeProgram = ConfigStore::getActiveProgram();
+  const uint8_t activeProgram = FileSystem::getActiveProgram();
   if (activeProgram == 0) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/cmd ON ignoriert: kein Programm gewaehlt.");
     return;
@@ -499,25 +499,25 @@ void startSequence() {
     }
   }
 
-  if (!Sequencer::start(autoValves, count)) {
+  if (!AutomaticController::start(autoValves, count)) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/cmd ON ignoriert: kein Ventil mit auto=ON.");
     return;
   }
 
   publishMainState(true);
-  const uint8_t first = Sequencer::getActiveValve();
+  const uint8_t first = AutomaticController::getActiveValve();
   applyValveCommand(first, true);
   publishActiveValve(first);
   publishRemainingTotalNow();
 }
 
 void stopSequence() {
-  const bool wasRunning = Sequencer::isRunning();
-  const uint8_t active = Sequencer::getActiveValve();
+  const bool wasRunning = AutomaticController::isRunning();
+  const uint8_t active = AutomaticController::getActiveValve();
   if (active != 0) {
     applyValveCommand(active, false);
   }
-  Sequencer::stop();
+  AutomaticController::stop();
   publishMainState(false);
   publishActiveValve(0);
   if (wasRunning) {
@@ -539,18 +539,18 @@ void handleMainCmd(const char *payloadStr) {
   }
 }
 
-// Kernlogik ohne Payload-Parsing, wiederverwendet von MqttManager::requestValveCmd()
+// Kernlogik ohne Payload-Parsing, wiederverwendet von MQTT::requestValveCmd()
 // (Touch-UI-Ventilmatrix, Touch-UI-Neugestaltung, kein MQTT-Umweg).
 void applyValveCmd(uint8_t index, bool targetOn) {
   // Waehrend die Automatik laeuft: manuelles ON ignorieren (siehe
   // docs/spec/07-automatik-sequenz.md); manuelles OFF des aktiven Ventils
   // wird angenommen und stoesst den naechsten Schritt der Sequenz an.
-  if (targetOn && Sequencer::isRunning()) {
+  if (targetOn && AutomaticController::isRunning()) {
     Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "V%u/cmd ON ignoriert (Automatik laeuft).", index);
     return;
   }
 
-  const bool wasActiveSequenceValve = Sequencer::isRunning() && Sequencer::getActiveValve() == index;
+  const bool wasActiveSequenceValve = AutomaticController::isRunning() && AutomaticController::getActiveValve() == index;
   applyValveCommand(index, targetOn);
   if (!targetOn) {
     if (wasActiveSequenceValve) {
@@ -598,7 +598,7 @@ void applyTimeValue(uint8_t index, long value) {
   }
 
   const uint16_t minutes = static_cast<uint16_t>(value);
-  ConfigStore::setValveTime(index, minutes);
+  FileSystem::setValveTime(index, minutes);
   publishTimeState(index, minutes);
 
   // Ventil laeuft gerade nicht und es laeuft auch keine Automatik-Sequenz:
@@ -606,7 +606,7 @@ void applyTimeValue(uint8_t index, long value) {
   // statt auf den naechsten Start zu warten. Waehrend einer laufenden Sequenz
   // NICHT re-armieren - sonst sieht ein bereits durchgelaufenes Ventil so aus,
   // als waere es noch an der Reihe (siehe armIdleValve()/advanceSequence()).
-  if (!ValveController::getValve(index) && !Sequencer::isRunning()) {
+  if (!ValveController::getValve(index) && !AutomaticController::isRunning()) {
     armIdleValve(index);
   }
 }
@@ -645,7 +645,7 @@ void applyMaxTimeValue(long value) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: ungueltiger maxTime-Wert '%ld'", value);
     return;
   }
-  ConfigStore::setMaxTime(static_cast<uint16_t>(value));
+  FileSystem::setMaxTime(static_cast<uint16_t>(value));
   publishMaxTime();
 }
 
@@ -665,7 +665,7 @@ bool parseValveKey(const char *key, uint8_t minIndex, uint8_t maxIndex, uint8_t 
 }
 
 void handleConfigSet(const char *payloadStr) {
-  StaticJsonDocument<ConfigStore::kJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, payloadStr);
   if (err) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: JSON-Fehler: %s", err.c_str());
@@ -730,26 +730,26 @@ void handleConfigSet(const char *payloadStr) {
 // und dem Key "activeProgram" in main/programs/set.
 void applyProgram(uint8_t programIndex) {
   if (programIndex != 0) {
-    if (programIndex > ConfigStore::getProgramCount()) {
+    if (programIndex > FileSystem::getProgramCount()) {
       Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Programm-Index '%u'", programIndex);
       return;
     }
     for (uint8_t v = 1; v <= 5; v++) {
-      if (ConfigStore::programHasTime(programIndex, v)) {
-        applyTimeValue(v, ConfigStore::getProgramTime(programIndex, v));
+      if (FileSystem::programHasTime(programIndex, v)) {
+        applyTimeValue(v, FileSystem::getProgramTime(programIndex, v));
       }
-      if (ConfigStore::programHasAuto(programIndex, v)) {
-        applyAutoValue(v, ConfigStore::getProgramAuto(programIndex, v));
+      if (FileSystem::programHasAuto(programIndex, v)) {
+        applyAutoValue(v, FileSystem::getProgramAuto(programIndex, v));
       }
     }
     Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "Programm '%s' angewendet.",
-                 ConfigStore::getProgramName(programIndex));
+                 FileSystem::getProgramName(programIndex));
   } else {
     for (uint8_t v = 1; v <= 5; v++) {
       applyAutoValue(v, false);
     }
   }
-  ConfigStore::setActiveProgram(programIndex);
+  FileSystem::setActiveProgram(programIndex);
   publishProgramState();
   publishProgramsState();
   publishConfigState();  // time/auto koennen sich durchs Anwenden geaendert haben
@@ -758,7 +758,7 @@ void applyProgram(uint8_t programIndex) {
 void handleProgramCmd(const char *payloadStr) {
   char *endPtr = nullptr;
   const long value = strtol(payloadStr, &endPtr, 10);
-  if (endPtr == payloadStr || *endPtr != '\0' || value < 0 || value > ConfigStore::kMaxPrograms) {
+  if (endPtr == payloadStr || *endPtr != '\0' || value < 0 || value > FileSystem::kMaxPrograms) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Ungueltiger Wert '%s' fuer main/program/cmd",
                  payloadStr);
     return;
@@ -770,7 +770,7 @@ void handleProgramCmd(const char *payloadStr) {
 // Programme, siehe docs/spec/14-programme.md, Kernentscheidung 5), "activeProgram" wendet
 // die Auswahl an (identisch zu main/program/cmd, ueber applyProgram()). Beide optional.
 void handleProgramsSet(const char *payloadStr) {
-  StaticJsonDocument<ConfigStore::kProgramsJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kProgramsJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, payloadStr);
   if (err) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/programs/set: JSON-Fehler: %s", err.c_str());
@@ -779,15 +779,15 @@ void handleProgramsSet(const char *payloadStr) {
 
   JsonArrayConst programsArr = doc["programs"];
   if (!programsArr.isNull()) {
-    ConfigStore::ProgramInput entries[ConfigStore::kMaxPrograms];
+    FileSystem::ProgramInput entries[FileSystem::kMaxPrograms];
     uint8_t count = 0;
     for (JsonObjectConst obj : programsArr) {
-      if (count >= ConfigStore::kMaxPrograms) {
+      if (count >= FileSystem::kMaxPrograms) {
         Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
-                     "main/programs/set: mehr als %u Programme, Rest wird ignoriert.", ConfigStore::kMaxPrograms);
+                     "main/programs/set: mehr als %u Programme, Rest wird ignoriert.", FileSystem::kMaxPrograms);
         break;
       }
-      ConfigStore::ProgramInput &entry = entries[count];
+      FileSystem::ProgramInput &entry = entries[count];
       entry.name = obj["name"] | "";
       for (uint8_t i = 0; i < 6; i++) {
         entry.timeSet[i] = false;
@@ -816,12 +816,12 @@ void handleProgramsSet(const char *payloadStr) {
       }
       count++;
     }
-    ConfigStore::setPrograms(entries, count);
+    FileSystem::setPrograms(entries, count);
   }
 
   if (!doc["activeProgram"].isNull()) {
     const long value = doc["activeProgram"].as<long>();
-    if (value < 0 || value > ConfigStore::kMaxPrograms) {
+    if (value < 0 || value > FileSystem::kMaxPrograms) {
       Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/programs/set: ungueltiger activeProgram-Wert '%ld'",
                    value);
     } else {
@@ -849,20 +849,20 @@ uint8_t parseWeekdayLabel(const char *value) {
   return 0xFF;
 }
 
-bool parseScheduleTypeValue(const char *value, ConfigStore::ScheduleType *outType) {
+bool parseScheduleTypeValue(const char *value, FileSystem::ScheduleType *outType) {
   if (value == nullptr) {
     return false;
   }
   if (strcmp(value, "daily") == 0) {
-    *outType = ConfigStore::ScheduleType::DAILY;
+    *outType = FileSystem::ScheduleType::DAILY;
     return true;
   }
   if (strcmp(value, "weekly") == 0) {
-    *outType = ConfigStore::ScheduleType::WEEKLY;
+    *outType = FileSystem::ScheduleType::WEEKLY;
     return true;
   }
   if (strcmp(value, "once") == 0) {
-    *outType = ConfigStore::ScheduleType::ONCE;
+    *outType = FileSystem::ScheduleType::ONCE;
     return true;
   }
   return false;
@@ -917,8 +917,8 @@ bool parseScheduleDateValue(const char *value, uint16_t *outYear, uint8_t *outMo
 }
 
 void publishScheduleState() {
-  char payload[ConfigStore::kScheduleJsonCapacity];
-  const size_t written = ConfigStore::scheduleToJson(payload, sizeof(payload));
+  char payload[FileSystem::kScheduleJsonCapacity];
+  const size_t written = FileSystem::scheduleToJson(payload, sizeof(payload));
   if (written == 0) {
     Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/schedule/state: Serialisierung fehlgeschlagen.");
     return;
@@ -931,7 +931,7 @@ void publishScheduleState() {
 // optional. Ungueltige Einzeleintraege werden übersprungen + geloggt, nicht die ganze
 // Anfrage abgelehnt (wie ueberall sonst im Projekt).
 void handleScheduleSet(const char *payloadStr) {
-  StaticJsonDocument<ConfigStore::kScheduleJsonCapacity> doc;
+  StaticJsonDocument<FileSystem::kScheduleJsonCapacity> doc;
   const DeserializationError err = deserializeJson(doc, payloadStr);
   if (err) {
     Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/schedule/set: JSON-Fehler: %s", err.c_str());
@@ -940,16 +940,16 @@ void handleScheduleSet(const char *payloadStr) {
 
   JsonArrayConst scheduleArr = doc["schedule"];
   if (!scheduleArr.isNull()) {
-    ConfigStore::ScheduleInput entries[ConfigStore::kMaxScheduleEntries];
+    FileSystem::ScheduleInput entries[FileSystem::kMaxScheduleEntries];
     uint8_t count = 0;
     for (JsonObjectConst obj : scheduleArr) {
-      if (count >= ConfigStore::kMaxScheduleEntries) {
+      if (count >= FileSystem::kMaxScheduleEntries) {
         Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT,
                      "main/schedule/set: mehr als %u Eintraege, Rest wird ignoriert.",
-                     ConfigStore::kMaxScheduleEntries);
+                     FileSystem::kMaxScheduleEntries);
         break;
       }
-      ConfigStore::ScheduleInput &entry = entries[count];
+      FileSystem::ScheduleInput &entry = entries[count];
       entry.program = obj["program"] | "";
       if (entry.program[0] == '\0') {
         Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
@@ -958,7 +958,7 @@ void handleScheduleSet(const char *payloadStr) {
       }
       entry.enabled = obj["enabled"] | true;
 
-      ConfigStore::ScheduleType type = ConfigStore::ScheduleType::DAILY;
+      FileSystem::ScheduleType type = FileSystem::ScheduleType::DAILY;
       if (!parseScheduleTypeValue(obj["type"] | "", &type)) {
         Logger::log(Logger::Type::ERROR, Logger::Source::MQTT,
                      "main/schedule/set: ungueltiger oder fehlender 'type', Eintrag uebersprungen.");
@@ -977,7 +977,7 @@ void handleScheduleSet(const char *payloadStr) {
       entry.minute = minute;
 
       entry.weekdaysMask = 0;
-      if (type == ConfigStore::ScheduleType::WEEKLY) {
+      if (type == FileSystem::ScheduleType::WEEKLY) {
         JsonArrayConst weekdaysArr = obj["weekdays"];
         for (JsonVariantConst wd : weekdaysArr) {
           const uint8_t bit = parseWeekdayLabel(wd.as<const char *>());
@@ -998,7 +998,7 @@ void handleScheduleSet(const char *payloadStr) {
       entry.year = 0;
       entry.month = 0;
       entry.day = 0;
-      if (type == ConfigStore::ScheduleType::ONCE) {
+      if (type == FileSystem::ScheduleType::ONCE) {
         uint16_t year = 0;
         uint8_t month = 0;
         uint8_t day = 0;
@@ -1014,11 +1014,11 @@ void handleScheduleSet(const char *payloadStr) {
 
       count++;
     }
-    ConfigStore::setSchedule(entries, count);
+    FileSystem::setSchedule(entries, count);
   }
 
   if (!doc["enabled"].isNull()) {
-    ConfigStore::setScheduleGlobalEnabled(doc["enabled"].as<bool>());
+    FileSystem::setScheduleGlobalEnabled(doc["enabled"].as<bool>());
   }
 
   publishScheduleState();
@@ -1031,7 +1031,7 @@ void handleScheduleCmd(const char *payloadStr) {
                  payloadStr);
     return;
   }
-  ConfigStore::setScheduleGlobalEnabled(targetOn);
+  FileSystem::setScheduleGlobalEnabled(targetOn);
   publishScheduleState();
 }
 
@@ -1052,17 +1052,17 @@ void handleScheduleCleanup() {
   const uint8_t currentMonth = static_cast<uint8_t>(timeinfo.tm_mon + 1);
   const uint8_t currentDay = static_cast<uint8_t>(timeinfo.tm_mday);
 
-  const uint8_t count = ConfigStore::getScheduleCount();
-  static char programBuf[ConfigStore::kMaxScheduleEntries][ConfigStore::kAliasMaxLength + 1];
-  ConfigStore::ScheduleInput entries[ConfigStore::kMaxScheduleEntries];
+  const uint8_t count = FileSystem::getScheduleCount();
+  static char programBuf[FileSystem::kMaxScheduleEntries][FileSystem::kAliasMaxLength + 1];
+  FileSystem::ScheduleInput entries[FileSystem::kMaxScheduleEntries];
   uint8_t keepCount = 0;
   uint8_t removedCount = 0;
   for (uint8_t i = 0; i < count; i++) {
     bool expired = false;
-    if (ConfigStore::getScheduleType(i) == ConfigStore::ScheduleType::ONCE) {
-      const uint16_t y = ConfigStore::getScheduleYear(i);
-      const uint8_t m = ConfigStore::getScheduleMonth(i);
-      const uint8_t d = ConfigStore::getScheduleDay(i);
+    if (FileSystem::getScheduleType(i) == FileSystem::ScheduleType::ONCE) {
+      const uint16_t y = FileSystem::getScheduleYear(i);
+      const uint8_t m = FileSystem::getScheduleMonth(i);
+      const uint8_t d = FileSystem::getScheduleDay(i);
       if (y < currentYear || (y == currentYear && m < currentMonth) ||
           (y == currentYear && m == currentMonth && d < currentDay)) {
         expired = true;
@@ -1073,24 +1073,24 @@ void handleScheduleCleanup() {
       continue;
     }
 
-    strncpy(programBuf[keepCount], ConfigStore::getScheduleProgram(i), ConfigStore::kAliasMaxLength);
-    programBuf[keepCount][ConfigStore::kAliasMaxLength] = '\0';
+    strncpy(programBuf[keepCount], FileSystem::getScheduleProgram(i), FileSystem::kAliasMaxLength);
+    programBuf[keepCount][FileSystem::kAliasMaxLength] = '\0';
 
-    ConfigStore::ScheduleInput &entry = entries[keepCount];
+    FileSystem::ScheduleInput &entry = entries[keepCount];
     entry.program = programBuf[keepCount];
-    entry.enabled = ConfigStore::getScheduleEnabled(i);
-    entry.type = ConfigStore::getScheduleType(i);
-    entry.hour = ConfigStore::getScheduleHour(i);
-    entry.minute = ConfigStore::getScheduleMinute(i);
-    entry.weekdaysMask = ConfigStore::getScheduleWeekdaysMask(i);
-    entry.year = ConfigStore::getScheduleYear(i);
-    entry.month = ConfigStore::getScheduleMonth(i);
-    entry.day = ConfigStore::getScheduleDay(i);
+    entry.enabled = FileSystem::getScheduleEnabled(i);
+    entry.type = FileSystem::getScheduleType(i);
+    entry.hour = FileSystem::getScheduleHour(i);
+    entry.minute = FileSystem::getScheduleMinute(i);
+    entry.weekdaysMask = FileSystem::getScheduleWeekdaysMask(i);
+    entry.year = FileSystem::getScheduleYear(i);
+    entry.month = FileSystem::getScheduleMonth(i);
+    entry.day = FileSystem::getScheduleDay(i);
     keepCount++;
   }
 
   if (removedCount > 0) {
-    ConfigStore::setSchedule(entries, keepCount);
+    FileSystem::setSchedule(entries, keepCount);
     publishScheduleState();
   }
   Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "main/schedule/cleanup: %u abgelaufene Eintraege entfernt.",
@@ -1098,13 +1098,13 @@ void handleScheduleCleanup() {
 }
 
 // Sicherheitskritisch im weiteren Sinne (lokale Zeitsteuerung soll wie der Ventil-Tick
-// unabhaengig von WLAN/MQTT laufen, siehe Aufrufstelle in MqttManager::loop()). Prueft
+// unabhaengig von WLAN/MQTT laufen, siehe Aufrufstelle in MQTT::loop()). Prueft
 // einmal pro Minute (siehe docs/spec/15-wochenplan.md, Kernentscheidung 4) die komplette
 // schedule-Liste gegen die aktuelle Zeit - kein Timer pro Eintrag.
 unsigned long lastCheckedScheduleMinute = 0xFFFFFFFFUL;  // Sentinel: noch nie geprueft
 
 void checkSchedule() {
-  if (!Logger::isRealTimeEnabled() || !ConfigStore::getScheduleGlobalEnabled()) {
+  if (!Logger::isRealTimeEnabled() || !FileSystem::getScheduleGlobalEnabled()) {
     return;
   }
 
@@ -1124,29 +1124,29 @@ void checkSchedule() {
   const uint8_t currentMonth = static_cast<uint8_t>(timeinfo.tm_mon + 1);
   const uint8_t currentDay = static_cast<uint8_t>(timeinfo.tm_mday);
 
-  const uint8_t count = ConfigStore::getScheduleCount();
+  const uint8_t count = FileSystem::getScheduleCount();
   for (uint8_t i = 0; i < count; i++) {
-    if (!ConfigStore::getScheduleEnabled(i)) {
+    if (!FileSystem::getScheduleEnabled(i)) {
       continue;
     }
-    if (ConfigStore::getScheduleHour(i) != currentHour || ConfigStore::getScheduleMinute(i) != currentMinute) {
+    if (FileSystem::getScheduleHour(i) != currentHour || FileSystem::getScheduleMinute(i) != currentMinute) {
       continue;
     }
-    const ConfigStore::ScheduleType type = ConfigStore::getScheduleType(i);
-    if (type == ConfigStore::ScheduleType::WEEKLY) {
-      if (!(ConfigStore::getScheduleWeekdaysMask(i) & (1 << currentWeekdayBit))) {
+    const FileSystem::ScheduleType type = FileSystem::getScheduleType(i);
+    if (type == FileSystem::ScheduleType::WEEKLY) {
+      if (!(FileSystem::getScheduleWeekdaysMask(i) & (1 << currentWeekdayBit))) {
         continue;
       }
-    } else if (type == ConfigStore::ScheduleType::ONCE) {
-      if (ConfigStore::getScheduleYear(i) != currentYear || ConfigStore::getScheduleMonth(i) != currentMonth ||
-          ConfigStore::getScheduleDay(i) != currentDay) {
+    } else if (type == FileSystem::ScheduleType::ONCE) {
+      if (FileSystem::getScheduleYear(i) != currentYear || FileSystem::getScheduleMonth(i) != currentMonth ||
+          FileSystem::getScheduleDay(i) != currentDay) {
         continue;
       }
     }
     // type == DAILY: Uhrzeit hat schon gepasst, kein weiterer Check noetig.
 
-    const char *programName = ConfigStore::getScheduleProgram(i);
-    const uint8_t programIndex = ConfigStore::getProgramIndexForName(programName);
+    const char *programName = FileSystem::getScheduleProgram(i);
+    const uint8_t programIndex = FileSystem::getProgramIndexForName(programName);
     if (programIndex == 0) {
       Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "Zeitplan: Programm '%s' (Eintrag %u) nicht gefunden.",
                    programName, i);
@@ -1155,7 +1155,7 @@ void checkSchedule() {
     Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "Zeitplan: Eintrag %u ausgeloest, Programm '%s'.", i,
                  programName);
     applyProgram(programIndex);
-    startSequence();  // Guard (Sequencer::isRunning()) loest "gleichzeitige Trigger" automatisch auf (siehe Spec)
+    startSequence();  // Guard (AutomaticController::isRunning()) loest "gleichzeitige Trigger" automatisch auf (siehe Spec)
   }
 }
 
@@ -1216,7 +1216,7 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
 }
 
 // Sicherheitskritisch: laeuft unabhaengig von WLAN/MQTT-Verbindungsstatus (siehe
-// Aufrufstelle in MqttManager::loop()). publish()-Aufrufe sind bei fehlender
+// Aufrufstelle in MQTT::loop()). publish()-Aufrufe sind bei fehlender
 // Verbindung ein sicherer No-Op (PubSubClient liefert dann nur false zurueck).
 void tickValveTimers() {
   uint8_t activeMask = 0;
@@ -1234,7 +1234,7 @@ void tickValveTimers() {
     if (expiredMask & (1 << i)) {
       // Zeitablauf des aktiven Sequenz-Ventils wird identisch zu manuellem OFF
       // behandelt: naechstes Ventil der Automatik-Sequenz uebernehmen.
-      const bool wasActiveSequenceValve = Sequencer::isRunning() && Sequencer::getActiveValve() == i;
+      const bool wasActiveSequenceValve = AutomaticController::isRunning() && AutomaticController::getActiveValve() == i;
       applyValveCommand(i, false);
       if (wasActiveSequenceValve) {
         advanceSequence();  // Restlaufzeit bleibt 0, bis die ganze Sequenz endet
@@ -1243,7 +1243,7 @@ void tickValveTimers() {
       }
     }
   }
-  if (Sequencer::isRunning()) {
+  if (AutomaticController::isRunning()) {
     publishRemainingTotalNow();
   }
 }
@@ -1282,14 +1282,14 @@ bool connectToBroker() {
     }
     publishAlias(0, ValveController::getAlias(0));
     for (uint8_t i = 1; i <= 5; i++) {
-      publishTimeState(i, ConfigStore::getValveTime(i));
+      publishTimeState(i, FileSystem::getValveTime(i));
       publishRemaining(i, ValveTimer::getRemainingSeconds(i));
       publishAutoState(i, ValveController::getAuto(i));
       publishAlias(i, ValveController::getAlias(i));
     }
     publishMaxTime();
-    publishMainState(Sequencer::isRunning());
-    publishActiveValve(Sequencer::getActiveValve());
+    publishMainState(AutomaticController::isRunning());
+    publishActiveValve(AutomaticController::getActiveValve());
     publishRemainingTotalNow();
     publishI2cStatus(Diagnostics::isI2cOk());
     if (Diagnostics::getLastError()[0] != '\0') {
@@ -1305,7 +1305,7 @@ bool connectToBroker() {
 
 }  // namespace
 
-void MqttManager::begin() {
+void MQTT::begin() {
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(handleMqttMessage);
   // Default (256 Byte) reicht nicht fuer die JSON-Topics (main/config/*, main/programs/*).
@@ -1314,7 +1314,7 @@ void MqttManager::begin() {
   Logger::setLineCallback(&onLoggerLine);
 }
 
-void MqttManager::loop() {
+void MQTT::loop() {
   const unsigned long now = millis();
   if (now - lastTickMs >= kTickIntervalMs) {
     lastTickMs = now;
@@ -1323,7 +1323,7 @@ void MqttManager::loop() {
     checkSchedule();  // laeuft wie die anderen beiden unabhaengig von WLAN/MQTT (siehe checkSchedule())
   }
 
-  if (!WifiManager::isConnected()) {
+  if (!WiFiController::isConnected()) {
     // Ohne WLAN ist ein MQTT-Reconnect-Versuch sinnlos; Status als getrennt fuehren.
     wasConnected = false;
     return;
@@ -1354,11 +1354,11 @@ void MqttManager::loop() {
   }
 }
 
-bool MqttManager::isConnected() {
+bool MQTT::isConnected() {
   return mqttClient.connected();
 }
 
-void MqttManager::requestMainCmd(bool on) {
+void MQTT::requestMainCmd(bool on) {
   if (on) {
     startSequence();
   } else {
@@ -1366,10 +1366,10 @@ void MqttManager::requestMainCmd(bool on) {
   }
 }
 
-void MqttManager::requestProgramSelect(uint8_t programIndex) {
+void MQTT::requestProgramSelect(uint8_t programIndex) {
   applyProgram(programIndex);
 }
 
-void MqttManager::requestValveCmd(uint8_t index, bool on) {
+void MQTT::requestValveCmd(uint8_t index, bool on) {
   applyValveCmd(index, on);
 }

@@ -23,7 +23,7 @@ class Diagnostics {
   static bool isI2cOk();
 
   /// Liefert true (und setzt intern zurueck), wenn seit dem letzten Abruf ein
-  /// neuer Fehler aufgetreten ist - fuer die Publish-Seite in MqttManager.
+  /// neuer Fehler aufgetreten ist - fuer die Publish-Seite in MQTT.
   static bool consumeNewError();
 
   /// Zuletzt aufgetretene Fehlermeldung inkl. Zeitstempel, leer wenn noch keine.

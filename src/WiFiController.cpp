@@ -1,4 +1,4 @@
-#include "WifiManager.h"
+#include "WiFiController.h"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -31,11 +31,11 @@ bool wasConnected = false;
 // Blockiert, bis WLAN verbunden ist oder das Timeout erreicht wird.
 bool waitForConnection(unsigned long timeoutMs) {
   const unsigned long start = millis();
-  while (!WifiManager::isConnected()) {
+  while (!WiFiController::isConnected()) {
     if (millis() - start >= timeoutMs) {
       return false;
     }
-    WifiManager::loop();
+    WiFiController::loop();
     delay(100);
   }
   return true;
@@ -56,7 +56,7 @@ bool waitForNtpSync(unsigned long timeoutMs) {
 
 }  // namespace
 
-void WifiManager::begin() {
+void WiFiController::begin() {
   WiFi.mode(WIFI_STA);
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);  // ESP-IDF haengt sich nach Verbindungsverlust selbst wieder ein
@@ -65,7 +65,7 @@ void WifiManager::begin() {
   Logger::logf(Logger::Type::INFO, Logger::Source::WIFI, "Verbinde mit '%s' ...", WIFI_SSID);
 }
 
-void WifiManager::loop() {
+void WiFiController::loop() {
   const bool connected = isConnected();
 
   if (connected && !wasConnected) {
@@ -92,11 +92,11 @@ void WifiManager::loop() {
   }
 }
 
-bool WifiManager::isConnected() {
+bool WiFiController::isConnected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
-void WifiManager::connectAndSyncTimeBlocking() {
+void WiFiController::connectAndSyncTimeBlocking() {
   begin();
   if (waitForConnection(kWifiConnectTimeoutMs)) {
     if (waitForNtpSync(kNtpSyncTimeoutMs)) {

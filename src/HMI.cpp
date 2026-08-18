@@ -1,15 +1,15 @@
-#include "HmiManager.h"
+#include "HMI.h"
 
 #include <Arduino.h>
 #include <Arduino_GFX_Library.h>
 #include <Wire.h>
 #include <lvgl.h>
 
-#include "ConfigStore.h"
+#include "FileSystem.h"
 #include "Diagnostics.h"
 #include "Logger.h"
-#include "MqttManager.h"
-#include "Sequencer.h"
+#include "MQTT.h"
+#include "AutomaticController.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
 #include "esp_lcd_touch_axs5106l.h"
@@ -167,8 +167,8 @@ void touchpadRead(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 }
 
 // --- Touch-UI: Start/Stop-Toggle & Ventil-Statusanzeige ---------------------
-// Liest den Zustand direkt aus ValveController/Sequencer (kein MQTT-Umweg fuer
-// die lokale Anzeige); der Toggle-Button loest ueber MqttManager::requestMainCmd()
+// Liest den Zustand direkt aus ValveController/AutomaticController (kein MQTT-Umweg fuer
+// die lokale Anzeige); der Toggle-Button loest ueber MQTT::requestMainCmd()
 // denselben Pfad wie main/cmd per MQTT aus (inkl. aller Publishes, keine
 // Sonderlogik), siehe docs/spec/13-touch-ui.md.
 
@@ -179,7 +179,7 @@ constexpr uint8_t kValveCount = 6;  // V0..V5, siehe ValveController::kValveCoun
 // eine spaetere Erweiterung auf 16 Ventile (volle MCP23017-Kapazitaet), siehe
 // docs/spec/13-touch-ui.md. V1..V5 sind per Tap direkt schaltbar (V{n}/cmd,
 // siehe valveCellEventHandler()); V0 hat wie bei MQTT keinen eigenen cmd
-// (Kopplung an V1-V5, siehe MqttManager) und bleibt ohne Funktion.
+// (Kopplung an V1-V5, siehe MQTT) und bleibt ohne Funktion.
 constexpr uint8_t kMatrixCols = 4;
 constexpr uint8_t kMatrixRows = 4;
 constexpr uint8_t kMatrixCellCount = kMatrixCols * kMatrixRows;
@@ -226,7 +226,7 @@ uint8_t browseProgramIndex = 0;  // 0 = "Kein Programm", 1..getProgramCount() = 
 
 // Der eingebaute LVGL-Font (Montserrat) enthaelt keine Umlaute - fuer die
 // lokale Anzeige auf ASCII transliterieren. Die eigentlichen Alias-Werte
-// (MQTT/ConfigStore) bleiben unveraendert UTF-8, das betrifft nur das Display.
+// (MQTT/FileSystem) bleiben unveraendert UTF-8, das betrifft nur das Display.
 void toDisplayAscii(const char *utf8, char *out, size_t outSize) {
   size_t o = 0;
   for (size_t i = 0; utf8[i] != '\0' && o + 1 < outSize;) {
@@ -267,7 +267,7 @@ void addPressHighlight(lv_obj_t *btn) {
 }
 
 // Ventil-Matrixzelle (V1..V5): schaltet direkt per V{n}/cmd (siehe
-// MqttManager::requestValveCmd()) - identisches Verhalten wie MQTT (waehrend die
+// MQTT::requestValveCmd()) - identisches Verhalten wie MQTT (waehrend die
 // Automatik laeuft, wird ein manuelles ON ignoriert, siehe applyValveCmd()). V0
 // bekommt bewusst keinen Handler (kein eigener cmd, siehe kMatrixCols-Kommentar).
 void valveCellEventHandler(lv_event_t *e) {
@@ -277,7 +277,7 @@ void valveCellEventHandler(lv_event_t *e) {
   const uint8_t index = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(e)));
   const bool targetOn = !ValveController::getValve(index);
   Logger::logf(Logger::Type::INFO, Logger::Source::HMI, "Touch: V%u manuell %s", index, targetOn ? "EIN" : "AUS");
-  MqttManager::requestValveCmd(index, targetOn);
+  MQTT::requestValveCmd(index, targetOn);
 }
 
 // Ohne gewaehltes Programm ist der Button laut refreshMainButton() bereits gesperrt
@@ -288,9 +288,9 @@ void mainButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  const bool starting = !Sequencer::isRunning();
+  const bool starting = !AutomaticController::isRunning();
   Logger::log(Logger::Type::INFO, Logger::Source::HMI, starting ? "Touch: START gedrueckt" : "Touch: STOP gedrueckt");
-  MqttManager::requestMainCmd(starting);
+  MQTT::requestMainCmd(starting);
 }
 
 void refreshProgramNameLabel() {
@@ -299,7 +299,7 @@ void refreshProgramNameLabel() {
     lv_label_set_text(programNameLabel, "Kein Programm");
     return;
   }
-  toDisplayAscii(ConfigStore::getProgramName(browseProgramIndex), nameAscii, sizeof(nameAscii));
+  toDisplayAscii(FileSystem::getProgramName(browseProgramIndex), nameAscii, sizeof(nameAscii));
   lv_label_set_text(programNameLabel, nameAscii);
 }
 
@@ -309,7 +309,7 @@ void programsButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  browseProgramIndex = ConfigStore::getActiveProgram();
+  browseProgramIndex = FileSystem::getActiveProgram();
   refreshProgramNameLabel();
   lv_scr_load(programScreen);
 }
@@ -318,7 +318,7 @@ void programPrevButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  const uint8_t count = ConfigStore::getProgramCount();
+  const uint8_t count = FileSystem::getProgramCount();
   browseProgramIndex = (browseProgramIndex == 0) ? count : browseProgramIndex - 1;
   refreshProgramNameLabel();
 }
@@ -327,7 +327,7 @@ void programNextButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  const uint8_t count = ConfigStore::getProgramCount();
+  const uint8_t count = FileSystem::getProgramCount();
   browseProgramIndex = (browseProgramIndex >= count) ? 0 : browseProgramIndex + 1;
   refreshProgramNameLabel();
 }
@@ -340,7 +340,7 @@ void programOkButtonEventHandler(lv_event_t *e) {
   }
   Logger::logf(Logger::Type::INFO, Logger::Source::HMI, "Touch: Programm-Auswahl Index %u bestaetigt",
                browseProgramIndex);
-  MqttManager::requestProgramSelect(browseProgramIndex);
+  MQTT::requestProgramSelect(browseProgramIndex);
   lv_scr_load(mainScreen);
 }
 
@@ -352,17 +352,17 @@ void programCancelButtonEventHandler(lv_event_t *e) {
 }
 
 void refreshMainButton() {
-  const bool running = Sequencer::isRunning();
+  const bool running = AutomaticController::isRunning();
   lv_label_set_text(mainButtonLabel, running ? "STOP" : "START");
   lv_obj_set_style_bg_color(mainButton, running ? lv_color_hex(0xAA0000) : lv_color_hex(0x008800), 0);
 
   // Ohne gewaehltes Programm kann START ohnehin nicht wirken (siehe
-  // MqttManager::startSequence(), Guard activeProgram==0) - Button daher gesperrt statt
+  // MQTT::startSequence(), Guard activeProgram==0) - Button daher gesperrt statt
   // nur per Hinweis zu erklaeren, warum ein Tap nichts bewirkt (Nachtrag 2026-08-18, analog
   // zum Web-Dashboard). STOP bleibt davon unberuehrt (running-Check zuerst), eine waehrend
   // einer laufenden Sequenz durch main/config/set ausgeloeste MANUELL-Ruecksetzung (siehe
-  // MqttManager::publishConfigStateAndClearProgram()) darf STOP nicht sperren.
-  if (!running && ConfigStore::getActiveProgram() == 0) {
+  // MQTT::publishConfigStateAndClearProgram()) darf STOP nicht sperren.
+  if (!running && FileSystem::getActiveProgram() == 0) {
     lv_obj_add_state(mainButton, LV_STATE_DISABLED);
     lv_obj_clear_flag(mainButton, LV_OBJ_FLAG_CLICKABLE);
   } else {
@@ -395,7 +395,7 @@ void refreshValveStatus() {
 // Alias-Namen des betroffenen Ventils (nur bei den beiden Ventil-Faellen, sonst leer) -
 // ValveTimer liefert fuer noch ausstehende (nicht gestartete) Ventile bereits deren
 // volle konfigurierte Zeit, daher genuegt fuer "gesamt" die Summe ueber aktives +
-// wartende Ventile (Sequencer::getPendingValve()).
+// wartende Ventile (AutomaticController::getPendingValve()).
 void refreshStatusLine() {
   char line1[40];
   char line2[40] = "";
@@ -406,13 +406,13 @@ void refreshStatusLine() {
     snprintf(line1, sizeof(line1), "I2C-Fehler!");
     color1 = lv_color_hex(0xFFFF00);
     boxColor = lv_color_hex(0xCC0000);
-  } else if (Sequencer::isRunning()) {
-    const uint8_t activeValve = Sequencer::getActiveValve();
+  } else if (AutomaticController::isRunning()) {
+    const uint8_t activeValve = AutomaticController::getActiveValve();
     const uint16_t activeRemaining = ValveTimer::getRemainingSeconds(activeValve);
     uint32_t totalRemaining = activeRemaining;
-    const uint8_t pendingCount = Sequencer::getPendingCount();
+    const uint8_t pendingCount = AutomaticController::getPendingCount();
     for (uint8_t i = 0; i < pendingCount; i++) {
-      totalRemaining += ValveTimer::getRemainingSeconds(Sequencer::getPendingValve(i));
+      totalRemaining += ValveTimer::getRemainingSeconds(AutomaticController::getPendingValve(i));
     }
     snprintf(line1, sizeof(line1), "V%u  %02u:%02u | %02u:%02u", activeValve, activeRemaining / 60,
              activeRemaining % 60, static_cast<unsigned>(totalRemaining / 60),
@@ -454,13 +454,13 @@ void refreshStatusLine() {
 }
 
 // Programme-Button (Hauptseite): zeigt das aktive Programm als eigenen Buttontext
-// (ersetzt die fruehere separate Anzeigezeile) - liest ConfigStore::getActiveProgram()
+// (ersetzt die fruehere separate Anzeigezeile) - liest FileSystem::getActiveProgram()
 // direkt, egal ob die Auswahl per Touch (Programme-Unterseite), MQTT main/program/cmd
 // oder main/programs/set zustande kam. Waehrend die Automatik laeuft, wird der Button
 // gesperrt (disabled + nicht klickbar) - ein Programmwechsel mitten in einer laufenden
 // Sequenz wuerde sonst Chaos anrichten (Nutzer-Feedback 2026-08-17).
 void refreshProgramsButtonLabel() {
-  if (Sequencer::isRunning()) {
+  if (AutomaticController::isRunning()) {
     lv_obj_add_state(programsButton, LV_STATE_DISABLED);
     lv_obj_clear_flag(programsButton, LV_OBJ_FLAG_CLICKABLE);
   } else {
@@ -468,17 +468,17 @@ void refreshProgramsButtonLabel() {
     lv_obj_add_flag(programsButton, LV_OBJ_FLAG_CLICKABLE);
   }
 
-  const uint8_t active = ConfigStore::getActiveProgram();
+  const uint8_t active = FileSystem::getActiveProgram();
   if (active == 0) {
     // Button UND Status in einem - zeigt bei keinem gewaehlten Programm bewusst "Manueller
     // Modus" statt "Kein Programm" (Nachtrag 2026-08-18, analog zum Web-Dashboard), da eine
     // manuelle time/auto-Aenderung die Programmwahl jetzt automatisch zuruecksetzt (siehe
-    // MqttManager::publishConfigStateAndClearProgram()) - der Button muss diesen Zustand also
+    // MQTT::publishConfigStateAndClearProgram()) - der Button muss diesen Zustand also
     // regelmaessig anzeigen, nicht nur direkt nach dem Boot.
     lv_label_set_text(programsButtonLabel, "Manueller Modus");
   } else {
     char nameAscii[40];
-    toDisplayAscii(ConfigStore::getProgramName(active), nameAscii, sizeof(nameAscii));
+    toDisplayAscii(FileSystem::getProgramName(active), nameAscii, sizeof(nameAscii));
     lv_label_set_text(programsButtonLabel, nameAscii);
   }
 }
@@ -668,7 +668,7 @@ void setupProgramScreen() {
 
 }  // namespace
 
-void HmiManager::begin() {
+void HMI::begin() {
   // Display initialisieren
   if (!gfx->begin()) {
     Logger::log(Logger::Type::ERROR, Logger::Source::HMI, "Display-Init fehlgeschlagen.");
@@ -679,7 +679,7 @@ void HmiManager::begin() {
   pinMode(kBacklightPin, OUTPUT);
   digitalWrite(kBacklightPin, HIGH);  // Backlight einschalten
 
-  // Touchscreen (I2C) - MCP23017 hängt am selben Bus (siehe I2CManager)
+  // Touchscreen (I2C) - MCP23017 hängt am selben Bus (siehe I2C)
   Wire.begin(kTouchSda, kTouchScl);
   bsp_touch_init(&Wire, kTouchRst, kTouchInt, gfx->getRotation(), gfx->width(), gfx->height());
 
@@ -706,7 +706,7 @@ void HmiManager::begin() {
   lv_timer_handler();
 }
 
-void HmiManager::loop() {
+void HMI::loop() {
   lv_timer_handler();  // LVGL-Verarbeitung (muss regelmäßig aufgerufen werden)
 
   const unsigned long now = millis();
