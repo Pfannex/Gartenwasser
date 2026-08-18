@@ -388,10 +388,25 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Auf Hardware verifiziert: manuelle Laufzeit-Aenderung bei aktivem Programm setzt `activeProgram` zuverlaessig auf 0 zurueck, alle Ventile gehen auf Auto-OFF, Ausgangszustand nach dem Test exakt wiederhergestellt. Vom Nutzer im Browser **und** am Geraet bestaetigt.
 - Details siehe `docs/spec/14-programme.md`, `docs/spec/13-touch-ui.md`, `docs/spec/17-webif-dashboard.md`, `docs/spec/18-webif-konfiguration.md` (jeweils Nachtrag 2026-08-18), `docs/testing.md`.
 
+### Phase 20 (Web-Interface: Zeitplan verwalten) umgesetzt und getestet
+
+- Komplexestes Datenmodell des Web-Interfaces bisher (Trigger-Typen `daily`/`weekly`/`once`, Programm-Referenz per Name statt Index - anders als bei Programmen (Phase 19) verschiebt ein Loeschen/Bearbeiten hier nichts anderes). Design vorab per Artefakt abgestimmt: Karte je Eintrag mit Programmname als Headline, farbcodiertem Trigger-Badge, „Pausiert"-Zustand, zwei bisher nirgends visuell behandelte Warnfaelle sichtbar gemacht (abgelaufener `once`-Termin gelb, „Programm nicht gefunden" bei kaputter Referenz). Editor mit demselben „modalen" Verhalten wie Phase 19.
+- Nach erstem Blick ein Detail nachjustiert: eigener Button „Abgelaufene Timer loeschen" statt Textlink.
+- Neue `data/zeitplan.html`/`data/zeitplan.js`. Karten-/Listen-/Editor-Grundgeruest bewusst von Phase 19 wiederverwendet statt dupliziert. Navigation aller vier Seiten jetzt komplett aktiv (letzter `soon`-Platzhalter entfernt), totes CSS aufgeraeumt. Keine Firmware-Aenderung noetig.
+- Schreibpfad vor dem Browser-Test per `paho-mqtt` verifiziert (Anlegen/Wochentage/globaler Schalter/Cleanup, Ausgangszustand exakt wiederhergestellt), danach vom Nutzer bestaetigt.
+- Details siehe `docs/spec/20-webif-zeitplan.md`, `docs/testing.md`.
+
+### Dashboard-Hero neu strukturiert: "Naechster Termin" + Programm-Picker
+
+- Direkt im Anschluss an Phase 20 zwei Nutzerwuensche umgesetzt. Erstens eine "Naechster Termin"-Anzeige, bewusst rein browserseitig berechnet (`app.js`, neue Wiederkehr-Logik fuer `daily`/`weekly`/`once`) - kein Firmware-Eingriff, anders als der 2026-08-17 verworfene "Kollisions-Hinweis" (echtzeit-blockierende Server-Pruefung), hier nur eine Anzeige.
+- Zweitens eine Hero-Neugestaltung: Klick auf den Programmnamen oeffnet eine Auswahlliste aller Programme, wendet sofort an (`main/program/cmd`), waehrend laufender Automatik gesperrt. Die bisherige "Automatik inaktiv"/"Manueller Modus"-Headline entfiel komplett (der Picker selbst zeigt den Zustand). "Naechster Termin" zog in den Hero um, dort nur sichtbar wenn nichts laeuft. Fussbereich radikal verschlankt auf nur noch "Diagnostics" ueber volle Breite.
+- Ein zusaetzlich vorgeschlagenes Live-Log der seriellen Konsole wurde geprueft (`Logger` hat aktuell keinen MQTT-Publish-Pfad) und bewusst als eigener Backlog-Punkt zurueckgestellt (siehe „Offene Punkte" unten).
+- Details siehe `docs/spec/17-webif-dashboard.md`, Nachtrag, `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
-- **Phase 20 (Web-Interface: Zeitplan verwalten)** — nächster Arbeitsschritt: komplexestes Datenmodell des Web-Interfaces bisher (Trigger-Typen `daily`/`weekly`/`once`, Programm-Referenz per Name), baut auf dem in Phase 18/19 erprobten Schreibpfad-Muster auf.
-- Phase 21 (Web-Interface: OTA) — geplant, hängt an Phase 20.
+- **Phase 21 (Web-Interface: OTA)** — nächster Arbeitsschritt, letzte Phase des vorgezogenen Web-Interface-Blocks.
+- **Live-Log-Karte fürs Web-Dashboard** (2026-08-18 als Backlog-Punkt notiert, noch nicht begonnen): Nutzeridee, das serielle ESP-Log live im Browser mitzulesen. Voraussetzung fehlt noch komplett — `Logger` hat aktuell keinen MQTT-Publish-Pfad (nur Serial + `diagnostics/lastError` für `ERROR`). Zu klären bei Umsetzung: eigenes Topic (nicht retained, Flut-Gefahr bei aktiver Automatik), welche Log-Level streamen, Ringpuffer-Dimensionierung im begrenzten RAM.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste. Zu pruefen bei der Umsetzung: die geplante `V{n}_auto`-Switch-Entity (siehe Abschnitt „Home-Assistant-MQTT-Discovery" oben) trifft jetzt auf die neue Regel „`auto` nur ueber Programme, jede direkte Aenderung loest MANUELL aus" - HA-seitiges Umschalten waere dann ein Programm-Abwahl-Trigger, nicht nur ein Flag-Toggle; ggf. bei Phase 10 nochmal bewusst gegenchecken, ob die Entity so wie geplant sinnvoll bleibt.

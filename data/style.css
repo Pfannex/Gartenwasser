@@ -118,8 +118,6 @@ nav.tabs a {
   color: var(--text-muted); padding: 7px 12px; border-radius: 8px;
 }
 nav.tabs a.active { background: var(--surface-sunken); color: var(--text); }
-nav.tabs a.soon { opacity: .5; cursor: default; pointer-events: none; }
-nav.tabs a.soon::after { content: " (bald)"; font-weight: 400; font-size: 11px; }
 
 .status-chips { display: flex; gap: 6px; }
 
@@ -148,6 +146,25 @@ nav.tabs a.soon::after { content: " (bald)"; font-weight: 400; font-size: 11px; 
 .hero-info .meta { font-size: 13.5px; color: var(--text-muted); }
 
 .program-tag { font-size: 19px; font-weight: 700; color: var(--accent); margin-bottom: 4px; text-wrap: balance; }
+
+.program-picker { position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 10px; margin: -4px 0 4px -10px; border-radius: 8px; transition: background .12s ease; }
+.program-picker:hover { background: var(--surface-sunken); }
+.program-picker.disabled { cursor: default; pointer-events: none; }
+.program-picker .program-tag { margin-bottom: 0; }
+.program-picker .caret { font-size: 12px; color: var(--text-muted); }
+.program-picker-menu {
+  position: absolute; top: 100%; left: 0; margin-top: 4px; min-width: 200px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: var(--shadow); padding: 6px; z-index: 20;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.program-picker-menu button {
+  display: block; width: 100%; text-align: left; font-family: inherit; font-size: 13.5px;
+  font-weight: 600; padding: 8px 10px; border-radius: 7px; border: none; cursor: pointer;
+  background: transparent; color: var(--text);
+}
+.program-picker-menu button:hover { background: var(--surface-sunken); }
+.program-picker-menu button.active { background: var(--accent); color: var(--accent-ink); }
 
 .meta-row { font-size: 13.5px; color: var(--text-muted); margin-top: 10px; }
 .meta-row b { color: var(--text); font-variant-numeric: tabular-nums; }
@@ -185,16 +202,8 @@ h2 {
 .valve-meta { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .valve-card.reserved .valve-meta { font-style: italic; }
 
-/* ---------- Fussbereich: Programm + Diagnostics ---------- */
-.footer-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
-@media (max-width: 700px) { .footer-grid { grid-template-columns: 1fr; } }
-
+/* ---------- Fussbereich: Diagnostics ---------- */
 .footer-card { padding: 18px 20px; }
-.footer-card .row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.footer-card .row-head span:first-child { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); }
-
-.program-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-.program-detail { font-size: 13px; color: var(--text-muted); }
 
 .diag-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin-bottom: 6px; color: var(--text); }
 .diag-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--state-idle); }
@@ -298,3 +307,55 @@ button.small, a.small {
 .editor-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 10px; flex-wrap: wrap; }
 .editor-footer .hint-inline { font-size: 12px; color: var(--text-muted); }
 .editor-footer .buttons { display: flex; gap: 8px; margin-left: auto; }
+
+/* ---------- Zeitplanseite (Phase 20) ---------- */
+.program-card.paused { opacity: .55; transition: opacity .15s ease; }
+
+.entry-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.entry-name.broken { color: var(--state-warning); }
+.entry-detail { font-size: 13.5px; color: var(--text-muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+.entry-detail .expired { color: var(--state-warning); font-weight: 600; }
+.entry-detail .broken-note { color: var(--state-warning); margin-top: 2px; }
+
+.type-badge {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  border-radius: 999px; padding: 3px 9px; color: #fff; white-space: nowrap;
+}
+.type-badge[data-type="daily"] { background: var(--accent); }
+.type-badge[data-type="weekly"] { background: var(--state-auto); }
+.type-badge[data-type="once"] { background: var(--state-idle); }
+.paused-badge {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  border-radius: 999px; padding: 3px 9px; color: var(--text-muted); background: var(--surface-sunken);
+}
+
+select, input[type="time"], input[type="date"] {
+  font-family: inherit; font-size: 14px; color: var(--text);
+  background: var(--surface-sunken); border: 1px solid var(--border); border-radius: 9px;
+  padding: 8px 10px; width: 100%;
+}
+select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.editor-row { margin-bottom: 14px; }
+.editor-row label { display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 6px; }
+.editor-grid { display: flex; gap: 14px; flex-wrap: wrap; }
+.editor-grid > div { flex: 1; min-width: 140px; }
+
+.segmented { display: flex; gap: 6px; }
+.segmented button {
+  flex: 1; font-family: inherit; font-size: 13px; font-weight: 600; padding: 8px 10px;
+  border-radius: 9px; border: 1px solid var(--border); background: var(--surface-sunken);
+  color: var(--text-muted); cursor: pointer;
+}
+.segmented button[data-active="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.weekday-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.weekday-chip {
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface-sunken); color: var(--text-muted); font-size: 12.5px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.weekday-chip[data-active="true"] { background: var(--state-auto); border-color: var(--state-auto); color: #fff; }
+
+.active-toggle-row { display: flex; align-items: center; gap: 10px; }
+.active-toggle-row span { font-size: 13px; color: var(--text-muted); }

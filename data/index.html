@@ -20,7 +20,7 @@
         <a class="active" href="#">Status</a>
         <a href="konfiguration.html">Konfiguration</a>
         <a href="programme.html">Programme</a>
-        <a class="soon" href="#">Zeitplan</a>
+        <a href="zeitplan.html">Zeitplan</a>
       </nav>
       <div class="status-chips">
         <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
@@ -34,10 +34,20 @@
         <span class="label" x-text="sequenceRunning ? 'STOP' : 'START'"></span>
       </button>
       <div class="hero-info">
-        <template x-if="activeProgramName">
-          <div class="program-tag">Programm: <span x-text="activeProgramName"></span></div>
+        <div class="program-picker" :class="sequenceRunning ? 'disabled' : ''" @click="togglePicker()">
+          <span class="program-tag" x-text="activeProgramName || 'Programm wählen'"></span>
+          <span class="caret">▾</span>
+          <div class="program-picker-menu" x-show="pickerOpen" @click.outside="pickerOpen = false" @click.stop>
+            <button type="button" :class="activeProgramIndex === 0 ? 'active' : ''" @click="selectProgram(0)">Kein Programm</button>
+            <template x-for="(p, i) in programs" :key="i">
+              <button type="button" :class="activeProgramIndex === i + 1 ? 'active' : ''" @click="selectProgram(i + 1)" x-text="p.name"></button>
+            </template>
+          </div>
+        </div>
+
+        <template x-if="sequenceRunning">
+          <div class="headline" x-text="heroHeadline()"></div>
         </template>
-        <div class="headline" x-text="heroHeadline()"></div>
         <template x-if="sequenceRunning">
           <div>
             <div class="meta-row">
@@ -49,6 +59,9 @@
               <div class="progress-track"><div class="progress-fill total" :style="`width: ${sequenceProgressPercent()}%`"></div></div>
             </div>
           </div>
+        </template>
+        <template x-if="!sequenceRunning && nextSchedule()">
+          <div class="meta-row">Nächster Termin <b x-text="nextSchedule().program"></b> - <span x-text="nextSchedule().when"></span></div>
         </template>
       </div>
     </div>
@@ -74,25 +87,14 @@
       </div>
     </div>
 
-    <h2>Übersicht</h2>
-    <div class="footer-grid">
-      <div class="card footer-card">
-        <div class="row-head">
-          <span>Aktives Programm</span>
-          <a href="programme.html" class="small btn-secondary">Ändern</a>
-        </div>
-        <div class="program-name" x-text="activeProgramName || 'MANUELL'"></div>
-        <div class="program-detail" x-text="programDetail()"></div>
+    <h2>Diagnostics</h2>
+    <div class="card footer-card">
+      <div class="diag-row">
+        <span class="diag-dot" :class="i2cStatus === 'ok' ? 'ok' : 'error'"></span>
+        <span class="label">I2C-Bus</span>&nbsp;<b x-text="i2cStatus"></b>
       </div>
-      <div class="card footer-card">
-        <div class="row-head"><span>Diagnostics</span></div>
-        <div class="diag-row">
-          <span class="diag-dot" :class="i2cStatus === 'ok' ? 'ok' : 'error'"></span>
-          <span class="label">I2C-Bus</span>&nbsp;<b x-text="i2cStatus"></b>
-        </div>
-        <div class="diag-row">
-          <span class="label">Letzter Fehler</span>&nbsp;<span x-text="lastError || 'keiner'"></span>
-        </div>
+      <div class="diag-row">
+        <span class="label">Letzter Fehler</span>&nbsp;<span x-text="lastError || 'keiner'"></span>
       </div>
     </div>
   </div>

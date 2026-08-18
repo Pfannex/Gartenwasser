@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gartenwasser – Zeitplan</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="mqtt.min.js"></script>
+  <script src="zeitplan.js"></script>
+  <script defer src="alpine.min.js"></script>
+</head>
+<body x-data="zeitplan()">
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a href="index.html">Status</a>
+        <a href="konfiguration.html">Konfiguration</a>
+        <a href="programme.html">Programme</a>
+        <a class="active" href="#">Zeitplan</a>
+      </nav>
+      <div class="status-chips">
+        <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
+        <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'"><span class="dot"></span><span x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span></span>
+      </div>
+    </div>
+
+    <h2>Zeitplan</h2>
+    <div class="card">
+      <div class="global-row">
+        <div>
+          <div class="field-label">Zeitplan aktiv</div>
+          <div class="field-sub">Bei „aus“ löst kein Eintrag aus (z. B. Urlaub) — die Konfiguration bleibt vollständig erhalten.</div>
+        </div>
+        <div class="switch" :data-on="globalEnabled" @click="toggleGlobal()"></div>
+      </div>
+    </div>
+
+    <h2>
+      Einträge <span class="count" x-text="`(${entries.length} von ${maxEntries})`"></span>
+      <button type="button" class="small btn-secondary" style="margin-left: auto; text-transform: none; letter-spacing: normal;" @click="cleanupExpired()">Abgelaufene Timer löschen</button>
+    </h2>
+    <p class="hint">Jeder Eintrag löst zur eingestellten Zeit das referenzierte Programm aus.</p>
+
+    <div class="program-list">
+      <template x-for="(entry, idx) in entries" :key="idx">
+        <div class="card program-card" :class="entry.enabled === false ? 'paused' : ''">
+          <div class="program-head">
+            <span class="entry-name" :class="isBroken(entry) ? 'broken' : ''" x-text="(isBroken(entry) ? '⚠ ' : '') + entry.program"></span>
+            <span class="type-badge" :data-type="entry.type" x-text="typeLabel(entry.type)"></span>
+            <span class="paused-badge" x-show="entry.enabled === false">Pausiert</span>
+            <div class="program-actions" x-show="editingIndex !== idx">
+              <button type="button" class="small btn-secondary" @click="startEdit(idx)">Bearbeiten</button>
+              <button type="button" class="small btn-danger" :class="confirmDeleteIndex === idx ? 'confirm' : ''" @click="requestDelete(idx)" x-text="confirmDeleteIndex === idx ? 'Wirklich löschen?' : 'Löschen'"></button>
+            </div>
+          </div>
+          <div class="entry-detail" x-show="editingIndex !== idx">
+            <span x-html="entryDetail(entry)"></span>
+            <div class="broken-note" x-show="isBroken(entry)" x-text="`Programm „${entry.program}“ nicht gefunden (umbenannt/gelöscht?)`"></div>
+          </div>
+
+          <template x-if="editingIndex === idx">
+            <div class="editor">
+              <div class="editor-row">
+                <label>Programm</label>
+                <select x-model="editDraft.program">
+                  <template x-for="name in programNames" :key="name">
+                    <option :value="name" x-text="name"></option>
+                  </template>
+                </select>
+              </div>
+              <div class="editor-row">
+                <label>Trigger</label>
+                <div class="segmented">
+                  <button type="button" :data-active="editDraft.type === 'daily'" @click="editDraft.type = 'daily'">Täglich</button>
+                  <button type="button" :data-active="editDraft.type === 'weekly'" @click="editDraft.type = 'weekly'">Wöchentlich</button>
+                  <button type="button" :data-active="editDraft.type === 'once'" @click="editDraft.type = 'once'">Einmalig</button>
+                </div>
+              </div>
+              <div class="editor-grid">
+                <div class="editor-row" x-show="editDraft.type === 'weekly'">
+                  <label>Wochentage</label>
+                  <div class="weekday-row">
+                    <template x-for="day in weekdayKeys" :key="day">
+                      <div class="weekday-chip" :data-active="editDraft.weekdays.includes(day)" @click="toggleDraftWeekday(day)" x-text="weekdayLabel(day)"></div>
+                    </template>
+                  </div>
+                </div>
+                <div class="editor-row" x-show="editDraft.type === 'once'">
+                  <label>Datum</label>
+                  <input type="date" x-model="editDraft.date" />
+                </div>
+                <div class="editor-row">
+                  <label>Uhrzeit</label>
+                  <input type="time" x-model="editDraft.time" />
+                </div>
+              </div>
+              <div class="editor-row active-toggle-row">
+                <div class="switch" :data-on="editDraft.enabled" @click="editDraft.enabled = !editDraft.enabled"></div>
+                <span>Eintrag aktiv</span>
+              </div>
+              <div class="editor-footer">
+                <div class="buttons">
+                  <button type="button" class="small btn-secondary" @click="cancelEdit()">Abbrechen</button>
+                  <button type="button" class="small btn-primary" @click="saveEdit()">Speichern</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <template x-if="editingIndex === 'new'">
+        <div class="card program-card">
+          <div class="program-head">
+            <span class="entry-name" style="color: var(--text-muted);">Neuer Eintrag</span>
+          </div>
+          <div class="editor">
+            <div class="editor-row">
+              <label>Programm</label>
+              <select x-model="editDraft.program">
+                <template x-for="name in programNames" :key="name">
+                  <option :value="name" x-text="name"></option>
+                </template>
+              </select>
+            </div>
+            <div class="editor-row">
+              <label>Trigger</label>
+              <div class="segmented">
+                <button type="button" :data-active="editDraft.type === 'daily'" @click="editDraft.type = 'daily'">Täglich</button>
+                <button type="button" :data-active="editDraft.type === 'weekly'" @click="editDraft.type = 'weekly'">Wöchentlich</button>
+                <button type="button" :data-active="editDraft.type === 'once'" @click="editDraft.type = 'once'">Einmalig</button>
+              </div>
+            </div>
+            <div class="editor-grid">
+              <div class="editor-row" x-show="editDraft.type === 'weekly'">
+                <label>Wochentage</label>
+                <div class="weekday-row">
+                  <template x-for="day in weekdayKeys" :key="day">
+                    <div class="weekday-chip" :data-active="editDraft.weekdays.includes(day)" @click="toggleDraftWeekday(day)" x-text="weekdayLabel(day)"></div>
+                  </template>
+                </div>
+              </div>
+              <div class="editor-row" x-show="editDraft.type === 'once'">
+                <label>Datum</label>
+                <input type="date" x-model="editDraft.date" />
+              </div>
+              <div class="editor-row">
+                <label>Uhrzeit</label>
+                <input type="time" x-model="editDraft.time" />
+              </div>
+            </div>
+            <div class="editor-row active-toggle-row">
+              <div class="switch" :data-on="editDraft.enabled" @click="editDraft.enabled = !editDraft.enabled"></div>
+              <span>Eintrag aktiv</span>
+            </div>
+            <div class="editor-footer">
+              <div class="buttons">
+                <button type="button" class="small btn-secondary" @click="cancelEdit()">Abbrechen</button>
+                <button type="button" class="small btn-primary" @click="saveEdit()">Speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <button type="button" class="program-add-card" style="margin-top: 12px;" x-show="editingIndex === null && entries.length < maxEntries" @click="startNew()">
+      <span class="plus">+</span> Neuer Eintrag
+    </button>
+  </div>
+</body>
+</html>

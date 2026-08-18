@@ -15,6 +15,18 @@ function parseMmSs(str) {
   return (parts[0] || 0) * 60 + (parts[1] || 0);
 }
 
+// Fuer die "Naechster Termin"-Karte: JS Date.getDay() (0=So..6=Sa) auf die im Projekt
+// verwendeten Wochentags-Keys (mon..sun, siehe docs/spec/15-wochenplan.md) abbilden.
+const WEEKDAY_KEYS_BY_JS_DAY = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+const WEEKDAY_LABELS = { mon: "Mo", tue: "Di", wed: "Mi", thu: "Do", fri: "Fr", sat: "Sa", sun: "So" };
+
+function atTime(date, time) {
+  const [h, m] = (time || "00:00").split(":").map(Number);
+  const d = new Date(date);
+  d.setHours(h || 0, m || 0, 0, 0);
+  return d;
+}
+
 function dashboard() {
   return {
     connected: false,
@@ -28,6 +40,9 @@ function dashboard() {
     activeProgramName: null,
     programs: [],
     activeProgramIndex: 0,
+    pickerOpen: false,
+    scheduleEntries: [],
+    scheduleGlobalEnabled: true,
     i2cStatus: "ok",
     lastError: "",
 
@@ -97,6 +112,15 @@ function dashboard() {
             /* ignorieren, Anzeige bleibt beim letzten gueltigen Stand */
           }
           break;
+        case "main/schedule/state":
+          try {
+            const parsed = JSON.parse(payload);
+            this.scheduleEntries = parsed.schedule || [];
+            this.scheduleGlobalEnabled = parsed.enabled !== false;
+          } catch (e) {
+            /* ignorieren, Anzeige bleibt beim letzten gueltigen Stand */
+          }
+          break;
         case "diagnostics/i2cStatus":
           this.i2cStatus = payload;
           break;
@@ -130,9 +154,7 @@ function dashboard() {
     },
 
     heroHeadline() {
-      if (this.sequenceRunning) return `${this.activeValveLabel()} läuft`;
-      if (!this.activeProgramName) return "Manueller Modus";
-      return "Automatik inaktiv";
+      return `${this.activeValveLabel()} läuft`;
     },
 
     activeValveRemaining() {
@@ -157,16 +179,79 @@ function dashboard() {
       return Math.max(0, Math.min(100, pct));
     },
 
-    // "V1 10min · V2 10min automatisch" aus main/programs/state fuer das aktive Programm.
-    programDetail() {
-      if (!this.activeProgramIndex) return "";
-      const prog = this.programs[this.activeProgramIndex - 1];
-      if (!prog || !prog.auto) return "";
-      const parts = Object.keys(prog.auto)
-        .filter((k) => prog.auto[k])
-        .sort()
-        .map((k) => (prog.time && prog.time[k] ? `${k} ${prog.time[k]}min` : k));
-      return parts.length ? `${parts.join(" · ")} automatisch` : "";
+    // Naechster faelliger Zeitplan-Eintrag, komplett browserseitig berechnet - anders als
+    // der 2026-08-17 verworfene "Kollisions-Hinweis" (echtzeit-blockierende Server-Pruefung
+    // fuer main/cmd ON) ist das hier nur eine Anzeige, keine Firmware-Aenderung noetig.
+    // Ignoriert: globalen Aus-Schalter, pausierte Eintraege, Eintraege mit einer Programm-
+    // Referenz, die es nicht (mehr) gibt (analog zur "Programm nicht gefunden"-Warnung auf
+    // der Zeitplanseite).
+    nextSchedule() {
+      if (!this.scheduleGlobalEnabled) return null;
+      const now = new Date();
+      let best = null;
+      for (const entry of this.scheduleEntries) {
+        if (entry.enabled === false) continue;
+        if (!this.programs.some((p) => p.name === entry.program)) continue;
+        const at = this.nextOccurrence(entry, now);
+        if (at && (!best || at < best.at)) {
+          best = { at, program: entry.program };
+        }
+      }
+      if (!best) return null;
+      return { program: best.program, when: this.formatWhen(best.at, now) };
+    },
+
+    nextOccurrence(entry, now) {
+      if (entry.type === "daily") {
+        const candidate = atTime(now, entry.time);
+        if (candidate <= now) candidate.setDate(candidate.getDate() + 1);
+        return candidate;
+      }
+      if (entry.type === "weekly") {
+        const days = entry.weekdays || [];
+        for (let offset = 0; offset < 8; offset++) {
+          const d = new Date(now);
+          d.setDate(d.getDate() + offset);
+          if (!days.includes(WEEKDAY_KEYS_BY_JS_DAY[d.getDay()])) continue;
+          const candidate = atTime(d, entry.time);
+          if (candidate <= now) continue; // heutiger Wochentag, Uhrzeit aber schon vorbei
+          return candidate;
+        }
+        return null;
+      }
+      if (entry.type === "once") {
+        const candidate = atTime(entry.date, entry.time);
+        return candidate > now ? candidate : null; // abgelaufen -> kein naechstes Mal
+      }
+      return null;
+    },
+
+    formatWhen(at, now) {
+      const time = `${String(at.getHours()).padStart(2, "0")}:${String(at.getMinutes()).padStart(2, "0")}`;
+      if (at.toDateString() === now.toDateString()) return `Heute · ${time}`;
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (at.toDateString() === tomorrow.toDateString()) return `Morgen · ${time}`;
+      if ((at - now) / 86400000 < 7) return `${WEEKDAY_LABELS[WEEKDAY_KEYS_BY_JS_DAY[at.getDay()]]} · ${time}`;
+      const dd = String(at.getDate()).padStart(2, "0");
+      const mm = String(at.getMonth() + 1).padStart(2, "0");
+      return `${dd}.${mm}.${at.getFullYear()} · ${time}`;
+    },
+
+    // Programm-Auswahlliste im Hero-Bereich: waehrend die Automatik laeuft gesperrt (ein
+    // Wechsel waere bis zum naechsten Start ohnehin wirkungslos, siehe applyProgram()-Reapply
+    // in MqttManager::startSequence() - analog zur bestehenden Sperre des Programme-Buttons
+    // im Touch-UI waehrend Sequencer::isRunning()).
+    togglePicker() {
+      if (this.sequenceRunning) return;
+      this.pickerOpen = !this.pickerOpen;
+    },
+
+    // Wendet sofort an (main/program/cmd), identisch zu "Aktivieren" auf der Programme-Seite
+    // - kein Bestaetigungsschritt noetig, Start bleibt weiterhin ein separater Schritt.
+    selectProgram(index) {
+      this.client.publish(TOPIC_PREFIX + "main/program/cmd", String(index));
+      this.pickerOpen = false;
     },
 
     // Start/Stop der Automatik-Sequenz - identisch zu main/cmd per MQTT/Touch-UI, keine

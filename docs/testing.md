@@ -202,6 +202,33 @@ Firmware-Änderung: manuelle `time`/`auto`-Änderungen (`V{n}/time/set`, `V{n}/a
 
 Vom Nutzer bestätigt: „Ja, beide korrekt gesperrt“.
 
+## Phase 20 — Web-Interface: Zeitplan verwalten — 2026-08-18
+
+Komplexestes Datenmodell des Web-Interfaces (typabhängige Felder, Programm-Referenz per Name). Design vorab per Artefakt abgestimmt, nach erstem Blick eine Detailkorrektur (eigener Cleanup-Button statt Textlink).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Dateiauslieferung | `/zeitplan.html`, `/zeitplan.js` per `curl` geprüft | HTTP 200 | ✅ |
+| 2 | Neuer `daily`-Eintrag | `main/schedule/set` (Array-Replace) | `main/schedule/state` zeigt ihn korrekt | ✅ |
+| 3 | `weekly`-Eintrag mit Wochentagen | `main/schedule/set` mit `weekdays` | Korrekt im State enthalten | ✅ |
+| 4 | Globaler Schalter | `main/schedule/cmd OFF`/`ON` | `enabled` (global) wechselt entsprechend | ✅ |
+| 5 | Cleanup abgelaufener Termine | abgelaufenen `once`-Eintrag gesetzt, `main/schedule/cleanup` gesendet | Nur der abgelaufene Eintrag entfernt | ✅ |
+| 6 | Wiederherstellung | Ausgangszustand (leerer Zeitplan) erneut gesetzt | Exakt wiederhergestellt (JSON-Vergleich) | ✅ |
+| 7 | Im Browser | Liste/Bearbeiten/Anlegen/Löschen/Cleanup/globaler Schalter getestet | Funktioniert, ein Detail nachjustiert (siehe Spec) | ✅ nach Korrektur |
+
+## Dashboard-Neugestaltung: "Nächster Termin" + Programm-Picker im Hero — 2026-08-18
+
+Rein browserseitige Erweiterung (`app.js`/`index.html`), keine Firmware-Änderung, daher primär im Browser statt per `paho-mqtt` geprüft.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | "Nächster Termin"-Berechnung | Demo-Zeitplan gesetzt (`daily` 21:00, `weekly` Di/Fr 20:00) | Karte/Hero zeigt korrektes Programm + "Heute · 21:00" | ✅ |
+| 2 | Programm-Picker öffnet/aktiviert | Klick auf Programmname im Hero, Auswahl aus Liste | Öffnet Dropdown, Auswahl aktiviert sofort per `main/program/cmd` | ✅ |
+| 3 | Picker gesperrt während Automatik | Sequenz gestartet, Klick auf Picker | Kein Öffnen, `.disabled`-Zustand | ✅ |
+| 4 | Fußbereich | Layout geprüft | Nur noch Diagnostics, volle Breite | ✅ |
+
+Vom Nutzer bestätigt: „Passt alles“.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.
