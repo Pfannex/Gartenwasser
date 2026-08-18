@@ -476,6 +476,14 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - **Bug gefunden und behoben**: erster Test (`curl`-Upload von `littlefs.bin`) ergab ein exakt passendes MD5 (`Update.md5String()` == lokal berechnetes MD5) - die Uebertragung war byte-genau korrekt -, aber der Webserver lieferte danach nur noch `404` fuer alles, und nach einem Firmware-Update passierte serverseitig sichtbar nichts. Ursache: `WebIF::loop()` war implementiert, aber nie in `main.cpp`s `loop()` eingehaengt - der Neustart-Timer wurde nie ausgewertet, `ESP.restart()` also nie aufgerufen. Fix: Einzeiler in `main.cpp`.
 - Auf Hardware Ende-zu-Ende verifiziert (echte PlatformIO-Build-Artefakte `firmware.bin`/`littlefs.bin`): beide Upload-Wege funktionieren nach dem Fix korrekt inkl. echtem Neustart, MD5-Integritaet bestaetigt, `config`-Partition (Programme/Zeitplan/Konfiguration) blieb ueber alle Testlaeufe hinweg unveraendert. Details siehe `docs/spec/21-webif-ota.md`, `docs/testing.md`.
 
+### Firmware-Version ergaenzt, vom Nutzer selbst per OTA-Update verifiziert
+
+- Neue `include/Version.h` (`kFirmwareVersion = "V0.8.0.0"`) - einzige Stelle, die vor einem Release/OTA-Test manuell angepasst wird. Ausloeser: der Nutzer wollte nach einem OTA-Update eindeutig erkennen koennen, ob die neue Firmware tatsaechlich uebernommen wurde.
+- Neues retained Topic `gartenwasser/diagnostics/version`, in `MQTT.cpp`s `connectToBroker()` publiziert (bereits durch die bestehende `diagnostics/+`-Wildcard in `mqtt-spy` abgedeckt, keine Config-Aenderung noetig). Boot-Log ("Setup abgeschlossen.") zeigt die Version zusaetzlich zur Kontrolle ueber Serial/Live-Log an.
+- Web-Dashboard (`data/index.html`/`app.js`): neue Zeile "Firmware" in der Diagnostics-Karte.
+- **`pio run` baut das Filesystem-Image NICHT automatisch mit** - nur `pio run --target uploadfs` (das gleichzeitig flasht) oder `pio run --target buildfs` (baut ohne zu flashen) erzeugen `littlefs.bin`. Fuer den WebIF-Upload-Workflow (Nutzer will selbst flashen, kein serielles `uploadfs`) ist `buildfs` der richtige Weg.
+- Erster echter Nutzung-Test durch den Nutzer selbst (nicht nur durch Testskripte): Firmware **und** Dateisystem ueber die neue Update-Seite hochgeladen, `diagnostics/version` kam korrekt als `V0.8.0.0` an - Nutzer-Fazit: "rennt wie Teufel, OTA approved!". Damit ist der WebIF-Teil von Phase 21 vollstaendig aus Nutzersicht bestaetigt, nicht nur durch `curl`-Tests.
+
 ## Offene Punkte / nächste Schritte
 
 - **Phase 21, zweiter Teil**: PlatformIO/ArduinoOTA (`pio run --target upload`/`uploadfs` über WLAN statt Kabel, für den eigenen Entwicklungsworkflow) — noch nicht begonnen. Merker: dabei auch einen Hardware-Status RAM/Flash ergänzen (ursprünglicher Merker für Phase 21).

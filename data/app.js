@@ -45,6 +45,7 @@ function dashboard() {
     scheduleGlobalEnabled: true,
     i2cStatus: "ok",
     lastError: "",
+    version: "",
 
     init() {
       this.client = mqtt.connect(BROKER_WS_URL);
@@ -126,6 +127,9 @@ function dashboard() {
           break;
         case "diagnostics/lastError":
           this.lastError = payload;
+          break;
+        case "diagnostics/version":
+          this.version = payload;
           break;
       }
     },

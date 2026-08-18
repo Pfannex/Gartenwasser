@@ -23,6 +23,7 @@
 #include "WebIF.h"
 #include "WiFiController.h"
 #include "Logger.h"
+#include "Version.h"
 
 // Default-Stack der Arduino-loopTask (8192 Byte) reicht nicht mehr: main/programs/set
 // (Phase 14) verarbeitet mehrere StaticJsonDocument<N>/Puffer gleichzeitig auf dem
@@ -71,7 +72,7 @@ void setup() {
   ValveTimer::begin();
   AutomaticController::begin();
 
-  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "Setup abgeschlossen.");
+  Logger::logf(Logger::Type::INFO, Logger::Source::SYSTEM, "Setup abgeschlossen. Firmware %s", kFirmwareVersion);
 }
 
 void loop() {

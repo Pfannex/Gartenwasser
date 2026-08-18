@@ -52,6 +52,7 @@ Erster End-to-End-Test über `curl` ergab HTTP 200 und ein exakt passendes `Upda
 4. **Fix verifiziert**: nach Ergänzen von `WebIF::loop();` — Dateisystem-Upload gefolgt von echtem Neustart, `curl http://.../index.html` → `HTTP 200`, Seiteninhalt (inkl. neuem „Update"-Tab) korrekt ausgeliefert. ✅
 5. **Firmware-OTA End-to-End**: `curl -F firmware=@firmware.bin http://.../api/ota/firmware` → MD5-Übereinstimmung, danach vollständige neue Boot-Sequenz im Live-Log (WLAN/MQTT-Reconnect, alle State-Publishes) — Gerät läuft nachweislich auf der per OTA übertragenen Firmware. ✅
 6. Zwischenzeitlich per seriellem `uploadfs` auf bekannt guten Stand zurückgesetzt, um während der Fehlersuche nicht in einem kaputten Zustand zu bleiben (Dateisystem war durch das damals fehlende `WebIF::loop()` dauerhaft unmounted). ✅
+7. **Echter Nutzer-Test** (nicht nur `curl`): Firmware-Version-Feature ergänzt (`include/Version.h`, retained Topic `diagnostics/version`, Anzeige im Dashboard), damit sich ein Update eindeutig bestätigen lässt. Nutzer hat darauf selbst über die Update-Seite Firmware **und** Dateisystem hochgeladen (`pio run --target buildfs` zum Bauen ohne Flashen), neue Version kam korrekt im Dashboard an. Nutzer-Fazit: „rennt wie Teufel, OTA approved!“ ✅
 
 ## Offene Punkte
 

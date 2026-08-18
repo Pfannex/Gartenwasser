@@ -14,6 +14,7 @@
 #include "AutomaticController.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
+#include "Version.h"
 #include "WiFiController.h"
 #include "secrets.h"
 
@@ -30,6 +31,9 @@ constexpr const char *kMainActiveValveTopic = "gartenwasser/main/activeValve";
 constexpr const char *kMainRemainingTotalTopic = "gartenwasser/main/remainingTotal";
 constexpr const char *kI2cStatusTopic = "gartenwasser/diagnostics/i2cStatus";
 constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
+// Firmware-Version (siehe include/Version.h) - retained, damit sich nach einem OTA-Update
+// (Phase 21) im Web-Dashboard bestaetigen laesst, dass die neue Firmware tatsaechlich laeuft.
+constexpr const char *kVersionTopic = "gartenwasser/diagnostics/version";
 // Live-Log (Nachtrag 2026-08-18): jede Logger-Zeile ausser PUB/SUB, siehe
 // Logger::setLineCallback(). Bewusst nicht retained (reiner Live-Stream, kein Verlauf
 // beim Verbinden).
@@ -339,6 +343,10 @@ void publishI2cStatus(bool ok) {
 
 void publishLastError(const char *text) {
   publishAndLog(kLastErrorTopic, text, true);
+}
+
+void publishVersion() {
+  publishAndLog(kVersionTopic, kFirmwareVersion, true);
 }
 
 // Sicherheitskritisch im weiteren Sinne (Fehlererkennung soll auch ohne MQTT
@@ -1295,6 +1303,7 @@ bool connectToBroker() {
     if (Diagnostics::getLastError()[0] != '\0') {
       publishLastError(Diagnostics::getLastError());
     }
+    publishVersion();
     publishConfigState();
     publishProgramState();
     publishProgramsState();

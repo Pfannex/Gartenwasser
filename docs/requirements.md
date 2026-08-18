@@ -173,6 +173,7 @@ gartenwasser/          |        |                    |
 └── diagnostics/       |        |                    |
     ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
     ├── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
+    ├── version        | ja     | z.B. "V0.8.0.0"    | Firmware-Version (include/Version.h), zum Bestaetigen eines OTA-Updates (Phase 21)
     └── livelog        | nein   | Log-Zeile (Text)   | jede Logger-Zeile (inkl. PUB/SUB), siehe Log-Format unten
         └── replay     | nein   | beliebig           | Einmalbefehl: kompletten aktuellen Log-Ringpuffer erneut senden
 ```
