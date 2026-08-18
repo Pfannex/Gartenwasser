@@ -1,6 +1,7 @@
 #include "ValveTimer.h"
 
 #include "ConfigStore.h"
+#include "Logger.h"
 
 namespace {
 
@@ -50,6 +51,7 @@ uint8_t ValveTimer::tick(uint8_t activeMask) {
       remainingSeconds[i]--;
       if (remainingSeconds[i] == 0) {
         expiredMask |= (1 << i);
+        Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u Zeit abgelaufen", i);
       }
     }
   }

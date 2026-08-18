@@ -1,5 +1,7 @@
 #include "Sequencer.h"
 
+#include "Logger.h"
+
 namespace {
 
 constexpr uint8_t kMaxQueueLength = 5;
@@ -27,10 +29,15 @@ bool Sequencer::start(const uint8_t *valves, uint8_t count) {
   }
   currentIndex = 0;
   running = true;
+  Logger::logf(Logger::Type::INFO, Logger::Source::SEQ, "Automatik gestartet, %u Ventil(e) in Warteschlange",
+               queueLength);
   return true;
 }
 
 void Sequencer::stop() {
+  if (running) {
+    Logger::log(Logger::Type::INFO, Logger::Source::SEQ, "Automatik gestoppt");
+  }
   running = false;
   queueLength = 0;
   currentIndex = 0;
@@ -54,8 +61,10 @@ uint8_t Sequencer::advance() {
   currentIndex++;
   if (currentIndex >= queueLength) {
     running = false;
+    Logger::log(Logger::Type::INFO, Logger::Source::SEQ, "Automatik abgeschlossen");
     return 0;
   }
+  Logger::logf(Logger::Type::INFO, Logger::Source::SEQ, "Wechsel zu V%u", queue[currentIndex]);
   return queue[currentIndex];
 }
 

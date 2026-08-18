@@ -212,11 +212,19 @@ hh:mm:ss:mmm CLASS TYPE logtext
 ```
 
 - `hh:mm:ss:mmm`: Laufzeit-/Uhrzeit-Format. Bis zur ersten erfolgreichen NTP-Synchronisierung beim Boot (siehe `WifiManager::connectAndSyncTimeBlocking()`, Phase 2) boot-relative Zeit seit Start (`millis()`-basiert); danach Echtzeituhr.
-- `CLASS` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `WIFI `, `MQTT `, `I2C  `, `HMI  `, `WEB  `, `SYS  `
+- `CLASS` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `WIFI `, `MQTT `, `I2C  `, `HMI  `, `WEB  `, `SYS  `, `VALVE`, `SEQ  ` (`VALVE`/`SEQ` seit 2026-08-18, siehe Nachtrag unten)
 - `TYPE` (5 Zeichen, rechts mit Leerzeichen aufgefüllt): `ERROR`, `INFO `, `DEBUG`, `PUB  `, `SUB  ` (`PUB`/`SUB` = ausgehende/eingehende MQTT-Nachrichten, siehe `MqttManager`)
 - Jeder `ERROR`-Eintrag landet zusätzlich automatisch in `diagnostics/lastError` (siehe `Diagnostics`, Phase 8) — über `Logger::setErrorCallback()`, ohne dass `Logger` `Diagnostics` kennt.
 
 Beispiel: `00:00:01:909 I2C   INFO  I2C-Scan gestartet...`
+
+**Nachtrag (2026-08-18): Logging-Überarbeitung, Vorstufe zum geplanten Live-Log im Web-Interface.** Ein vollständiger Audit aller `Logger`-Aufrufstellen ergab: `Type::DEBUG` und `Source::HMI` waren definiert, aber nirgends benutzt; `Sequencer`/`ValveTimer` loggten gar nichts; Touch-UI-Aktionen liefen komplett über dieselben Funktionen wie MQTT und wurden deshalb immer als `Source::MQTT` geloggt statt als `HMI`; `Source::I2C` vermischte Bus-Gesundheit (Scan, MCP23017-Erreichbarkeit) mit tatsächlichen Ventilschaltungen. Entschieden (Nutzer-Vorgabe: „jedes manuelle Ereignis", „wichtigste interne Programmaktivitäten", „alle Pub/Sub-Events" loggen):
+- Neue `Source`-Werte `VALVE` (Ventilschaltungen, aus `ValveController`/`ValveTimer` — vorher fälschlich `I2C`) und `SEQ` (Automatik-Sequenz-Lebenszyklus aus `Sequencer`: Start/Fortschritt/Ende, vorher komplett unsichtbar).
+- `HmiManager` loggt jetzt bei jeder manuellen Touch-Aktion (START/STOP, Ventil-Matrix-Tap, Programm-OK) selbst eine `INFO/HMI`-Zeile, zusätzlich zur bestehenden Zeile der aufgerufenen Funktion — schließt die Lücke, dass `Source::HMI` nie benutzt wurde.
+- `ConfigStore` loggt jetzt auch den **Erfolgsfall** beim Speichern aller drei Dateien (`config.json`/`programs.json`/`schedule.json`), vorher nur Fehler.
+- **Bewusst nicht lösbar** (technische Grenze, keine Lücke): Web-Dashboard-Aktionen lassen sich nicht von generischen externen MQTT-Clients unterscheiden — der Browser spricht bei Architektur B direkt und identisch zu jedem anderen MQTT-Client mit dem Broker (siehe `docs/spec/16-webif-fundament.md`). Beide erzeugen bereits heute vollständige `SUB`-Log-Einträge für jede eingehende Nachricht — eine Unterscheidung bräuchte eine Payload-Markierung, die die MQTT-Kompatibilität mit Home Assistant/Skripten bräche, daher bewusst nicht umgesetzt.
+- Alle Pub/Sub-Events waren bereits vollständig abgedeckt (`publishAndLog()` als einzige Publish-Stelle, `handleMqttMessage()` loggt jede eingehende Nachricht) — kein Handlungsbedarf.
+- Auf Hardware verifiziert: alle betroffenen Aktionspfade (Ventil manuell, Konfiguration speichern, Programm anwenden, Automatik starten/stoppen) funktionieren nach der Umstellung weiterhin normal, keine Regressionen.
 
 ## Home-Assistant-MQTT-Discovery (Phase 10, geplant)
 

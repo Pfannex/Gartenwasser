@@ -190,6 +190,7 @@ void save() {
   }
   serializeJson(doc, file);
   file.close();
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "ConfigStore: config.json gespeichert.");
 }
 
 void load() {
@@ -262,6 +263,7 @@ void saveProgramsFile() {
   }
   serializeJson(doc, file);
   file.close();
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "ConfigStore: programs.json gespeichert.");
 }
 
 void loadProgramsFile() {
@@ -365,6 +367,7 @@ void saveScheduleFile() {
   }
   serializeJson(doc, file);
   file.close();
+  Logger::log(Logger::Type::INFO, Logger::Source::SYSTEM, "ConfigStore: schedule.json gespeichert.");
 }
 
 void loadScheduleFile() {

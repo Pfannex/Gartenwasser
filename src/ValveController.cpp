@@ -24,7 +24,7 @@ void ValveController::begin() {
 
 void ValveController::setValve(uint8_t index, bool on) {
   if (index >= kValveCount) {
-    Logger::logf(Logger::Type::ERROR, Logger::Source::I2C, "ValveController: ungueltiger Index %u", index);
+    Logger::logf(Logger::Type::ERROR, Logger::Source::VALVE, "ValveController: ungueltiger Index %u", index);
     return;
   }
 
@@ -35,7 +35,7 @@ void ValveController::setValve(uint8_t index, bool on) {
     portBState &= ~(1 << bit);
   }
   I2CManager::writeRegister(I2CManager::kMcp23017Addr, kGpioB, portBState);
-  Logger::logf(Logger::Type::INFO, Logger::Source::I2C, "V%u %s", index, on ? "ON" : "OFF");
+  Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u %s", index, on ? "ON" : "OFF");
 }
 
 bool ValveController::getValve(uint8_t index) {

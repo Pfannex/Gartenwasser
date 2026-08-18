@@ -7,6 +7,7 @@
 
 #include "ConfigStore.h"
 #include "Diagnostics.h"
+#include "Logger.h"
 #include "MqttManager.h"
 #include "Sequencer.h"
 #include "ValveController.h"
@@ -275,6 +276,7 @@ void valveCellEventHandler(lv_event_t *e) {
   }
   const uint8_t index = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(e)));
   const bool targetOn = !ValveController::getValve(index);
+  Logger::logf(Logger::Type::INFO, Logger::Source::HMI, "Touch: V%u manuell %s", index, targetOn ? "EIN" : "AUS");
   MqttManager::requestValveCmd(index, targetOn);
 }
 
@@ -286,7 +288,9 @@ void mainButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  MqttManager::requestMainCmd(!Sequencer::isRunning());
+  const bool starting = !Sequencer::isRunning();
+  Logger::log(Logger::Type::INFO, Logger::Source::HMI, starting ? "Touch: START gedrueckt" : "Touch: STOP gedrueckt");
+  MqttManager::requestMainCmd(starting);
 }
 
 void refreshProgramNameLabel() {
@@ -334,6 +338,8 @@ void programOkButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
+  Logger::logf(Logger::Type::INFO, Logger::Source::HMI, "Touch: Programm-Auswahl Index %u bestaetigt",
+               browseProgramIndex);
   MqttManager::requestProgramSelect(browseProgramIndex);
   lv_scr_load(mainScreen);
 }

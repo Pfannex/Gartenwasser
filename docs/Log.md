@@ -403,10 +403,18 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Ein zusaetzlich vorgeschlagenes Live-Log der seriellen Konsole wurde geprueft (`Logger` hat aktuell keinen MQTT-Publish-Pfad) und bewusst als eigener Backlog-Punkt zurueckgestellt (siehe „Offene Punkte" unten).
 - Details siehe `docs/spec/17-webif-dashboard.md`, Nachtrag, `docs/testing.md`.
 
+### Logging-Ueberarbeitung (Vorstufe zum Live-Log)
+
+- Vor der eigentlichen Live-Log-Umsetzung (siehe Backlog-Punkt weiter unten) auf Nutzerwunsch erst die bestehende `Logger`-Nutzung durchleuchtet: `Type::DEBUG` und `Source::HMI` waren definiert, aber nie benutzt; `Sequencer`/`ValveTimer` loggten gar nichts; Touch-UI-Aktionen liefen ueber dieselben Funktionen wie MQTT und wurden deshalb immer als `Source::MQTT` geloggt statt `HMI`; `Source::I2C` vermischte Bus-Gesundheit mit tatsaechlichen Ventilschaltungen.
+- Neue `Source`-Werte `VALVE` (Ventilschaltungen, vorher faelschlich `I2C`) und `SEQ` (Automatik-Sequenz-Lebenszyklus, vorher unsichtbar). `HmiManager` loggt jetzt jede manuelle Touch-Aktion selbst (`INFO/HMI`). `ConfigStore` loggt jetzt auch erfolgreiches Speichern, nicht nur Fehler.
+- Bewusst nicht geloest (technische Grenze): Web-Dashboard-Aktionen sind von generischen MQTT-Clients nicht unterscheidbar (Architektur B, siehe Phase 16) - beide erzeugen bereits vollstaendige `SUB`-Log-Eintraege, eine Unterscheidung braeuchte eine Payload-Markierung, die die MQTT-Kompatibilitaet mit HA/Skripten braeche.
+- Auf Hardware verifiziert: alle betroffenen Aktionspfade funktionieren nach der Umstellung weiterhin normal (Ventil, Konfiguration speichern, Programm anwenden, Automatik start/stop), keine Regressionen.
+- Details siehe `docs/requirements.md`, Abschnitt „Log-Format", Nachtrag 2026-08-18.
+
 ## Offene Punkte / nächste Schritte
 
-- **Phase 21 (Web-Interface: OTA)** — nächster Arbeitsschritt, letzte Phase des vorgezogenen Web-Interface-Blocks.
-- **Live-Log-Karte fürs Web-Dashboard** (2026-08-18 als Backlog-Punkt notiert, noch nicht begonnen): Nutzeridee, das serielle ESP-Log live im Browser mitzulesen. Voraussetzung fehlt noch komplett — `Logger` hat aktuell keinen MQTT-Publish-Pfad (nur Serial + `diagnostics/lastError` für `ERROR`). Zu klären bei Umsetzung: eigenes Topic (nicht retained, Flut-Gefahr bei aktiver Automatik), welche Log-Level streamen, Ringpuffer-Dimensionierung im begrenzten RAM.
+- **Live-Log-Karte fürs Web-Dashboard** — als Nächstes dran: die zugrundeliegende Logging-Überarbeitung ist erledigt (siehe oben), jetzt fehlt noch die eigentliche MQTT-Weiterleitung (`Logger::setLineCallback()`, analog `setErrorCallback()`, bewusst über rohes `mqttClient.publish()` statt `publishAndLog()` um eine Rückkopplung über erneut geloggte `PUB`-Einträge zu vermeiden — `PUB`/`SUB` werden generell nicht weitergeleitet) sowie die Dashboard-Karte (scrollend, nach Type eingefärbt, live-only ohne Verlauf/Ringpuffer).
+- **Phase 21 (Web-Interface: OTA)** — danach dran, letzte Phase des vorgezogenen Web-Interface-Blocks.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste. Zu pruefen bei der Umsetzung: die geplante `V{n}_auto`-Switch-Entity (siehe Abschnitt „Home-Assistant-MQTT-Discovery" oben) trifft jetzt auf die neue Regel „`auto` nur ueber Programme, jede direkte Aenderung loest MANUELL aus" - HA-seitiges Umschalten waere dann ein Programm-Abwahl-Trigger, nicht nur ein Flag-Toggle; ggf. bei Phase 10 nochmal bewusst gegenchecken, ob die Entity so wie geplant sinnvoll bleibt.
