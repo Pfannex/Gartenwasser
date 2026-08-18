@@ -152,6 +152,14 @@ constexpr uint8_t kLogBufferCapacity = 80;
 char logBuffer[kLogBufferCapacity][224];
 uint8_t logBufferCount = 0;
 uint8_t logBufferStart = 0;
+// Wie viele der zuletzt gepufferten Zeilen noch nicht live publiziert wurden - siehe
+// flushPendingLogLines() fuer den Grund, warum das nicht direkt in appendToLogBuffer()/
+// onLoggerLine() passiert.
+uint8_t pendingLogCount = 0;
+// Anfrage ueber diagnostics/livelog/replay kommt aus handleMqttMessage() (MQTT-Callback-
+// Kontext) - aus demselben Grund wie pendingLogCount nicht dort direkt ausfuehren, sondern
+// nur vormerken und in flushPendingLogLines() (sicherer Kontext) abarbeiten.
+bool deferredReplayRequested = false;
 
 void appendToLogBuffer(const char *line) {
   const uint8_t writeIndex = (logBufferStart + logBufferCount) % kLogBufferCapacity;
@@ -164,17 +172,53 @@ void appendToLogBuffer(const char *line) {
   }
 }
 
-// Live-Log-Weiterleitung (Logger::setLineCallback(), Nachtrag 2026-08-18): bewusst rohes
-// mqttClient.publish() statt publishAndLog() - letzteres wuerde selbst wieder eine PUB-Zeile
-// erzeugen und damit eine Rueckkopplung ausloesen (weitergeleitete Zeile -> neue PUB-Zeile ->
-// wird auch weitergeleitet -> ...). PUB/SUB erreichen diese Funktion ohnehin nie, siehe
-// Logger::log() (dort bereits gefiltert). Jede Zeile landet immer im Ringpuffer, zusaetzlich
-// sofort live publiziert, wenn gerade eine Verbindung besteht.
+// Live-Log-Weiterleitung (Logger::setLineCallback(), Nachtrag 2026-08-18): puffert nur, OHNE
+// direkt zu publizieren - siehe flushPendingLogLines() fuer den Grund. Filtert vorher die
+// zwei sekuendlich (nicht retained) publizierenden Live-Werte main/remainingTotal und
+// V{n}/time/remaining heraus - die wuerden das Live-Log waehrend einer laufenden Automatik-
+// Sequenz reinem Rauschen unterordnen, ohne Zusatzinfo gegenueber main/state/main/activeValve.
 void onLoggerLine(const char *line) {
-  appendToLogBuffer(line);
-  if (mqttClient.connected()) {
-    mqttClient.publish(kLiveLogTopic, line, false);
+  if (strstr(line, "remainingTotal =") != nullptr || strstr(line, "time/remaining =") != nullptr) {
+    return;
   }
+  appendToLogBuffer(line);
+  if (pendingLogCount < kLogBufferCapacity) {
+    pendingLogCount++;
+  }
+}
+
+// Publiziert alle seit dem letzten Aufruf gepufferten Log-Zeilen. WICHTIG: dies NIEMALS
+// direkt aus onLoggerLine()/Logger::log() heraus aufrufen, sondern nur von einer Stelle, die
+// garantiert ausserhalb eines eingehenden MQTT-Callbacks laeuft (hier: am Ende von
+// MqttManager::loop(), nach mqttClient.loop()). Grund: PubSubClient nutzt einen gemeinsamen
+// internen Puffer fuer ein- und ausgehende Pakete; das an handleMqttMessage() uebergebene
+// `topic` zeigt vermutlich direkt in diesen Puffer. Ein publish() WAEHREND der Verarbeitung
+// einer eingehenden Nachricht ueberschreibt diesen Puffer und macht `topic` damit fuer die
+// anschliessenden strcmp()-Vergleiche zu Datenmuell - auf Hardware reproduziert: jede SUB-
+// Zeile erzeugte durch den (damals noch synchronen) Live-Log-Publish direkt danach eine
+// falsche "Unbekanntes Topic"-ERROR-Zeile fuer dieselbe, eigentlich gueltige Nachricht.
+void flushPendingLogLines() {
+  if (!mqttClient.connected()) {
+    return;
+  }
+  if (deferredReplayRequested) {
+    // Kompletter Puffer inkl. der noch "pending" Zeilen - deckt beides in einem Rutsch ab.
+    for (uint8_t i = 0; i < logBufferCount; i++) {
+      mqttClient.publish(kLiveLogTopic, logBuffer[(logBufferStart + i) % kLogBufferCapacity], false);
+    }
+    deferredReplayRequested = false;
+    pendingLogCount = 0;
+    return;
+  }
+  if (pendingLogCount == 0) {
+    return;
+  }
+  const uint8_t startOffset = logBufferCount - pendingLogCount;
+  for (uint8_t i = 0; i < pendingLogCount; i++) {
+    const uint8_t idx = (logBufferStart + startOffset + i) % kLogBufferCapacity;
+    mqttClient.publish(kLiveLogTopic, logBuffer[idx], false);
+  }
+  pendingLogCount = 0;
 }
 
 // Sendet den kompletten aktuellen Ringpuffer erneut raus - einerseits automatisch nach jedem
@@ -1145,7 +1189,7 @@ void handleMqttMessage(char *topic, uint8_t *payload, unsigned int length) {
     return;
   }
   if (strcmp(topic, kLiveLogReplayTopic) == 0) {
-    replayLogBuffer();
+    deferredReplayRequested = true;  // nicht direkt hier ausfuehren, siehe flushPendingLogLines()
     return;
   }
 
@@ -1278,6 +1322,9 @@ void MqttManager::loop() {
   }
 
   mqttClient.loop();
+  // Erst NACH mqttClient.loop() - siehe flushPendingLogLines() fuer den Grund
+  // (PubSubClient-Pufferkonflikt, wenn stattdessen direkt aus dem Empfangs-Callback publiziert wird).
+  flushPendingLogLines();
   const bool connected = mqttClient.connected();
 
   // "Verbunden." wird direkt in connectToBroker() geloggt (vor den Publishes),

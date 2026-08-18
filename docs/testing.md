@@ -258,6 +258,20 @@ Mehrstufig entwickelt (Dashboard-Karte → eigene Seite → Tabelle mit Filtern)
 
 Vom Nutzer abschließend bestätigt: „sehr geil, läuft jetzt perfekt!“.
 
+## Backend-Logging-Review, PUB/SUB im Live-Log, PubSubClient-Reentrancy-Fix — 2026-08-18
+
+Datei-für-Datei-Review deckte einen Bug auf: nach Freischalten der PUB/SUB-Durchleitung ins Live-Log folgte auf jede `SUB`-Zeile sporadisch eine falsche `MQTT ERROR Unbekanntes Topic: '<Datenmüll>'`-Zeile (PubSubClient-Pufferkonflikt durch synchrones `publish()` aus dem Empfangs-Callback). Fix: Live-Log-Publishes gepuffert, erst am Ende von `MqttManager::loop()` rausgeschickt.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Bug reproduziert (vor Fix) | `test_livelog_pubsub.py`: Auto-Toggle, Programmwahl, Automatik-Start/-Stopp, 404-Aufruf | Jede `SUB`-Zeile gefolgt von falscher `Unbekanntes Topic`-ERROR-Zeile mit 2-Zeichen-Datenmüll (z. B. `'0X'`) | ❌ (vor Fix) |
+| 2 | Fix verifiziert | Gleicher Testlauf nach Flash des gepufferten `flushPendingLogLines()`-Mechanismus | 108 Live-Log-Zeilen, keine einzige `Unbekanntes Topic`-Fehlzeile mehr | ✅ |
+| 3 | PUB-Zeilen kommen durch | Gleicher Mitschnitt | 45 `PUB`-Zeilen vorhanden | ✅ |
+| 4 | SUB-Zeilen kommen durch | Gleicher Mitschnitt | 6 `SUB`-Zeilen vorhanden | ✅ |
+| 5 | Rausch-Filter weiterhin aktiv | Gleicher Mitschnitt, Automatik lief ca. 3s | 0 `remainingTotal`/`time/remaining`-Zeilen | ✅ |
+| 6 | 404-Logging | `urllib`-Aufruf einer nicht existierenden Datei | `WEB DEBUG 404: /does-not-exist.txt`-Zeile vorhanden | ✅ |
+| 7 | Kommandos weiterhin korrekt zugestellt | Programmwahl (`main/program/cmd`), Automatik-Start/-Stopp im selben Testlauf | Alle erwarteten Folge-PUBs (`V1/time/state`, `V1/auto/state`, `main/program/state`, `main/state`, …) korrekt und vollständig | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

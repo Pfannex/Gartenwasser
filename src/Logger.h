@@ -45,10 +45,12 @@ class Logger {
   /// (Diagnostics), ohne dass Logger die Diagnostics-Klasse kennen muss.
   static void setErrorCallback(ErrorCallback callback);
 
-  /// Registriert einen Callback, der bei jeder Log-Zeile ausser PUB/SUB mit der komplett
+  /// Registriert einen Callback, der bei JEDER Log-Zeile (inkl. PUB/SUB) mit der komplett
   /// formatierten Zeile (wie auf Serial) aufgerufen wird - Grundlage fuer diagnostics/livelog
-  /// (MqttManager), ohne dass Logger MqttManager kennen muss. PUB/SUB sind bewusst
-  /// ausgenommen: sonst wuerde das Weiterleiten selbst wieder eine neue PUB-Zeile erzeugen
-  /// (Rueckkopplung), ausserdem waeren sie durch den Sekundentakt der Automatik viel zu haeufig.
+  /// (MqttManager), ohne dass Logger MqttManager kennen muss. Keine Rueckkopplungsgefahr durch
+  /// das Weiterleiten selbst, solange der Callback dafuer rohes MQTT-Publish statt einer
+  /// geloggten Publish-Funktion nutzt (2026-08-18 klargestellt, siehe MqttManager::
+  /// onLoggerLine()). Zu haeufige Einzeltopics (z.B. sekuendliche Restlaufzeit-Ticks) filtert
+  /// bei Bedarf gezielt der Aufrufer selbst.
   static void setLineCallback(LineCallback callback);
 };

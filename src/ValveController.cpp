@@ -60,6 +60,7 @@ bool ValveController::getAuto(uint8_t index) {
 
 void ValveController::setAuto(uint8_t index, bool on) {
   ConfigStore::setValveAuto(index, on);
+  Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u Automatik %s", index, on ? "EIN" : "AUS");
 }
 
 const char *ValveController::getAlias(uint8_t index) {
@@ -68,4 +69,5 @@ const char *ValveController::getAlias(uint8_t index) {
 
 void ValveController::setAlias(uint8_t index, const char *alias) {
   ConfigStore::setValveAlias(index, alias);
+  Logger::logf(Logger::Type::INFO, Logger::Source::VALVE, "V%u Alias '%s' gesetzt", index, alias);
 }

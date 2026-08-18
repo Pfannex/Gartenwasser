@@ -79,7 +79,7 @@ void Logger::log(Type type, Source source, const char *message) {
   if (type == Type::ERROR && errorCallback != nullptr) {
     errorCallback(message);
   }
-  if (type != Type::PUB && type != Type::SUB && lineCallback != nullptr) {
+  if (lineCallback != nullptr) {
     lineCallback(line);
   }
 }

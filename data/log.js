@@ -7,9 +7,10 @@ const BROKER_WS_URL = "ws://192.168.1.123:9001/mqtt";
 const TOPIC_PREFIX = "gartenwasser/";
 const MAX_LOG_LINES = 500; // eigene Seite, mehr Platz/Kontext als die vorherige Dashboard-Karte
 
-// PUB/SUB erreichen diagnostics/livelog nie (Logger::log() filtert sie bereits raus, siehe
-// MqttManager::onLoggerLine()) - deshalb hier nicht als Filter-Option gefuehrt.
-const LOG_TYPES = ["ERROR", "INFO", "DEBUG"];
+// PUB/SUB kommen seit 2026-08-18 grundsaetzlich durch (siehe MqttManager::onLoggerLine()) -
+// nur main/remainingTotal und V{n}/time/remaining werden dort gezielt herausgefiltert
+// (Sekundentakt waehrend der Automatik, reines Rauschen ohne Zusatzinfo).
+const LOG_TYPES = ["ERROR", "INFO", "DEBUG", "PUB", "SUB"];
 const LOG_SOURCES = ["WIFI", "MQTT", "I2C", "HMI", "WEB", "SYS", "VALVE", "SEQ"];
 
 function livelog() {
