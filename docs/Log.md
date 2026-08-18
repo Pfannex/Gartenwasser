@@ -503,6 +503,7 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 
 ## Offene Punkte / nächste Schritte
 
+- Merker (naechste Sitzung): Live-Log-Zeilenhoehe verringern; JSON-Payloads (pretty-printed, siehe Nachtrag oben) bekommen einen "JSON-Payload"-Button statt direkt aufgeklappt zu sein - Aufklappen nur bei Bedarf, damit die Zeilenhoehe im Normalzustand gleich bleibt (aktuell blaeht ein grosser JSON-Kasten sofort die ganze Zeile auf).
 - Merker: bei einem spaeteren Anlass einen Hardware-Status RAM/Flash im Dashboard ergaenzen (urspruenglicher Merker fuer Phase 21, noch nicht umgesetzt).
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MQTT::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
