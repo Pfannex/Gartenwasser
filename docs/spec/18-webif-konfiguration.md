@@ -50,3 +50,16 @@ Vor der Umsetzung ein visueller Vorschlag vorgelegt (gleiche „Dashboard Cards�
 3. **Im Browser** (Nutzer): Seite lädt korrekt, Felder vorbefüllt, Bearbeiten + Verlassen eines Feldes färbt es sofort rot und blendet nach Bestätigung weich zur normalen Textfarbe zurück, gelbe Deckelungs-Warnung erscheint wie erwartet. ✅ („passt alles“)
 
 Damit ist der erste Schreibpfad des Web-Interfaces (Architektur B: Browser publiziert direkt per MQTT-over-WebSocket, keine eigene Server-Logik im `WebManager`) vollständig erprobt — Grundlage für die komplexeren Datenmodelle in Phase 19 (Programme) und Phase 20 (Zeitplan).
+
+## Nachtrag (2026-08-18): Automatik-Toggle entfernt, "MANUELL"-Konsistenz
+
+Nach dem Umsetzen von Phase 19 (Programme) stellte der Nutzer eine grundsätzliche Frage: da eine Programm-Aktivierung `time`/`auto` ohnehin überschreibt und `startSequence()` das gewählte Programm vor jedem Start zur Drift-Vermeidung erneut anwendet (siehe `docs/spec/14-programme.md`, Kernentscheidung 3), hätte eine manuelle `auto`-Änderung auf dieser Seite beim nächsten Start ohnehin wieder stillschweigend verworfen werden — Details/Beispiel siehe `docs/spec/14-programme.md`, Nachtrag 2026-08-18.
+
+**Entscheidung** (Nutzer): `auto` ist ausschließlich über Programme setzbar, `time`/`alias` bleiben hier editierbar (steuern die manuelle Einzelventil-Laufzeit, unabhängig von Programmen). Umgesetzt:
+
+- **Automatik-Toggle entfernt**: die `.switch`-Spalte je Ventilzeile (`data/konfiguration.html`) sowie `konfig.js`s `toggleAuto()` komplett gestrichen, nicht nur versteckt. Die Ventil-Badge-Farbe (grün/grau) bleibt als reine, nicht editierbare Information stehen — zeigt weiterhin, welche Ventile aktuell zur Automatik gehören.
+- Hinweistext ergänzt: „Automatik wird ausschließlich über Programme gesetzt — eine hier geänderte Laufzeit setzt das aktive Programm auf „MANUELL“ zurück“.
+- Firmwareseitig (siehe `docs/spec/14-programme.md`, Nachtrag): jede direkte `time`-Änderung über diese Seite löst jetzt `MqttManager::publishConfigStateAndClearProgram()` aus, setzt also `activeProgram` auf `0` zurück.
+- Totes CSS aufgeräumt: `.switch-col` (nur noch von der entfernten Spalte genutzt) sowie das nie verwendete `button.ghost` (Rest aus Phase 16/17-Grundgerüst) entfernt.
+
+Auf Hardware verifiziert (zusammen mit dem Firmware-Test in `docs/spec/14-programme.md`) und vom Nutzer im Browser bestätigt.

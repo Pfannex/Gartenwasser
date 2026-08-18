@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gartenwasser – Programme</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="mqtt.min.js"></script>
+  <script src="programme.js"></script>
+  <script defer src="alpine.min.js"></script>
+</head>
+<body x-data="programme()">
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a href="index.html">Status</a>
+        <a href="konfiguration.html">Konfiguration</a>
+        <a class="active" href="#">Programme</a>
+        <a class="soon" href="#">Zeitplan</a>
+      </nav>
+      <div class="status-chips">
+        <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
+        <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'"><span class="dot"></span><span x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span></span>
+      </div>
+    </div>
+
+    <h2>Programme <span class="count" x-text="`(${programs.length} von ${maxPrograms})`"></span></h2>
+    <p class="hint">
+      <span x-show="maxTime > 0">maxTime aktuell <b x-text="maxTime + ' min'"></b> — Laufzeiten darüber werden beim Ausführen automatisch gekappt (gelb markiert). </span>
+      <a href="#" @click.prevent="clearActive()" x-show="activeProgram !== 0" style="color: var(--accent); text-decoration: underline;">Kein Programm aktivieren</a>
+    </p>
+
+    <div class="program-list">
+      <template x-for="(p, idx) in programs" :key="idx">
+        <div class="card program-card">
+          <div class="program-head">
+            <span class="program-name" x-text="p.name"></span>
+            <span class="badge-active" x-show="activeProgram === idx + 1">Aktiv</span>
+            <div class="program-actions" x-show="editingIndex !== idx">
+              <button type="button" class="small btn-secondary" x-show="activeProgram !== idx + 1" @click="activate(idx + 1)">Aktivieren</button>
+              <button type="button" class="small btn-secondary" @click="startEdit(idx)">Bearbeiten</button>
+              <button type="button" class="small btn-danger" :class="confirmDeleteIndex === idx ? 'confirm' : ''" @click="requestDelete(idx)" x-text="confirmDeleteIndex === idx ? 'Wirklich löschen?' : 'Löschen'"></button>
+            </div>
+          </div>
+          <div class="program-detail" x-show="editingIndex !== idx" x-html="programDetail(p)"></div>
+
+          <template x-if="editingIndex === idx">
+            <div class="editor">
+              <div class="editor-name-row">
+                <label>Name</label>
+                <input type="text" x-model="editDraft.name" placeholder="z. B. Rasen" />
+              </div>
+              <template x-for="n in [1, 2, 3, 4, 5]" :key="n">
+                <div class="valve-row">
+                  <div class="valve-badge" :data-state="editDraft.auto['V' + n] ? 'auto' : 'idle'" x-text="'V' + n"></div>
+                  <div class="valve-row-name" x-text="valveName(n)"></div>
+                  <div class="laufzeit-group">
+                    <input type="number" min="1" x-model.number="editDraft.time['V' + n]" :disabled="!editDraft.auto['V' + n]" :class="isCapped('V' + n) ? 'time-exceeded' : ''" />
+                    <span class="unit">min</span>
+                    <span class="cap-note" x-show="isCapped('V' + n)" x-text="'→ ' + maxTime + ' min effektiv'"></span>
+                  </div>
+                  <div class="switch" :data-on="editDraft.auto['V' + n]" @click="editDraft.auto['V' + n] = !editDraft.auto['V' + n]"></div>
+                </div>
+              </template>
+              <div class="editor-footer">
+                <span class="hint-inline">Nur Ventile mit Automatik EIN werden Teil des Programms.</span>
+                <div class="buttons">
+                  <button type="button" class="small btn-secondary" @click="cancelEdit()">Abbrechen</button>
+                  <button type="button" class="small btn-primary" @click="saveEdit()">Speichern</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <template x-if="editingIndex === 'new'">
+        <div class="card program-card">
+          <div class="program-head">
+            <span class="program-name" style="color: var(--text-muted);">Neues Programm</span>
+          </div>
+          <div class="editor">
+            <div class="editor-name-row">
+              <label>Name</label>
+              <input type="text" x-model="editDraft.name" placeholder="z. B. Rasen" />
+            </div>
+            <template x-for="n in [1, 2, 3, 4, 5]" :key="n">
+              <div class="valve-row">
+                <div class="valve-badge" :data-state="editDraft.auto['V' + n] ? 'auto' : 'idle'" x-text="'V' + n"></div>
+                <div class="valve-row-name" x-text="valveName(n)"></div>
+                <div class="laufzeit-group">
+                  <input type="number" min="1" x-model.number="editDraft.time['V' + n]" :disabled="!editDraft.auto['V' + n]" :class="isCapped('V' + n) ? 'time-exceeded' : ''" />
+                  <span class="unit">min</span>
+                  <span class="cap-note" x-show="isCapped('V' + n)" x-text="'→ ' + maxTime + ' min effektiv'"></span>
+                </div>
+                <div class="switch" :data-on="editDraft.auto['V' + n]" @click="editDraft.auto['V' + n] = !editDraft.auto['V' + n]"></div>
+              </div>
+            </template>
+            <div class="editor-footer">
+              <span class="hint-inline">Nur Ventile mit Automatik EIN werden Teil des Programms.</span>
+              <div class="buttons">
+                <button type="button" class="small btn-secondary" @click="cancelEdit()">Abbrechen</button>
+                <button type="button" class="small btn-primary" @click="saveEdit()">Speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <button type="button" class="program-add-card" style="margin-top: 12px;" x-show="editingIndex === null && programs.length < maxPrograms" @click="startNew()">
+      <span class="plus">+</span> Neues Programm
+    </button>
+  </div>
+</body>
+</html>

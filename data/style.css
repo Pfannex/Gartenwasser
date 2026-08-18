@@ -93,13 +93,6 @@ button {
   color: var(--text);
 }
 button.primary { background: var(--accent); color: var(--accent-ink); }
-button.ghost {
-  font-size: 12.5px;
-  background: var(--surface-sunken);
-  color: var(--text-muted);
-  padding: 6px 12px;
-  cursor: not-allowed;
-}
 
 /* ---------- Kopfzeile / Navigation ---------- */
 .topbar {
@@ -145,6 +138,8 @@ nav.tabs a.soon::after { content: " (bald)"; font-weight: 400; font-size: 11px; 
 }
 .hero-btn:active { transform: scale(0.96); }
 .hero-btn[data-running="true"] { background: var(--state-running); }
+.hero-btn:disabled { background: var(--state-idle); cursor: not-allowed; opacity: .6; }
+.hero-btn:disabled:active { transform: none; }
 .hero-btn .icon { font-size: 26px; line-height: 1; }
 .hero-btn .label { font-size: 15px; font-weight: 700; letter-spacing: .03em; }
 
@@ -252,5 +247,54 @@ input.time-exceeded { color: var(--state-warning); font-weight: 700; }
 }
 .switch[data-on="true"] { background: var(--state-auto); border-color: var(--state-auto); }
 .switch[data-on="true"]::after { background: #fff; transform: translateX(18px); }
-.switch-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.switch-col label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); }
+
+input:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- Programmseite (Phase 19) ---------- */
+.program-list { display: flex; flex-direction: column; gap: 12px; }
+.program-card { padding: 16px 20px; }
+.program-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.program-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.badge-active {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: #fff; background: var(--state-auto); border-radius: 999px; padding: 3px 9px;
+}
+.program-actions { margin-left: auto; display: flex; gap: 6px; }
+.program-detail { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+.program-detail .capped { color: var(--state-warning); font-weight: 600; }
+h2 .count { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; }
+
+button.small, a.small {
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; cursor: pointer; border: none;
+  text-decoration: none; display: inline-block;
+}
+.btn-secondary { background: var(--surface-sunken); color: var(--text); }
+.btn-secondary:hover { background: var(--border); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-danger { background: var(--surface-sunken); color: var(--state-running); }
+.btn-danger.confirm { background: var(--state-running); color: #fff; }
+
+.program-add-card {
+  border: 1.5px dashed var(--border); border-radius: var(--radius);
+  background: transparent; box-shadow: none;
+  padding: 14px 20px; width: 100%; text-align: left;
+  display: flex; align-items: center; gap: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 650; color: var(--text-muted);
+  cursor: pointer; transition: border-color .15s ease, color .15s ease;
+}
+.program-add-card:hover { border-color: var(--accent); color: var(--accent); }
+.program-add-card .plus {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--surface-sunken);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex: none;
+}
+
+.valve-row-name { font-size: 13.5px; color: var(--text); }
+
+.editor { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 14px; }
+.editor-name-row { margin-bottom: 6px; }
+.editor-name-row label { display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-bottom: 4px; }
+.editor-name-row input[type="text"] { max-width: 320px; }
+.editor-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 10px; flex-wrap: wrap; }
+.editor-footer .hint-inline { font-size: 12px; color: var(--text-muted); }
+.editor-footer .buttons { display: flex; gap: 8px; margin-left: auto; }

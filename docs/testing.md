@@ -172,6 +172,36 @@ Erster Schreibpfad des Web-Interfaces (bisher nur Phase 17, rein lesend). Design
 
 Testdaten (`V3`, `maxTime`) nach Punkt 6 auf Ausgangswerte zurückgesetzt. Vom Nutzer bestätigt: „passt alles“.
 
+## Phase 19 — Web-Interface: Programme verwalten — 2026-08-18
+
+Erstes Listen-/Array-Datenmodell des Web-Interfaces. Design vorab per Artefakt abgestimmt, nach erstem Blick eine Detailkorrektur (Aktionsleiste blendet sich im Bearbeitungsmodus aus).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Dateiauslieferung | `/programme.html`, `/programme.js` per `curl` geprüft | HTTP 200 | ✅ |
+| 2 | Neues Programm anlegen | `main/programs/set` mit angehängtem Testprogramm (Array-Replace) | `main/programs/state` zeigt den neuen Eintrag | ✅ |
+| 3 | Programm aktivieren | `main/program/cmd <neuer Index>` | `main/program/state` zeigt Name/Index korrekt, `activeProgram` in `main/programs/state` stimmt | ✅ |
+| 4 | Programm löschen | `main/programs/set` ohne den Testeintrag, `activeProgram` explizit zurückgesetzt | Ausgangszustand exakt wiederhergestellt (JSON-Vergleich) | ✅ |
+| 5 | Im Browser | Liste/Bearbeiten/Anlegen/Löschen/Aktivieren getestet | Funktioniert, ein Detail nachjustiert (siehe Spec) | ✅ nach Korrektur |
+
+Vom Nutzer bestätigt: „sieht gut aus“.
+
+## "MANUELL"-Konsistenz (Nachtrag zu Phase 13/14/17/18) — 2026-08-18
+
+Firmware-Änderung: manuelle `time`/`auto`-Änderungen (`V{n}/time/set`, `V{n}/auto/set`, `main/config/set`) setzen `activeProgram` jetzt auf `0` zurück (`MqttManager::publishConfigStateAndClearProgram()`), Automatik-Toggle aus der Web-Konfigurationsseite entfernt, START-Button in beiden UIs gesperrt ohne gewähltes Programm. Auslöser/Design-Diskussion siehe `docs/spec/14-programme.md`, Nachtrag.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Programm aktivieren | `main/program/cmd 1` | `activeProgram` in `main/programs/state` = `1` | ✅ |
+| 2 | Manuelle Laufzeit-Änderung setzt zurück | `V1/time/set "9"` bei aktivem Programm | `activeProgram` = `0`, `main/program/state` = `{"index":0,"name":null}` | ✅ |
+| 3 | Laufzeit trotzdem übernommen | s.o. | `V1/time/state` = `9` | ✅ |
+| 4 | Alle Ventile auf Auto-OFF ("MANUELL" = alle grau) | `V1`–`V5` `auto/state` geprüft | Alle `OFF` | ✅ |
+| 5 | Wiederherstellung | ursprüngliche Laufzeit + ursprüngliches Programm erneut gesetzt | Exakter Ausgangszustand (JSON-Vergleich) | ✅ |
+| 6 | Web-Dashboard | Headline zeigt „Manueller Modus“, Ventilkacheln zeigen Laufzeit statt „nicht in Automatik“, START-Button grau/deaktiviert | Bestätigt im Browser | ✅ |
+| 7 | Touch-Display | Programme-Button zeigt „Manueller Modus“ statt „Kein Programm“, START-Button gesperrt (kein Tap-Effekt) | Bestätigt am Gerät | ✅ |
+
+Vom Nutzer bestätigt: „Ja, beide korrekt gesperrt“.
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

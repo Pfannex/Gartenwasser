@@ -368,10 +368,30 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Schreibpfad vor dem Browser-Test wieder per `paho-mqtt` (`transport="websockets"`) verifiziert (alle 5 Set-Topics inkl. `maxTime`-Deckelungsfall), danach vom Nutzer im Browser bestaetigt: „passt alles“.
 - Details siehe `docs/spec/18-webif-konfiguration.md`, `docs/testing.md`.
 
+### Phase 19 (Web-Interface: Programme verwalten) umgesetzt und getestet
+
+- Erstes Listen-/Array-Datenmodell des Web-Interfaces (bisher nur Einzelwerte, Phase 18). Design vorab per Artefakt abgestimmt: Programmliste als Karten (Name, „Aktiv"-Badge, Ventil-Zusammenfassung inkl. gelber `maxTime`-Warnung), Editor mit Automatik-Switch + Laufzeit je Ventil, „+ Neues Programm" als gestrichelte Karte, zweistufige Inline-Löschbestätigung.
+- Nutzer-Korrektur nach erstem Blick: obere Aktionsleiste (Aktivieren/Bearbeiten/Löschen) blendet sich jetzt waehrend der Bearbeitung komplett aus - „der Bearbeitungsmodus ist wie ein eigenes modales Fenster, nur OK/Abbrechen sind aktiv".
+- `publishPrograms()` schickt `programs` **und** `activeProgram` immer zusammen: ein Loeschen vor dem aktiven Programm verschiebt dessen Array-Index, getrenntes Senden (Teil-Update-Prinzip von `main/programs/set`) wuerde den dann falschen `activeProgram`-Wert im Geraet stehen lassen.
+- Neue `data/programme.html`/`data/programme.js`. Schreibpfad vor dem Browser-Test per `paho-mqtt` verifiziert (Anlegen/Aktivieren/Loeschen inkl. Wiederherstellung des Ausgangszustands), danach vom Nutzer bestaetigt: „sieht gut aus".
+- Details siehe `docs/spec/19-webif-programme.md`, `docs/testing.md`.
+
+### "MANUELL"-Konsistenz ueber Phase 13/14/17/18 nachgezogen
+
+- **Wichtig**: bevor irgendetwas umgesetzt wurde, hat der Nutzer explizit korrigiert, dass er bei einem "checke das mal gegen"-Vorschlag zuerst einen Dialog erwartet, keine sofortige Umsetzung - als Feedback-Memory gesichert, gilt fuer alle kuenftigen Sitzungen.
+- Ausloeser: der Nutzer stellte direkt nach Phase 19 die Grundsatzfrage, ob eine separate Konfigurationsseite fuer `time`/`auto` ueberhaupt noch sinnvoll ist, wenn Programme das ohnehin ueberschreiben. Konkretes Beispiel: Programm "Kurz" (nur V1 auf auto) waehlen, dann manuell V2 zusaetzlich auf auto stellen - die Anzeige zeigt weiterhin "Programm: Kurz", fuehlt sich inkonsistent an.
+- Analyse ergab: das Problem ist tiefer als eine reine Anzeige-Inkonsistenz. `startSequence()` wendet das gewaehlte Programm vor jedem Start ohnehin erneut an (Drift-Schutz, Phase 14), eine manuelle Aenderung waere also beim naechsten Start ohnehin **stillschweigend verworfen** worden.
+- Nutzer-Entscheidung: `auto` ist nur noch ueber Programme setzbar (Auto-Toggle aus der Konfigurationsseite entfernt), `time`/`alias` bleiben dort editierbar (steuern die manuelle Einzelventil-Laufzeit). Jede direkte `time`/`auto`-Aenderung setzt `activeProgram` jetzt sofort auf `0` zurueck (neue `MqttManager::publishConfigStateAndClearProgram()`, wiederverwendet `applyProgram(0)` inkl. dessen bestehendem Auto-Reset aller Ventile - "bei MANUELL muessten eigentlich alle Ventile grau sein").
+- Wortwahl abgestimmt: Web-Dashboard-Headline "Manueller Modus" (Fliesstext, statt der kompakten "MANUELL"-Badge-Schreibweise anderswo), Touch-UI-Programme-Button ebenfalls "Manueller Modus" statt "Kein Programm" (Button UND Status in einem, Nutzer-Zitat).
+- START-Button in beiden Oberflaechen gesperrt, solange kein Programm gewaehlt ist (vorher: Web zeigte gar keine Rueckmeldung, Touch-UI nur einen 2-Sekunden-Hinweis) - der bisherige transiente Warnhinweis-Mechanismus im HMI wurde komplett entfernt, nicht nur ungenutzt gelassen (wird durch die Button-Sperre gegenstandslos).
+- Ventilkacheln im Web-Dashboard zeigen jetzt die konfigurierte Laufzeit statt "nicht in Automatik" (seit MANUELL der Normalzustand fuer alle Ventile ist, war der alte Text auf praktisch jeder Kachel gleichzeitig zu sehen und wenig hilfreich).
+- Auf Hardware verifiziert: manuelle Laufzeit-Aenderung bei aktivem Programm setzt `activeProgram` zuverlaessig auf 0 zurueck, alle Ventile gehen auf Auto-OFF, Ausgangszustand nach dem Test exakt wiederhergestellt. Vom Nutzer im Browser **und** am Geraet bestaetigt.
+- Details siehe `docs/spec/14-programme.md`, `docs/spec/13-touch-ui.md`, `docs/spec/17-webif-dashboard.md`, `docs/spec/18-webif-konfiguration.md` (jeweils Nachtrag 2026-08-18), `docs/testing.md`.
+
 ## Offene Punkte / nächste Schritte
 
-- **Phase 19 (Web-Interface: Programme verwalten)** — nächster Arbeitsschritt: erstes komplexeres Datenmodell des Web-Interfaces (Array/Liste statt Einzelwerte, Teilmengen-Semantik wie bei `main/config/set`), baut auf dem in Phase 18 erprobten Schreibpfad-Muster auf.
-- Phasen 20–21 (Web-Interface: Zeitplan, OTA) — geplant, hängen an Phase 19.
+- **Phase 20 (Web-Interface: Zeitplan verwalten)** — nächster Arbeitsschritt: komplexestes Datenmodell des Web-Interfaces bisher (Trigger-Typen `daily`/`weekly`/`once`, Programm-Referenz per Name), baut auf dem in Phase 18/19 erprobten Schreibpfad-Muster auf.
+- Phase 21 (Web-Interface: OTA) — geplant, hängt an Phase 20.
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MqttManager::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
-- Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste.
+- Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste. Zu pruefen bei der Umsetzung: die geplante `V{n}_auto`-Switch-Entity (siehe Abschnitt „Home-Assistant-MQTT-Discovery" oben) trifft jetzt auf die neue Regel „`auto` nur ueber Programme, jede direkte Aenderung loest MANUELL aus" - HA-seitiges Umschalten waere dann ein Programm-Abwahl-Trigger, nicht nur ein Flag-Toggle; ggf. bei Phase 10 nochmal bewusst gegenchecken, ob die Entity so wie geplant sinnvoll bleibt.

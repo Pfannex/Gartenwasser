@@ -52,3 +52,13 @@ Auf Nutzerwunsch, noch vor den separaten Unterseiten (Phasen 18–20), die berei
 - **Ventilkacheln `V1`–`V5`**: `toggleValve(v)` publiziert `V{n}/cmd` (`ON`/`OFF`) direkt — `V0` bleibt ohne Handler (kein eigener `cmd`, wie bei Touch-UI/MQTT).
 - Hover-/Press-Feedback (`cursor: pointer`, leichte Skalierung beim Antippen) für beide.
 - Vor dem Browser-Test der Schreibpfad per `paho-mqtt` (`transport="websockets"`) simuliert (identisch zu einem echten Kachel-Klick): `V1/cmd ON` → `V1/state` wechselt auf `ON`, `V1/cmd OFF` → zurück auf `OFF`. ✅
+
+## Nachtrag (2026-08-18): "MANUELL"-Konsistenz (analog Touch-UI)
+
+Im Zuge der Phase-14/18-Überarbeitung (siehe dortige Nachträge — manuelle `time`/`auto`-Änderungen setzen `activeProgram` jetzt zurück) auch das Dashboard nachgezogen:
+
+- **`app.js`**: `heroHeadline()` unterscheidet jetzt drei Fälle statt zwei — läuft eine Sequenz: `"{Ventil} läuft"` (unverändert); kein Programm gewählt (`!activeProgramName`): **„Manueller Modus“** (neu, bewusst als Fließtext statt der kompakten „MANUELL“-Badge-Schreibweise, passend zur größeren Headline-Zeile neben dem START-Button); sonst weiterhin „Automatik inaktiv“ (Programm gewählt, aber nicht gestartet). Footer-Karte „Aktives Programm“ zeigt bei keiner Auswahl jetzt „MANUELL“ statt „Kein Programm gewählt“ (Wortgleichheit mit der Touch-UI-Statuszeile).
+- **Ventilkacheln**: `valveMeta()` zeigt für Ventile außerhalb der Automatik jetzt die konfigurierte Laufzeit (`"{time} min"`) statt des wenig hilfreichen „nicht in Automatik“ — seit MANUELL der Normalzustand für alle Ventile ist, war dieser Text auf praktisch jeder Kachel gleichzeitig zu sehen. Dafür `handleMessage()`/das Ventil-Datenmodell um `V{n}/time/state` erweitert (bisher wurde dort nur die Restlaufzeit während des Laufens verfolgt).
+- **START-Button gesperrt** (`disabled`-Attribut, `:disabled="!sequenceRunning && !activeProgramName"`), solange kein Programm gewählt ist — vorher passierte bei einem Klick in diesem Zustand gar nichts sichtbares (die Firmware weist `main/cmd ON` still ab). Neue CSS-Regel `.hero-btn:disabled` (grau, `cursor: not-allowed`, kein Press-Scale-Effekt). Analog zur gleichzeitig umgesetzten Sperre auf dem Touch-Display (siehe `docs/spec/13-touch-ui.md`, Nachtrag).
+
+Auf Hardware/im Browser vom Nutzer bestätigt.

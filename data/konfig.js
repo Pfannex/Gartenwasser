@@ -1,7 +1,10 @@
-// Gartenwasser Web-Interface - Konfigurationsseite (Phase 18)
+// Gartenwasser Web-Interface - Konfigurationsseite (Phase 18, Nachtrag: Auto-Buttons entfernt)
 // Architektur B (siehe docs/spec/16-webif-fundament.md): eigene MQTT-over-WebSocket-
-// Verbindung wie app.js, aber eigenes Datenmodell (time/auto/alias je Ventil, maxTime)
-// und eigene Schreibpfade (V{n}/alias/set, V{n}/time/set, V{n}/auto/set, main/config/set).
+// Verbindung wie app.js, aber eigenes Datenmodell (time/auto/alias je Ventil, maxTime).
+// Schreibpfade nur noch V{n}/alias/set, V{n}/time/set, main/config/set (maxTime) - "auto"
+// wird nur noch lesend angezeigt (Ventilkachel-Farbe), gesetzt wird es ausschliesslich ueber
+// Programme (siehe programme.js) - manuelle time/alias-Aenderungen setzen das aktive Programm
+// firmwareseitig automatisch auf "MANUELL" zurueck (main/program/state, index=0).
 
 const BROKER_WS_URL = "ws://192.168.1.123:9001/mqtt";
 const TOPIC_PREFIX = "gartenwasser/";
@@ -84,10 +87,6 @@ function konfiguration() {
     setTime(v) {
       v.timePending = true;
       this.client.publish(TOPIC_PREFIX + `V${v.index}/time/set`, String(v.time));
-    },
-
-    toggleAuto(v) {
-      this.client.publish(TOPIC_PREFIX + `V${v.index}/auto/set`, v.auto ? "OFF" : "ON");
     },
 
     setMaxTime() {

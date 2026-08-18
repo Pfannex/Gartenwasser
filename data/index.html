@@ -19,7 +19,7 @@
       <nav class="tabs">
         <a class="active" href="#">Status</a>
         <a href="konfiguration.html">Konfiguration</a>
-        <a class="soon" href="#">Programme</a>
+        <a href="programme.html">Programme</a>
         <a class="soon" href="#">Zeitplan</a>
       </nav>
       <div class="status-chips">
@@ -29,7 +29,7 @@
     </div>
 
     <div class="card hero">
-      <button class="hero-btn" :data-running="sequenceRunning" @click="toggleSequence()">
+      <button class="hero-btn" :data-running="sequenceRunning" :disabled="!sequenceRunning && !activeProgramName" @click="toggleSequence()">
         <span class="icon" x-text="sequenceRunning ? '■' : '▶'"></span>
         <span class="label" x-text="sequenceRunning ? 'STOP' : 'START'"></span>
       </button>
@@ -79,9 +79,9 @@
       <div class="card footer-card">
         <div class="row-head">
           <span>Aktives Programm</span>
-          <button class="ghost" title="Folgt in Phase 19">Ändern</button>
+          <a href="programme.html" class="small btn-secondary">Ändern</a>
         </div>
-        <div class="program-name" x-text="activeProgramName || 'Kein Programm gewählt'"></div>
+        <div class="program-name" x-text="activeProgramName || 'MANUELL'"></div>
         <div class="program-detail" x-text="programDetail()"></div>
       </div>
       <div class="card footer-card">

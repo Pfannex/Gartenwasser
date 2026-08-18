@@ -356,6 +356,23 @@ void advanceSequence() {
 // ergibt keinen Sinn mehr, seit es Programme gibt - siehe docs/spec/14-programme.md).
 void applyProgram(uint8_t programIndex);
 
+// Gemeinsamer Nachtritt fuer jede DIREKTE time/auto-Aenderung (V{n}/time|auto/set,
+// main/config/set - NICHT das Anwenden eines Programms selbst, das ruft applyTimeValue()/
+// applyAutoValue() direkt auf und bleibt unberuehrt): startSequence() wendet das aktive
+// Programm vor jedem Start ohnehin erneut an, um Drift durch zwischenzeitliche manuelle
+// Aenderungen zu verhindern (siehe dort) - ein manueller Zwischenstand wuerde beim naechsten
+// Start also unsichtbar verworfen. Um das nicht als stillen Widerspruch zwischen Anzeige und
+// tatsaechlicher Wirkung stehen zu lassen, beendet eine direkte Aenderung stattdessen sofort
+// die Programmzuordnung (= "MANUELL" im UI, inkl. des bereits bestehenden Auto-Resets aus
+// applyProgram(0)) - Ventile lassen sich danach nur noch einzeln manuell schalten.
+void publishConfigStateAndClearProgram() {
+  if (ConfigStore::getActiveProgram() != 0) {
+    applyProgram(0);  // publiziert config/program/programs-State bereits
+  } else {
+    publishConfigState();
+  }
+}
+
 void startSequence() {
   if (Sequencer::isRunning()) {
     Logger::log(Logger::Type::INFO, Logger::Source::MQTT, "main/cmd ON ignoriert (Automatik laeuft bereits).");
@@ -466,7 +483,7 @@ void handleAutoSet(uint8_t index, const char *payloadStr) {
     return;
   }
   applyAutoValue(index, targetOn);
-  publishConfigState();
+  publishConfigStateAndClearProgram();
 }
 
 // Kernlogik ohne Payload-Parsing, wiederverwendet von main/config/set
@@ -500,7 +517,7 @@ void handleTimeSet(uint8_t index, const char *payloadStr) {
     return;
   }
   applyTimeValue(index, value);
-  publishConfigState();
+  publishConfigStateAndClearProgram();
 }
 
 // Kernlogik ohne Aufrufkontext, wiederverwendet von main/config/set.
@@ -556,11 +573,16 @@ void handleConfigSet(const char *payloadStr) {
     applyMaxTimeValue(doc["maxTime"].as<long>());
   }
 
+  // Nur time/auto gehoeren zu einem Programm (siehe applyProgram()) - maxTime/alias loesen
+  // deshalb bewusst KEIN "MANUELL" aus, siehe publishConfigStateAndClearProgram().
+  bool touchedTimeOrAuto = false;
+
   uint8_t index = 0;
   JsonObjectConst timeObj = doc["time"];
   for (JsonPairConst kv : timeObj) {
     if (parseValveKey(kv.key().c_str(), 1, 5, &index)) {
       applyTimeValue(index, kv.value().as<long>());
+      touchedTimeOrAuto = true;
     } else {
       Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: unbekanntes Ventil '%s' in time",
                    kv.key().c_str());
@@ -571,6 +593,7 @@ void handleConfigSet(const char *payloadStr) {
   for (JsonPairConst kv : autoObj) {
     if (parseValveKey(kv.key().c_str(), 1, 5, &index)) {
       applyAutoValue(index, kv.value().as<bool>());
+      touchedTimeOrAuto = true;
     } else {
       Logger::logf(Logger::Type::ERROR, Logger::Source::MQTT, "main/config/set: unbekanntes Ventil '%s' in auto",
                    kv.key().c_str());
@@ -588,7 +611,11 @@ void handleConfigSet(const char *payloadStr) {
     }
   }
 
-  publishConfigState();
+  if (touchedTimeOrAuto) {
+    publishConfigStateAndClearProgram();
+  } else {
+    publishConfigState();
+  }
 }
 
 // Kernfunktion (Phase 14): wendet Programm `programIndex` (1-basiert) an, indem fuer jedes im

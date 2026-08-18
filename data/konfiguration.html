@@ -19,7 +19,7 @@
       <nav class="tabs">
         <a href="index.html">Status</a>
         <a class="active" href="#">Konfiguration</a>
-        <a class="soon" href="#">Programme</a>
+        <a href="programme.html">Programme</a>
         <a class="soon" href="#">Zeitplan</a>
       </nav>
       <div class="status-chips">
@@ -43,7 +43,7 @@
     </div>
 
     <h2>Ventile</h2>
-    <p class="hint">Änderungen werden beim Verlassen eines Feldes bzw. beim Umschalten sofort übernommen — kein separater „Speichern“-Knopf nötig.</p>
+    <p class="hint">Laufzeit/Alias gelten für den manuellen Betrieb (z. B. Kachel-Klick auf dem Dashboard) und werden beim Verlassen eines Feldes sofort übernommen. Automatik wird ausschließlich über <a href="programme.html" style="color: var(--accent);">Programme</a> gesetzt — eine hier geänderte Laufzeit setzt das aktive Programm auf „MANUELL“ zurück (siehe Hinweis dazu auf der Statusseite).</p>
     <div class="card">
       <template x-for="v in valves" :key="v.index">
         <div class="valve-row">
@@ -63,13 +63,7 @@
             </div>
           </template>
           <template x-if="v.index === 0"><div></div></template>
-          <template x-if="v.index > 0">
-            <div class="switch-col">
-              <label>Automatik</label>
-              <div class="switch" :data-on="v.auto" @click="toggleAuto(v)"></div>
-            </div>
-          </template>
-          <template x-if="v.index === 0"><div></div></template>
+          <div></div>
         </div>
       </template>
     </div>

@@ -184,7 +184,6 @@ constexpr uint8_t kMatrixRows = 4;
 constexpr uint8_t kMatrixCellCount = kMatrixCols * kMatrixRows;
 
 constexpr unsigned long kUiRefreshIntervalMs = 250;
-constexpr unsigned long kProgramHintDurationMs = 2000;  // Anzeigedauer fuer "Kein Programm vorgewaehlt!"
 
 // Layout: graue Titelzeile + START/STOP-Button oben, darunter die Ventil-Statusmatrix,
 // direkt darunter der Programme-Button (zeigt das aktive Programm als Buttontext), den
@@ -223,12 +222,6 @@ unsigned long lastUiRefreshMs = 0;
 lv_obj_t *programScreen = nullptr;
 lv_obj_t *programNameLabel = nullptr;
 uint8_t browseProgramIndex = 0;  // 0 = "Kein Programm", 1..getProgramCount() = Programm-Index
-
-// Transienter Hinweis "Kein Programm vorgewaehlt!" bei START ohne aktives Programm -
-// blendet sich nach kProgramHintDurationMs von selbst wieder aus (0 = kein aktiver
-// Hinweis), siehe refreshStatusLine().
-char programHintText[24] = "";
-unsigned long programHintUntilMs = 0;
 
 // Der eingebaute LVGL-Font (Montserrat) enthaelt keine Umlaute - fuer die
 // lokale Anzeige auf ASCII transliterieren. Die eigentlichen Alias-Werte
@@ -285,19 +278,15 @@ void valveCellEventHandler(lv_event_t *e) {
   MqttManager::requestValveCmd(index, targetOn);
 }
 
+// Ohne gewaehltes Programm ist der Button laut refreshMainButton() bereits gesperrt
+// (LV_STATE_DISABLED + nicht klickbar) - dieser Handler feuert dann gar nicht erst,
+// braucht also keinen eigenen Guard mehr (Nachtrag 2026-08-18, vorher: transienter
+// "Kein Programm vorgewaehlt!"-Hinweis statt Sperren).
 void mainButtonEventHandler(lv_event_t *e) {
   if (lv_event_get_code(e) != LV_EVENT_CLICKED) {
     return;
   }
-  const bool startingSequence = !Sequencer::isRunning();
-  // Nur bewusst als Hinweis, nicht blockierend: main/cmd nutzt ohnehin die aktuell
-  // gesetzten auto-Flags, unabhaengig davon, ob/welches Programm "aktiv" markiert ist -
-  // rein manuelle Konfiguration ohne Programm ist ein vollwertiger, unveraenderter Weg.
-  if (startingSequence && ConfigStore::getActiveProgram() == 0) {
-    snprintf(programHintText, sizeof(programHintText), "Kein Programm vorgewaehlt!");
-    programHintUntilMs = millis() + kProgramHintDurationMs;
-  }
-  MqttManager::requestMainCmd(startingSequence);
+  MqttManager::requestMainCmd(!Sequencer::isRunning());
 }
 
 void refreshProgramNameLabel() {
@@ -346,7 +335,6 @@ void programOkButtonEventHandler(lv_event_t *e) {
     return;
   }
   MqttManager::requestProgramSelect(browseProgramIndex);
-  programHintUntilMs = 0;  // frischer Programmwechsel/-abwahl verdraengt einen evtl. sichtbaren Hinweis
   lv_scr_load(mainScreen);
 }
 
@@ -361,6 +349,20 @@ void refreshMainButton() {
   const bool running = Sequencer::isRunning();
   lv_label_set_text(mainButtonLabel, running ? "STOP" : "START");
   lv_obj_set_style_bg_color(mainButton, running ? lv_color_hex(0xAA0000) : lv_color_hex(0x008800), 0);
+
+  // Ohne gewaehltes Programm kann START ohnehin nicht wirken (siehe
+  // MqttManager::startSequence(), Guard activeProgram==0) - Button daher gesperrt statt
+  // nur per Hinweis zu erklaeren, warum ein Tap nichts bewirkt (Nachtrag 2026-08-18, analog
+  // zum Web-Dashboard). STOP bleibt davon unberuehrt (running-Check zuerst), eine waehrend
+  // einer laufenden Sequenz durch main/config/set ausgeloeste MANUELL-Ruecksetzung (siehe
+  // MqttManager::publishConfigStateAndClearProgram()) darf STOP nicht sperren.
+  if (!running && ConfigStore::getActiveProgram() == 0) {
+    lv_obj_add_state(mainButton, LV_STATE_DISABLED);
+    lv_obj_clear_flag(mainButton, LV_OBJ_FLAG_CLICKABLE);
+  } else {
+    lv_obj_clear_state(mainButton, LV_STATE_DISABLED);
+    lv_obj_add_flag(mainButton, LV_OBJ_FLAG_CLICKABLE);
+  }
 }
 
 // Ventil-Statusmatrix: gruen = auto AN + state AUS, dunkelgrau = auto AUS + state AUS,
@@ -380,10 +382,10 @@ void refreshValveStatus() {
 }
 
 // Statuszeile (2 Zeilen), Fussleiste: Zeile 1 in Prioritaet I2C-Fehler (roter
-// Hintergrund, gelbe Schrift - deutlich auffaelliger als der Rest) > transienter
-// Programm-Hinweis (2s, orange) > waehrend die Automatik laeuft "V{n} mm:ss | mm:ss"
-// (aktives Ventil | Restlaufzeit der gesamten Sequenz, gelb) > manuell (per Matrix-Tap)
-// geschaltetes Ventil "MANUELL" (hellblau) > sonst leer. Zeile 2 zeigt dazu jeweils den
+// Hintergrund, gelbe Schrift - deutlich auffaelliger als der Rest) > waehrend die
+// Automatik laeuft "V{n} mm:ss | mm:ss" (aktives Ventil | Restlaufzeit der gesamten
+// Sequenz, gelb) > manuell (per Matrix-Tap) geschaltetes Ventil "MANUELL" (hellblau) >
+// sonst leer (START ist dann ohnehin gesperrt, siehe refreshMainButton()). Zeile 2 zeigt dazu jeweils den
 // Alias-Namen des betroffenen Ventils (nur bei den beiden Ventil-Faellen, sonst leer) -
 // ValveTimer liefert fuer noch ausstehende (nicht gestartete) Ventile bereits deren
 // volle konfigurierte Zeit, daher genuegt fuer "gesamt" die Summe ueber aktives +
@@ -398,9 +400,6 @@ void refreshStatusLine() {
     snprintf(line1, sizeof(line1), "I2C-Fehler!");
     color1 = lv_color_hex(0xFFFF00);
     boxColor = lv_color_hex(0xCC0000);
-  } else if (millis() < programHintUntilMs) {
-    snprintf(line1, sizeof(line1), "%s", programHintText);
-    color1 = lv_color_hex(0xFF8800);
   } else if (Sequencer::isRunning()) {
     const uint8_t activeValve = Sequencer::getActiveValve();
     const uint16_t activeRemaining = ValveTimer::getRemainingSeconds(activeValve);
@@ -465,7 +464,12 @@ void refreshProgramsButtonLabel() {
 
   const uint8_t active = ConfigStore::getActiveProgram();
   if (active == 0) {
-    lv_label_set_text(programsButtonLabel, "Kein Programm");
+    // Button UND Status in einem - zeigt bei keinem gewaehlten Programm bewusst "Manueller
+    // Modus" statt "Kein Programm" (Nachtrag 2026-08-18, analog zum Web-Dashboard), da eine
+    // manuelle time/auto-Aenderung die Programmwahl jetzt automatisch zuruecksetzt (siehe
+    // MqttManager::publishConfigStateAndClearProgram()) - der Button muss diesen Zustand also
+    // regelmaessig anzeigen, nicht nur direkt nach dem Boot.
+    lv_label_set_text(programsButtonLabel, "Manueller Modus");
   } else {
     char nameAscii[40];
     toDisplayAscii(ConfigStore::getProgramName(active), nameAscii, sizeof(nameAscii));

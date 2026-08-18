@@ -19,7 +19,7 @@ function dashboard() {
   return {
     connected: false,
     deviceOnline: false,
-    valves: [0, 1, 2, 3, 4, 5].map((i) => ({ index: i, on: false, auto: false, alias: "", remaining: "00:00" })),
+    valves: [0, 1, 2, 3, 4, 5].map((i) => ({ index: i, on: false, auto: false, alias: "", remaining: "00:00", time: 0 })),
     sequenceRunning: false,
     activeValve: "-",
     remainingTotal: "00:00",
@@ -44,12 +44,13 @@ function dashboard() {
     },
 
     handleMessage(topic, payload) {
-      const valveMatch = topic.match(/^V(\d)\/(state|auto\/state|alias|time\/remaining)$/);
+      const valveMatch = topic.match(/^V(\d)\/(state|auto\/state|alias|time\/state|time\/remaining)$/);
       if (valveMatch) {
         const valve = this.valves[parseInt(valveMatch[1], 10)];
         if (valveMatch[2] === "state") valve.on = payload === "ON";
         else if (valveMatch[2] === "auto/state") valve.auto = payload === "ON";
         else if (valveMatch[2] === "alias") valve.alias = payload;
+        else if (valveMatch[2] === "time/state") valve.time = parseInt(payload, 10) || 0;
         else if (valveMatch[2] === "time/remaining") {
           valve.remaining = payload;
           if (this.sequenceRunning && this.activeValve === "V" + valveMatch[1] && this.activeValveTotalSeconds === null) {
@@ -117,7 +118,7 @@ function dashboard() {
     valveMeta(v) {
       if (v.index === 0) return v.on ? "an" : "aus";
       if (v.on) return `${v.remaining} verbleibend`;
-      if (!v.auto) return "nicht in Automatik";
+      if (!v.auto) return `${v.time} min`;
       return `wartet · ${v.remaining}`;
     },
 
@@ -129,8 +130,9 @@ function dashboard() {
     },
 
     heroHeadline() {
-      if (!this.sequenceRunning) return "Automatik inaktiv";
-      return `${this.activeValveLabel()} läuft`;
+      if (this.sequenceRunning) return `${this.activeValveLabel()} läuft`;
+      if (!this.activeProgramName) return "Manueller Modus";
+      return "Automatik inaktiv";
     },
 
     activeValveRemaining() {
