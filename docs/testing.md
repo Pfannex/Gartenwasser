@@ -320,6 +320,17 @@ End-to-End-Tests direkt gegen die echten PlatformIO-Build-Artefakte (`firmware.b
 | 5 | Firmware-Upload, Integrität + Neustart | `curl -F firmware=@firmware.bin .../api/ota/firmware`, MD5 verglichen, danach Live-Log auf neue Boot-Sequenz geprüft | MD5 identisch (`e6edb823...`/`60c3767d...` je nach Testlauf), vollständige neue Boot-Sequenz (WLAN/MQTT-Reconnect, alle State-Publishes) im Live-Log sichtbar | ✅ |
 | 6 | Partitionsschutz (config) | Kein gezielter Test nötig — durch `esp_partition_find_first(..., ESP_PARTITION_SUBTYPE_DATA_SPIFFS, ...)` strukturell ausgeschlossen (`config` hat SubType `0x40`, nicht `spiffs`) | Programme/Zeitplan/Konfiguration blieben über alle Testläufe hinweg unverändert erhalten | ✅ |
 | 7 | Wiederherstellung während der Fehlersuche | Serielles `pio run --target uploadfs`/`upload` als bekannt guter Rückfallpunkt zwischen den Testrunden | Gerät jederzeit in funktionierenden Zustand zurückgeholt, kein Datenverlust | ✅ |
+| 8 | **Echter Nutzer-Test**: Firmware-Version im Dashboard | `include/Version.h`/`diagnostics/version`-Feature ergänzt, Nutzer lädt Firmware + Dateisystem selbst über die Update-Seite hoch (nicht per Testskript) | Neue Version korrekt im Dashboard sichtbar, Nutzer-Fazit „rennt wie Teufel, OTA approved!“ | ✅ |
+
+## Phase 21 (PlatformIO/ArduinoOTA-Teil) — kabelloses Flashen für den Dev-Workflow — 2026-08-18
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Build (neues Environment) | `pio run` (baut jetzt beide Environments aus `platformio.ini`) | Beide `SUCCESS`, RAM 61,3%→62,6%, Flash 43,5%→45,0% | ✅ |
+| 2 | `OTA::begin()` läuft ohne Fehler | Serieller Reset (DTR/RTS-Toggle über `pyserial`), Boot-Sequenz live mitgeschnitten | `OTA   INFO  PlatformIO-OTA bereit ('gartenwasser.local').` erscheint korrekt im Boot-Log | ✅ |
+| 3 | Erster espota-Versuch | `pio run -e esp32-c6-devkitc-1-ota --target upload` direkt nach einem frischen seriellen Flash | `ERROR: No response from device` — vermutlich zu knappes Timing (mDNS/UDP-Listener noch nicht vollständig bereit) | ❌ (Timing, kein Code-Bug) |
+| 4 | Espota-Upload bei laufendem Gerät, live mitgeschnitten | Serieller Reset, dann `pio run -e esp32-c6-devkitc-1-ota --target upload` während eine parallele `pyserial`-Sitzung mitliest | 100 %-Fortschritt, `Result: OK`/`Success`, Live-Log zeigt Start-/Ende-Zeile, danach sauberer Neustart (Reset-Grund `SW_CPU`) | ✅ |
+| 5 | Gerät nach OTA-Flash funktionsfähig | `diagnostics/version` nach dem Neustart erneut abgefragt | Kommt korrekt als `V0.8.0.0` an, normale Boot-/MQTT-Reconnect-Sequenz | ✅ |
 
 ## Frühere Phasen (2–13)
 

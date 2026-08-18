@@ -58,6 +58,10 @@ bool waitForNtpSync(unsigned long timeoutMs) {
 
 void WiFiController::begin() {
   WiFi.mode(WIFI_STA);
+  // Muss vor WiFi.begin() gesetzt werden, um zu greifen - macht das Geraet im Router/DHCP
+  // erkennbar und ist der mDNS-Name, unter dem OTA::begin() (Phase 21, PlatformIO-OTA) das
+  // Geraet als "gartenwasser.local" bewirbt.
+  WiFi.setHostname("gartenwasser");
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);  // ESP-IDF haengt sich nach Verbindungsverlust selbst wieder ein
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);

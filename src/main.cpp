@@ -20,6 +20,7 @@
 #include "AutomaticController.h"
 #include "ValveController.h"
 #include "ValveTimer.h"
+#include "OTA.h"
 #include "WebIF.h"
 #include "WiFiController.h"
 #include "Logger.h"
@@ -53,10 +54,16 @@ void setup() {
   // WLAN verbinden, danach NTP synchronisieren (beides blockierend beim Boot, siehe WiFiController).
   WiFiController::connectAndSyncTimeBlocking();
 
+  // PlatformIO/VSCode-OTA (Phase 21, zweiter Teil): `pio run -e ...-ota --target upload`/
+  // `uploadfs` uebers WLAN statt Kabel, fuer den eigenen Dev-Workflow - unabhaengig vom
+  // WebIF-Browser-Upload unten (der ist fuer Nutzer ohne Entwicklungsumgebung gedacht).
+  OTA::begin();
+
   // MQTT-Client konfigurieren (nicht blockierend, siehe MQTT::loop())
   MQTT::begin();
 
-  // Web-Interface (Phase 16): async, kein loop()-Aufruf noetig - setzt gemountetes
+  // Web-Interface (Phase 16): async, braucht aber trotzdem einen loop()-Aufruf (siehe unten) -
+  // fuer den verzoegerten Neustart nach einem OTA-Update (Phase 21). Setzt gemountetes
   // LittleFS voraus (siehe FileSystem::begin() oben) und WLAN (siehe WiFiController oben).
   WebIF::begin();
 
@@ -77,6 +84,7 @@ void setup() {
 
 void loop() {
   WiFiController::loop();
+  OTA::loop();
   MQTT::loop();
   HMI::loop();
   WebIF::loop();

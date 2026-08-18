@@ -1,6 +1,6 @@
 # Phase 21 — Web-Interface: Firmware-Update (OTA)
 
-**Status:** ✅ Erledigt & getestet (WebIF-Upload) — PlatformIO/ArduinoOTA folgt als zweiter Teil
+**Status:** ✅ Vollständig erledigt & getestet (beide Teile: WebIF-Upload + PlatformIO/ArduinoOTA)
 
 ## Ziel
 
@@ -54,8 +54,15 @@ Erster End-to-End-Test über `curl` ergab HTTP 200 und ein exakt passendes `Upda
 6. Zwischenzeitlich per seriellem `uploadfs` auf bekannt guten Stand zurückgesetzt, um während der Fehlersuche nicht in einem kaputten Zustand zu bleiben (Dateisystem war durch das damals fehlende `WebIF::loop()` dauerhaft unmounted). ✅
 7. **Echter Nutzer-Test** (nicht nur `curl`): Firmware-Version-Feature ergänzt (`include/Version.h`, retained Topic `diagnostics/version`, Anzeige im Dashboard), damit sich ein Update eindeutig bestätigen lässt. Nutzer hat darauf selbst über die Update-Seite Firmware **und** Dateisystem hochgeladen (`pio run --target buildfs` zum Bauen ohne Flashen), neue Version kam korrekt im Dashboard an. Nutzer-Fazit: „rennt wie Teufel, OTA approved!“ ✅
 
+## Teil 2: PlatformIO/ArduinoOTA (eigener Dev-Workflow ohne Kabel)
+
+- **Neue `src/OTA.h`/`.cpp`**: schlanker Wrapper um die `ArduinoOTA`-Bibliothek (mDNS-Ankündigung als `gartenwasser.local`, kein Passwort — passend zum bisherigen Sicherheitsniveau des Projekts). `onStart`/`onEnd`/`onError`-Callbacks loggen über die neue `Source::OTA`, identisch zum WebIF-Upload-Pfad. `ArduinoOTA.begin()` übernimmt Neustart-nach-Erfolg selbst (`setRebootOnSuccess`, Default `true`) — anders als beim WebIF-Upload ist hier **kein** eigener verzögerter Neustart nötig, das UDP/TCP-Protokoll klärt das intern.
+- **`WiFiController.cpp`**: `WiFi.setHostname("gartenwasser")` ergänzt (vor `WiFi.begin()`, wie von der API gefordert) — macht das Gerät im Router/DHCP erkennbar und ist derselbe Name, unter dem `ArduinoOTA` sich per mDNS bewirbt.
+- **`platformio.ini`**: neues `[env:esp32-c6-devkitc-1-ota]`, erbt (`extends`) alles vom bestehenden Serial-Environment, überschreibt nur `upload_protocol = espota` + `upload_port` (aktuelle Geräte-IP). Aufruf: `pio run -e esp32-c6-devkitc-1-ota --target upload` bzw. `--target uploadfs`.
+- **`main.cpp`**: `OTA::begin()` direkt nach dem blockierenden WLAN-Verbindungsaufbau, `OTA::loop()` in der Haupt-Loop.
+- Auf Hardware verifiziert: `pio run -e esp32-c6-devkitc-1-ota --target upload` mit dem echten `firmware.bin` — vollständiger Upload (100 %-Fortschrittsanzeige), `Result: OK`/`Success`, Live-Log zeigt `PlatformIO-OTA gestartet (Firmware).`/`... abgeschlossen, Neustart folgt.`, danach sauberer Neustart (Reset-Grund `SW_CPU`) und normaler Boot mit korrekter neuer Version. Ein erster Versuch direkt nach einem frischen seriellen Flash schlug mit „No response from device" fehl (vermutlich zu knappes Timing, mDNS/UDP-Listener war da noch nicht vollständig bereit) — beim Retry auf einem bereits laufenden Gerät fehlerfrei.
+
 ## Offene Punkte
 
-- **PlatformIO/ArduinoOTA** (zweiter Teil dieser Phase, siehe Ziel oben): `pio run --target upload`/`uploadfs` über WLAN statt Kabel, via `ArduinoOTA`-Bibliothek + zusätzlichem `[env:...-ota]` in `platformio.ini` — noch nicht begonnen.
-- Kein automatisches Rollback bei nicht-bootender Firmware (bewusst zurückgestellt, siehe „Design-Entscheidungen" oben).
+- Kein automatisches Rollback bei nicht-bootender Firmware (bewusst zurückgestellt, siehe „Design-Entscheidungen" oben) — gilt für beide OTA-Wege.
 - Keine Authentifizierung auf den Upload-Endpunkten (bewusst zurückgestellt, siehe oben).
