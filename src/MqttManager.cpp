@@ -463,7 +463,10 @@ void applyProgram(uint8_t programIndex);
 // die Programmzuordnung (= "MANUELL" im UI, inkl. des bereits bestehenden Auto-Resets aus
 // applyProgram(0)) - Ventile lassen sich danach nur noch einzeln manuell schalten.
 void publishConfigStateAndClearProgram() {
-  if (ConfigStore::getActiveProgram() != 0) {
+  const uint8_t previous = ConfigStore::getActiveProgram();
+  if (previous != 0) {
+    Logger::logf(Logger::Type::INFO, Logger::Source::MQTT,
+                 "MANUELL: Programm '%s' durch direkte Aenderung abgewaehlt.", ConfigStore::getProgramName(previous));
     applyProgram(0);  // publiziert config/program/programs-State bereits
   } else {
     publishConfigState();
@@ -736,6 +739,8 @@ void applyProgram(uint8_t programIndex) {
         applyAutoValue(v, ConfigStore::getProgramAuto(programIndex, v));
       }
     }
+    Logger::logf(Logger::Type::INFO, Logger::Source::MQTT, "Programm '%s' angewendet.",
+                 ConfigStore::getProgramName(programIndex));
   } else {
     for (uint8_t v = 1; v <= 5; v++) {
       applyAutoValue(v, false);

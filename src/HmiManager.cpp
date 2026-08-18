@@ -670,7 +670,9 @@ void setupProgramScreen() {
 
 void HmiManager::begin() {
   // Display initialisieren
-  gfx->begin();
+  if (!gfx->begin()) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::HMI, "Display-Init fehlgeschlagen.");
+  }
   lcdRegInit();  // Herstellerspezifische Registersequenz
   gfx->setRotation(kRotation);
   gfx->fillScreen(RGB565_BLACK);  // Schwarzen Hintergrund setzen

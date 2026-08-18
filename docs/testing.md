@@ -272,6 +272,17 @@ Datei-für-Datei-Review deckte einen Bug auf: nach Freischalten der PUB/SUB-Durc
 | 6 | 404-Logging | `urllib`-Aufruf einer nicht existierenden Datei | `WEB DEBUG 404: /does-not-exist.txt`-Zeile vorhanden | ✅ |
 | 7 | Kommandos weiterhin korrekt zugestellt | Programmwahl (`main/program/cmd`), Automatik-Start/-Stopp im selben Testlauf | Alle erwarteten Folge-PUBs (`V1/time/state`, `V1/auto/state`, `main/program/state`, `main/state`, …) korrekt und vollständig | ✅ |
 
+## Backend-Logging-Review abgeschlossen: `applyProgram()`/MANUELL-Log, Display-Init-Fehlerlog — 2026-08-18
+
+Letzte Runde der Datei-für-Datei-Review (`MqttManager.cpp`, `HmiManager.cpp`, `main.cpp`). Zwei neue Log-Zeilen in `MqttManager.cpp` mit `test_program_logging.py` verifiziert; `HmiManager::begin()`-Änderung (Display-Init-Fehlerprüfung) nur per Code-Review + erfolgreichem Boot nach dem Flash geprüft (kein gezielter Fehlerfall provoziert, da dafür Hardware manipuliert werden müsste).
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | "Programm angewendet"-Log | `main/program/cmd 1` gesendet, `diagnostics/livelog` mitgeschnitten | `MQTT INFO Programm 'Kurz' angewendet.` erscheint direkt nach den Auto-Flag-Resets, vor den State-Publishes | ✅ |
+| 2 | MANUELL-Deselect-Log | Direkt danach `V1/time/set 3` (manuelle Änderung bei aktivem Programm) gesendet | `MQTT INFO MANUELL: Programm 'Kurz' durch direkte Aenderung abgewaehlt.` erscheint vor dem resultierenden Auto-Reset | ✅ |
+| 3 | Keine Regression | Ausgangszustand (`V1/time` auf ursprünglichen Wert, Programm auf 0) danach wiederhergestellt, kompletter Mitschnitt (70 Zeilen) auf Auffälligkeiten geprüft | Alle erwarteten PUB/SUB/VALVE/SYS-Zeilen vorhanden, keine Fehlzeilen | ✅ |
+| 4 | Build/Boot nach `HmiManager.cpp`-Änderung | `pio run --target upload`, Gerät bootet | Kein Build-Fehler, Display funktioniert nach dem Flash normal weiter (kein Fehlerfall aufgetreten, `gfx->begin()` liefert im Normalfall `true`) | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.
