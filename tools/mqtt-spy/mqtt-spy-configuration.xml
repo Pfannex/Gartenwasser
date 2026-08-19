@@ -86,6 +86,9 @@
             <!-- main: State-Topics aller Sub-Namespaces (config/state, programs/state, program/state, schedule/state) -->
             <Subscription createTab="true" qos="0" topic="gartenwasser/main/+/state" scriptFile=""/>
 
+            <!-- Hardware-/Systeminfo (Info-Seite, main/info/*) -->
+            <Subscription createTab="true" qos="0" topic="gartenwasser/main/info/+" scriptFile=""/>
+
             <!-- Diagnose -->
             <Subscription createTab="true" qos="0" topic="gartenwasser/diagnostics/+" scriptFile=""/>
 

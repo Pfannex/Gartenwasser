@@ -151,4 +151,12 @@ class FileSystem {
   /// Serialisiert schedule+enabled als JSON (main/schedule/state-Struktur). Liefert die
   /// Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler.
   static size_t scheduleToJson(char *buffer, size_t bufferSize);
+
+  // --- Partitions-Info (Phase 21-Folge, "Info"-Seite) -------------------------------------
+
+  /// Belegter/gesamter Speicherplatz der "config"-Partition (LittleFS, siehe partitions.csv) -
+  /// fuer die Partitionstabelle auf der Info-Seite. Die "webfs"-Partition wird direkt ueber
+  /// das globale LittleFS-Objekt in WebIF.cpp abgefragt, dafuer ist kein eigener Getter noetig.
+  static size_t usedBytes();
+  static size_t totalBytes();
 };

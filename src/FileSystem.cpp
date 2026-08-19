@@ -733,3 +733,11 @@ size_t FileSystem::scheduleToJson(char *buffer, size_t bufferSize) {
   buildScheduleJson(doc);
   return serializeJson(doc, buffer, bufferSize);
 }
+
+size_t FileSystem::usedBytes() {
+  return configFs.usedBytes();
+}
+
+size_t FileSystem::totalBytes() {
+  return configFs.totalBytes();
+}

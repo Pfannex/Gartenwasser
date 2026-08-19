@@ -342,6 +342,17 @@ End-to-End-Tests direkt gegen die echten PlatformIO-Build-Artefakte (`firmware.b
 | 4 | Zeilenhöhe-Bug eingegrenzt | Gemeinsam per Chrome-DevTools (Computed-Panel, `$0.outerHTML` in der Konsole) | `<tr>`-Höhe 71,75px für eine einzelne Textzeile bestätigt; `outerHTML` zeigte wörtliche `\n`+Einrückung zwischen den Template-Tags als Ursache (`white-space: pre-wrap` bewahrte Formatierungs-Whitespace, nicht nur echten Text) | ✅ (Root Cause gefunden) |
 | 5 | Fix verifiziert | `white-space: pre-wrap` → `normal` auf `.log-table td`, deployed, Nutzer prüft im Browser | Kompakte, gleichmäßige Zeilenhöhe — Nutzer-Bestätigung „perfect“ | ✅ |
 
+## Info-Seite: Hardware-/Systeminfo + main/info/*-Topics — 2026-08-19
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Build/Link | `pio run` nach Einbinden von `<esp_partition.h>`/`<esp_ota_ops.h>`/`<esp_system.h>`/`<LittleFS.h>` in `MQTT.cpp` | Kein Kompilierfehler, RAM/Flash praktisch unverändert | ✅ |
+| 2 | Alle sieben `main/info/*`-Topics bei Boot | Live-Log-Mitschnitt direkt nach Neustart | `resetReason`/`uptime`/`stackFree`/`rssi`/`ip`/`broker`/`partitions` erscheinen alle korrekt | ✅ |
+| 3 | Partitionstabelle korrekt | `main/info/partitions`-Payload inhaltlich geprüft | Alle 7 Partitionen (app0/app1/nvs/otadata/webfs/config/coredump), `app0` korrekt als `active:true` mit `used` markiert, `webfs`/`config` mit `used` aus `LittleFS.usedBytes()`/`FileSystem::usedBytes()` | ✅ |
+| 4 | Reset-Grund-Lücke gefunden und geschlossen | Erster Test zeigte `resetReason = Unbekannt` für einen seriellen Flash-Reset; `esp_system.h` auf vollständige `esp_reset_reason_t`-Liste geprüft | ESP32-C6 (RISC-V) hat 5 zusätzliche Gründe (`USB`/`JTAG`/`EFUSE`/`PWR_GLITCH`/`CPU_LOCKUP`) gegenüber den ursprünglich gemappten 11 — ergänzt, danach korrekt `USB` (passend zum internen USB-Serial/JTAG-Controller des Chips) | ✅ nach Fix |
+| 5 | Filesystem-Deploy geprüft | `curl .../info.html`/`.../info.js` | Beide `HTTP 200`, Seiteninhalt (vier Gruppen: Firmware/Speicher/Partitionen/Netzwerk) korrekt vorhanden | ✅ |
+| 6 | Keine Regression | Kompletter `test_livelog_pubsub.py`-Lauf nach dem Flash | Alle 4 Prüfpunkte weiterhin PASS | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

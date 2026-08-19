@@ -2,11 +2,15 @@
 
 #include <ArduinoJson.h>
 #include <Arduino.h>
+#include <LittleFS.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <esp_ota_ops.h>
+#include <esp_partition.h>
+#include <esp_system.h>
 
 #include "FileSystem.h"
 #include "Diagnostics.h"
@@ -42,6 +46,19 @@ constexpr const char *kVersionTopic = "gartenwasser/diagnostics/version";
 constexpr const char *kRamTopic = "gartenwasser/diagnostics/ram";
 constexpr const char *kFlashTopic = "gartenwasser/diagnostics/flash";
 constexpr unsigned long kHardwareStatusIntervalMs = 30000;
+// "Info"-Seite (Phase 21-Folge): main/info/* fuer alles, was ueber die diagnostics/*-Basics
+// oben hinausgeht - eigener Namensraum, damit die vorhandenen diagnostics/*-Topics (bereits
+// vom Dashboard genutzt) unangetastet bleiben. resetReason/ip/broker aendern sich nur einmal
+// pro Boot (bei connectToBroker() publiziert), uptime/rssi im selben 30s-Rhythmus wie RAM/
+// Flash oben, partitions bei Boot + danach nur noch bei Bedarf (aendert sich praktisch nie
+// zur Laufzeit, ausser durch neues Flashen - dann ohnehin ein Neustart).
+constexpr const char *kInfoResetReasonTopic = "gartenwasser/main/info/resetReason";
+constexpr const char *kInfoUptimeTopic = "gartenwasser/main/info/uptime";
+constexpr const char *kInfoStackFreeTopic = "gartenwasser/main/info/stackFree";
+constexpr const char *kInfoRssiTopic = "gartenwasser/main/info/rssi";
+constexpr const char *kInfoIpTopic = "gartenwasser/main/info/ip";
+constexpr const char *kInfoBrokerTopic = "gartenwasser/main/info/broker";
+constexpr const char *kInfoPartitionsTopic = "gartenwasser/main/info/partitions";
 // Live-Log (Nachtrag 2026-08-18): jede Logger-Zeile ausser PUB/SUB, siehe
 // Logger::setLineCallback(). Bewusst nicht retained (reiner Live-Stream, kein Verlauf
 // beim Verbinden).
@@ -382,6 +399,106 @@ void publishHardwareStatus() {
   publishAndLog(kFlashTopic, flashPayload, true);
 }
 
+// Vollstaendige Liste (esp_system.h, ESP32-C6/RISC-V hat 5 zusaetzliche Gruende gegenueber
+// den klassischen Xtensa-Chips - USB/JTAG/EFUSE/PWR_GLITCH/CPU_LOCKUP).
+const char *resetReasonToString(esp_reset_reason_t reason) {
+  switch (reason) {
+    case ESP_RST_UNKNOWN:    return "Unbekannt";
+    case ESP_RST_POWERON:    return "Power-On";
+    case ESP_RST_EXT:        return "Extern (Reset-Pin)";
+    case ESP_RST_SW:         return "Software (esp_restart)";
+    case ESP_RST_PANIC:      return "Panic/Exception";
+    case ESP_RST_INT_WDT:    return "Interrupt-Watchdog";
+    case ESP_RST_TASK_WDT:   return "Task-Watchdog";
+    case ESP_RST_WDT:        return "Watchdog";
+    case ESP_RST_DEEPSLEEP:  return "Deep-Sleep-Aufwachen";
+    case ESP_RST_BROWNOUT:   return "Brownout";
+    case ESP_RST_SDIO:       return "SDIO";
+    case ESP_RST_USB:        return "USB";
+    case ESP_RST_JTAG:       return "JTAG";
+    case ESP_RST_EFUSE:      return "eFuse-Fehler";
+    case ESP_RST_PWR_GLITCH: return "Spannungs-Glitch";
+    case ESP_RST_CPU_LOCKUP: return "CPU-Lockup";
+    default:                 return "Unbekannt";
+  }
+}
+
+// Uptime (Sekunden seit Boot) und WLAN-Signalstaerke aendern sich zur Laufzeit, daher im
+// selben 30s-Rhythmus wie publishHardwareStatus() aktualisiert (siehe checkDiagnostics()).
+void publishInfoLive() {
+  char uptimePayload[16];
+  snprintf(uptimePayload, sizeof(uptimePayload), "%lu", millis() / 1000UL);
+  publishAndLog(kInfoUptimeTopic, uptimePayload, true);
+
+  // uxTaskGetStackHighWaterMark() liefert Worte (4 Byte auf ESP32), nicht Byte - relevant zum
+  // Frueherkennen einer Wiederholung des fruehen Stack-Overflow-Bugs (siehe main.cpp,
+  // SET_LOOP_TASK_STACK_SIZE-Kommentar).
+  char stackPayload[16];
+  snprintf(stackPayload, sizeof(stackPayload), "%lu", static_cast<unsigned long>(uxTaskGetStackHighWaterMark(nullptr)) * 4);
+  publishAndLog(kInfoStackFreeTopic, stackPayload, true);
+
+  char rssiPayload[8];
+  snprintf(rssiPayload, sizeof(rssiPayload), "%d", WiFi.RSSI());
+  publishAndLog(kInfoRssiTopic, rssiPayload, true);
+}
+
+// Partitionstabelle per esp_partition_find()/next() dynamisch ausgelesen statt aus
+// partitions.csv abgeschrieben - bleibt so automatisch korrekt, falls sich die Tabelle mal
+// aendert. "used" nur dort ausgewiesen, wo sich das sinnvoll bestimmen laesst: aktiver
+// App-Slot (Sketch-Groesse), webfs/config (LittleFS.usedBytes()) - nvs/otadata/coredump
+// haben keine dafuer geeignete API, bleiben ohne "used".
+void publishPartitions() {
+  StaticJsonDocument<1024> doc;
+  JsonArray arr = doc.to<JsonArray>();
+  const esp_partition_t *running = esp_ota_get_running_partition();
+
+  esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, nullptr);
+  for (; it != nullptr; it = esp_partition_next(it)) {
+    const esp_partition_t *p = esp_partition_get(it);
+    JsonObject o = arr.createNestedObject();
+    o["label"] = p->label;
+    o["size"] = p->size;
+    o["active"] = (p->address == running->address);
+    if (p->address == running->address) {
+      o["used"] = ESP.getSketchSize();
+    }
+  }
+
+  it = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, nullptr);
+  for (; it != nullptr; it = esp_partition_next(it)) {
+    const esp_partition_t *p = esp_partition_get(it);
+    JsonObject o = arr.createNestedObject();
+    o["label"] = p->label;
+    o["size"] = p->size;
+    if (strcmp(p->label, "webfs") == 0) {
+      o["used"] = LittleFS.usedBytes();
+    } else if (strcmp(p->label, "config") == 0) {
+      o["used"] = FileSystem::usedBytes();
+    }
+  }
+
+  char payload[1024];
+  const size_t written = serializeJson(doc, payload, sizeof(payload));
+  if (written == 0) {
+    Logger::log(Logger::Type::ERROR, Logger::Source::MQTT, "main/info/partitions: Serialisierung fehlgeschlagen.");
+    return;
+  }
+  publishAndLog(kInfoPartitionsTopic, payload, true);
+}
+
+// Reset-Grund/IP/Broker-Adresse/Partitionstabelle aendern sich nur einmal pro Boot (bzw.
+// praktisch nie zur Laufzeit) - daher nur bei connectToBroker() publiziert, nicht periodisch.
+void publishInfoStatic() {
+  publishAndLog(kInfoResetReasonTopic, resetReasonToString(esp_reset_reason()), true);
+  publishAndLog(kInfoIpTopic, WiFi.localIP().toString().c_str(), true);
+
+  char brokerPayload[48];
+  snprintf(brokerPayload, sizeof(brokerPayload), "%s:%d", MQTT_BROKER, MQTT_PORT);
+  publishAndLog(kInfoBrokerTopic, brokerPayload, true);
+
+  publishPartitions();
+}
+
 // Sicherheitskritisch im weiteren Sinne (Fehlererkennung soll auch ohne MQTT
 // funktionieren) - laeuft daher wie tickValveTimers() unabhaengig von WLAN/MQTT.
 void checkDiagnostics() {
@@ -397,6 +514,7 @@ void checkDiagnostics() {
   if (now - lastHardwareStatusMs >= kHardwareStatusIntervalMs) {
     lastHardwareStatusMs = now;
     publishHardwareStatus();
+    publishInfoLive();
   }
 }
 
@@ -1345,6 +1463,8 @@ bool connectToBroker() {
     }
     publishVersion();
     publishHardwareStatus();
+    publishInfoLive();
+    publishInfoStatic();
     publishConfigState();
     publishProgramState();
     publishProgramsState();

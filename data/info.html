@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gartenwasser – Info</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="mqtt.min.js"></script>
+  <script src="info.js"></script>
+  <script defer src="alpine.min.js"></script>
+</head>
+<body x-data="info()">
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">GW</div>
+        <h1>Gartenwasser</h1>
+      </div>
+      <nav class="tabs">
+        <a href="index.html">Status</a>
+        <a href="konfiguration.html">Konfiguration</a>
+        <a href="programme.html">Programme</a>
+        <a href="zeitplan.html">Zeitplan</a>
+        <a href="log.html">Log</a>
+        <a href="ota.html">Update</a>
+        <a class="active" href="#">Info</a>
+      </nav>
+      <div class="status-chips">
+        <span class="chip" :data-state="connected ? 'auto' : 'running'"><span class="dot"></span><span x-text="connected ? 'Verbunden' : 'Getrennt'"></span></span>
+        <span class="chip" :data-state="deviceOnline ? 'auto' : 'idle'"><span class="dot"></span><span x-text="deviceOnline ? 'Gerät online' : 'Gerät offline'"></span></span>
+      </div>
+    </div>
+
+    <h2>Firmware</h2>
+    <div class="card footer-card">
+      <div class="diag-row"><span class="label">Version</span>&nbsp;<span x-text="version || '…'"></span></div>
+      <div class="diag-row"><span class="label">Uptime</span>&nbsp;<span x-text="uptime !== null ? formatUptime(uptime) : '…'"></span></div>
+      <div class="diag-row"><span class="label">Letzter Neustart</span>&nbsp;<span x-text="resetReason || '…'"></span></div>
+    </div>
+
+    <h2>Speicher</h2>
+    <div class="card footer-card">
+      <div class="diag-row"><span class="label">RAM</span>&nbsp;<span x-text="ram || '…'"></span></div>
+      <div class="diag-row"><span class="label">Flash</span>&nbsp;<span x-text="flash || '…'"></span></div>
+      <div class="diag-row"><span class="label">Freier Stack (loopTask)</span>&nbsp;<span x-text="stackFree !== null ? (stackFree / 1024).toFixed(1) + ' KB' : '…'"></span></div>
+    </div>
+
+    <h2>Partitionen</h2>
+    <div class="card">
+      <table class="info-table">
+        <thead>
+          <tr><th>Partition</th><th>Größe</th><th>Belegung</th></tr>
+        </thead>
+        <tbody>
+          <template x-if="partitions.length === 0">
+            <tr><td colspan="3" class="info-empty">…</td></tr>
+          </template>
+          <template x-for="p in partitions" :key="p.label">
+            <tr>
+              <td>
+                <span x-text="p.label"></span>
+                <span class="badge-active" x-show="p.active" style="margin-left: 6px;">Aktiv</span>
+              </td>
+              <td x-text="formatKB(p.size)"></td>
+              <td x-text="p.used !== undefined ? formatKB(p.used) + ' (' + Math.round((p.used / p.size) * 100) + '%)' : '–'"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Netzwerk</h2>
+    <div class="card footer-card">
+      <div class="diag-row"><span class="label">IP-Adresse</span>&nbsp;<span x-text="ip || '…'"></span></div>
+      <div class="diag-row"><span class="label">WLAN-Signal</span>&nbsp;<span x-text="rssi !== null ? rssi + ' dBm' : '…'"></span></div>
+      <div class="diag-row"><span class="label">MQTT-Broker</span>&nbsp;<span x-text="broker || '…'"></span></div>
+    </div>
+  </div>
+</body>
+</html>
