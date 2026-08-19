@@ -91,12 +91,14 @@ function info() {
     // Boot-Zeitpunkt wird bewusst im Browser aus der Client-Uhr berechnet (Date.now() - Uptime)
     // statt vom Geraet per eigenem Topic zu kommen - spart eine weitere Publish-Quelle, das
     // Geraet kennt sein Echtzeit-Datum ohnehin erst nach erfolgreicher NTP-Synchronisierung.
-    // Nur Datum (dd.mm.yy), keine Uhrzeit (Nutzerwunsch).
+    // dd/mm/yy | hh:mm (Nutzerwunsch, finale Fassung nach mehreren Format-Runden).
     formatBootTime(totalSeconds) {
       const bootDate = new Date(Date.now() - totalSeconds * 1000);
       const pad = (n) => String(n).padStart(2, "0");
       const yy = String(bootDate.getFullYear()).slice(-2);
-      return `${pad(bootDate.getDate())}.${pad(bootDate.getMonth() + 1)}.${yy}`;
+      const date = `${pad(bootDate.getDate())}/${pad(bootDate.getMonth() + 1)}/${yy}`;
+      const time = `${pad(bootDate.getHours())}:${pad(bootDate.getMinutes())}`;
+      return `${date} | ${time}`;
     },
 
     formatKB(bytes) {
