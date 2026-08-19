@@ -240,13 +240,13 @@ Erreichbar über `http://<Geräte-IP>/` im Browser (Smartphone, Tablet, PC — k
 
 ### 6.1 Status (Startseite)
 
-*Platzhalter für Screenshot: `images/webif-status.png`*
+![WebIF Status-Seite](images/webif-status.webp)
 
 Übersicht: START/STOP-Button + Programmwahl im Hero-Bereich, „Nächster Termin" (nächster Zeitplan-Trigger, im Browser berechnet), Ventilkacheln mit Live-Status/Restlaufzeit, sowie eine Diagnostics-Karte (I2C-Status, letzter Fehler, Firmware-Version, RAM/Flash-Auslastung).
 
 ### 6.2 Konfiguration
 
-*Platzhalter für Screenshot: `images/webif-konfiguration.png`*
+![WebIF Konfigurations-Seite](images/webif-konfiguration.webp)
 
 Editierbar je Ventil: **Alias** (Klartextname) und **Laufzeit** (`time`, Minuten). Zusätzlich global: **maxTime** (Obergrenze pro Ventil — die tatsächlich verwendete Laufzeit ist `min(time, maxTime)`, überschrittene Werte werden gelb markiert).
 
@@ -254,9 +254,13 @@ Editierbar je Ventil: **Alias** (Klartextname) und **Laufzeit** (`time`, Minuten
 
 ### 6.3 Programme
 
-*Platzhalter für Screenshot: `images/webif-programme.png`*
+![WebIF Programme-Seite](images/webif-programme.webp)
 
-Bis zu 32 Programme, jeweils mit Name + je Ventil `time`/`auto`. Karten-Ansicht mit Aktivieren/Bearbeiten/Löschen. Der Editor zeigt für jedes Ventil einen Automatik-Schalter und ein Laufzeit-Feld — nur Ventile mit Automatik EIN werden Teil der Sequenz beim Start.
+Bis zu 32 Programme, jeweils mit Name + je Ventil `time`/`auto`. Karten-Ansicht mit Aktivieren/Bearbeiten/Löschen.
+
+![WebIF Programme bearbeiten](images/webif-programme-bearbeiten.webp)
+
+Der Editor zeigt für jedes Ventil einen Automatik-Schalter und ein Laufzeit-Feld — nur Ventile mit Automatik EIN werden Teil der Sequenz beim Start.
 
 ### 6.4 Zeitplan
 
