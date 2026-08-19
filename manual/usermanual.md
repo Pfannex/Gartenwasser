@@ -172,12 +172,28 @@ pio run -e esp32-c6-devkitc-1 --target uploadfs    # Web-Interface-Dateien
 
 Nach dem ersten erfolgreichen Boot ist das Gerät auch kabellos erreichbar (siehe Kapitel 9).
 
-### 4.4 Erste Schritte danach
+### 4.4 MQTT-Broker: WebSocket-Zugang für den Browser einrichten
 
-1. Web-Interface öffnen (`http://<Geräte-IP>/` — IP steht z. B. im Router oder auf der *Info*-Seite, siehe 6.8).
+Das Web-Interface verbindet sich **direkt** aus dem Browser per MQTT-over-WebSocket mit dem Broker (siehe Kapitel 1/6) — nicht über einen Umweg über den ESP32. Ein Browser kann aber keine rohe TCP-Verbindung auf den üblichen MQTT-Port 1883 öffnen, dafür braucht der Broker zusätzlich einen **WebSocket-Listener**. Das ist eine einmalige, vom Gerät unabhängige Einrichtung direkt auf dem Broker — ohne sie bleibt das Web-Interface dauerhaft auf „Getrennt“, während MQTT-Clients wie mqtt-spy oder Home Assistant (die den normalen Port 1883 nutzen) ganz normal funktionieren.
+
+Für Mosquitto (ab Version 1.6) genügt eine zusätzliche Konfigurationsdatei, zum Beispiel `/etc/mosquitto/conf.d/websockets.conf`:
+
+```
+listener 9001
+protocol websockets
+allow_anonymous true
+```
+
+`allow_anonymous true` passend zum ohnehin anonymen Standard-Listener wählen (bzw. hier ergänzen, falls dieser bereits Zugangsdaten verlangt). Danach den Broker neu laden (`systemctl restart mosquitto`) und den offenen Port verifizieren (`ss -tlnp | grep 9001`).
+
+Die resultierende Adresse (`ws://<Broker-IP>:9001/mqtt`) steht als `BROKER_WS_URL`-Konstante am Kopf jeder `data/*.js`-Datei (`app.js`, `konfig.js`, `programme.js`, `zeitplan.js`, `log.js`, `info.js`). Ändert sich Broker-IP oder -Port, muss diese Konstante in allen sechs Dateien angepasst und per `pio run --target uploadfs` neu ausgeliefert werden. Zusätzlich muss jedes Gerät, das das Web-Interface im Browser öffnet (PC, Smartphone, Tablet), Netzwerkzugriff auf diesen Port haben — genau wie auf die IP-Adresse des ESP32 selbst.
+
+### 4.5 Erste Schritte danach
+
+1. Web-Interface öffnen (`http://<Geräte-IP>/` — IP steht z. B. im Router oder auf der *Info*-Seite, siehe 6.7).
 2. Unter *Konfiguration* Ventil-Aliasnamen vergeben und Laufzeiten prüfen.
-3. Unter *Programme* mindestens ein Programm anlegen (ohne Programm kann die Automatik nicht gestartet werden — siehe 6.4).
-4. Optional: Zeitplan-Einträge anlegen (Kapitel 6.5).
+3. Unter *Programme* mindestens ein Programm anlegen (ohne Programm kann die Automatik nicht gestartet werden — siehe 6.3).
+4. Optional: Zeitplan-Einträge anlegen (Kapitel 6.4).
 
 ---
 
@@ -185,23 +201,11 @@ Nach dem ersten erfolgreichen Boot ist das Gerät auch kabellos erreichbar (sieh
 
 ### 5.1 Hauptseite
 
-```
-┌─────────────────────────┐
-│      Gartenwasser        │  ← Titelzeile (statisch)
-├─────────────────────────┤
-│   [ START / STOP ]       │  ← volle Breite
-├─────────────────────────┤
-│  V1  V2  V3  V4          │  ← Ventil-Matrix (4×4,
-│  V5  ·   ·   ·           │    V0–V5 belegt, Rest
-│  ·   ·   ·   ·           │    Platzhalter)
-│  ·   ·   ·   ·           │
-├─────────────────────────┤
-│   [ <Programmname> ]     │  ← Programme-Button
-├─────────────────────────┤
-│  V3  02:15 | 07:40       │  ← Statuszeile (2 Zeilen)
-│  Kübelpflanzen            │
-└─────────────────────────┘
-```
+| Ruhezustand | Laufende Automatik |
+|---|---|
+| ![Hauptseite im Ruhezustand](images/hmi-start.webp) | ![Hauptseite mit laufender Automatik](images/hmi-betrieb.webp) |
+
+Aufbau von oben nach unten: Titelzeile, START/STOP-Button (volle Breite), Ventil-Matrix (4×4, `V0`–`V5` belegt, Rest Platzhalter für eine spätere Erweiterung), Programme-Button, zweizeilige Statuszeile.
 
 **START/STOP:** Startet/stoppt die Automatik-Sequenz für das aktuell gewählte Programm. Ohne gewähltes Programm ist der Button gesperrt (ausgegraut) — ein Programm muss zuerst über den Programme-Button gewählt werden.
 
@@ -221,6 +225,8 @@ Nach dem ersten erfolgreichen Boot ist das Gerät auch kabellos erreichbar (sieh
 4. Sonst leer
 
 ### 5.2 Programme-Unterseite
+
+![Programme-Unterseite](images/hmi-programme.webp)
 
 Über den Programme-Button erreichbar. `‹`/`›` blättert durch alle angelegten Programme (inkl. „Kein Programm"). **OK** wendet das durchgeblätterte Programm an — startet aber **nichts**, der Start bleibt ein separater Schritt über den START-Button auf der Hauptseite. **Abbrechen** verwirft die Auswahl.
 
@@ -282,7 +288,71 @@ Gruppierte Hardware-/Systeminformationen: Firmware-Version + Build-Nummer + Upti
 
 Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert bleibt beim Broker gespeichert, ein neu verbundener Client bekommt ihn sofort.
 
-### 7.1 Ventile (`V0`–`V5`)
+### 7.1 Gesamter Topic-Baum
+
+```
+TOPIC                  | RETAIN | VALUE              | BEDEUTUNG
+------------------------------------------------------------------
+gartenwasser/          |        |                    |
+├── availability       | ja     | online|offline     | Last Will (Verbindungsstatus)
+├── V0/                |        |                    |
+│   ├── state          | ja     | ON|OFF             | read-only, folgt V1-V5
+│   ├── alias          | ja     | "Hauptventil"      | Klartextname
+│   └── alias/set      | nein   | "Text"             | Alias-Namen editieren
+├── V1/ .. V5/          |        |                    |
+│   ├── state          | ja     | ON|OFF             | read-only, Ist-Zustand
+│   ├── cmd            | nein   | ON|OFF             | Ventil schalten
+│   ├── alias          | ja     | "Rasen Seite"      | Klartextname
+│   │   └── set        | nein   | "Text"             | Alias-Namen editieren
+│   ├── time/          |        |                    |
+│   │   ├── state      | ja     | <Minuten>          | aktuell eingestellte Laufzeit
+│   │   ├── set        | nein   | <Minuten>          | Laufzeit setzen
+│   │   └── remaining  | nein   | mm:ss              | Restlaufzeit, Sekundentakt
+│   └── auto/          |        |                    |
+│       ├── state      | ja     | ON|OFF             | Automatik-Flag Ist
+│       └── set        | nein   | ON|OFF             | Automatik-Flag setzen (löst „Manueller Modus" aus)
+├── main/              |        |                    |
+│   ├── cmd            | nein   | ON|OFF             | Start/Stop der Automatik-Sequenz
+│   ├── state           | ja     | ON|OFF             | Sequenz läuft?
+│   ├── activeValve    | ja     | "V1".."V5"|"-"     | aktuell aktives Ventil
+│   ├── remainingTotal | nein   | mm:ss              | Restzeit der gesamten Sequenz
+│   ├── time/           |        |                    |
+│   │   └── maxTime    | ja     | <Minuten>          | Obergrenze pro Ventil, effektiv = min(time, maxTime)
+│   ├── config/        |        |                    |
+│   │   ├── set        | nein   | JSON               | time/auto/alias/maxTime setzen (ganz oder teilweise)
+│   │   └── state      | ja     | JSON               | aktueller Gesamtstand von config
+│   ├── programs/      |        |                    |
+│   │   ├── set        | nein   | JSON               | Programme-Array + activeProgram setzen (ersetzt Array komplett)
+│   │   └── state      | ja     | JSON               | aktueller Gesamtstand von programs
+│   ├── program/       |        |                    |
+│   │   ├── cmd        | nein   | <integer>          | Programm per Index auswählen, 1-basiert (0 = keins)
+│   │   └── state      | ja     | JSON               | {"index":n,"name":"..."}, aktuell gewähltes Programm
+│   ├── schedule/       |        |                    |
+│   │   ├── set        | nein   | JSON               | Zeitplan-Array + enabled setzen (ersetzt Array komplett)
+│   │   ├── state      | ja     | JSON               | aktueller Gesamtstand von schedule
+│   │   ├── cmd        | nein   | ON|OFF             | globaler Ein/Aus-Schalter
+│   │   └── cleanup    | nein   | beliebig           | entfernt abgelaufene „einmalig"-Einträge
+│   └── info/           |        |                    | Hardware-/Systeminfo (Info-Seite)
+│       ├── resetReason | ja     | z. B. "USB"        | Grund des letzten Neustarts, einmalig pro Boot
+│       ├── uptime      | ja     | <Sekunden>         | Laufzeit seit Boot, alle 30s
+│       ├── stackFree   | ja     | <Byte>             | freier loopTask-Stack, alle 30s
+│       ├── rssi        | ja     | <dBm, negativ>     | WLAN-Signalstärke, alle 30s
+│       ├── ip          | ja     | z. B. "192.168.10.33" | eigene IP-Adresse, einmalig pro Boot
+│       ├── broker      | ja     | z. B. "192.168.1.123:1883" | MQTT-Broker-Adresse, einmalig pro Boot
+│       └── partitions  | ja     | JSON-Array         | Partitionstabelle inkl. Belegung, einmalig pro Boot
+└── diagnostics/        |        |                    |
+    ├── i2cStatus       | ja     | ok|error           | Status I2C-Bus / MCP23017
+    ├── lastError       | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
+    ├── version         | ja     | z. B. "V0.8.0.0 Build 00019" | Firmware-Version
+    ├── ram             | ja     | z. B. "63% (206/328 KB)" | Heap-Nutzung, alle 30s
+    ├── flash           | ja     | z. B. "45% (1382/3072 KB)" | Sketch-Größe vs. freier App-Slot
+    ├── livelog         | nein   | Log-Zeile (Text)   | jede Logger-Zeile, inkl. PUB/SUB
+    └── livelog/replay  | nein   | beliebig           | Einmalbefehl: kompletten Log-Ringpuffer erneut senden
+```
+
+Die folgenden Tabellen (7.2–7.6) zeigen dieselben Topics gruppiert mit ausführlicherer Beschreibung.
+
+### 7.2 Ventile (`V0`–`V5`)
 
 | Topic | Retain | Wert | Bedeutung |
 |---|---|---|---|
@@ -295,7 +365,7 @@ Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert 
 | `V{1-5}/time/remaining` | nein | `mm:ss` | Restlaufzeit, sekündlich |
 | `V{1-5}/auto/state`, `.../auto/set` | ja / – | `ON`/`OFF` | Automatik-Teilnahme (**Hinweis:** direktes Setzen löst „Manueller Modus" aus, siehe Kapitel 1) |
 
-### 7.2 Automatik-Sequenz (`main/`)
+### 7.3 Automatik-Sequenz (`main/`)
 
 | Topic | Retain | Wert | Bedeutung |
 |---|---|---|---|
@@ -305,7 +375,7 @@ Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert 
 | `main/remainingTotal` | nein | `mm:ss` | Restzeit der Gesamtsequenz |
 | `main/time/maxTime` | ja | Minuten | Globale Obergrenze pro Ventil |
 
-### 7.3 Konfiguration / Programme / Zeitplan
+### 7.4 Konfiguration / Programme / Zeitplan
 
 | Topic | Retain | Wert | Bedeutung |
 |---|---|---|---|
@@ -316,7 +386,7 @@ Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert 
 | `main/schedule/cmd` | – | `ON`/`OFF` | Zeitplan global ein/aus |
 | `main/schedule/cleanup` | – | beliebig | Abgelaufene „einmalig"-Einträge entfernen |
 
-### 7.4 Diagnose (`diagnostics/`)
+### 7.5 Diagnose (`diagnostics/`)
 
 | Topic | Retain | Wert | Bedeutung |
 |---|---|---|---|
@@ -326,7 +396,7 @@ Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert 
 | `diagnostics/ram`, `diagnostics/flash` | ja | z. B. „63% (206/328 KB)" | Speicherauslastung, alle 30s |
 | `diagnostics/livelog`, `.../livelog/replay` | nein | Text / beliebig | Live-Log-Stream + Anfrage-Replay |
 
-### 7.5 Hardware-/Systeminfo (`main/info/`)
+### 7.6 Hardware-/Systeminfo (`main/info/`)
 
 | Topic | Retain | Wert | Bedeutung |
 |---|---|---|---|
@@ -337,7 +407,7 @@ Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert 
 | `main/info/ip`, `main/info/broker` | ja | Text | Eigene IP / Broker-Adresse |
 | `main/info/partitions` | ja | JSON-Array | Partitionstabelle inkl. Belegung |
 
-### 7.6 Beispiele
+### 7.7 Beispiele
 
 ```bash
 # Ventil V1 manuell einschalten
