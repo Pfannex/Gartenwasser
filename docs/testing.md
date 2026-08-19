@@ -332,6 +332,14 @@ End-to-End-Tests direkt gegen die echten PlatformIO-Build-Artefakte (`firmware.b
 | 4 | Espota-Upload bei laufendem Gerät, live mitgeschnitten | Serieller Reset, dann `pio run -e esp32-c6-devkitc-1-ota --target upload` während eine parallele `pyserial`-Sitzung mitliest | 100 %-Fortschritt, `Result: OK`/`Success`, Live-Log zeigt Start-/Ende-Zeile, danach sauberer Neustart (Reset-Grund `SW_CPU`) | ✅ |
 | 5 | Gerät nach OTA-Flash funktionsfähig | `diagnostics/version` nach dem Neustart erneut abgefragt | Kommt korrekt als `V0.8.0.0` an, normale Boot-/MQTT-Reconnect-Sequenz | ✅ |
 
+## Live-Log-Kompaktierung + RAM/Flash-Hardwarestatus — 2026-08-19
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Filesystem-Deploy geprüft | `curl .../log.html`/`.../style.css`, auf `JSON-Payload`/`log-json-toggle`-Strings geprüft | Beide vorhanden — neue Markup-/CSS-Änderungen korrekt ausgeliefert | ✅ |
+| 2 | `diagnostics/ram`/`diagnostics/flash` bei Boot | Live-Log-Mitschnitt direkt nach Neustart | Beide Topics erscheinen korrekt formatiert (`73% (182/247 KB)` bzw. `31% (1436/4508 KB)`) | ✅ |
+| 3 | Keine Regression | Kompletter `test_livelog_pubsub.py`-Lauf nach dem Flash | Alle 4 Prüfpunkte weiterhin PASS | ✅ |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

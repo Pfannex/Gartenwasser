@@ -501,9 +501,16 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Auf Hardware verifiziert: Build-Nummer zaehlt bei jedem `pio run` korrekt hoch, kommt korrekt kombiniert im Live-Log/MQTT an.
 - Hinweis fuer spaeter: ein `pio run` ohne `-e` baut beide Environments (Serial + OTA, siehe oben) und zaehlt dadurch zweimal hoch - kein Fehler, nur bei exakter Zaehlung zu beachten.
 
+### Live-Log kompaktiert + JSON-Payload-Button, RAM/Flash-Hardwarestatus — 2026-08-19
+
+- Umsetzung der beiden Merker von gestern.
+- **Live-Log**: Zeilenhoehe verringert (`.log-table td`-Padding 5px->3px, `line-height` explizit auf 1.35 statt geerbter 1.5). JSON-Pretty-Print-Kasten ist jetzt standardmaessig eingeklappt (`jsonExpanded: false` je Zeile in `data/log.js`), stattdessen ein kleiner "JSON-Payload"-Button (mit ▸/▾-Pfeil) - Klick klappt auf/zu, die Zeilenhoehe bleibt im Normalzustand konstant statt sofort durch einen grossen Kasten aufgeblaeht zu werden.
+- **RAM/Flash-Hardwarestatus**: zwei neue retained Topics `diagnostics/ram`/`diagnostics/flash` in `MQTT.cpp`. RAM (`ESP.getFreeHeap()`/`getHeapSize()`) aendert sich zur Laufzeit, daher alle 30s aktualisiert (`checkDiagnostics()`s bestehendem 1s-Tick angehaengt, eigenes Intervall-Gate); Flash (`ESP.getSketchSize()`/`getFreeSketchSpace()`) aendert sich nur mit einem neuen Flash, wird der Einfachheit halber im selben Rhythmus mitpubliziert. Zusaetzlich direkt bei `connectToBroker()` publiziert, damit ein frisch verbundenes Dashboard nicht bis zu 30s warten muss - dadurch am Boot zwei sehr nah beieinanderliegende Publishes (einmal vom Connect-Handler, einmal vom ohnehin sofort feuernden ersten Tick), harmlos, nicht behoben.
+- Web-Dashboard (`data/index.html`/`app.js`): zwei neue Zeilen "RAM"/"Flash" in der Diagnostics-Karte, Format wie am Broker: "63% (206/328 KB)" bzw. "31% (1436/4508 KB)".
+- Auf Hardware verifiziert: beide Topics kommen korrekt an, Live-Log-Regressionstest (`test_livelog_pubsub.py`) weiterhin PASS.
+
 ## Offene Punkte / nächste Schritte
 
-- Merker (naechste Sitzung): Live-Log-Zeilenhoehe verringern; JSON-Payloads (pretty-printed, siehe Nachtrag oben) bekommen einen "JSON-Payload"-Button statt direkt aufgeklappt zu sein - Aufklappen nur bei Bedarf, damit die Zeilenhoehe im Normalzustand gleich bleibt (aktuell blaeht ein grosser JSON-Kasten sofort die ganze Zeile auf).
 - Merker: bei einem spaeteren Anlass einen Hardware-Status RAM/Flash im Dashboard ergaenzen (urspruenglicher Merker fuer Phase 21, noch nicht umgesetzt).
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MQTT::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.

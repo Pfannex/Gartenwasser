@@ -268,12 +268,23 @@ h2 {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .log-search-clear:hover { background: var(--state-running); color: #fff; }
-.log-table td { padding: 5px 10px; vertical-align: top; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }
+.log-table td { padding: 3px 10px; vertical-align: top; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; line-height: 1.35; }
 .log-table td.col-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .log-table tr[data-type="ERROR"] td { color: var(--state-running); font-weight: 600; }
 .log-table tr[data-type="INFO"] td { color: var(--text); }
 .log-table tr + tr td { border-top: 1px solid var(--border); }
 .log-empty-cell { text-align: left; font-style: italic; color: var(--text-muted); }
+
+/* JSON-Payload-Button (2026-08-19) - der Pretty-Print-Kasten ist jetzt standardmaessig
+   eingeklappt (Nutzer-Feedback: blaeht sonst die Zeilenhoehe sofort auf, auch wenn man den
+   Inhalt gar nicht braucht) und klappt erst auf Klick auf. */
+.log-json-toggle {
+  margin-left: 6px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-muted); font-family: inherit; font-size: 10.5px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.log-json-toggle:hover { color: var(--text); border-color: var(--accent); }
+.log-json-toggle .arrow { display: inline-block; font-size: 8px; margin-right: 1px; }
 
 /* JSON-Pretty-Print in der Event-Spalte (2026-08-18) - Payload eines PUB/SUB mit JSON-Wert
    (main/config/state, main/programs/state, ...) wird eingerueckt statt als Einzeiler gezeigt.

@@ -46,6 +46,8 @@ function dashboard() {
     i2cStatus: "ok",
     lastError: "",
     version: "",
+    ram: "",
+    flash: "",
 
     init() {
       this.client = mqtt.connect(BROKER_WS_URL);
@@ -130,6 +132,12 @@ function dashboard() {
           break;
         case "diagnostics/version":
           this.version = payload;
+          break;
+        case "diagnostics/ram":
+          this.ram = payload;
+          break;
+        case "diagnostics/flash":
+          this.flash = payload;
           break;
       }
     },

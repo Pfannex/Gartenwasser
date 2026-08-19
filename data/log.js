@@ -73,6 +73,9 @@ function livelog() {
         jsonTopic: json ? json.topic : null,
         jsonPretty: json ? json.pretty : null,
         jsonTruncated: json ? json.truncated : false,
+        // Standardmaessig eingeklappt (2026-08-19) - Nutzer-Feedback: der Pretty-Print-Kasten
+        // blaeht sonst jede JSON-Zeile sofort auf, auch wenn man den Inhalt gar nicht braucht.
+        jsonExpanded: false,
       });
       if (this.logLines.length > MAX_LOG_LINES) this.logLines.shift();
       this.$nextTick(() => {

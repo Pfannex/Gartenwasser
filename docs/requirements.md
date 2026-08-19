@@ -174,6 +174,8 @@ gartenwasser/          |        |                    |
     ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
     ├── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
     ├── version        | ja     | z.B. "V0.8.0.0"    | Firmware-Version (include/Version.h), zum Bestaetigen eines OTA-Updates (Phase 21)
+    ├── ram            | ja     | z.B. "63% (206/328 KB)" | Heap-Nutzung, alle 30s aktualisiert (ESP.getFreeHeap()/getHeapSize())
+    ├── flash          | ja     | z.B. "45% (1382/3072 KB)" | Sketch-Groesse vs. freier App-Slot (ESP.getSketchSize()/getFreeSketchSpace())
     └── livelog        | nein   | Log-Zeile (Text)   | jede Logger-Zeile (inkl. PUB/SUB), siehe Log-Format unten
         └── replay     | nein   | beliebig           | Einmalbefehl: kompletten aktuellen Log-Ringpuffer erneut senden
 ```

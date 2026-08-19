@@ -35,6 +35,13 @@ constexpr const char *kLastErrorTopic = "gartenwasser/diagnostics/lastError";
 // Firmware-Version (siehe include/Version.h) - retained, damit sich nach einem OTA-Update
 // (Phase 21) im Web-Dashboard bestaetigen laesst, dass die neue Firmware tatsaechlich laeuft.
 constexpr const char *kVersionTopic = "gartenwasser/diagnostics/version";
+// Hardware-Status RAM/Flash (Merker aus Phase 21) - RAM aendert sich zur Laufzeit (Heap),
+// daher periodisch aktualisiert (siehe checkHardwareStatus()); Flash (Sketch-Groesse) aendert
+// sich nur mit einem neuen Firmware-Flash, wird aber der Einfachheit halber im selben Rhythmus
+// mitpubliziert (retained, kein spuerbarer Mehraufwand).
+constexpr const char *kRamTopic = "gartenwasser/diagnostics/ram";
+constexpr const char *kFlashTopic = "gartenwasser/diagnostics/flash";
+constexpr unsigned long kHardwareStatusIntervalMs = 30000;
 // Live-Log (Nachtrag 2026-08-18): jede Logger-Zeile ausser PUB/SUB, siehe
 // Logger::setLineCallback(). Bewusst nicht retained (reiner Live-Stream, kein Verlauf
 // beim Verbinden).
@@ -354,6 +361,27 @@ void publishVersion() {
   publishAndLog(kVersionTopic, payload, true);
 }
 
+// RAM: aktueller Heap (ESP.getFreeHeap()/getHeapSize()) - dynamisch, daher periodisch
+// aktualisiert statt nur einmalig. Flash: Sketch-Groesse vs. freier Platz im App-Slot
+// (ESP.getSketchSize()/getFreeSketchSpace()) - entspricht der Groessenordnung, die auch
+// "pio run" beim Bauen als "Flash: XX%" ausweist.
+void publishHardwareStatus() {
+  const uint32_t heapTotal = ESP.getHeapSize();
+  const uint32_t heapFree = ESP.getFreeHeap();
+  const uint32_t heapUsed = heapTotal - heapFree;
+  char ramPayload[40];
+  snprintf(ramPayload, sizeof(ramPayload), "%lu%% (%lu/%lu KB)",
+           heapTotal > 0 ? (100UL * heapUsed) / heapTotal : 0, heapUsed / 1024, heapTotal / 1024);
+  publishAndLog(kRamTopic, ramPayload, true);
+
+  const uint32_t flashUsed = ESP.getSketchSize();
+  const uint32_t flashTotal = flashUsed + ESP.getFreeSketchSpace();
+  char flashPayload[40];
+  snprintf(flashPayload, sizeof(flashPayload), "%lu%% (%lu/%lu KB)",
+           flashTotal > 0 ? (100UL * flashUsed) / flashTotal : 0, flashUsed / 1024, flashTotal / 1024);
+  publishAndLog(kFlashTopic, flashPayload, true);
+}
+
 // Sicherheitskritisch im weiteren Sinne (Fehlererkennung soll auch ohne MQTT
 // funktionieren) - laeuft daher wie tickValveTimers() unabhaengig von WLAN/MQTT.
 void checkDiagnostics() {
@@ -362,6 +390,13 @@ void checkDiagnostics() {
   }
   if (Diagnostics::consumeNewError()) {
     publishLastError(Diagnostics::getLastError());
+  }
+
+  static unsigned long lastHardwareStatusMs = 0 - kHardwareStatusIntervalMs;  // sofort beim ersten Tick
+  const unsigned long now = millis();
+  if (now - lastHardwareStatusMs >= kHardwareStatusIntervalMs) {
+    lastHardwareStatusMs = now;
+    publishHardwareStatus();
   }
 }
 
@@ -1309,6 +1344,7 @@ bool connectToBroker() {
       publishLastError(Diagnostics::getLastError());
     }
     publishVersion();
+    publishHardwareStatus();
     publishConfigState();
     publishProgramState();
     publishProgramsState();

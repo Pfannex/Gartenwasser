@@ -111,7 +111,10 @@
                     <template x-if="l.jsonPretty">
                       <div>
                         <span x-text="l.jsonTopic + ' =' + (l.jsonTruncated ? ' (gekürzt)' : '')"></span>
-                        <pre class="log-json" :class="l.jsonTruncated ? 'log-json-truncated' : ''" x-text="l.jsonPretty"></pre>
+                        <button type="button" class="log-json-toggle" @click="l.jsonExpanded = !l.jsonExpanded">
+                          <span class="arrow" x-text="l.jsonExpanded ? '▾' : '▸'"></span>JSON-Payload
+                        </button>
+                        <pre class="log-json" x-show="l.jsonExpanded" :class="l.jsonTruncated ? 'log-json-truncated' : ''" x-text="l.jsonPretty"></pre>
                       </div>
                     </template>
                   </td>
