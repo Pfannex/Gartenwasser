@@ -6,3 +6,5 @@
 .vscode/ipch
 include/secrets.h
 include/BuildNumber.h
+data/*.bundle.js
+data/mqtt.min.js

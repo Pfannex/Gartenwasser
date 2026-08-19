@@ -378,6 +378,25 @@ Nutzer-Beobachtung nach den ersten beiden Fixes: das Unerreichbar-Problem tritt 
 
 **Hinweis zur Historie**: `no-cache, no-store` wurde ursprünglich (2026-08-17) genau wegen eines gegenteiligen Problems eingeführt — veraltete gecachte Inhalte auf einem Handy. Reines `no-cache` (ohne `no-store`) löst beide Anliegen: der Browser fragt bei jeder Anfrage weiterhin beim Server nach (keine unbemerkt veralteten Inhalte mehr), darf die Antwort aber lokal behalten und per `If-None-Match` bedingt anfragen — bei unverändertem Inhalt kommt nur ein winziges `304 Not Modified` zurück statt der kompletten Datei.
 
+## Vierter Bugfix: WebIF weiterhin unerreichbar mit dem iPhone der Ehefrau — CONFIG_LWIP_MAX_ACTIVE_TCP-Limit — 2026-08-19
+
+Trotz Bugfix 3 (Caching) trat das Problem erneut auf. Gezielter Isolationstest durch den Nutzer grenzte die Ursache eindeutig ein.
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Isolationstest | PC allein: wiederholt manuell zwischen WebIF-Seiten gewechselt | Läuft durchgehend stabil, kein Hänger | ✅ |
+| 2 | Isolationstest | iPhone des Nutzers (Chrome) allein: Seite geöffnet | Kein Hänger | ✅ |
+| 3 | Isolationstest | iPhone der Ehefrau: nur die IP-Adresse aufgerufen | WebIF hängt sich auf — für alle Clients, nicht nur das eine Gerät | ✅ (Trigger reproduzierbar isoliert) |
+| 4 | LWIP-Verbindungslimit geprüft | `sdkconfig.h` des ESP32-C6-Arduino-Frameworks durchsucht (`framework-arduinoespressif32-libs`) | `CONFIG_LWIP_MAX_ACTIVE_TCP=16`, `CONFIG_LWIP_MAX_SOCKETS=16` — hart im vorkompilierten Framework verankert, für `framework=arduino` nicht ohne kompletten ESP-IDF-Rebuild änderbar | ✅ (harte Grenze bestätigt) |
+| 5 | Anfragen pro Seitenaufruf gezählt | `data/*.html` durchsucht | Jede Seite lädt 5 Dateien: HTML, `style.css`, `mqtt.min.js`, `<seite>.js`, `alpine.min.js` — mobile WebKit-Browser (Safari-Engine, gilt auch für "Chrome" auf iOS) öffnen dafür oft mehrere parallele statt sequenzielle Verbindungen; kombiniert mit einer schwächeren/instabileren Verbindung eines Geräts (hängende Verbindungen belegen TCP-Plätze länger) reicht das, um die 16er-Grenze zu sprengen | ✅ (Mechanismus erklärt) |
+| 6 | Bundling-Fix: Skripte prüfen | `web-src/*.js` auf synchronen Top-Level-Code durchsucht (der bei `defer` in falscher Reihenfolge laufen könnte) | Alle Seiten-Skripte definieren nur eine Factory-Funktion (`function dashboard() { return {...} }` o. ä.) — kein synchroner Code, gefahrlos bündelbar | ✅ |
+| 7 | Bundling-Fix: Speicherbedarf (1. Versuch) | `mqtt.min.js` + `<seite>.js` + `alpine.min.js` in jedes Bundle kopiert | `data/`-Gesamtgröße 3,1 MB — passt NICHT in die ca. 1,79-MB-`webfs`-Partition (mqtt.min.js 369 KB × 6 Seiten dupliziert) | ❌ (verworfen) |
+| 8 | Bundling-Fix: Speicherbedarf (korrigiert) | `mqtt.min.js` bleibt eigenständig, nur `<seite>.js` + `alpine.min.js` gebündelt; Quelldateien nach `web-src/` verschoben (nicht mehr Teil der LittleFS-Auslieferung) | `data/`-Gesamtgröße 832 KB — passt komfortabel; Anfragen pro Seitenaufruf 5 → 4 | ✅ |
+| 9 | Build + Flash + Verifikation | `pio run --target upload` + `--target uploadfs`, danach `curl` auf alle sieben `*.bundle.js` + `mqtt.min.js` + `style.css`, MQTT-Snapshot | Alle Dateien `HTTP 200`, alte Einzeldateien (`app.js`, `alpine.min.js`) korrekt `404` (nicht mehr ausgeliefert), `availability=online`, Build 00034, `ram=75%` — normale Baseline, `V1/state` weiterhin korrekt abrufbar | ✅ |
+| 10 | End-to-End mit dem iPhone der Ehefrau | **Noch offen** — Nutzer muss den ursprünglichen Trigger (Schritt 3) mit dem gebündelten Stand erneut nachstellen | — | ⏳ Nutzer-Test ausstehend |
+
+**Technischer Hintergrund Bundling**: `tools/bundle_assets.py` (neuer PlatformIO-Pre-Build-Hook, gleiches Muster wie `tools/increment_build_number.py`) fasst pro Seite `<seite>.js` + `alpine.min.js` zu `data/<seite>.bundle.js` zusammen und kopiert `mqtt.min.js` unverändert nach `data/`. Läuft bei jedem Build automatisch, Bundles/kopiertes `mqtt.min.js` sind reine Build-Artefakte (`.gitignore`), Quelle bleiben die einzelnen Dateien in `web-src/`.
+
 **Root-Cause-Notiz WebIF-Reconnect-Bug**: `ESPAsyncWebServer::begin()` wurde bisher nur einmal beim Boot aufgerufen (`WebIF::begin()`). Nach einem WLAN-Verbindungsabbruch+Wiederverbindung kann der zugrundeliegende TCP-Listen-Socket ungültig werden, ohne dass der Server das selbst bemerkt (bekanntes ESPAsyncWebServer/LWIP-Verhalten) — er nimmt keine neuen Verbindungen mehr an, bis ein manueller Reboot den Server neu initialisiert. Indiz aus der Praxis: Nutzer-Screenshot zeigte `diagnostics/lastError = "WLAN Verbindung verloren."` bei gleichzeitig unerreichbarem WebIF, während MQTT (eigene aktive Reconnect-Logik in `MqttManager::loop()`) durchgehend erreichbar blieb — passt exakt zum bekannten Fehlerbild. Fix: `WiFiController` ruft bei jedem erkannten Reconnect (`connected && !wasConnected`) einen registrierten Callback auf; `WebIF::begin()` registriert dafür `rebindServer()` (`server.end(); server.begin();` — registrierte Routen bleiben dabei erhalten, nur der Listen-Socket wird neu aufgebaut).
 
 ## Frühere Phasen (2–13)
