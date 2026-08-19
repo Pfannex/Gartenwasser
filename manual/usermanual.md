@@ -148,7 +148,9 @@ graph LR
 | Touch Reset | 20 |
 | Touch Interrupt | 21 |
 
-*Bild ergänzen:* Foto der tatsächlichen Verkabelung/des Gehäuses.
+![Testaufbau auf dem Breadboard](images/board-aufbau.webp)
+
+Testaufbau: MCP23017 (schwarzer DIP-Chip, mittig), Test-LEDs anstelle der eigentlichen Relais/Ventile, Display/Touch-Board oben aufgesteckt.
 
 ---
 
@@ -302,67 +304,38 @@ Alle Topics beginnen mit `gartenwasser/`. `retain=ja` bedeutet: der letzte Wert 
 
 ### 7.1 Gesamter Topic-Baum
 
-```
-TOPIC                  | RETAIN | VALUE              | BEDEUTUNG
-------------------------------------------------------------------
-gartenwasser/          |        |                    |
-├── availability       | ja     | online|offline     | Last Will (Verbindungsstatus)
-├── V0/                |        |                    |
-│   ├── state          | ja     | ON|OFF             | read-only, folgt V1-V5
-│   ├── alias          | ja     | "Hauptventil"      | Klartextname
-│   └── alias/set      | nein   | "Text"             | Alias-Namen editieren
-├── V1/ .. V5/          |        |                    |
-│   ├── state          | ja     | ON|OFF             | read-only, Ist-Zustand
-│   ├── cmd            | nein   | ON|OFF             | Ventil schalten
-│   ├── alias          | ja     | "Rasen Seite"      | Klartextname
-│   │   └── set        | nein   | "Text"             | Alias-Namen editieren
-│   ├── time/          |        |                    |
-│   │   ├── state      | ja     | <Minuten>          | aktuell eingestellte Laufzeit
-│   │   ├── set        | nein   | <Minuten>          | Laufzeit setzen
-│   │   └── remaining  | nein   | mm:ss              | Restlaufzeit, Sekundentakt
-│   └── auto/          |        |                    |
-│       ├── state      | ja     | ON|OFF             | Automatik-Flag Ist
-│       └── set        | nein   | ON|OFF             | Automatik-Flag setzen (löst „Manueller Modus" aus)
-├── main/              |        |                    |
-│   ├── cmd            | nein   | ON|OFF             | Start/Stop der Automatik-Sequenz
-│   ├── state           | ja     | ON|OFF             | Sequenz läuft?
-│   ├── activeValve    | ja     | "V1".."V5"|"-"     | aktuell aktives Ventil
-│   ├── remainingTotal | nein   | mm:ss              | Restzeit der gesamten Sequenz
-│   ├── time/           |        |                    |
-│   │   └── maxTime    | ja     | <Minuten>          | Obergrenze pro Ventil, effektiv = min(time, maxTime)
-│   ├── config/        |        |                    |
-│   │   ├── set        | nein   | JSON               | time/auto/alias/maxTime setzen (ganz oder teilweise)
-│   │   └── state      | ja     | JSON               | aktueller Gesamtstand von config
-│   ├── programs/      |        |                    |
-│   │   ├── set        | nein   | JSON               | Programme-Array + activeProgram setzen (ersetzt Array komplett)
-│   │   └── state      | ja     | JSON               | aktueller Gesamtstand von programs
-│   ├── program/       |        |                    |
-│   │   ├── cmd        | nein   | <integer>          | Programm per Index auswählen, 1-basiert (0 = keins)
-│   │   └── state      | ja     | JSON               | {"index":n,"name":"..."}, aktuell gewähltes Programm
-│   ├── schedule/       |        |                    |
-│   │   ├── set        | nein   | JSON               | Zeitplan-Array + enabled setzen (ersetzt Array komplett)
-│   │   ├── state      | ja     | JSON               | aktueller Gesamtstand von schedule
-│   │   ├── cmd        | nein   | ON|OFF             | globaler Ein/Aus-Schalter
-│   │   └── cleanup    | nein   | beliebig           | entfernt abgelaufene „einmalig"-Einträge
-│   └── info/           |        |                    | Hardware-/Systeminfo (Info-Seite)
-│       ├── resetReason | ja     | z. B. "USB"        | Grund des letzten Neustarts, einmalig pro Boot
-│       ├── uptime      | ja     | <Sekunden>         | Laufzeit seit Boot, alle 30s
-│       ├── stackFree   | ja     | <Byte>             | freier loopTask-Stack, alle 30s
-│       ├── rssi        | ja     | <dBm, negativ>     | WLAN-Signalstärke, alle 30s
-│       ├── ip          | ja     | z. B. "192.168.10.33" | eigene IP-Adresse, einmalig pro Boot
-│       ├── broker      | ja     | z. B. "192.168.1.123:1883" | MQTT-Broker-Adresse, einmalig pro Boot
-│       └── partitions  | ja     | JSON-Array         | Partitionstabelle inkl. Belegung, einmalig pro Boot
-└── diagnostics/        |        |                    |
-    ├── i2cStatus       | ja     | ok|error           | Status I2C-Bus / MCP23017
-    ├── lastError       | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
-    ├── version         | ja     | z. B. "V0.8.0.0 Build 00019" | Firmware-Version
-    ├── ram             | ja     | z. B. "63% (206/328 KB)" | Heap-Nutzung, alle 30s
-    ├── flash           | ja     | z. B. "45% (1382/3072 KB)" | Sketch-Größe vs. freier App-Slot
-    ├── livelog         | nein   | Log-Zeile (Text)   | jede Logger-Zeile, inkl. PUB/SUB
-    └── livelog/replay  | nein   | beliebig           | Einmalbefehl: kompletten Log-Ringpuffer erneut senden
+```mermaid
+graph TD
+    ROOT(("gartenwasser/"))
+    ROOT --> AVAIL["availability<br/>online · offline"]
+    ROOT --> V0["V0/<br/>Hauptventil"]
+    V0 --> V0S["state"]
+    V0 --> V0A["alias · alias/set"]
+    ROOT --> VN["V1/ … V5/<br/>Bewässerungsventile"]
+    VN --> VNS["state"]
+    VN --> VNC["cmd"]
+    VN --> VNA["alias · alias/set"]
+    VN --> VNT["time/<br/>state · set · remaining"]
+    VN --> VNAuto["auto/<br/>state · set"]
+    ROOT --> MAIN["main/<br/>Automatik-Sequenz"]
+    MAIN --> MCmd["cmd · state"]
+    MAIN --> MActive["activeValve"]
+    MAIN --> MRem["remainingTotal"]
+    MAIN --> MTime["time/maxTime"]
+    MAIN --> MConfig["config/<br/>set · state"]
+    MAIN --> MProgs["programs/<br/>set · state"]
+    MAIN --> MProg["program/<br/>cmd · state"]
+    MAIN --> MSched["schedule/<br/>set · state · cmd · cleanup"]
+    MAIN --> MInfo["info/<br/>resetReason · uptime · stackFree ·<br/>rssi · ip · broker · partitions"]
+    ROOT --> DIAG["diagnostics/"]
+    DIAG --> DI2C["i2cStatus"]
+    DIAG --> DErr["lastError"]
+    DIAG --> DVer["version"]
+    DIAG --> DRam["ram · flash"]
+    DIAG --> DLog["livelog · livelog/replay"]
 ```
 
-Die folgenden Tabellen (7.2–7.6) zeigen dieselben Topics gruppiert mit ausführlicherer Beschreibung.
+Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag, Werteformat und ausführlicherer Beschreibung.
 
 ### 7.2 Ventile (`V0`–`V5`)
 
