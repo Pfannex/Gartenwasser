@@ -110,11 +110,19 @@ void WebIF::begin() {
     return;
   }
 
-  // No-Cache waehrend der aktiven Entwicklung (2026-08-17, Nutzer-Wunsch nach einem
-  // Browser-Cache-Missverstaendnis auf dem Handy): jede Aenderung soll sofort sichtbar
-  // sein, statt gegen veraltete gecachte Dateien zu testen. Vor einem produktiven Release
-  // wieder auf normales Caching umstellen (die Dateien aendern sich dann nicht mehr staendig).
-  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html").setCacheControl("no-cache, no-store, must-revalidate");
+  // Nachtrag (2026-08-19): "no-store" ergaenzend zu "no-cache" entfernt - RAM lief bei zwei
+  // gleichzeitigen Clients (PC + Handy) innerhalb weniger Minuten auf 97% (240/247 KB), weil
+  // "no-store" den Browser anweist, die Antwort gar nicht erst lokal zu behalten - jede Anfrage
+  // von jedem Geraet lud dadurch ALLE Dateien komplett neu, inkl. mqtt.min.js (369 KB) und
+  // alpine.min.js (47 KB). "no-cache" allein zwingt den Browser weiterhin, bei JEDER Anfrage
+  // beim Server nachzufragen (loest also weiterhin das urspruengliche Problem, wegen dem
+  // no-cache ueberhaupt eingefuehrt wurde - ein Browser-Cache-Missverstaendnis auf dem Handy,
+  // 2026-08-17), erlaubt ihm aber, die Antwort lokal zu behalten und per If-None-Match
+  // bedingt anzufragen - ESPAsyncWebServer beantwortet das dann automatisch mit einem
+  // winzigen "304 Not Modified" statt die komplette Datei erneut zu uebertragen (ETag-Logik
+  // ist in der Library bereits eingebaut, siehe AsyncStaticWebHandler). Immer noch sofort
+  // aktuell nach jedem Deploy, aber ohne die wiederholte Vollzustellung grosser Dateien.
+  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html").setCacheControl("no-cache");
   // DEBUG statt INFO/ERROR: faellt beim Browsen routinemaessig auch fuer harmlose Anfragen
   // wie /favicon.ico an, ist aber fuers Aufspueren kaputter/veralteter Links im Web-Interface
   // nuetzlich (Nachtrag 2026-08-18, Logging-Brainstorming).
