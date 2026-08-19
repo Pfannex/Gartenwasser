@@ -34,7 +34,7 @@
     <h2>Firmware</h2>
     <div class="card footer-card">
       <div class="diag-row"><span class="label">Version</span>&nbsp;<span x-text="version || '…'"></span></div>
-      <div class="diag-row"><span class="label">Uptime</span>&nbsp;<span x-text="uptime !== null ? formatUptime(uptime) : '…'"></span></div>
+      <div class="diag-row"><span class="label">Uptime</span>&nbsp;<span x-text="uptime !== null ? formatUptime(uptime) + ' seit ' + formatBootTime(uptime) : '…'"></span></div>
       <div class="diag-row"><span class="label">Letzter Neustart</span>&nbsp;<span x-text="resetReason || '…'"></span></div>
     </div>
 

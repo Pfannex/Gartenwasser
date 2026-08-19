@@ -77,17 +77,23 @@ function info() {
       }
     },
 
+    // dd:hh:mm:ss, durchgehend 2-stellig gepolstert (Nutzerwunsch) - anders als anderswo im
+    // Projekt (mm:ss fuer Restlaufzeiten) hier bewusst mit Tagen, da Uptime ueber Tage laufen kann.
     formatUptime(totalSeconds) {
+      const pad = (n) => String(n).padStart(2, "0");
       const s = totalSeconds % 60;
       const m = Math.floor(totalSeconds / 60) % 60;
       const h = Math.floor(totalSeconds / 3600) % 24;
       const d = Math.floor(totalSeconds / 86400);
-      const parts = [];
-      if (d) parts.push(d + "d");
-      if (d || h) parts.push(h + "h");
-      if (d || h || m) parts.push(m + "m");
-      parts.push(s + "s");
-      return parts.join(" ");
+      return `${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`;
+    },
+
+    // Boot-Zeitpunkt wird bewusst im Browser aus der Client-Uhr berechnet (Date.now() - Uptime)
+    // statt vom Geraet per eigenem Topic zu kommen - spart eine weitere Publish-Quelle, das
+    // Geraet kennt sein Echtzeit-Datum ohnehin erst nach erfolgreicher NTP-Synchronisierung.
+    formatBootTime(totalSeconds) {
+      const bootDate = new Date(Date.now() - totalSeconds * 1000);
+      return bootDate.toLocaleString("de-DE");
     },
 
     formatKB(bytes) {
