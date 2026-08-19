@@ -264,25 +264,33 @@ Der Editor zeigt für jedes Ventil einen Automatik-Schalter und ein Laufzeit-Fel
 
 ### 6.4 Zeitplan
 
-*Platzhalter für Screenshot: `images/webif-zeitplan.png`*
+![WebIF Zeitplan-Seite](images/webif-zeitplan.webp)
 
 Bis zu 16 Einträge, je Eintrag: verknüpftes Programm (per Name), Trigger-Typ (**täglich**, **wöchentlich** mit Wochentagsauswahl, oder **einmalig** mit Datum), Uhrzeit, aktiv/pausiert. Globaler Schalter „Zeitplan aktiv" (z. B. für Urlaub — deaktiviert alle Trigger, ohne die Konfiguration zu löschen). Abgelaufene „einmalig"-Termine lassen sich über einen Button gesammelt entfernen.
 
+![WebIF Zeitplan-Eintrag bearbeiten](images/webif-zeitplan-bearbeiten.webp)
+
 ### 6.5 Log
 
-*Platzhalter für Screenshot: `images/webif-log.png`*
+![WebIF Log-Seite mit aufgeklapptem JSON-Payload](images/webif-log-json.webp)
 
 Live-Mitschnitt aller Logmeldungen des Geräts (inklusive der Boot-Sequenz und allem MQTT-Publish-/Subscribe-Verkehr). Filterbar nach Quelle und Typ (Fehler/Info/Debug/Publish/Subscribe), Volltextsuche über die Event-Spalte. JSON-Nutzlasten (z. B. Konfigurationsstände) lassen sich über einen „JSON-Payload"-Button einzeln aufklappen.
 
+![WebIF Log-Seite mit aktivem Eventfilter](images/webif-log-filter.webp)
+
+Die Event-Spaltenüberschrift wird per Klick zum Live-Suchfeld — hier gefiltert auf „flash".
+
 ### 6.6 Update
 
-*Platzhalter für Screenshot: `images/webif-update.png`*
+![WebIF Update-Seite](images/webif-update.webp)
 
 Firmware- und Dateisystem-Update direkt aus dem Browser, ohne Entwicklungsumgebung — siehe Kapitel 9.
 
 ### 6.7 Info
 
-*Platzhalter für Screenshot: `images/webif-info.png`*
+![WebIF Info-Seite: Firmware und Hardware](images/webif-info-oben.webp)
+
+![WebIF Info-Seite: Partitionen und Netzwerk](images/webif-info-partitionen.webp)
 
 Gruppierte Hardware-/Systeminformationen: Firmware-Version + Build-Nummer + Uptime + letzter Neustart-Grund, Speicher (RAM/Flash/freier Stack), Partitionstabelle mit Belegung, Netzwerk (IP, WLAN-Signalstärke, MQTT-Broker), sowie feste Hardware-Eckdaten (Board/RAM/Flash/Display/Touch/I-O, siehe Kapitel 2).
 
