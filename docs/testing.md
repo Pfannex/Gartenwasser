@@ -353,6 +353,19 @@ End-to-End-Tests direkt gegen die echten PlatformIO-Build-Artefakte (`firmware.b
 | 5 | Filesystem-Deploy geprüft | `curl .../info.html`/`.../info.js` | Beide `HTTP 200`, Seiteninhalt (vier Gruppen: Firmware/Speicher/Partitionen/Netzwerk) korrekt vorhanden | ✅ |
 | 6 | Keine Regression | Kompletter `test_livelog_pubsub.py`-Lauf nach dem Flash | Alle 4 Prüfpunkte weiterhin PASS | ✅ |
 
+## Zwei Bugfixes: Dashboard "wartet · 00:00" + WebIF-Reconnect nach WLAN-Abbruch — 2026-08-19
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Root Cause "wartet · 00:00" | Code-Review `data/app.js`/`src/MQTT.cpp`: `valveMeta()` nutzte für wartende Auto-Ventile `v.remaining` (aus dem nicht retained Sekundentakt-Topic `V{n}/time/remaining`, nur für das aktive Ventil publiziert) statt `v.time` (retained, `V{n}/time/state`) | Root Cause bestätigt: wartende Ventile bekommen `time/remaining` nie zugestellt, `v.remaining` bleibt am JS-Startwert `"00:00"` hängen | ✅ (Root Cause gefunden) |
+| 2 | Fix build | `pio run` nach Aenderung `data/app.js:158` (`v.remaining` → `v.time`) | Kein Kompilierfehler betroffen (reiner Frontend-Fix) | ✅ |
+| 3 | Datengrundlage nach Flash | MQTT-Snapshot nach `uploadfs`: `V2/time/state`/`V3/time/state` geprüft (Programm „Beete" aktiv, V2=8min/V3=11min laut `main/programs/state`) | Beide Topics liefern korrekt `8`/`11` — Dashboard zeigt nach dem Fix „wartet · 8 min“/„wartet · 11 min“ statt „wartet · 00:00“ | ✅ |
+| 4 | WebIF-Reconnect-Fix build | `pio run` nach `WiFiController::setReconnectCallback()` (neu) + `WebIF::rebindServer()` (neu, per Callback registriert) | Kein Kompilierfehler, RAM 62,6% / Flash 45,1% (Build 00027) | ✅ |
+| 5 | Flash + Boot | `pio run --target upload` + `--target uploadfs`, danach MQTT-Snapshot | `availability=online`, `resetReason=USB`, `diagnostics/version=V0.8.0.0 Build 00027`, `uptime=3` (frischer Boot) | ✅ |
+| 6 | WLAN-Reconnect-Fix End-to-End | **Noch offen** — erfordert einen echten WLAN-Verbindungsabbruch (Router-Regel/MAC-Sperre ~30s) während parallelem WebIF-Zugriffsversuch, um zu verifizieren, dass der Server nach Wiederverbindung tatsächlich neu bindet statt weiter unerreichbar zu bleiben | — | ⏳ Nutzer-Test ausstehend |
+
+**Root-Cause-Notiz WebIF-Reconnect-Bug**: `ESPAsyncWebServer::begin()` wurde bisher nur einmal beim Boot aufgerufen (`WebIF::begin()`). Nach einem WLAN-Verbindungsabbruch+Wiederverbindung kann der zugrundeliegende TCP-Listen-Socket ungültig werden, ohne dass der Server das selbst bemerkt (bekanntes ESPAsyncWebServer/LWIP-Verhalten) — er nimmt keine neuen Verbindungen mehr an, bis ein manueller Reboot den Server neu initialisiert. Indiz aus der Praxis: Nutzer-Screenshot zeigte `diagnostics/lastError = "WLAN Verbindung verloren."` bei gleichzeitig unerreichbarem WebIF, während MQTT (eigene aktive Reconnect-Logik in `MqttManager::loop()`) durchgehend erreichbar blieb — passt exakt zum bekannten Fehlerbild. Fix: `WiFiController` ruft bei jedem erkannten Reconnect (`connected && !wasConnected`) einen registrierten Callback auf; `WebIF::begin()` registriert dafür `rebindServer()` (`server.end(); server.begin();` — registrierte Routen bleiben dabei erhalten, nur der Listen-Socket wird neu aufgebaut).
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.

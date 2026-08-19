@@ -5,6 +5,7 @@
 #include <Update.h>
 
 #include "Logger.h"
+#include "WiFiController.h"
 
 namespace {
 
@@ -67,6 +68,23 @@ void handleOtaChunk(int command, const char *label, size_t index, uint8_t *data,
   }
 }
 
+// ESPAsyncWebServer::begin() wird nur einmal im Setup aufgerufen (siehe WebIF::begin()) - nach
+// einem WLAN-Verbindungsabbruch+Wiederverbindung (neues Netzwerkinterface/neue DHCP-Lease
+// intern) kann der zugrundeliegende TCP-Listen-Socket ungueltig werden, ohne dass der Server
+// das selbst bemerkt: er "denkt" er lauscht noch, nimmt aber keine neuen Verbindungen mehr an
+// (bekanntes ESPAsyncWebServer/LWIP-Verhalten). MQTT ist davon nicht betroffen, weil
+// MqttManager::loop() bei Verbindungsverlust aktiv einen komplett neuen Socket aufbaut - WebIF
+// hatte bislang kein Aequivalent dazu. Fix: bei jedem von WiFiController gemeldeten Reconnect
+// (siehe WiFiController::setReconnectCallback() in WebIF::begin() unten) den Server explizit
+// neu binden. server.end()/begin() loescht dabei NICHT die per server.on(...) registrierten
+// Routen (die bleiben im AsyncWebServer-Objekt bestehen) - nur der Listen-Socket wird neu
+// aufgebaut.
+void rebindServer() {
+  server.end();
+  server.begin();
+  Logger::log(Logger::Type::INFO, Logger::Source::WEB, "WebIF: Server nach WLAN-Reconnect neu gebunden.");
+}
+
 void handleOtaResult(AsyncWebServerRequest *request) {
   const bool ok = !otaFailed;
   AsyncWebServerResponse *response =
@@ -122,6 +140,8 @@ void WebIF::begin() {
 
   server.begin();
   Logger::log(Logger::Type::INFO, Logger::Source::WEB, "WebIF: Webserver gestartet (Port 80).");
+
+  WiFiController::setReconnectCallback(rebindServer);
 }
 
 void WebIF::loop() {

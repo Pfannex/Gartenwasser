@@ -27,6 +27,7 @@ constexpr time_t kMinValidEpoch = 1700000000;
 
 unsigned long lastAttemptMs = 0;
 bool wasConnected = false;
+WiFiController::ReconnectCallback reconnectCallback = nullptr;
 
 // Blockiert, bis WLAN verbunden ist oder das Timeout erreicht wird.
 bool waitForConnection(unsigned long timeoutMs) {
@@ -56,6 +57,8 @@ bool waitForNtpSync(unsigned long timeoutMs) {
 
 }  // namespace
 
+void WiFiController::setReconnectCallback(ReconnectCallback callback) { reconnectCallback = callback; }
+
 void WiFiController::begin() {
   WiFi.mode(WIFI_STA);
   // Muss vor WiFi.begin() gesetzt werden, um zu greifen - macht das Geraet im Router/DHCP
@@ -75,6 +78,9 @@ void WiFiController::loop() {
   if (connected && !wasConnected) {
     Logger::logf(Logger::Type::INFO, Logger::Source::WIFI, "Verbunden. IP: %s",
                  WiFi.localIP().toString().c_str());
+    if (reconnectCallback != nullptr) {
+      reconnectCallback();
+    }
   } else if (!connected && wasConnected) {
     Logger::log(Logger::Type::ERROR, Logger::Source::WIFI, "WLAN Verbindung verloren.");
   }

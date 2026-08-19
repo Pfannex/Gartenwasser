@@ -155,7 +155,7 @@ function dashboard() {
       if (v.index === 0) return v.on ? "an" : "aus";
       if (v.on) return `${v.remaining} verbleibend`;
       if (!v.auto) return `${v.time} min`;
-      return `wartet · ${v.remaining}`;
+      return `wartet · ${v.time} min`;
     },
 
 // "V1 · Apfel" (oder nur "V1" ohne Alias) - Basis fuer Headline und Ventil-Restlaufzeit-Label.
