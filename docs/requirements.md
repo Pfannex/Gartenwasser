@@ -129,63 +129,63 @@ Ersetzt die ursprünglich für Phase 11 vorgesehenen Sammel-Befehle `main/time/s
 ## MQTT-Topic-Struktur
 
 ```
-TOPIC                  | RETAIN | VALUE              | DESCRIPTION
-------------------------------------------------------------------
-gartenwasser/          |        |                    |
-├── availability       | ja     | online|offline     | LWT
-├── V0/                |        |                    |
-│   ├── state          | ja     | ON|OFF             | read-only
-│   ├── alias          | ja     | "Hauptventil"      | Klartextname
-│   └── alias/set      | nein   | "Text"             | Editieren des Alias-Namens
-├── V1/ .. V5/         |        |                    |
-│   ├── state          | ja     | ON|OFF             | read-only, Ist-Zustand
-│   ├── cmd            | nein   | ON|OFF             | Befehl, von HA
-│   ├── alias          | ja     | "Rasen Seite"      | Klartextname
-│   │   └── set        | nein   | "Text"             | Editieren des Alias-Namens
-│   ├── time/          |        |                    |
-│   │   ├── state      | ja     | <Minuten>          | aktuell eingestellte Laufzeit
-│   │   ├── set        | nein   | <Minuten>          | Befehl, von HA
-│   │   └── remaining  | nein   | mm:ss              | Restlaufzeit, Sekundentakt
-│   └── auto/          |        |                    |
-│       ├── state      | ja     | ON|OFF             | Automatik-Flag Ist
-│       └── set        | nein   | ON|OFF             | Automatik-Flag Befehl
-├── main/              |        |                    |
-│   ├── cmd            | nein   | ON|OFF             | Start/Stop Befehl
-│   ├── state          | ja     | ON|OFF             | Sequenz läuft?
-│   ├── activeValve    | ja     | "V1".."V5"|"-"     | aktives Ventil
-│   ├── remainingTotal | nein   | mm:ss              | Restzeit der gesamten Sequenz
-│   ├── time/          |        |                    |
-│   │   └── maxTime    | ja     | <Minuten>          | Obergrenze pro Ventil, effektive Laufzeit = min(time, maxTime)
-│   ├── config/        |        |                    |
-│   │   ├── set        | nein   | JSON               | time/auto/alias/maxTime setzen (komplett oder teilweise)
-│   │   └── state      | ja     | JSON               | Aktueller Gesamtstand von config (retained, Backup/Restore, Presets)
-│   ├── programs/      |        |                    |
-│   │   ├── set        | nein   | JSON               | Programme-Array + activeProgram setzen (Array wird komplett ersetzt)
-│   │   └── state      | ja     | JSON               | Aktueller Gesamtstand von programs (retained)
-│   ├── program/       |        |                    |
-│   │   ├── cmd        | nein   | <integer>          | Programm per Index auswählen, 1-basiert (0 = keins)
-│   │   └── state      | ja     | JSON               | {"index":n,"name":"..."} , aktuell gewähltes Programm
-│   └── schedule/      |        |                    |
-│       ├── set        | nein   | JSON               | Zeitplan-Array + enabled setzen (Array wird komplett ersetzt)
-│       ├── state      | ja     | JSON               | Aktueller Gesamtstand von schedule (retained)
-│       ├── cmd        | nein   | ON|OFF             | Globaler Ein/Aus-Schalter (Convenience, analog main/program/cmd)
-│       └── cleanup    | nein   | beliebig           | Entfernt abgelaufene "once"-Einträge (Einmalbefehl)
-├── main/info/         |        |                    | Hardware-/Systeminfo (Info-Seite), getrennt von diagnostics/ oben
-│   ├── resetReason    | ja     | z.B. "USB"         | Grund des letzten Neustarts (esp_reset_reason()), einmalig pro Boot
-│   ├── uptime         | ja     | <Sekunden>         | Laufzeit seit Boot, alle 30s aktualisiert
-│   ├── stackFree      | ja     | <Byte>             | Freier loopTask-Stack (uxTaskGetStackHighWaterMark), alle 30s
-│   ├── rssi           | ja     | <dBm, negativ>     | WLAN-Signalstärke, alle 30s
-│   ├── ip             | ja     | z.B. "192.168.10.33" | Eigene IP-Adresse, einmalig pro Boot
+TOPIC                  | RETAIN | VALUE                     | DESCRIPTION
+-------------------------------------------------------------------------
+gartenwasser/          |        |                           |
+├── availability       | ja     | online|offline            | LWT
+├── V0/                |        |                           |
+│   ├── state          | ja     | ON|OFF                    | read-only
+│   ├── alias          | ja     | "Hauptventil"             | Klartextname
+│   └── alias/set      | nein   | "Text"                    | Editieren des Alias-Namens
+├── V1/ .. V5/         |        |                           |
+│   ├── state          | ja     | ON|OFF                    | read-only, Ist-Zustand
+│   ├── cmd            | nein   | ON|OFF                    | Befehl, von HA
+│   ├── alias          | ja     | "Rasen Seite"             | Klartextname
+│   │   └── set        | nein   | "Text"                    | Editieren des Alias-Namens
+│   ├── time/          |        |                           |
+│   │   ├── state      | ja     | <Minuten>                 | aktuell eingestellte Laufzeit
+│   │   ├── set        | nein   | <Minuten>                 | Befehl, von HA
+│   │   └── remaining  | nein   | mm:ss                     | Restlaufzeit, Sekundentakt
+│   └── auto/          |        |                           |
+│       ├── state      | ja     | ON|OFF                    | Automatik-Flag Ist
+│       └── set        | nein   | ON|OFF                    | Automatik-Flag Befehl
+├── main/              |        |                           |
+│   ├── cmd            | nein   | ON|OFF                    | Start/Stop Befehl
+│   ├── state          | ja     | ON|OFF                    | Sequenz läuft?
+│   ├── activeValve    | ja     | "V1".."V5"|"-"            | aktives Ventil
+│   ├── remainingTotal | nein   | mm:ss                     | Restzeit der gesamten Sequenz
+│   ├── time/          |        |                           |
+│   │   └── maxTime    | ja     | <Minuten>                 | Obergrenze pro Ventil, effektive Laufzeit = min(time, maxTime)
+│   ├── config/        |        |                           |
+│   │   ├── set        | nein   | JSON                      | time/auto/alias/maxTime setzen (komplett oder teilweise)
+│   │   └── state      | ja     | JSON                      | Aktueller Gesamtstand von config (retained, Backup/Restore, Presets)
+│   ├── programs/      |        |                           |
+│   │   ├── set        | nein   | JSON                      | Programme-Array + activeProgram setzen (Array wird komplett ersetzt)
+│   │   └── state      | ja     | JSON                      | Aktueller Gesamtstand von programs (retained)
+│   ├── program/       |        |                           |
+│   │   ├── cmd        | nein   | <integer>                 | Programm per Index auswählen, 1-basiert (0 = keins)
+│   │   └── state      | ja     | JSON                      | {"index":n,"name":"..."} , aktuell gewähltes Programm
+│   └── schedule/      |        |                           |
+│       ├── set        | nein   | JSON                      | Zeitplan-Array + enabled setzen (Array wird komplett ersetzt)
+│       ├── state      | ja     | JSON                      | Aktueller Gesamtstand von schedule (retained)
+│       ├── cmd        | nein   | ON|OFF                    | Globaler Ein/Aus-Schalter (Convenience, analog main/program/cmd)
+│       └── cleanup    | nein   | beliebig                  | Entfernt abgelaufene "once"-Einträge (Einmalbefehl)
+├── main/info/         |        |                           | Hardware-/Systeminfo (Info-Seite), getrennt von diagnostics/ oben
+│   ├── resetReason    | ja     | z.B. "USB"                | Grund des letzten Neustarts (esp_reset_reason()), einmalig pro Boot
+│   ├── uptime         | ja     | <Sekunden>                | Laufzeit seit Boot, alle 30s aktualisiert
+│   ├── stackFree      | ja     | <Byte>                    | Freier loopTask-Stack (uxTaskGetStackHighWaterMark), alle 30s
+│   ├── rssi           | ja     | <dBm, negativ>            | WLAN-Signalstärke, alle 30s
+│   ├── ip             | ja     | z.B. "192.168.10.33"      | Eigene IP-Adresse, einmalig pro Boot
 │   ├── broker         | ja     | z.B. "192.168.1.123:1883" | MQTT-Broker-Adresse, einmalig pro Boot
-│   └── partitions     | ja     | JSON-Array         | Partitionstabelle (dynamisch per esp_partition_find() ausgelesen), inkl. Belegung wo bestimmbar (app-Slots, webfs, config), einmalig pro Boot
-└── diagnostics/       |        |                    |
-    ├── i2cStatus      | ja     | ok|error           | Status i2cBus / MCP23017
-    ├── lastError      | ja     | <Text/Zeitstempel> | letzte Fehlermeldung
-    ├── version        | ja     | z.B. "V0.8.0.0"    | Firmware-Version (include/Version.h), zum Bestaetigen eines OTA-Updates (Phase 21)
-    ├── ram            | ja     | z.B. "63% (206/328 KB)" | Heap-Nutzung, alle 30s aktualisiert (ESP.getFreeHeap()/getHeapSize())
+│   └── partitions     | ja     | JSON-Array                | Partitionstabelle (dynamisch per esp_partition_find() ausgelesen), inkl. Belegung wo bestimmbar (app-Slots, webfs, config), einmalig pro Boot
+└── diagnostics/       |        |                           |
+    ├── i2cStatus      | ja     | ok|error                  | Status i2cBus / MCP23017
+    ├── lastError      | ja     | <Text/Zeitstempel>        | letzte Fehlermeldung
+    ├── version        | ja     | z.B. "V0.8.0.0"           | Firmware-Version (include/Version.h), zum Bestaetigen eines OTA-Updates (Phase 21)
+    ├── ram            | ja     | z.B. "63% (206/328 KB)"   | Heap-Nutzung, alle 30s aktualisiert (ESP.getFreeHeap()/getHeapSize())
     ├── flash          | ja     | z.B. "45% (1382/3072 KB)" | Sketch-Groesse vs. freier App-Slot (ESP.getSketchSize()/getFreeSketchSpace())
-    └── livelog        | nein   | Log-Zeile (Text)   | jede Logger-Zeile (inkl. PUB/SUB), siehe Log-Format unten
-        └── replay     | nein   | beliebig           | Einmalbefehl: kompletten aktuellen Log-Ringpuffer erneut senden
+    └── livelog        | nein   | Log-Zeile (Text)          | jede Logger-Zeile (inkl. PUB/SUB), siehe Log-Format unten
+        └── replay     | nein   | beliebig                  | Einmalbefehl: kompletten aktuellen Log-Ringpuffer erneut senden
 ```
 
 ## Zugangsdaten
