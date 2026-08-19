@@ -268,7 +268,13 @@ h2 {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .log-search-clear:hover { background: var(--state-running); color: #fff; }
-.log-table td { padding: 3px 10px; vertical-align: top; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; line-height: 1.35; }
+/* white-space:normal statt pre-wrap (2026-08-19, Bug gefunden per DevTools) - pre-wrap
+   bewahrte auch die Zeilenumbrueche/Einrueckung ZWISCHEN den HTML-Tags aus dem mehrzeilig
+   formatierten Template (siehe JSON-Payload-Button), nicht nur echten Text - das erzeugte
+   sichtbare Leerzeilen und blaehte die Zeilenhoehe massiv auf. Normal bricht lange Zeilen
+   genauso an Wortgrenzen um, ohne dieses Problem; .log-json behaelt sein eigenes explizites
+   white-space:pre fuer die tatsaechlich gewuenschte JSON-Einrueckung. */
+.log-table td { padding: 3px 10px; vertical-align: top; color: var(--text-muted); white-space: normal; word-break: break-word; line-height: 1.35; }
 .log-table td.col-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .log-table tr[data-type="ERROR"] td { color: var(--state-running); font-weight: 600; }
 .log-table tr[data-type="INFO"] td { color: var(--text); }

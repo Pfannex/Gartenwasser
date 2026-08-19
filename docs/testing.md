@@ -339,6 +339,8 @@ End-to-End-Tests direkt gegen die echten PlatformIO-Build-Artefakte (`firmware.b
 | 1 | Filesystem-Deploy geprüft | `curl .../log.html`/`.../style.css`, auf `JSON-Payload`/`log-json-toggle`-Strings geprüft | Beide vorhanden — neue Markup-/CSS-Änderungen korrekt ausgeliefert | ✅ |
 | 2 | `diagnostics/ram`/`diagnostics/flash` bei Boot | Live-Log-Mitschnitt direkt nach Neustart | Beide Topics erscheinen korrekt formatiert (`73% (182/247 KB)` bzw. `31% (1436/4508 KB)`) | ✅ |
 | 3 | Keine Regression | Kompletter `test_livelog_pubsub.py`-Lauf nach dem Flash | Alle 4 Prüfpunkte weiterhin PASS | ✅ |
+| 4 | Zeilenhöhe-Bug eingegrenzt | Gemeinsam per Chrome-DevTools (Computed-Panel, `$0.outerHTML` in der Konsole) | `<tr>`-Höhe 71,75px für eine einzelne Textzeile bestätigt; `outerHTML` zeigte wörtliche `\n`+Einrückung zwischen den Template-Tags als Ursache (`white-space: pre-wrap` bewahrte Formatierungs-Whitespace, nicht nur echten Text) | ✅ (Root Cause gefunden) |
+| 5 | Fix verifiziert | `white-space: pre-wrap` → `normal` auf `.log-table td`, deployed, Nutzer prüft im Browser | Kompakte, gleichmäßige Zeilenhöhe — Nutzer-Bestätigung „perfect“ | ✅ |
 
 ## Frühere Phasen (2–13)
 

@@ -509,9 +509,16 @@ Chronologisches Entwicklungs-Log. Fachliche Spezifikation siehe [requirements.md
 - Web-Dashboard (`data/index.html`/`app.js`): zwei neue Zeilen "RAM"/"Flash" in der Diagnostics-Karte, Format wie am Broker: "63% (206/328 KB)" bzw. "31% (1436/4508 KB)".
 - Auf Hardware verifiziert: beide Topics kommen korrekt an, Live-Log-Regressionstest (`test_livelog_pubsub.py`) weiterhin PASS.
 
+### Nachtrag: echter Root-Cause der Zeilenhoehe gefunden und behoben
+
+- Die obige Padding-/line-height-Anpassung reichte nicht - Nutzer meldete nach Reload weiterhin sehr hohe Zeilen, auch fuer reinen Text ohne JSON. Gemeinsam per Chrome-DevTools eingegrenzt (Computed-Panel zeigte `<tr>`-Hoehe von 71,75px fuer eine einzelne Textzeile - viel zu hoch).
+- **Root Cause**: `white-space: pre-wrap` auf `.log-table td` bewahrte nicht nur echten Text, sondern auch die Zeilenumbrueche/Einrueckung ZWISCHEN den HTML-Tags aus dem mehrzeilig formatierten Template (`<template x-if="!l.jsonPretty">\n  <span ...></span>\n</template>...`) - das war vorher unproblematisch (Zelle enthielt nur einen einzigen `<span>`), wurde aber durch das mehrzeilige JSON-Payload-Button-Markup sichtbar: jede Formatierungs-Einrueckung im Quellcode wurde als sichtbare Leerzeile gerendert. Per `$0.outerHTML` in der Browser-Konsole direkt nachgewiesen (zeigte woertliche `\n`+Einrueckung zwischen den Tags).
+- **Fix**: `white-space: pre-wrap` -> `normal` auf `.log-table td` (normales Umbrechen an Wortgrenzen reicht fuer lange Log-Zeilen, ohne das Whitespace-Problem). `.log-json` (der eigentliche JSON-Pretty-Print-Kasten) hat weiterhin sein eigenes explizites `white-space: pre`, bleibt also unveraendert korrekt eingerueckt.
+- Vom Nutzer nach dem Fix bestaetigt: "perfect".
+
 ## Offene Punkte / nächste Schritte
 
-- Merker: bei einem spaeteren Anlass einen Hardware-Status RAM/Flash im Dashboard ergaenzen (urspruenglicher Merker fuer Phase 21, noch nicht umgesetzt).
+- **Neue "Info"-Unterseite** (Nutzerwunsch): gruppierte Hardware-/Systeminfo-Anzeige - RAM/Flash (schon vorhanden), Reset-Grund, Uptime, freier loopTask-Stack, WLAN-Signalstaerke, Partitionstabelle inkl. Auslastung (webfs/config ueber LittleFS.usedBytes()/totalBytes()), zusaetzlich eigene IP und Broker-IP:Port. Dazu ein neues `main/info`-Topic mit sinnvollen Untertopics zum Abfragen derselben Daten per MQTT. Naechster Schritt nach dem Live-Log-Fix (Nutzer: "machen wir aber zuerst das log fertig, nicht beides auf einmal").
 - Feinschliff der Statuszeilen-/Button-Abstände auf der Touch-UI-Hauptseite — funktional fertig, rein kosmetisch noch offen (Nutzer-Aussage: „lass es so, ggf. vielleicht nochmal später hübsch machen“).
 - Erweiterung auf 16 Ventile (V0–V15, volle MCP23017-Kapazität) — eigene, noch nicht begonnene Phase; bekanntes Risiko: `MQTT::parseValveTopic()` müsste für zweistellige Ventilnummern angepasst werden.
 - Phase 10 (Home Assistant MQTT-Discovery) — mit Phase 15 sind alle geräteinternen Phasen (00–09, 11–15) fertig; jetzt hinter dem vorgezogenen Web-Interface (Phasen 16–21) einsortiert, danach der letzte Punkt der ursprünglichen Phasenliste. Zu pruefen bei der Umsetzung: die geplante `V{n}_auto`-Switch-Entity (siehe Abschnitt „Home-Assistant-MQTT-Discovery" oben) trifft jetzt auf die neue Regel „`auto` nur ueber Programme, jede direkte Aenderung loest MANUELL aus" - HA-seitiges Umschalten waere dann ein Programm-Abwahl-Trigger, nicht nur ein Flag-Toggle; ggf. bei Phase 10 nochmal bewusst gegenchecken, ob die Entity so wie geplant sinnvoll bleibt.
