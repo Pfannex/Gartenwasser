@@ -28,6 +28,7 @@ function zeitplan() {
     confirmDeleteIndex: null,
     maxEntries: MAX_ENTRIES,
     weekdayKeys: WEEKDAY_KEYS,
+    footerVersion: "",
 
     init() {
       this.client = mqtt.connect(BROKER_WS_URL);
@@ -61,6 +62,9 @@ function zeitplan() {
           } catch (e) {
             /* ignorieren, Anzeige bleibt beim letzten gueltigen Stand */
           }
+          break;
+        case "diagnostics/version":
+          this.footerVersion = payload;
           break;
       }
     },

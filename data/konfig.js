@@ -18,6 +18,7 @@ function konfiguration() {
     })),
     maxTime: 0,
     maxTimePending: false,
+    footerVersion: "",
 
     init() {
       this.client = mqtt.connect(BROKER_WS_URL);
@@ -53,6 +54,9 @@ function konfiguration() {
         case "main/time/maxTime":
           this.maxTime = parseInt(payload, 10) || 0;
           this.maxTimePending = false;
+          break;
+        case "diagnostics/version":
+          this.footerVersion = payload;
           break;
       }
     },

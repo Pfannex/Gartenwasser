@@ -21,6 +21,7 @@ function programme() {
     editDraft: null,
     confirmDeleteIndex: null,
     maxPrograms: MAX_PROGRAMS,
+    footerVersion: "",
 
     init() {
       this.client = mqtt.connect(BROKER_WS_URL);
@@ -55,6 +56,9 @@ function programme() {
           } catch (e) {
             /* ignorieren, Anzeige bleibt beim letzten gueltigen Stand */
           }
+          break;
+        case "diagnostics/version":
+          this.footerVersion = payload;
           break;
       }
     },

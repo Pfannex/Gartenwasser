@@ -30,12 +30,14 @@ function livelog() {
     sourceMenuOpen: false,
     typeMenuOpen: false,
     eventSearchActive: false,
+    footerVersion: "",
 
     init() {
       this.client = mqtt.connect(BROKER_WS_URL);
       this.client.on("connect", () => {
         this.connected = true;
         this.client.subscribe(TOPIC_PREFIX + "diagnostics/livelog");
+        this.client.subscribe(TOPIC_PREFIX + "diagnostics/version");
         this.client.subscribe(TOPIC_PREFIX + "availability");
         // Kein Retain auf diagnostics/livelog (reiner Stream) - ohne diese Anfrage saehe eine
         // frisch geoeffnete Log-Seite nur kuenftige Zeilen, nichts von vorher.
@@ -52,6 +54,8 @@ function livelog() {
         this.appendLogLine(payload);
       } else if (topic === "availability") {
         this.deviceOnline = payload === "online";
+      } else if (topic === "diagnostics/version") {
+        this.footerVersion = payload;
       }
     },
 

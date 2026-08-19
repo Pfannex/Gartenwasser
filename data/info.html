@@ -33,16 +33,27 @@
 
     <h2>Firmware</h2>
     <div class="card footer-card">
-      <div class="diag-row"><span class="label">Version</span>&nbsp;<span x-text="version || '…'"></span></div>
-      <div class="diag-row"><span class="label">Uptime</span>&nbsp;<span x-text="uptime !== null ? formatUptime(uptime) + ' seit ' + formatBootTime(uptime) : '…'"></span></div>
-      <div class="diag-row"><span class="label">Letzter Neustart</span>&nbsp;<span x-text="resetReason || '…'"></span></div>
+      <div class="diag-row"><span class="label">Version</span><span x-text="version || '…'"></span></div>
+      <div class="diag-row"><span class="label">Uptime</span><span x-text="uptime !== null ? formatUptime(uptime) + ' seit ' + formatBootTime(uptime) : '…'"></span></div>
+      <div class="diag-row"><span class="label">Letzter Neustart</span><span x-text="resetReason || '…'"></span></div>
+    </div>
+
+    <h2>Hardware</h2>
+    <div class="card footer-card">
+      <div class="diag-row"><span class="label">Board</span><span>ESP32-C6FH8</span></div>
+      <div class="diag-row"><span class="label">RAM</span><span>512 KB</span></div>
+      <div class="diag-row"><span class="label">Flash</span><span>8 MB</span></div>
+      <div class="diag-row"><span class="label">TFT</span><span>SPI-JD9853</span></div>
+      <div class="diag-row"><span class="label">Größe</span><span>172×320</span></div>
+      <div class="diag-row"><span class="label">Touch</span><span>AXS5106L</span></div>
+      <div class="diag-row"><span class="label">I/O</span><span>MCP23017</span></div>
     </div>
 
     <h2>Speicher</h2>
     <div class="card footer-card">
-      <div class="diag-row"><span class="label">RAM</span>&nbsp;<span x-text="ram || '…'"></span></div>
-      <div class="diag-row"><span class="label">Flash</span>&nbsp;<span x-text="flash || '…'"></span></div>
-      <div class="diag-row"><span class="label">Freier Stack (loopTask)</span>&nbsp;<span x-text="stackFree !== null ? (stackFree / 1024).toFixed(1) + ' KB' : '…'"></span></div>
+      <div class="diag-row"><span class="label">RAM</span><span x-text="ram || '…'"></span></div>
+      <div class="diag-row"><span class="label">Flash</span><span x-text="flash || '…'"></span></div>
+      <div class="diag-row"><span class="label">Freier Stack (loopTask)</span><span x-text="stackFree !== null ? (stackFree / 1024).toFixed(1) + ' KB' : '…'"></span></div>
     </div>
 
     <h2>Partitionen</h2>
@@ -71,10 +82,12 @@
 
     <h2>Netzwerk</h2>
     <div class="card footer-card">
-      <div class="diag-row"><span class="label">IP-Adresse</span>&nbsp;<span x-text="ip || '…'"></span></div>
-      <div class="diag-row"><span class="label">WLAN-Signal</span>&nbsp;<span x-text="rssi !== null ? rssi + ' dBm' : '…'"></span></div>
-      <div class="diag-row"><span class="label">MQTT-Broker</span>&nbsp;<span x-text="broker || '…'"></span></div>
+      <div class="diag-row"><span class="label">IP-Adresse</span><span x-text="ip || '…'"></span></div>
+      <div class="diag-row"><span class="label">WLAN-Signal</span><span x-text="rssi !== null ? rssi + ' dBm' : '…'"></span></div>
+      <div class="diag-row"><span class="label">MQTT-Broker</span><span x-text="broker || '…'"></span></div>
     </div>
+
+    <footer class="site-footer">Gartenbewässerung<span class="sep">|</span><span x-text="version || '…'"></span><span class="sep">|</span>© by Pfanne/26</footer>
   </div>
 </body>
 </html>

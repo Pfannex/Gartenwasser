@@ -93,22 +93,23 @@
     <h2>Diagnostics</h2>
     <div class="card footer-card">
       <div class="diag-row">
-        <span class="diag-dot" :class="i2cStatus === 'ok' ? 'ok' : 'error'"></span>
-        <span class="label">I2C-Bus</span>&nbsp;<b x-text="i2cStatus"></b>
+        <span class="label"><span class="diag-dot" :class="i2cStatus === 'ok' ? 'ok' : 'error'"></span>I2C-Bus</span><b x-text="i2cStatus"></b>
       </div>
       <div class="diag-row">
-        <span class="label">Letzter Fehler</span>&nbsp;<span x-text="lastError || 'keiner'"></span>
+        <span class="label">Letzter Fehler</span><span x-text="lastError || 'keiner'"></span>
       </div>
       <div class="diag-row">
-        <span class="label">Firmware</span>&nbsp;<span x-text="version || '…'"></span>
+        <span class="label">Firmware</span><span x-text="version || '…'"></span>
       </div>
       <div class="diag-row">
-        <span class="label">RAM</span>&nbsp;<span x-text="ram || '…'"></span>
+        <span class="label">RAM</span><span x-text="ram || '…'"></span>
       </div>
       <div class="diag-row">
-        <span class="label">Flash</span>&nbsp;<span x-text="flash || '…'"></span>
+        <span class="label">Flash</span><span x-text="flash || '…'"></span>
       </div>
     </div>
+
+    <footer class="site-footer">Gartenbewässerung<span class="sep">|</span><span x-text="version || '…'"></span><span class="sep">|</span>© by Pfanne/26</footer>
   </div>
 </body>
 </html>
