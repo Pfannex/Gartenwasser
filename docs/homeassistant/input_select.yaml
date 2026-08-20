@@ -1,0 +1,18 @@
+# Neue Datei fuer Home Assistant - noch NICHT in configuration.yaml eingebunden.
+# Erfordert einen NEUEN Include in der Haupt-configuration.yaml (input_select gibt es dort
+# aktuell noch nicht, anders als input_number/mqtt/automation):
+#
+#   input_select: !include configurations/input_select.yaml
+#
+# Diese Datei dann als configurations/input_select.yaml ablegen (gleiches Muster wie
+# input_number.yaml/mqtt.yaml).
+
+gartenwasser_programm:
+  name: Gartenwasser Programm
+  icon: mdi:sprinkler-variant
+  options:
+    - "Kein Programm"
+  # Weitere Optionen kommen automatisch dazu - siehe automations.yaml
+  # ("Gartenwasser: Programme-Liste synchronisieren"), die die Liste bei jeder
+  # Aenderung von main/programs/state per input_select.set_options aktualisiert.
+  # Der hier eingetragene Startzustand ist nur ein Platzhalter bis zum ersten Sync.

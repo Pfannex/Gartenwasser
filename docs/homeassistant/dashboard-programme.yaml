@@ -1,0 +1,51 @@
+# Lovelace-Dashboard (YAML-Modus) fuer Phase 10.1 - Programme-Auswahl + Start/Stop.
+# Einbindung: Einstellungen -> Dashboards -> "+ Dashboard hinzufuegen" -> "Neues Dashboard
+# aus YAML erstellen", diesen Inhalt einfuegen. Alternativ als zusaetzliche "view" in ein
+# bestehendes Dashboard uebernehmen (dann nur den Inhalt von "views:" kopieren).
+#
+# WICHTIG: die Entity-IDs unten sind aus den in HaDiscovery.cpp vergebenen "name"-Feldern
+# abgeleitet (Home Assistant erzeugt daraus automatisch einen Slug, z. B. "Automatik-
+# Sequenz" -> switch.automatik_sequenz). Bitte in Einstellungen -> Geraete & Dienste ->
+# Entitaeten gegenpruefen, ob die IDs bei dir tatsaechlich so heissen - je nach HA-Version/
+# bereits vorhandenen gleichnamigen Entities kann HA einen abweichenden Suffix vergeben
+# (z. B. "_2").
+
+title: Gartenwasser
+views:
+  - title: Programme
+    path: gartenwasser-programme
+    icon: mdi:sprinkler-variant
+    cards:
+      - type: entities
+        title: Programm
+        entities:
+          - entity: input_select.gartenwasser_programm
+            name: Programm waehlen
+          - entity: switch.automatik_sequenz
+            name: Start / Stop
+
+      - type: glance
+        title: Laufender Status
+        entities:
+          - entity: sensor.aktives_ventil
+            name: Aktives Ventil
+          - entity: sensor.restzeit_sequenz
+            name: Restzeit
+
+      - type: entities
+        title: Ventile (Uebersicht)
+        entities:
+          - entity: switch.ventil_1
+          - entity: switch.ventil_2
+          - entity: switch.ventil_3
+          - entity: switch.ventil_4
+          - entity: switch.ventil_5
+
+      - type: entities
+        title: Diagnose
+        show_header_toggle: false
+        entities:
+          - entity: sensor.i2c_status
+            name: I2C-Bus
+          - entity: sensor.letzter_fehler
+            name: Letzter Fehler

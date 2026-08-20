@@ -32,4 +32,35 @@ Automatische Geräte-/Entity-Erkennung in Home Assistant ohne manuelle YAML-Konf
 
 1. Auf Hardware geflasht, per Python/paho-mqtt gegen den echten Broker verifiziert: alle 26 erwarteten `homeassistant/+/gartenwasser/+/config`-Topics kommen an (5 `switch`, 6 `binary_sensor`, 5 `number`, 10 `sensor`), keine fehlend/zusätzlich. ✅
 2. Beispiel-Payload (`V1_auto`) inhaltlich geprüft: `state_topic`, `name`, `unique_id`, `availability_topic`, `device`- und `origin`-Objekt korrekt und vollständig, `device.name` ("Gartenbewässerung") nach dem Encoding-Fix byteweise korrekt (`\xc3\xa4`). ✅
-3. **Noch nicht durchgeführt** (kein Home-Assistant-Testsystem in dieser Session verfügbar): tatsächliches Verbinden mit einer echten HA-Instanz, Prüfen dass das Gerät „Gartenbewässerung“ mit allen 26 Entities erscheint, Schalter/Number-Entities aus der HA-UI bedienen, Availability-Verhalten bei Geräteausfall.
+3. ✅ Vom Nutzer gegen eine echte HA-Instanz bestätigt: Gerät „Gartenbewässerung“ erscheint mit allen Entities (Steuerung: Automatik-Sequenz, Ventil 1–5 + Laufzeit-Slider; Sensoren: Aktives Ventil, Hauptventil, I2C-Status, Letzter Fehler, Restzeit Sequenz, Ventil-Automatik/-Restlaufzeit je Ventil), Aktivität/Verlauf wird korrekt mitgeschrieben.
+
+## Nachtrag: Phase 10.1 — Programme-Auswahlliste (2026-08-19)
+
+Autodiscovery kann keine dynamische Optionsliste abbilden (HA-`select` bräuchte ein
+Jinja-Template mit fest eingebackener Name→Index-Tabelle, die bei jeder Programmänderung
+per Firmware-Reconnect neu veröffentlicht werden müsste — zu fragil). Stattdessen:
+**Strategiewechsel** — zusätzlich zur automatischen Discovery liefert das Projekt ab jetzt
+manuell einzubindende HA-YAML-Konfiguration mit (`docs/homeassistant/`), die der Nutzer
+selbst in seine bestehende `configurations/`-Struktur übernimmt (kein automatischer
+Rollout, kein Zugriff auf die HA-Instanz von hier aus möglich).
+
+- `docs/homeassistant/mqtt.yaml` — neuer `sensor.gartenwasser_programme` (State: Anzahl
+  Programme, Attribute: rohe `programs`-Liste + `activeProgram` via `json_attributes_topic`
+  auf `main/programs/state`, ohne Template — HA übernimmt alle Top-Level-JSON-Felder
+  automatisch als Attribute).
+- `docs/homeassistant/input_select.yaml` — neuer Helper `input_select.gartenwasser_programm`
+  (passt zum bestehenden `input_number.yaml`-Muster des Nutzers). Erfordert einen NEUEN
+  Include in der Haupt-`configuration.yaml` (`input_select:` gab es dort noch nicht).
+- `docs/homeassistant/automations.yaml` — drei Automationen für bidirektionale
+  Synchronisierung: (1) Programmliste → Dropdown-Optionen (`input_select.set_options`,
+  läuft bei jeder Änderung automatisch, kein manuelles Nachpflegen), (2) aktives Programm
+  vom Gerät → Dropdown-Anzeige, (3) Dropdown-Auswahl → `main/program/cmd`. Kein
+  Rückkopplungsrisiko, da `platform: state`-Trigger nur bei tatsächlicher Wertänderung
+  feuert.
+- `docs/homeassistant/dashboard-programme.yaml` — eigenes Lovelace-Dashboard (Programm-
+  Auswahl, Start/Stop, Ventil-Übersicht, Diagnose). Entity-IDs aus den `name`-Feldern in
+  `HaDiscovery.cpp` abgeleitet (HA-Slug-Konvention) — nicht gegen die echte Instanz
+  verifizierbar, Nutzer muss vor Verwendung gegenprüfen (siehe Kommentar in der Datei).
+- `docs/homeassistant/README.md` — Schritt-für-Schritt-Einbindungsanleitung.
+
+**Noch offen**: Einbindung + Test durch den Nutzer in der echten HA-Instanz.

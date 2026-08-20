@@ -1,0 +1,55 @@
+# Ergaenzung zu configurations/automations.yaml (Home Assistant) - unten anhaengen.
+# Voraussetzung: mqtt.yaml (sensor.gartenwasser_programme) und input_select.yaml
+# (input_select.gartenwasser_programm) sind bereits eingebunden.
+#
+# Drei Automationen zusammen bilden eine bidirektionale Synchronisierung zwischen dem
+# HA-Dropdown und main/program/*:
+#   1. Programme-Liste (Namen) -> Dropdown-Optionen, bei jeder Aenderung der Programme.
+#   2. Aktives Programm (vom Geraet, z.B. per Touch/WebIF gewaehlt) -> Dropdown-Anzeige.
+#   3. Dropdown-Auswahl (durch den Nutzer in HA) -> main/program/cmd (Index).
+#
+# Kein Endlos-Ruecksprung zu erwarten: input_select.select_option loest platform:state nur
+# bei TATSAECHLICHER Aenderung aus - wird derselbe Wert erneut gesetzt (z.B. weil das
+# Geraet die eigene Auswahl bestaetigt), bleibt Automation 3 stumm.
+
+- alias: "Gartenwasser: Programme-Liste synchronisieren"
+  id: gartenwasser_programme_sync_options
+  trigger:
+    - platform: state
+      entity_id: sensor.gartenwasser_programme
+  action:
+    - service: input_select.set_options
+      target:
+        entity_id: input_select.gartenwasser_programm
+      data:
+        options: >
+          {{ ['Kein Programm'] + (state_attr('sensor.gartenwasser_programme', 'programs') | default([]) | map(attribute='name') | list) }}
+
+- alias: "Gartenwasser: Aktives Programm -> Dropdown"
+  id: gartenwasser_programm_sync_state
+  trigger:
+    - platform: mqtt
+      topic: "gartenwasser/main/program/state"
+  action:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.gartenwasser_programm
+      data:
+        option: "{{ trigger.payload_json.name | default('Kein Programm', true) }}"
+
+- alias: "Gartenwasser: Dropdown -> Programm waehlen"
+  id: gartenwasser_programm_select
+  trigger:
+    - platform: state
+      entity_id: input_select.gartenwasser_programm
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "gartenwasser/main/program/cmd"
+        payload: >
+          {% set names = state_attr('sensor.gartenwasser_programme', 'programs') | default([]) | map(attribute='name') | list %}
+          {% if trigger.to_state.state == 'Kein Programm' or trigger.to_state.state not in names %}
+            0
+          {% else %}
+            {{ names.index(trigger.to_state.state) + 1 }}
+          {% endif %}

@@ -1,0 +1,18 @@
+# Ergaenzung zu configurations/mqtt.yaml (Home Assistant) - unter den bestehenden
+# "light:"-Block anhaengen, NICHT ersetzen. Deckt das ab, was die MQTT-Discovery (Phase 10,
+# 26 automatisch erkannte Entities: Ventile, Automatik, Diagnose) bewusst nicht abdeckt -
+# den Programm-Namen als lesbare Liste fuer die Dropdown-Synchronisierung, siehe
+# input_select.yaml + automations.yaml in diesem Ordner.
+#
+# Kollisionsfrei zu den 26 Discovery-Entities: eigene unique_id, kein ueberlappendes Topic.
+
+sensor:
+  - name: "Gartenwasser Programme"
+    unique_id: gartenwasser_programs_raw
+    state_topic: "gartenwasser/main/programs/state"
+    value_template: "{{ value_json.programs | length }}"
+    unit_of_measurement: "Programme"
+    json_attributes_topic: "gartenwasser/main/programs/state"
+    # Attribute "programs" (Array {name,time,auto}) und "activeProgram" (Index) stehen dadurch
+    # als sensor.gartenwasser_programme-Attribute zur Verfuegung - Grundlage fuer die
+    # Dropdown-Synchronisierung in automations.yaml.
