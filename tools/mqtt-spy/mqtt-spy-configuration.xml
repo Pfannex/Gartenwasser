@@ -60,6 +60,9 @@
             <Publication topic="gartenwasser/main/schedule/cmd"/>
             <Publication topic="gartenwasser/main/schedule/cleanup"/>
 
+            <!-- Live-Log: Replay-Anfrage (kompletten Ringpuffer erneut senden) -->
+            <Publication topic="gartenwasser/diagnostics/livelog/replay"/>
+
             <!-- LWT -->
             <Subscription createTab="true" qos="0" topic="gartenwasser/availability" scriptFile=""/>
 
@@ -89,8 +92,15 @@
             <!-- Hardware-/Systeminfo (Info-Seite, main/info/*) -->
             <Subscription createTab="true" qos="0" topic="gartenwasser/main/info/+" scriptFile=""/>
 
-            <!-- Diagnose -->
+            <!-- Diagnose (i2cStatus, lastError, livelog) -->
             <Subscription createTab="true" qos="0" topic="gartenwasser/diagnostics/+" scriptFile=""/>
+
+            <!-- Home-Assistant-MQTT-Discovery (Phase 10): alle 26 Discovery-Configs (switch/
+                 binary_sensor/number/sensor) unter homeassistant/<component>/gartenwasser/
+                 <object_id>/config. Bewusst nicht "homeassistant/#" - auf demselben Broker
+                 laufen fremde Geraete mit eigenen Discovery-Configs (z.B. "venti_001"), die
+                 hier nicht mit reinsollen. -->
+            <Subscription createTab="true" qos="0" topic="homeassistant/+/gartenwasser/+/config" scriptFile=""/>
 
             <AutoOpen>false</AutoOpen>
             <AutoConnect>true</AutoConnect>
