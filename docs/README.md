@@ -31,4 +31,6 @@ Tabellenreihenfolge = geplante Bearbeitungsreihenfolge, nicht die Phasennummer (
 | [19](spec/19-webif-programme.md) | Web-Interface: Programme verwalten | ✅ |
 | [20](spec/20-webif-zeitplan.md) | Web-Interface: Zeitplan verwalten | ✅ |
 | [21](spec/21-webif-ota.md) | Web-Interface: Firmware-Update (OTA) | ✅ |
-| [10](spec/10-ha-discovery.md) | Home Assistant MQTT-Discovery | 📋 (zurückgestellt — externe Integration, ganz zum Schluss) |
+| [10](spec/10-ha-discovery.md) | Home Assistant MQTT-Discovery | ✅ |
+
+Damit sind alle geplanten Phasen abgeschlossen. Verbleibend nur noch (siehe `docs/Log.md`, „Offene Punkte“): das zurückgestellte WebIF-Verbindungsproblem (braucht das iPhone der Ehefrau zum Nachtesten) und die humorvoll auf „V2.0“ vertagte 16-Ventile-Erweiterung.

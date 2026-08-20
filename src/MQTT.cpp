@@ -21,6 +21,7 @@
 #include "Version.h"
 #include "BuildNumber.h"
 #include "WiFiController.h"
+#include "HaDiscovery.h"
 #include "secrets.h"
 
 namespace {
@@ -1469,6 +1470,7 @@ bool connectToBroker() {
     publishProgramState();
     publishProgramsState();
     publishScheduleState();
+    HaDiscovery::publishAll();
   }
   return ok;
 }
@@ -1483,6 +1485,8 @@ void MQTT::begin() {
   mqttClient.setBufferSize(static_cast<uint16_t>(kMaxJsonPayloadSize));
   Logger::setLineCallback(&onLoggerLine);
 }
+
+void MQTT::publish(const char *topic, const char *payload, bool retained) { publishAndLog(topic, payload, retained); }
 
 void MQTT::loop() {
   const unsigned long now = millis();

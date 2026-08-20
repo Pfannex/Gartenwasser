@@ -18,6 +18,13 @@ void loop();
 /// Liefert true, wenn aktuell eine MQTT-Verbindung besteht.
 bool isConnected();
 
+/// Oeffentlicher Zugriff auf die zentrale Publish-Stelle (siehe MQTT.cpp, publishAndLog()) -
+/// fuer Module wie HaDiscovery, die eigene Topics publizieren, aber keinen direkten Zugriff
+/// auf den privaten PubSubClient dieser Datei haben sollen. topic ist der volle Topic-String
+/// (inkl. "gartenwasser/"- bzw. "homeassistant/"-Praefix), landet wie jeder andere Publish
+/// auch im Live-Log.
+void publish(const char *topic, const char *payload, bool retained);
+
 /// Startet/stoppt die Automatik-Sequenz genau wie ein main/cmd MQTT-Befehl
 /// (inkl. aller Publishes) - fuer lokale Ausloeser wie das Touch-UI, keine
 /// Sonderlogik gegenueber dem MQTT-Pfad.

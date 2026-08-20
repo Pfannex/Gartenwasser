@@ -277,9 +277,9 @@ Zweiter Teil, `src/OTA.h`/`.cpp`: `ArduinoOTA`-Bibliothek für den eigenen Dev-W
 
 **Nachtrag (2026-08-18): automatischer Build-Zähler.** `build_number.txt` (versioniert, ein Integer) wird von `tools/increment_build_number.py` — als PlatformIO-`extra_scripts`-Pre-Build-Hook eingebunden — bei jedem Build um 1 hochgezählt und daraus `include/BuildNumber.h` (`kBuildNumber`, 5-stellig, z. B. `"00004"`) generiert; die Header-Datei selbst ist reines Build-Artefakt (`.gitignore`). `diagnostics/version` zeigt seither `"<kFirmwareVersion> Build <kBuildNumber>"` (z. B. `"V0.8.0.0 Build 00004"`), ebenso die Boot-Log-Zeile. `kFirmwareVersion` bleibt weiterhin manuell gepflegt, nur die Build-Nummer läuft automatisch mit. Ein `pio run` ohne `-e` baut beide Environments (siehe oben) und zählt dadurch zweimal hoch — kein Fehler, nur bei genauer Zählung zu beachten.
 
-## Home-Assistant-MQTT-Discovery (Phase 10, geplant)
+## Home-Assistant-MQTT-Discovery (Phase 10, ✅ fertig — 2026-08-19)
 
-Alle Discovery-Configs teilen sich ein `device`-Objekt (`identifiers: ["gartenwasser"]`, Name „Gartenbewässerung“, Hersteller „Pf@nne“) und referenzieren `gartenwasser/availability` (online/offline), damit alle Entities auf einer Geräteseite in Home Assistant gebündelt sind.
+Alle Discovery-Configs teilen sich ein `device`-Objekt (`identifiers: ["gartenwasser"]`, Name „Gartenbewässerung“, Hersteller „Pf@nne“, `sw_version`) und ein `origin`-Objekt (Firmware-Name/-Version), referenzieren `gartenwasser/availability` (online/offline) als `availability_topic`, damit alle Entities auf einer Geräteseite in Home Assistant gebündelt sind und bei Geräteausfall gemeinsam als „nicht verfügbar“ erscheinen.
 
 | HA-Komponente | Object-ID | Topics |
 |---|---|---|
@@ -287,14 +287,16 @@ Alle Discovery-Configs teilen sich ein `device`-Objekt (`identifiers: ["gartenwa
 | `switch` | `V{n}_cmd` | cmd: `V{n}/cmd`, state: `V{n}/state` |
 | `number` | `V{n}_time` | set: `V{n}/time/set`, state: `V{n}/time/state` |
 | `sensor` | `V{n}_remaining` | state: `V{n}/time/remaining` |
-| `switch` | `V{n}_auto` | set: `V{n}/auto/set`, state: `V{n}/auto/state` |
+| `binary_sensor` | `V{n}_auto` | state: `V{n}/auto/state` |
 | `switch` | `main_cmd` | cmd: `main/cmd`, state: `main/state` |
 | `sensor` | `main_activeValve` | state: `main/activeValve` |
 | `sensor` | `main_remainingTotal` | state: `main/remainingTotal` |
 | `sensor` | `diag_i2cStatus` | state: `diagnostics/i2cStatus` |
 | `sensor` | `diag_lastError` | state: `diagnostics/lastError` |
 
-Discovery-Configs werden retained unter `homeassistant/<component>/gartenwasser/<object_id>/config` nach jedem erfolgreichen MQTT-Connect neu publiziert.
+**Nachtrag (Umsetzung 2026-08-19)**: `V{n}_auto` bewusst als `binary_sensor` (nur Anzeige) statt `switch` implementiert — abweichend vom ursprünglichen Plan oben. Grund: seit der MANUELL-Regel (siehe Abschnitt „Programme“) wählt ein direktes Setzen von `auto` implizit das aktive Programm ab; ein schaltbarer HA-`switch` wäre damit überraschend (Umlegen löst unsichtbar eine Programm-Abwahl aus). Ändern der Automatik-Teilnahme bleibt exklusiv über Programme (Touch-UI, WebIF, `main/program/cmd`).
+
+Discovery-Configs (insgesamt 26 Entities) werden retained unter `homeassistant/<component>/gartenwasser/<object_id>/config` publiziert, jeweils komplett neu nach jedem erfolgreichen MQTT-Connect (nicht nur beim Boot) — stellt sicher, dass Home Assistant die Entities auch nach einem eigenen Neustart (leere Datenbank) wiederfindet. Implementiert in `src/HaDiscovery.h`/`.cpp`, aufgerufen aus `MqttManager::connectToBroker()`.
 
 ## Entscheidungshistorie
 

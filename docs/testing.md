@@ -399,6 +399,17 @@ Trotz Bugfix 3 (Caching) trat das Problem erneut auf. Gezielter Isolationstest d
 
 **Root-Cause-Notiz WebIF-Reconnect-Bug**: `ESPAsyncWebServer::begin()` wurde bisher nur einmal beim Boot aufgerufen (`WebIF::begin()`). Nach einem WLAN-Verbindungsabbruch+Wiederverbindung kann der zugrundeliegende TCP-Listen-Socket ungültig werden, ohne dass der Server das selbst bemerkt (bekanntes ESPAsyncWebServer/LWIP-Verhalten) — er nimmt keine neuen Verbindungen mehr an, bis ein manueller Reboot den Server neu initialisiert. Indiz aus der Praxis: Nutzer-Screenshot zeigte `diagnostics/lastError = "WLAN Verbindung verloren."` bei gleichzeitig unerreichbarem WebIF, während MQTT (eigene aktive Reconnect-Logik in `MqttManager::loop()`) durchgehend erreichbar blieb — passt exakt zum bekannten Fehlerbild. Fix: `WiFiController` ruft bei jedem erkannten Reconnect (`connected && !wasConnected`) einen registrierten Callback auf; `WebIF::begin()` registriert dafür `rebindServer()` (`server.end(); server.begin();` — registrierte Routen bleiben dabei erhalten, nur der Listen-Socket wird neu aufgebaut).
 
+## Phase 10: Home Assistant MQTT-Discovery — 2026-08-19
+
+| # | Prüfpunkt | Test (was/wie) | Ergebnis | Bewertung |
+|---|---|---|---|---|
+| 1 | Build | `pio run` nach neuer `HaDiscovery`-Klasse (`src/HaDiscovery.h`/`.cpp`) + `MQTT::publish()` | Kein Kompilierfehler, RAM unverändert (Stack-lokale JSON-Docs, keine persistente Zunahme), Flash +2948 Byte | ✅ |
+| 2 | Flash + Discovery-Configs vollständig | `pio run --target upload`, danach `mosquitto`-Snapshot auf `homeassistant/+/gartenwasser/+/config` | Exakt 26 Configs (5 `switch`, 6 `binary_sensor`, 5 `number`, 10 `sensor`) — kein fehlendes/zusätzliches Topic gegenüber der Mapping-Tabelle | ✅ |
+| 3 | Payload-Struktur | Beispiel-Payload (`V1_auto`) inhaltlich geprüft | `state_topic`, `name`, `unique_id`, `availability_topic`, vollständiges `device`- und `origin`-Objekt korrekt vorhanden | ✅ |
+| 4 | Encoding-Bug gefunden | `device.name` ("Gartenbewässerung") byteweise verglichen | Wörtlicher Umlaut im C++-Quelltext führte zu einem U+FFFD-Ersatzzeichen in der publizierten Config, obwohl die Quelldatei selbst korrekt UTF-8-kodiert war (per `rb`-Byte-Inspektion bestätigt) | ✅ (Root Cause gefunden) |
+| 5 | Encoding-Fix verifiziert | Hex-Escape (`"Gartenbew\xc3\xa4sserung"`) statt wörtlichem Zeichen, neu geflasht (Build 00040), erneuter MQTT-Snapshot mit Byte-Vergleich | `device.name` liefert exakt `b'Gartenbew\xc3\xa4sserung'` — korrekt | ✅ |
+| 6 | Home-Assistant-Instanz-Test | **Noch offen** — kein HA-Testsystem in dieser Session verfügbar; echtes Erscheinen des Geräts + Bedienung aus der HA-UI noch nicht durchgeführt | — | ⏳ Nutzer-Test ausstehend |
+
 ## Frühere Phasen (2–13)
 
 Einzeln je Phase manuell auf Hardware verifiziert, bevor die automatisierten Python/paho-mqtt-Skripte eingeführt wurden (ab Phase 14) — Details und Testfälle in den jeweiligen `docs/spec/*.md`-Dateien, kurz zusammengefasst in `docs/Log.md`. Kein struktureller Nacherfassungsbedarf, da der Regressionstest oben (Phase 12) dieselbe Funktionalität nochmal zusammenhängend abdeckt.
