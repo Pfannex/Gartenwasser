@@ -1,51 +1,85 @@
-# Lovelace-Dashboard (YAML-Modus) fuer Phase 10.1 - Programme-Auswahl + Start/Stop.
+# Lovelace-Dashboard (YAML-Modus) - Nachbau der WebIF-Statusseite (docs/manual/images/
+# webif-status.webp) + Programme-Auswahl (Phase 10.1/10.3).
 # Einbindung: Einstellungen -> Dashboards -> "+ Dashboard hinzufuegen" -> "Neues Dashboard
-# aus YAML erstellen", diesen Inhalt einfuegen. Alternativ als zusaetzliche "view" in ein
-# bestehendes Dashboard uebernehmen (dann nur den Inhalt von "views:" kopieren).
+# aus YAML erstellen", diesen Inhalt einfuegen. Alternativ ueber configuration.yaml als
+# YAML-Dashboard registrieren (lovelace.dashboards, url_path braucht einen Bindestrich!).
 #
-# WICHTIG: die Entity-IDs unten sind aus den in HaDiscovery.cpp vergebenen "name"-Feldern
-# abgeleitet (Home Assistant erzeugt daraus automatisch einen Slug, z. B. "Automatik-
-# Sequenz" -> switch.automatik_sequenz). Bitte in Einstellungen -> Geraete & Dienste ->
-# Entitaeten gegenpruefen, ob die IDs bei dir tatsaechlich so heissen - je nach HA-Version/
-# bereits vorhandenen gleichnamigen Entities kann HA einen abweichenden Suffix vergeben
-# (z. B. "_2").
+# Entity-IDs unten sind aus der ECHTEN Entity-Registry einer laufenden Instanz uebernommen
+# (core.entity_registry), nicht nur aus den HaDiscovery.cpp-"name"-Feldern geraten - Home
+# Assistant haengt bei Discovery-Entities automatisch den Geraetenamen als Praefix an
+# (z. B. "Ventil 1" -> switch.gartenbewasserung_ventil_1). Trotzdem vor Verwendung gegen
+# die eigene Instanz pruefen (Einstellungen -> Geraete & Dienste -> Entitaeten) - bei
+# Namenskollisionen kann HA einen abweichenden Suffix ("_2") vergeben.
+#
+# Bekannte Luecke: WebIF-Ventil-Aliase (z. B. "Sprenger Rasen") sind NICHT ueber MQTT/
+# Discovery verfuegbar (kein Topic dafuer) - das Dashboard zeigt daher "Ventil 1" statt
+# des Alias. Wer die Aliase im Dashboard sehen will, muss sie manuell in customize.yaml
+# als friendly_name je Entity eintragen und bei Aenderung im WebIF von Hand nachpflegen.
 
 title: Gartenwasser
 views:
-  - title: Programme
-    path: gartenwasser-programme
+  - title: Status
+    path: gartenwasser-status
     icon: mdi:sprinkler-variant
     cards:
-      - type: entities
-        title: Programm
-        entities:
-          - entity: input_select.gartenwasser_programm
-            name: Programm waehlen
-          - entity: switch.automatik_sequenz
+      - type: horizontal-stack
+        cards:
+          - type: tile
+            entity: switch.gartenbewasserung_automatik_sequenz
             name: Start / Stop
+            icon: mdi:play-circle
+            vertical: true
+          - type: tile
+            entity: input_select.gartenwasser_programm
+            name: Programm
+            vertical: true
 
-      - type: glance
-        title: Laufender Status
-        entities:
-          - entity: sensor.aktives_ventil
-            name: Aktives Ventil
-          - entity: sensor.restzeit_sequenz
-            name: Restzeit
-
-      - type: entities
-        title: Ventile (Uebersicht)
-        entities:
-          - entity: switch.ventil_1
-          - entity: switch.ventil_2
-          - entity: switch.ventil_3
-          - entity: switch.ventil_4
-          - entity: switch.ventil_5
+      - type: markdown
+        title: Ventile
+        content: |
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          {% for n in range(0,6) %}
+            {%- if n == 0 -%}
+              {%- set is_on = is_state('binary_sensor.gartenbewasserung_hauptventil','on') -%}
+              {%- set label = 'V0' -%}
+              {%- set alias = 'Hauptventil' -%}
+              {%- set status = 'an' if is_on else 'aus' -%}
+              {%- set active = is_on -%}
+            {%- else -%}
+              {%- set is_on = is_state('switch.gartenbewasserung_ventil_' ~ n, 'on') -%}
+              {%- set is_auto = is_state('binary_sensor.gartenbewasserung_ventil_' ~ n ~ '_automatik', 'on') -%}
+              {%- set remaining = states('sensor.gartenbewasserung_ventil_' ~ n ~ '_restlaufzeit') -%}
+              {%- set configured = states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') -%}
+              {%- set label = 'V' ~ n -%}
+              {%- set alias = 'Ventil ' ~ n -%}
+              {%- if is_on -%}
+                {%- set status = (remaining if remaining not in ['unknown','unavailable',none] else configured) ~ ' min' -%}
+              {%- elif is_auto -%}
+                {%- set status = 'wartet · ' ~ configured ~ ' min' -%}
+              {%- else -%}
+                {%- set status = configured ~ ' min' -%}
+              {%- endif -%}
+              {%- set active = is_on or is_auto -%}
+            {%- endif -%}
+          <div style="background:{{ '#2e7d5b' if active else '#2b2f36' }};border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-weight:bold;">{{ label }}</div>
+          <div style="font-size:0.85em;">{{ alias }}</div>
+          <div style="font-size:0.8em;opacity:0.8;">{{ status }}</div>
+          </div>
+          {% endfor %}
+          </div>
 
       - type: entities
         title: Diagnose
         show_header_toggle: false
         entities:
-          - entity: sensor.i2c_status
+          - entity: sensor.gartenbewasserung_i2c_status
             name: I2C-Bus
-          - entity: sensor.letzter_fehler
+          - entity: sensor.gartenbewasserung_letzter_fehler
             name: Letzter Fehler
+          - entity: sensor.gartenwasser_firmware
+            name: Firmware
+          - entity: sensor.gartenwasser_ram
+            name: RAM
+          - entity: sensor.gartenwasser_flash
+            name: Flash

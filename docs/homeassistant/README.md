@@ -3,7 +3,14 @@
 Ergänzt die automatische MQTT-Discovery (Phase 10, 26 Entities — Ventile, Automatik,
 Diagnose, siehe `docs/spec/10-ha-discovery.md`) um das, was Discovery allein nicht
 abdeckt: eine Programme-Auswahlliste mit automatisch synchronisierter Optionsliste
-(Phase 10.1).
+(Phase 10.1) sowie ein eigenes Status-Dashboard, das die WebIF-Statusseite
+(`docs/manual/images/webif-status.webp`) im Rahmen der verfügbaren Entities nachbildet
+(Phase 10.3).
+
+**Bekannte Lücke:** WebIF-Ventil-Aliase (z. B. „Sprenger Rasen") sind über MQTT/Discovery
+nicht verfügbar (kein Topic dafür) — das Dashboard zeigt daher „Ventil 1" statt des
+Alias. Wer die Aliase sehen will, muss sie manuell in `customize.yaml` als
+`friendly_name` je Entity eintragen und bei Änderung im WebIF von Hand nachpflegen.
 
 **Voraussetzung:** Phase 10 (Discovery) läuft bereits — die 26 Basis-Entities müssen
 in Home Assistant sichtbar sein, bevor diese Ergänzung Sinn ergibt (sie referenziert
@@ -38,11 +45,25 @@ z. B. `switch.automatik_sequenz` im Dashboard).
 5. Prüfen: `input_select.gartenwasser_programm` sollte nach dem Neustart automatisch
    mit den aktuellen Programmnamen befüllt sein (Automation „Gartenwasser: Programme-
    Liste synchronisieren“ läuft beim ersten `main/programs/state`-Update).
-6. **`dashboard-programme.yaml`**: Einstellungen → Dashboards → „+ Dashboard
-   hinzufügen“ → „Neues Dashboard aus YAML erstellen“, Inhalt einfügen. Vorher die
-   Entity-IDs gegen deine tatsächliche Installation prüfen (Kommentar oben in der
-   Datei) — HA leitet sie aus den Anzeigenamen ab, kann bei Namenskollisionen aber
-   abweichen.
+6. **`dashboard-programme.yaml`**: entweder über Einstellungen → Dashboards → „+
+   Dashboard hinzufügen“ → „Neues Dashboard aus YAML erstellen“ einfügen, oder als
+   Datei ablegen (z. B. `dashboards/gartenwasser.yaml`) und in `configuration.yaml`
+   registrieren:
+   ```yaml
+   lovelace:
+     mode: storage
+     dashboards:
+       gartenwasser-dashboard:   # url_path braucht zwingend einen Bindestrich, sonst
+         mode: yaml              # "Invalid config for 'lovelace'" beim Config-Check
+         title: Gartenwasser
+         icon: mdi:sprinkler-variant
+         show_in_sidebar: true
+         filename: dashboards/gartenwasser.yaml
+   ```
+   Vorher die Entity-IDs gegen deine tatsächliche Installation prüfen (Einstellungen →
+   Geräte & Dienste → Entitäten) — die Datei enthält bereits die per Entity-Registry
+   verifizierten IDs (Präfix `gartenbewasserung_`), bei Namenskollisionen kann HA aber
+   einen abweichenden Suffix („_2") vergeben.
 
 ## Funktionsweise (kurz)
 

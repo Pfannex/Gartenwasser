@@ -16,3 +16,19 @@ sensor:
     # Attribute "programs" (Array {name,time,auto}) und "activeProgram" (Index) stehen dadurch
     # als sensor.gartenwasser_programme-Attribute zur Verfuegung - Grundlage fuer die
     # Dropdown-Synchronisierung in automations.yaml.
+
+  # Firmware/RAM/Flash haben (wie die Programme-Liste oben) keine Discovery-Entity - die
+  # 26 Discovery-Entities decken nur i2cStatus/lastError aus diagnostics/* ab. Rest sind
+  # retained Plain-Text-Topics, daher ohne Template direkt uebernehmbar. Fuer das
+  # Status-Dashboard (dashboard-programme.yaml), Diagnose-Karte.
+  - name: "Gartenwasser Firmware"
+    unique_id: gartenwasser_diag_version
+    state_topic: "gartenwasser/diagnostics/version"
+
+  - name: "Gartenwasser RAM"
+    unique_id: gartenwasser_diag_ram
+    state_topic: "gartenwasser/diagnostics/ram"
+
+  - name: "Gartenwasser Flash"
+    unique_id: gartenwasser_diag_flash
+    state_topic: "gartenwasser/diagnostics/flash"
