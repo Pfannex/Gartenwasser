@@ -413,6 +413,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             cards:
               - type: entities
                 title: Alias
