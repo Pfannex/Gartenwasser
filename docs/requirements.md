@@ -298,6 +298,17 @@ Alle Discovery-Configs teilen sich ein `device`-Objekt (`identifiers: ["gartenwa
 
 Discovery-Configs (insgesamt 26 Entities) werden retained unter `homeassistant/<component>/gartenwasser/<object_id>/config` publiziert, jeweils komplett neu nach jedem erfolgreichen MQTT-Connect (nicht nur beim Boot) — stellt sicher, dass Home Assistant die Entities auch nach einem eigenen Neustart (leere Datenbank) wiederfindet. Implementiert in `src/HaDiscovery.h`/`.cpp`, aufgerufen aus `MqttManager::connectToBroker()`.
 
+**Backlog-Idee (2026-08-21, noch nicht umgesetzt):** neues retained Topic `main/totalDuration` —
+beim Start einer Automatik-Sequenz (`main/cmd ON`) einmalig die Gesamtdauer des GERADE
+gestarteten Programms einfrieren und veröffentlichen, bis zum Sequenzende unverändert (unabhängig
+davon, ob der Nutzer währenddessen die Programmauswahl ändert). Hintergrund: der HA-Gesamtlaufzeit-
+Balken (`docs/homeassistant/dashboard-programme.yaml`) muss die Gesamtdauer aktuell in HA selbst
+aus der Summe der Laufzeiten aller `auto=on`-Ventile annähern, da es dafür kein Topic gibt — diese
+Annäherung folgt aber den LIVE-Auto-Flags, nicht dem tatsächlich laufenden Programm, und kann bei
+einem Programmwechsel mitten im Lauf auf 0 fallen (siehe `docs/Log.md`, Nachtrag Fortschrittsbalken,
+dort mit einem adaptiven Untergrenzen-Workaround in HA abgefangen). Ein echtes Firmware-Topic würde
+diesen Workaround überflüssig machen.
+
 ## Entscheidungshistorie
 
 - Konfiguration per MQTT (2026-08-15): statt eines separaten `main/reset`-Topics mit fest hinterlegten Presets (`DEFAULT`/`TEST`) gibt es `main/config/set`/`main/config/state` (volle Konfiguration als JSON, lesen/schreiben, Teil-Updates möglich). Presets sind damit einfach extern gespeicherte JSON-Payloads statt Firmware-Code. Ersetzt außerdem die für Phase 11 geplanten Sammel-Befehle `main/time/set`/`main/auto/set`. Noch nicht implementiert (siehe `docs/spec/11-sammelbefehle.md`).

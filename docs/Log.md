@@ -742,6 +742,7 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 
 ## Offene Punkte / nächste Schritte
 - **Phase 10.1/10.3 Dashboard, iterativer Aufbau in Arbeit**: Status-Seite Kachel 1 (Start/Stop-Button + aktives Programm) gebaut, siehe Nachtrag 2026-08-21 - noch nicht visuell in HA verifiziert. Naechste Elemente der Status-Seite (Ventil-Grid, Diagnose-Karte) folgen schrittweise nach demselben Muster (R:\ live anpassen, docs/homeassistant/ spiegeln, Log.md fortschreiben). Restliche Views (Konfiguration/Programme/Zeitplan/Log/Info) haben noch Platzhalter-Karten.
+- **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.2 (Zeitplan-Sichtbarkeit)**: globaler "Zeitplan aktiv"-Schalter (`main/schedule/cmd`) fehlt noch in den Discovery-Entities, optional "naechster Termin"-Anzeige - noch nicht begonnen.
 - **Phase 10.3 (vollstaendiges Dashboard)**: alle Entities (Ventile, Automatik, Diagnose, Programme) in einer Ansicht - noch nicht begonnen.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo Phase 10/10.1 laufen - noch nicht begonnen.
