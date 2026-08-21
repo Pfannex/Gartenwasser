@@ -341,8 +341,22 @@ views:
                 name: I2C-Bus
               - entity: sensor.gartenbewasserung_letzter_fehler
                 name: Letzter Fehler
-              # Firmware/RAM/Flash vorerst raus - Entities werden noch nicht angelegt,
-              # wird separat nachverfolgt.
+              - entity: sensor.gartenwasser_firmware
+                name: Firmware
+              - entity: sensor.gartenwasser_ram
+                name: RAM
+              - entity: sensor.gartenwasser_flash
+                name: Flash
+
+          - type: markdown
+            content: >-
+              Gartenbewässerung | {{ states('sensor.gartenwasser_firmware') }} | © by
+              Pfanne/26
+            grid_options:
+              columns: full
+            # Fusszeile nach WebIF-Vorbild (docs/manual/images) - "Gartenbewaesserung" und
+            # das Copyright sind bewusst statischer Text (kein passendes MQTT-Topic dafuer),
+            # nur die Firmware-Version in der Mitte ist live aus diagnostics/version.
 
   - title: Konfiguration
     path: gartenwasser-konfiguration
