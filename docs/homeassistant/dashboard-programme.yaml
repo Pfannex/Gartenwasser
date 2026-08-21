@@ -375,11 +375,21 @@ views:
             content: "## Globale Einstellungen"
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
 
           - type: entities
             show_header_toggle: false
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             entities:
               - entity: number.gartenwasser_max_time
                 name: Maximale Laufzeit
@@ -387,27 +397,14 @@ views:
             # (mqtt.yaml) verpackt den Wert per command_template in main/config/set.
 
           - type: markdown
-            content: >
-              Harte Obergrenze pro Ventil (`min(Laufzeit, Max)`) — überschreitet eine
-              konfigurierte Laufzeit diesen Wert, wird das im WebIF gelb markiert (in HA
-              nicht separat abgebildet).
-            grid_options:
-              columns: full
-
-          - type: markdown
             content: "## Ventile"
             grid_options:
               columns: full
-
-          - type: markdown
-            content: >
-              Laufzeit/Alias gelten für den manuellen Betrieb (z. B. Kachel-Klick auf dem
-              Dashboard) und werden beim Verlassen eines Feldes sofort übernommen.
-              Automatik wird ausschließlich über Programme gesetzt — eine hier geänderte
-              Laufzeit setzt das aktive Programm auf „MANUELL" zurück (siehe Hinweis dazu
-              auf der Statusseite).
-            grid_options:
-              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
 
           - type: custom:stack-in-card
             mode: horizontal
@@ -463,6 +460,7 @@ views:
               style: |
                 ha-card {
                   text-align: center;
+                  min-width: 700px;
                 }
 
   - title: Programme

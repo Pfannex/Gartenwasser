@@ -753,6 +753,7 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Fusszeile (identisch zur Statusseite, zentriert) als letzte Karte ergaenzt - erscheint jetzt zuverlaessig ganz unten ueber die volle Breite.
 - Per Screenshot verifiziert: Reihenfolge/Layout exakt wie gewuenscht, keine Fehler.
 - **Nachtrag "Spalten breiter"**: diesmal per `card_mod` (`ha-card { min-width: 700px; }`) auf der Alias/Laufzeit-`stack-in-card` direkt geloest - anders als beim verworfenen Versuch auf der Statusseite lag hier KEIN konkurrierendes numerisches `grid_options.columns` vor (die Karte war schon `columns: full`), wodurch `min-width` sauber griff und sogar die gesamte Seitenbreite mitgewachsen ist (alle Karten, nicht nur die eine). Per Screenshot verifiziert: keine Umbrueche mehr, alle Laufzeit-Werte vollstaendig lesbar.
+- **Nachtrag "Hinweise raus, Rest angleichen"**: beide erklaerenden Markdown-Hinweistexte ("Harte Obergrenze...", "Laufzeit/Alias gelten...") entfernt. Die uebrigen Karten ("Globale Einstellungen"-Ueberschrift, "Maximale Laufzeit"-Karte, "Ventile"-Ueberschrift, Fusszeile) bekamen dasselbe `min-width: 700px` wie die Alias/Laufzeit-Karte, damit die ganze Seite eine einheitliche Breite hat. Per Screenshot verifiziert: durchgehend gleich breite Karten, sauberes Layout.
 
 ### Nachtrag: Status-Seite Layout — Ventile/Diagnose nebeneinander — 2026-08-21
 
