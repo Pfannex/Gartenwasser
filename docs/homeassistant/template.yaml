@@ -13,8 +13,23 @@
 # rechnet die Bar-Card selbst aus Uhrzeit + Gesamtdauer - dafuer braucht es eine Entity mit
 # der GEPLANTEN Gesamtdauer (Summe der Laufzeiten aller Ventile mit auto=on), die es bisher
 # nirgends gibt.
-
-- sensor:
+#
+# Trigger-basiert (nicht die einfachere "state:"-Kurzform) - der Sensor rechnet dadurch
+# auch periodisch (alle 30s) neu, nicht nur bei einer Aenderung der ueberwachten Entities.
+# Wichtig fuer die "elapsed"-Untergrenze weiter unten: die muss waehrend eines laufenden
+# Zyklus staendig mitwachsen, nicht nur einmalig beim Einschalten berechnet werden.
+- trigger:
+    - platform: time_pattern
+      seconds: "/30"
+    - platform: state
+      entity_id:
+        - switch.gartenbewasserung_automatik_sequenz
+        - binary_sensor.gartenbewasserung_ventil_1_automatik
+        - binary_sensor.gartenbewasserung_ventil_2_automatik
+        - binary_sensor.gartenbewasserung_ventil_3_automatik
+        - binary_sensor.gartenbewasserung_ventil_4_automatik
+        - binary_sensor.gartenbewasserung_ventil_5_automatik
+  sensor:
     - name: "Gartenwasser Gesamtlaufzeit"
       unique_id: gartenwasser_total_duration
       unit_of_measurement: "min"
@@ -25,7 +40,22 @@
             {% set ns.total = ns.total + (states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') | float(0)) %}
           {% endif %}
         {% endfor %}
-        {{ ns.total }}
+        {% set sw = states.switch.gartenbewasserung_automatik_sequenz %}
+        {% set elapsed = ((now() - sw.last_changed).total_seconds() / 60) if sw and sw.state == 'on' else 0 %}
+        {{ [ns.total, elapsed + 5, 1] | max }}
       # Summe der konfigurierten Laufzeiten aller Ventile, die aktuell an der Automatik
       # teilnehmen (auto=on) - Naeherung an die tatsaechliche Sequenzdauer, passend zum
       # AutomaticController-Ablauf (V1->V5 sequenziell, siehe docs/requirements.md).
+      #
+      # max(..., 1) verhindert 0: kommt vor, wenn waehrend einer laufenden Sequenz das
+      # Programm auf "Kein Programm" gewechselt wird (kein Ventil mehr auto=on), die
+      # Automatik selbst aber noch nachlaeuft - eine duration von 0 liesse timer-bar-card
+      # (Division durch 0) auf reinen Text ohne Balken zurueckfallen.
+      #
+      # max(..., elapsed + 5) ist der eigentliche Fix fuer denselben Randfall: eine feste
+      # Untergrenze (z.B. 30 min) haette das Problem nur verzoegert, sobald die Sequenz
+      # laenger als die feste Zahl laeuft, waere "die Zeit wieder abgelaufen" und der
+      # Balken erneut verschwunden. Die Untergrenze waechst dank des time_pattern-Triggers
+      # oben laufend mit der seit dem Einschalten verstrichenen Zeit (+5 min Puffer) mit -
+      # kann dadurch nie kleiner als die tatsaechlich schon verstrichene Laufzeit werden,
+      # egal wie lange dieser Randfall anhaelt.

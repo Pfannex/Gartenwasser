@@ -78,9 +78,6 @@ views:
                 duration:
                   entity: sensor.gartenwasser_gesamtlaufzeit
                   units: minutes
-                remain_time:
-                  entity: sensor.gartenwasser_main_remaining_hms
-                  units: duration
                 layout: hide_name
                 icon: mdi:clock-outline
                 bar_height: 10px
@@ -91,11 +88,17 @@ views:
                   - condition: state
                     entity: switch.gartenbewasserung_automatik_sequenz
                     state: "on"
-                # remain_time (main/remainingTotal) ist waehrend des Laufens laut Nutzer
-                # sekuendlich zuverlaessig - im Ruhezustand aber "unknown" (Topic wird nur
-                # waehrend der Automatik publiziert), was die Karte zum Absturz bringt. Die
-                # visibility-Bedingung oben sorgt dafuer, dass die Karte nur gerendert wird,
-                # wenn remain_time garantiert einen gueltigen Wert hat.
+                # BEWUSST kein remain_time (main/remainingTotal): timer-bar-card hat einen
+                # bekannten, ungefixten Upstream-Bug (rianadon/timer-bar-card#244) - wenn die
+                # Karte einmal in dem kurzen Fenster rendert, bevor die erste frische
+                # MQTT-Nachricht ankommt (remain_time kurzzeitig "unknown"), bleibt sie
+                # dauerhaft haengen (nur Icon+Text, kein Balken) und erholt sich NICHT von
+                # selbst, auch wenn die Daten danach laengst gueltig sind - nur ein
+                # Seiten-Reload hilft, was der Nutzer explizit abgelehnt hat. Stattdessen wie
+                # bei den Ventil-Balken rein aus Uhrzeit + duration selbst berechnet - kein
+                # Abhaengigkeit von einer Quelle, die je "unknown" sein kann, damit tritt der
+                # Bug erst gar nicht auf. visibility oben blendet die Karte ausserdem im
+                # Ruhezustand komplett aus.
 
           # War vorher ein "type: markdown"-Card mit <div style="..."> als Pseudo-Grid -
           # gerendert hat HA daraus nur rohen Text (DOMPurify filtert Inline-style/divs in

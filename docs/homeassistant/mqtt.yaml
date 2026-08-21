@@ -55,16 +55,3 @@ sensor:
     unique_id: gartenwasser_v5_alias
     state_topic: "gartenwasser/V5/alias"
 
-  # V{n}/time/remaining und main/remainingTotal kommen als "mm:ss" (siehe docs/requirements.md
-  # Topic-Baum), timer-bar-card erwartet fuer units:"duration" aber "h:mm:ss" - ohne
-  # Stunden-Anteil wuerde "03:28" faelschlich als 3 Stunden 28 Minuten gelesen. Deshalb eigene
-  # Sensoren, die "0:" voranstellen. Nutzer-Bestaetigung (2026-08-21): beide Topics werden
-  # sekuendlich publiziert und sind zuverlaessig nutzbar (nicht nur waehrend des Laufens).
-  #
-  # Wichtig: KEIN "object_id:" hier - ist fuer die MQTT-"sensor"-Plattform keine gueltige
-  # Option (fuehrte zu einem Config-Fehler, der jeden YAML-Reload stumm scheitern liess) -
-  # `name` muss deshalb exakt zum gewuenschten Entity-ID-Slug passen.
-  - name: "Gartenwasser Main Remaining HMS"
-    unique_id: gartenwasser_main_remaining_hms
-    state_topic: "gartenwasser/main/remainingTotal"
-    value_template: "0:{{ value }}"
