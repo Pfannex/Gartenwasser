@@ -1,0 +1,31 @@
+# Neue Datei fuer Home Assistant - noch NICHT in configuration.yaml eingebunden.
+# Erfordert einen NEUEN Include in der Haupt-configuration.yaml (template gibt es dort
+# aktuell noch nicht):
+#
+#   template: !include configurations/template.yaml
+#
+# Diese Datei dann als configurations/template.yaml ablegen.
+#
+# Grund: main/remainingTotal (Restzeit der gesamten Automatik-Sequenz) ist wie die
+# Ventil-Restlaufzeiten nicht retained und nur waehrend des Laufens publiziert - fuer den
+# Gesamtlaufzeit-Balken auf der Status-Seite (dashboard-programme.yaml, timer-bar-card)
+# reicht das nicht als Basis (siehe Log.md, Nachtrag Fortschrittsbalken). Stattdessen
+# rechnet die Bar-Card selbst aus Uhrzeit + Gesamtdauer - dafuer braucht es eine Entity mit
+# der GEPLANTEN Gesamtdauer (Summe der Laufzeiten aller Ventile mit auto=on), die es bisher
+# nirgends gibt.
+
+- sensor:
+    - name: "Gartenwasser Gesamtlaufzeit"
+      unique_id: gartenwasser_total_duration
+      unit_of_measurement: "min"
+      state: >-
+        {% set ns = namespace(total=0) %}
+        {% for n in range(1, 6) %}
+          {% if is_state('binary_sensor.gartenbewasserung_ventil_' ~ n ~ '_automatik', 'on') %}
+            {% set ns.total = ns.total + (states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') | float(0)) %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.total }}
+      # Summe der konfigurierten Laufzeiten aller Ventile, die aktuell an der Automatik
+      # teilnehmen (auto=on) - Naeherung an die tatsaechliche Sequenzdauer, passend zum
+      # AutomaticController-Ablauf (V1->V5 sequenziell, siehe docs/requirements.md).

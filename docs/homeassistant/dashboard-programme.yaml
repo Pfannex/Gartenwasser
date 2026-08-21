@@ -33,80 +33,300 @@ views:
       - type: grid
         cards:
           - type: custom:stack-in-card
-            mode: horizontal
             grid_options:
               columns: full
-              rows: 4
             cards:
-              - type: custom:mushroom-template-card
+              - type: custom:stack-in-card
+                mode: horizontal
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: switch.gartenbewasserung_automatik_sequenz
+                    primary: "{{ 'STOP' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'START' }}"
+                    icon: "{{ 'mdi:stop' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'mdi:play' }}"
+                    icon_color: "{{ 'red' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'green' }}"
+                    layout: vertical
+                    tap_action:
+                      action: toggle
+                    card_mod:
+                      style:
+                        ha-tile-icon$: |
+                          .container {
+                            width: 96px !important;
+                            height: 96px !important;
+                            border-radius: 50% !important;
+                          }
+                        .: |
+                          ha-tile-icon {
+                            --mdc-icon-size: 64px !important;
+                          }
+
+                  - type: custom:mushroom-template-card
+                    primary: Aktives Programm
+                    secondary: "{{ states('input_select.gartenwasser_programm') }}"
+                    icon: mdi:playlist-check
+                    layout: horizontal
+                    # Bewusst rein informativ, kein tap_action: sowohl die entities-Karte
+                    # (fruehere Version) als auch mushroom-select-card (Zwischenversion)
+                    # oeffneten bei Klick einen Dialog/eigenes Fenster - vom Nutzer explizit
+                    # abgelehnt (siehe Log.md). Programm-Wechsel bleibt vorerst WebIF/Touch.
+                    # Platzhalter: "Naechster Termin" (siehe WebIF-Vorbild) folgt in einem
+                    # spaeteren Schritt, sobald Zeitplan-Daten per MQTT verfuegbar sind.
+
+              - type: custom:timer-bar-card
                 entity: switch.gartenbewasserung_automatik_sequenz
-                primary: "{{ 'STOP' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'START' }}"
-                icon: "{{ 'mdi:stop' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'mdi:play' }}"
-                icon_color: green
-                layout: vertical
+                active_state: "on"
+                duration:
+                  entity: sensor.gartenwasser_gesamtlaufzeit
+                  units: minutes
+                remain_time:
+                  entity: sensor.gartenwasser_main_remaining_hms
+                  units: duration
+                layout: hide_name
+                icon: mdi:clock-outline
+                bar_height: 10px
+                sync_issues: fix
                 tap_action:
-                  action: toggle
-                card_mod:
-                  style:
-                    ha-tile-icon$: |
-                      .container {
-                        width: 96px !important;
-                        height: 96px !important;
-                        border-radius: 50% !important;
-                      }
-                    .: |
-                      ha-tile-icon {
-                        --mdc-icon-size: 64px !important;
-                      }
+                  action: none
+                visibility:
+                  - condition: state
+                    entity: switch.gartenbewasserung_automatik_sequenz
+                    state: "on"
+                # remain_time (main/remainingTotal) ist waehrend des Laufens laut Nutzer
+                # sekuendlich zuverlaessig - im Ruhezustand aber "unknown" (Topic wird nur
+                # waehrend der Automatik publiziert), was die Karte zum Absturz bringt. Die
+                # visibility-Bedingung oben sorgt dafuer, dass die Karte nur gerendert wird,
+                # wenn remain_time garantiert einen gueltigen Wert hat.
 
-              - type: custom:mushroom-template-card
-                primary: "{{ states('input_select.gartenwasser_programm') }}"
-                secondary: Aktives Programm
-                icon: mdi:playlist-check
-                layout: horizontal
-                # Platzhalter: "Naechster Termin" (siehe WebIF-Vorbild) folgt in einem
-                # spaeteren Schritt, sobald Zeitplan-Daten per MQTT verfuegbar sind.
-
-          - type: tile
-            entity: input_select.gartenwasser_programm
-            name: Programm wählen
-
-          - type: markdown
-            title: Ventile
+          # War vorher ein "type: markdown"-Card mit <div style="..."> als Pseudo-Grid -
+          # gerendert hat HA daraus nur rohen Text (DOMPurify filtert Inline-style/divs in
+          # Markdown-Karten komplett raus, siehe Log.md). Erst durch eine schlichte
+          # entities-Karte ersetzt, jetzt auf mushroom-template-card umgestellt (bereits
+          # verifiziert funktionstuechtig beim Start/Programm-Element) - damit lassen sich
+          # Alias-Name + dynamische Laufzeit/Restlaufzeit + Automatik-Faerbung abbilden, was
+          # eine reine entities-Karte nicht kann.
+          - type: custom:stack-in-card
             grid_options:
               columns: full
-            content: |
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-              {% for n in range(0,6) %}
-                {%- if n == 0 -%}
-                  {%- set is_on = is_state('binary_sensor.gartenbewasserung_hauptventil','on') -%}
-                  {%- set label = 'V0' -%}
-                  {%- set alias = 'Hauptventil' -%}
-                  {%- set status = 'an' if is_on else 'aus' -%}
-                  {%- set active = is_on -%}
-                {%- else -%}
-                  {%- set is_on = is_state('switch.gartenbewasserung_ventil_' ~ n, 'on') -%}
-                  {%- set is_auto = is_state('binary_sensor.gartenbewasserung_ventil_' ~ n ~ '_automatik', 'on') -%}
-                  {%- set remaining = states('sensor.gartenbewasserung_ventil_' ~ n ~ '_restlaufzeit') -%}
-                  {%- set configured = states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') -%}
-                  {%- set label = 'V' ~ n -%}
-                  {%- set alias = 'Ventil ' ~ n -%}
-                  {%- if is_on -%}
-                    {%- set status = (remaining if remaining not in ['unknown','unavailable',none] else configured) ~ ' min' -%}
-                  {%- elif is_auto -%}
-                    {%- set status = 'wartet · ' ~ configured ~ ' min' -%}
-                  {%- else -%}
-                    {%- set status = configured ~ ' min' -%}
-                  {%- endif -%}
-                  {%- set active = is_on or is_auto -%}
-                {%- endif -%}
-              <div style="background:{{ '#2e7d5b' if active else '#2b2f36' }};border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-weight:bold;">{{ label }}</div>
-              <div style="font-size:0.85em;">{{ alias }}</div>
-              <div style="font-size:0.8em;opacity:0.8;">{{ status }}</div>
-              </div>
-              {% endfor %}
-              </div>
+            cards:
+              - type: markdown
+                content: "## Ventile"
+
+              - type: custom:mushroom-template-card
+                primary: "{{ states('sensor.gartenwasser_v0_alias') }}"
+                secondary: "{{ 'An' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else 'Aus' }}"
+                icon: mdi:valve
+                icon_color: "{{ 'red' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else 'green' }}"
+                layout: horizontal
+
+              - type: custom:stack-in-card
+                mode: horizontal
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: switch.gartenbewasserung_ventil_1
+                    primary: "{{ states('sensor.gartenwasser_v1_alias') }}"
+                    secondary: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_1', 'on') %}
+                        {{ states('sensor.gartenbewasserung_ventil_1_restlaufzeit') }} min
+                      {% else %}
+                        {{ states('number.gartenbewasserung_ventil_1_laufzeit') }} min
+                      {% endif %}
+                    icon: mdi:sprinkler-variant
+                    icon_color: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_1', 'on') %}
+                        red
+                      {% elif is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') %}
+                        green
+                      {% else %}
+                        grey
+                      {% endif %}
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
+
+                  - type: custom:timer-bar-card
+                    entity: switch.gartenbewasserung_ventil_1
+                    active_state: "on"
+                    duration:
+                      entity: number.gartenbewasserung_ventil_1_laufzeit
+                      units: minutes
+                    layout: hide_name
+                    icon: mdi:clock-outline
+                    bar_height: 10px
+                    sync_issues: fix
+                    tap_action:
+                      action: none
+                    visibility:
+                      - condition: state
+                        entity: switch.gartenbewasserung_ventil_1
+                        state: "on"
+
+              - type: custom:stack-in-card
+                mode: horizontal
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: switch.gartenbewasserung_ventil_2
+                    primary: "{{ states('sensor.gartenwasser_v2_alias') }}"
+                    secondary: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_2', 'on') %}
+                        {{ states('sensor.gartenbewasserung_ventil_2_restlaufzeit') }} min
+                      {% else %}
+                        {{ states('number.gartenbewasserung_ventil_2_laufzeit') }} min
+                      {% endif %}
+                    icon: mdi:sprinkler-variant
+                    icon_color: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_2', 'on') %}
+                        red
+                      {% elif is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') %}
+                        green
+                      {% else %}
+                        grey
+                      {% endif %}
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
+
+                  - type: custom:timer-bar-card
+                    entity: switch.gartenbewasserung_ventil_2
+                    active_state: "on"
+                    duration:
+                      entity: number.gartenbewasserung_ventil_2_laufzeit
+                      units: minutes
+                    layout: hide_name
+                    icon: mdi:clock-outline
+                    bar_height: 10px
+                    sync_issues: fix
+                    tap_action:
+                      action: none
+                    visibility:
+                      - condition: state
+                        entity: switch.gartenbewasserung_ventil_2
+                        state: "on"
+
+              - type: custom:stack-in-card
+                mode: horizontal
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: switch.gartenbewasserung_ventil_3
+                    primary: "{{ states('sensor.gartenwasser_v3_alias') }}"
+                    secondary: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_3', 'on') %}
+                        {{ states('sensor.gartenbewasserung_ventil_3_restlaufzeit') }} min
+                      {% else %}
+                        {{ states('number.gartenbewasserung_ventil_3_laufzeit') }} min
+                      {% endif %}
+                    icon: mdi:sprinkler-variant
+                    icon_color: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_3', 'on') %}
+                        red
+                      {% elif is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') %}
+                        green
+                      {% else %}
+                        grey
+                      {% endif %}
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
+
+                  - type: custom:timer-bar-card
+                    entity: switch.gartenbewasserung_ventil_3
+                    active_state: "on"
+                    duration:
+                      entity: number.gartenbewasserung_ventil_3_laufzeit
+                      units: minutes
+                    layout: hide_name
+                    icon: mdi:clock-outline
+                    bar_height: 10px
+                    sync_issues: fix
+                    tap_action:
+                      action: none
+                    visibility:
+                      - condition: state
+                        entity: switch.gartenbewasserung_ventil_3
+                        state: "on"
+
+              - type: custom:stack-in-card
+                mode: horizontal
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: switch.gartenbewasserung_ventil_4
+                    primary: "{{ states('sensor.gartenwasser_v4_alias') }}"
+                    secondary: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_4', 'on') %}
+                        {{ states('sensor.gartenbewasserung_ventil_4_restlaufzeit') }} min
+                      {% else %}
+                        {{ states('number.gartenbewasserung_ventil_4_laufzeit') }} min
+                      {% endif %}
+                    icon: mdi:sprinkler-variant
+                    icon_color: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_4', 'on') %}
+                        red
+                      {% elif is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') %}
+                        green
+                      {% else %}
+                        grey
+                      {% endif %}
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
+
+                  - type: custom:timer-bar-card
+                    entity: switch.gartenbewasserung_ventil_4
+                    active_state: "on"
+                    duration:
+                      entity: number.gartenbewasserung_ventil_4_laufzeit
+                      units: minutes
+                    layout: hide_name
+                    icon: mdi:clock-outline
+                    bar_height: 10px
+                    sync_issues: fix
+                    tap_action:
+                      action: none
+                    visibility:
+                      - condition: state
+                        entity: switch.gartenbewasserung_ventil_4
+                        state: "on"
+
+              - type: custom:stack-in-card
+                mode: horizontal
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: switch.gartenbewasserung_ventil_5
+                    primary: "{{ states('sensor.gartenwasser_v5_alias') }}"
+                    secondary: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_5', 'on') %}
+                        {{ states('sensor.gartenbewasserung_ventil_5_restlaufzeit') }} min
+                      {% else %}
+                        {{ states('number.gartenbewasserung_ventil_5_laufzeit') }} min
+                      {% endif %}
+                    icon: mdi:sprinkler-variant
+                    icon_color: >-
+                      {% if is_state('switch.gartenbewasserung_ventil_5', 'on') %}
+                        red
+                      {% elif is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') %}
+                        green
+                      {% else %}
+                        grey
+                      {% endif %}
+                    layout: horizontal
+                    tap_action:
+                      action: toggle
+
+                  - type: custom:timer-bar-card
+                    entity: switch.gartenbewasserung_ventil_5
+                    active_state: "on"
+                    duration:
+                      entity: number.gartenbewasserung_ventil_5_laufzeit
+                      units: minutes
+                    layout: hide_name
+                    icon: mdi:clock-outline
+                    bar_height: 10px
+                    sync_issues: fix
+                    tap_action:
+                      action: none
+                    visibility:
+                      - condition: state
+                        entity: switch.gartenbewasserung_ventil_5
+                        state: "on"
 
           - type: entities
             title: Diagnose
@@ -138,15 +358,17 @@ views:
     icon: mdi:playlist-check
     show_icon_and_title: true
     cards:
-      - type: entities
-        title: Programm waehlen
-        entities:
-          - entity: input_select.gartenwasser_programm
+      # Programm-Auswahl passiert jetzt inline auf der Status-Seite (mushroom-select-card,
+      # Dropdown ohne eigenes Fenster) - die fruehere "Programm waehlen"-entities-Karte hier
+      # wurde entfernt, weil eine entities-Karte bei input_select IMMER den more-info-Dialog
+      # (eigenes Fenster) oeffnet - genau das, was hier vermieden werden sollte.
       - type: markdown
         content: >
           **Programm-Editor noch nicht umgesetzt.** Anlegen/Bearbeiten/Loeschen von
           Programmen (Ventile + Laufzeiten je Programm) gibt es bisher nur im WebIF -
-          dafuer muesste die Firmware zusaetzliche MQTT-Command-Topics anbieten.
+          dafuer muesste die Firmware zusaetzliche MQTT-Command-Topics anbieten. Die
+          Programm-Auswahl selbst (welches Programm aktiv ist) geht bereits inline
+          auf der Status-Seite.
 
   - title: Zeitplan
     path: gartenwasser-zeitplan

@@ -7,14 +7,9 @@ abdeckt: eine Programme-Auswahlliste mit automatisch synchronisierter Optionslis
 (`docs/manual/images/webif-status.webp`) im Rahmen der verfügbaren Entities nachbildet
 (Phase 10.3).
 
-**Bekannte Lücke:** WebIF-Ventil-Aliase (z. B. „Sprenger Rasen") sind über MQTT/Discovery
-nicht verfügbar (kein Topic dafür) — das Dashboard zeigt daher „Ventil 1" statt des
-Alias. Wer die Aliase sehen will, muss sie manuell in `customize.yaml` als
-`friendly_name` je Entity eintragen und bei Änderung im WebIF von Hand nachpflegen.
-
 **Voraussetzung:** Phase 10 (Discovery) läuft bereits — die 26 Basis-Entities müssen
 in Home Assistant sichtbar sein, bevor diese Ergänzung Sinn ergibt (sie referenziert
-z. B. `switch.automatik_sequenz` im Dashboard).
+z. B. `switch.gartenbewasserung_automatik_sequenz` im Dashboard).
 
 ## Abhängigkeiten (Custom Cards über HACS)
 
@@ -27,6 +22,7 @@ Repositories erkunden & herunterladen" installieren, danach Browser-Cache leeren
 | **Mushroom** | `piitaya/lovelace-mushroom` | `mushroom-template-card` für die Start/Stop-Kachel (Icon + Programmname in einer Box) — reine Bordmittel-Karten (`tile`, `markdown`) konnten das nicht: eine `tile`-Karte ist immer als Ganzes die Tap-Fläche und lässt sich nicht mit fremden Entities kombinieren, eine `markdown`-Karte filtert Inline-`style`-Attribute per DOMPurify-Sanitizing komplett raus (kein Grid/keine Farben rendern). |
 | **card_mod** | `thomasloven/lovelace-card-mod` | CSS-Override für die Icon-Größe der Mushroom-Karte (`--icon-size`) — Mushroom selbst bietet dafür keine YAML-Option. |
 | **stack-in-card** | `custom-cards/stack-in-card` | Fasst mehrere Karten (z. B. Start/Stop-Button + Programm-Anzeige) zu einer optisch nahtlosen Kachel mit gemeinsamem Rahmen zusammen — ein reiner `horizontal-stack` (Bordmittel) lässt jede Kind-Karte mit eigenem Schatten/Abstand stehen. |
+| **timer-bar-card** | `rianadon/timer-bar-card` | Fortschrittsbalken für Ventil-Laufzeit + Gesamtlaufzeit der Sequenz — berechnet die Restzeit selbst aus Client-Uhrzeit + `duration`, ohne durchgehend auf die nicht-retained `time/remaining`-Topics angewiesen zu sein (Ausnahme: der Gesamtlaufzeit-Balken nutzt `main/remainingTotal` zusätzlich als `remain_time`, siehe `dashboard-programme.yaml`). |
 
 Zusätzlich in der Test-Instanz installiert, aber von dieser Config **nicht** referenziert (nicht
 nötig für den Nachbau, nur zur Vollständigkeit dokumentiert — vermutlich aus der verlorenen
@@ -48,6 +44,7 @@ gestylte Dashboard-Kacheln in Home Assistant.
 |---|---|
 | `mqtt.yaml` | Inhalt an `configurations/mqtt.yaml` anhängen (unter den bestehenden `light:`-Block) |
 | `input_select.yaml` | Als `configurations/input_select.yaml` ablegen (neu) |
+| `template.yaml` | Als `configurations/template.yaml` ablegen (neu) |
 | `automations.yaml` | Inhalt an `configurations/automations.yaml` anhängen |
 | `dashboard-programme.yaml` | Als neues Dashboard einfügen (siehe Kommentar in der Datei) |
 
@@ -62,16 +59,25 @@ gestylte Dashboard-Kacheln in Home Assistant.
    ```yaml
    input_select: !include configurations/input_select.yaml
    ```
-3. **`automations.yaml`**: die drei Automationen an `configurations/automations.yaml`
+3. **`template.yaml`** (neu): Inhalt als `configurations/template.yaml` speichern. In der
+   Haupt-`configuration.yaml` einen **neuen** Include ergänzen — `template` gibt es bei
+   dir aktuell noch nicht:
+   ```yaml
+   template: !include configurations/template.yaml
+   ```
+4. **`automations.yaml`**: die drei Automationen an `configurations/automations.yaml`
    anhängen (bestehende Automationen bleiben unverändert).
-4. Home Assistant neu starten (Einstellungen → System → Neu starten) — YAML-Änderungen
-   an `input_select`/`mqtt`/`automation` lassen sich zwar teils per „Config neu laden“
-   übernehmen, ein kompletter Neustart ist aber der zuverlässigste Weg bei mehreren
-   gleichzeitigen Änderungen.
-5. Prüfen: `input_select.gartenwasser_programm` sollte nach dem Neustart automatisch
+5. **Home Assistant komplett neu starten** (Einstellungen → System → Neu starten, NICHT
+   nur „Alle YAML-Konfigurationen neu laden“) — ein brandneuer Top-Level-Schlüssel wie
+   `template:`, der vorher noch nie in deiner `configuration.yaml` stand, wird von einem
+   reinen YAML-Reload nicht wirklich initialisiert (die Entities bleiben dauerhaft
+   "unknown"/nicht auffindbar), erst ein echter Neustart richtet die Integration ein.
+   Bereits bestehende Domains (`mqtt`/`input_select`/`automation`) reloaden dagegen ohne
+   Neustart zuverlässig.
+6. Prüfen: `input_select.gartenwasser_programm` sollte nach dem Neustart automatisch
    mit den aktuellen Programmnamen befüllt sein (Automation „Gartenwasser: Programme-
    Liste synchronisieren“ läuft beim ersten `main/programs/state`-Update).
-6. **`dashboard-programme.yaml`**: entweder über Einstellungen → Dashboards → „+
+7. **`dashboard-programme.yaml`**: entweder über Einstellungen → Dashboards → „+
    Dashboard hinzufügen“ → „Neues Dashboard aus YAML erstellen“ einfügen, oder als
    Datei ablegen (z. B. `dashboards/gartenwasser.yaml`) und in `configuration.yaml`
    registrieren:
