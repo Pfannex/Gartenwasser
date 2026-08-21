@@ -26,6 +26,7 @@ Repositories erkunden & herunterladen" installieren, danach Browser-Cache leeren
 |---|---|---|
 | **Mushroom** | `piitaya/lovelace-mushroom` | `mushroom-template-card` für die Start/Stop-Kachel (Icon + Programmname in einer Box) — reine Bordmittel-Karten (`tile`, `markdown`) konnten das nicht: eine `tile`-Karte ist immer als Ganzes die Tap-Fläche und lässt sich nicht mit fremden Entities kombinieren, eine `markdown`-Karte filtert Inline-`style`-Attribute per DOMPurify-Sanitizing komplett raus (kein Grid/keine Farben rendern). |
 | **card_mod** | `thomasloven/lovelace-card-mod` | CSS-Override für die Icon-Größe der Mushroom-Karte (`--icon-size`) — Mushroom selbst bietet dafür keine YAML-Option. |
+| **stack-in-card** | `custom-cards/stack-in-card` | Fasst mehrere Karten (z. B. Start/Stop-Button + Programm-Anzeige) zu einer optisch nahtlosen Kachel mit gemeinsamem Rahmen zusammen — ein reiner `horizontal-stack` (Bordmittel) lässt jede Kind-Karte mit eigenem Schatten/Abstand stehen. |
 
 Grund für die Wahl "Custom Card statt reinem YAML": beide o.g. Board-Mittel-Ansätze
 sind an dieser Stelle nachweislich gescheitert (siehe `docs/Log.md`, Nachtrag

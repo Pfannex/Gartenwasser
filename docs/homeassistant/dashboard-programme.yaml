@@ -32,7 +32,8 @@ views:
     sections:
       - type: grid
         cards:
-          - type: horizontal-stack
+          - type: custom:stack-in-card
+            mode: horizontal
             grid_options:
               columns: full
               rows: 4
