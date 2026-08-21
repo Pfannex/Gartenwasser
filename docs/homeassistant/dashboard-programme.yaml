@@ -350,8 +350,9 @@ views:
 
           - type: markdown
             content: >-
-              Gartenbewässerung | {{ states('sensor.gartenwasser_firmware') }} | © by
-              Pfanne/26
+              Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
+              states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
+              by Pfanne/26
             grid_options:
               columns: full
             card_mod:
@@ -436,6 +437,14 @@ views:
               - type: entities
                 title: Laufzeit
                 show_header_toggle: false
+                card_mod:
+                  style:
+                    hui-number-entity-row$: |
+                      :host {
+                        min-height: 64px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                      }
                 entities:
                   - entity: number.gartenbewasserung_ventil_1_laufzeit
                     name: "V1"
@@ -452,8 +461,9 @@ views:
 
           - type: markdown
             content: >-
-              Gartenbewässerung | {{ states('sensor.gartenwasser_firmware') }} | © by
-              Pfanne/26
+              Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
+              states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
+              by Pfanne/26
             grid_options:
               columns: full
             card_mod:
