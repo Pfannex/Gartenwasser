@@ -1,5 +1,5 @@
-# Lovelace-Dashboard (YAML-Modus) - Nachbau der WebIF-Statusseite (docs/manual/images/
-# webif-status.webp) + Programme-Auswahl (Phase 10.1/10.3).
+# Lovelace-Dashboard (YAML-Modus) - Nachbau der WebIF-Navigation (7 Tabs, docs/manual/
+# images/webif-status.webp) + Programme-Auswahl (Phase 10.1/10.3).
 # Einbindung: Einstellungen -> Dashboards -> "+ Dashboard hinzufuegen" -> "Neues Dashboard
 # aus YAML erstellen", diesen Inhalt einfuegen. Alternativ ueber configuration.yaml als
 # YAML-Dashboard registrieren (lovelace.dashboards, url_path braucht einen Bindestrich!).
@@ -15,71 +15,172 @@
 # Discovery verfuegbar (kein Topic dafuer) - das Dashboard zeigt daher "Ventil 1" statt
 # des Alias. Wer die Aliase im Dashboard sehen will, muss sie manuell in customize.yaml
 # als friendly_name je Entity eintragen und bei Aenderung im WebIF von Hand nachpflegen.
+#
+# Abhaengigkeiten: die Status-View nutzt "custom:mushroom-template-card" (HACS-Repository
+# piitaya/lovelace-mushroom) fuer die Start/Stop-Kachel - reine Bordmittel (tile/markdown)
+# konnten weder mehrere Entities in einer Box kombinieren noch farbig gestylte Boxen
+# rendern (Markdown-Karte filtert Inline-style per DOMPurify raus). Details/Rationale
+# siehe README.md, Abschnitt "Abhaengigkeiten".
 
 title: Gartenwasser
 views:
   - title: Status
     path: gartenwasser-status
     icon: mdi:sprinkler-variant
-    cards:
-      - type: horizontal-stack
+    show_icon_and_title: true
+    type: sections
+    sections:
+      - type: grid
         cards:
-          - type: tile
-            entity: switch.gartenbewasserung_automatik_sequenz
-            name: Start / Stop
-            icon: mdi:play-circle
-            vertical: true
+          - type: horizontal-stack
+            grid_options:
+              columns: full
+              rows: 4
+            cards:
+              - type: custom:mushroom-template-card
+                entity: switch.gartenbewasserung_automatik_sequenz
+                primary: "{{ 'STOP' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'START' }}"
+                icon: "{{ 'mdi:stop' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'mdi:play' }}"
+                icon_color: green
+                layout: vertical
+                tap_action:
+                  action: toggle
+                card_mod:
+                  style:
+                    ha-tile-icon$: |
+                      .container {
+                        width: 96px !important;
+                        height: 96px !important;
+                        border-radius: 50% !important;
+                      }
+                    .: |
+                      ha-tile-icon {
+                        --mdc-icon-size: 64px !important;
+                      }
+
+              - type: custom:mushroom-template-card
+                primary: "{{ states('input_select.gartenwasser_programm') }}"
+                secondary: Aktives Programm
+                icon: mdi:playlist-check
+                layout: horizontal
+                # Platzhalter: "Naechster Termin" (siehe WebIF-Vorbild) folgt in einem
+                # spaeteren Schritt, sobald Zeitplan-Daten per MQTT verfuegbar sind.
+
           - type: tile
             entity: input_select.gartenwasser_programm
-            name: Programm
-            vertical: true
+            name: Programm wählen
 
+          - type: markdown
+            title: Ventile
+            grid_options:
+              columns: full
+            content: |
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+              {% for n in range(0,6) %}
+                {%- if n == 0 -%}
+                  {%- set is_on = is_state('binary_sensor.gartenbewasserung_hauptventil','on') -%}
+                  {%- set label = 'V0' -%}
+                  {%- set alias = 'Hauptventil' -%}
+                  {%- set status = 'an' if is_on else 'aus' -%}
+                  {%- set active = is_on -%}
+                {%- else -%}
+                  {%- set is_on = is_state('switch.gartenbewasserung_ventil_' ~ n, 'on') -%}
+                  {%- set is_auto = is_state('binary_sensor.gartenbewasserung_ventil_' ~ n ~ '_automatik', 'on') -%}
+                  {%- set remaining = states('sensor.gartenbewasserung_ventil_' ~ n ~ '_restlaufzeit') -%}
+                  {%- set configured = states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') -%}
+                  {%- set label = 'V' ~ n -%}
+                  {%- set alias = 'Ventil ' ~ n -%}
+                  {%- if is_on -%}
+                    {%- set status = (remaining if remaining not in ['unknown','unavailable',none] else configured) ~ ' min' -%}
+                  {%- elif is_auto -%}
+                    {%- set status = 'wartet · ' ~ configured ~ ' min' -%}
+                  {%- else -%}
+                    {%- set status = configured ~ ' min' -%}
+                  {%- endif -%}
+                  {%- set active = is_on or is_auto -%}
+                {%- endif -%}
+              <div style="background:{{ '#2e7d5b' if active else '#2b2f36' }};border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-weight:bold;">{{ label }}</div>
+              <div style="font-size:0.85em;">{{ alias }}</div>
+              <div style="font-size:0.8em;opacity:0.8;">{{ status }}</div>
+              </div>
+              {% endfor %}
+              </div>
+
+          - type: entities
+            title: Diagnose
+            grid_options:
+              columns: full
+            show_header_toggle: false
+            entities:
+              - entity: sensor.gartenbewasserung_i2c_status
+                name: I2C-Bus
+              - entity: sensor.gartenbewasserung_letzter_fehler
+                name: Letzter Fehler
+              # Firmware/RAM/Flash vorerst raus - Entities werden noch nicht angelegt,
+              # wird separat nachverfolgt.
+
+  - title: Konfiguration
+    path: gartenwasser-konfiguration
+    icon: mdi:cog-outline
+    show_icon_and_title: true
+    cards:
       - type: markdown
-        title: Ventile
-        content: |
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-          {% for n in range(0,6) %}
-            {%- if n == 0 -%}
-              {%- set is_on = is_state('binary_sensor.gartenbewasserung_hauptventil','on') -%}
-              {%- set label = 'V0' -%}
-              {%- set alias = 'Hauptventil' -%}
-              {%- set status = 'an' if is_on else 'aus' -%}
-              {%- set active = is_on -%}
-            {%- else -%}
-              {%- set is_on = is_state('switch.gartenbewasserung_ventil_' ~ n, 'on') -%}
-              {%- set is_auto = is_state('binary_sensor.gartenbewasserung_ventil_' ~ n ~ '_automatik', 'on') -%}
-              {%- set remaining = states('sensor.gartenbewasserung_ventil_' ~ n ~ '_restlaufzeit') -%}
-              {%- set configured = states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') -%}
-              {%- set label = 'V' ~ n -%}
-              {%- set alias = 'Ventil ' ~ n -%}
-              {%- if is_on -%}
-                {%- set status = (remaining if remaining not in ['unknown','unavailable',none] else configured) ~ ' min' -%}
-              {%- elif is_auto -%}
-                {%- set status = 'wartet · ' ~ configured ~ ' min' -%}
-              {%- else -%}
-                {%- set status = configured ~ ' min' -%}
-              {%- endif -%}
-              {%- set active = is_on or is_auto -%}
-            {%- endif -%}
-          <div style="background:{{ '#2e7d5b' if active else '#2b2f36' }};border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-weight:bold;">{{ label }}</div>
-          <div style="font-size:0.85em;">{{ alias }}</div>
-          <div style="font-size:0.8em;opacity:0.8;">{{ status }}</div>
-          </div>
-          {% endfor %}
-          </div>
+        content: >
+          **Noch nicht umgesetzt.** Globale maximale Laufzeit und Ventil-Aliase gibt es
+          bisher nur im WebIF (`gartenwasser/main/config/*`, kein passendes MQTT-Topic
+          fuer HA). Ventil-Laufzeiten koennt ihr schon jetzt ueber die Discovery-Number-
+          Entities (`number.gartenbewasserung_ventil_N_laufzeit`) setzen.
 
+  - title: Programme
+    path: gartenwasser-programme
+    icon: mdi:playlist-check
+    show_icon_and_title: true
+    cards:
       - type: entities
-        title: Diagnose
-        show_header_toggle: false
+        title: Programm waehlen
         entities:
-          - entity: sensor.gartenbewasserung_i2c_status
-            name: I2C-Bus
-          - entity: sensor.gartenbewasserung_letzter_fehler
-            name: Letzter Fehler
-          - entity: sensor.gartenwasser_firmware
-            name: Firmware
-          - entity: sensor.gartenwasser_ram
-            name: RAM
-          - entity: sensor.gartenwasser_flash
-            name: Flash
+          - entity: input_select.gartenwasser_programm
+      - type: markdown
+        content: >
+          **Programm-Editor noch nicht umgesetzt.** Anlegen/Bearbeiten/Loeschen von
+          Programmen (Ventile + Laufzeiten je Programm) gibt es bisher nur im WebIF -
+          dafuer muesste die Firmware zusaetzliche MQTT-Command-Topics anbieten.
+
+  - title: Zeitplan
+    path: gartenwasser-zeitplan
+    icon: mdi:calendar-clock
+    show_icon_and_title: true
+    cards:
+      - type: markdown
+        content: >
+          **Noch nicht umgesetzt.** Zeitplan-Verwaltung (Eintraege, Wochentage,
+          aktiv/pausiert) hat aktuell kein MQTT-Aequivalent - nur im WebIF verfuegbar.
+
+  - title: Log
+    path: gartenwasser-log
+    icon: mdi:text-box-outline
+    show_icon_and_title: true
+    cards:
+      - type: logbook
+        title: Aktivitaet
+        entities:
+          - switch.gartenbewasserung_automatik_sequenz
+          - switch.gartenbewasserung_ventil_1
+          - switch.gartenbewasserung_ventil_2
+          - switch.gartenbewasserung_ventil_3
+          - switch.gartenbewasserung_ventil_4
+          - switch.gartenbewasserung_ventil_5
+        hours_to_show: 24
+
+  - title: Info
+    path: gartenwasser-info
+    icon: mdi:information-outline
+    show_icon_and_title: true
+    cards:
+      - type: markdown
+        content: >
+          **Nur teilweise umgesetzt.** Partitionstabelle, Reset-Grund, RSSI, IP/Broker
+          (aus `main/info/*`) sind noch nicht als Entities verfuegbar. Firmware/RAM/
+          Flash aus `diagnostics/*` sind vorgesehen, aktuell aber noch nicht sauber
+          eingerichtet (siehe Diagnose-Karte auf der Status-Seite).

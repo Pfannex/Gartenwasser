@@ -16,6 +16,22 @@ Alias. Wer die Aliase sehen will, muss sie manuell in `customize.yaml` als
 in Home Assistant sichtbar sein, bevor diese Ergänzung Sinn ergibt (sie referenziert
 z. B. `switch.automatik_sequenz` im Dashboard).
 
+## Abhängigkeiten (Custom Cards über HACS)
+
+Das Status-Dashboard (`dashboard-programme.yaml`) nutzt zwei Custom Cards, die HACS
+(Home Assistant Community Store) voraussetzen. Beide über HACS → Frontend → „+
+Repositories erkunden & herunterladen" installieren, danach Browser-Cache leeren:
+
+| Card | Repository | Wofür |
+|---|---|---|
+| **Mushroom** | `piitaya/lovelace-mushroom` | `mushroom-template-card` für die Start/Stop-Kachel (Icon + Programmname in einer Box) — reine Bordmittel-Karten (`tile`, `markdown`) konnten das nicht: eine `tile`-Karte ist immer als Ganzes die Tap-Fläche und lässt sich nicht mit fremden Entities kombinieren, eine `markdown`-Karte filtert Inline-`style`-Attribute per DOMPurify-Sanitizing komplett raus (kein Grid/keine Farben rendern). |
+| **card_mod** | `thomasloven/lovelace-card-mod` | CSS-Override für die Icon-Größe der Mushroom-Karte (`--icon-size`) — Mushroom selbst bietet dafür keine YAML-Option. |
+
+Grund für die Wahl "Custom Card statt reinem YAML": beide o.g. Board-Mittel-Ansätze
+sind an dieser Stelle nachweislich gescheitert (siehe `docs/Log.md`, Nachtrag
+Phase 10.3) — Mushroom+card_mod ist der Community-Standardweg für zusammengesetzte,
+gestylte Dashboard-Kacheln in Home Assistant.
+
 ## Dateien in diesem Ordner
 
 | Datei | Ziel in deiner HA-Konfiguration |
