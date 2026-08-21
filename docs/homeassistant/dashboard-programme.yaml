@@ -469,6 +469,28 @@ views:
 
           - type: markdown
             content: >-
+              {% set warn = namespace(text='') %}
+              {% for n in range(1, 6) %}
+                {% set laufzeit = states('number.gartenbewasserung_ventil_' ~ n ~
+              '_laufzeit') | float(0) %}
+                {% set maxt = states('number.gartenwasser_max_time') | float(9999) %}
+                {% if laufzeit > maxt %}
+                  {% set warn.text = warn.text ~ '⚠️ V' ~ n ~ ' (' ~ laufzeit | int ~
+              ' min) überschreitet die Maximale Laufzeit (' ~ maxt | int ~ ' min) -
+              effektive Laufzeit wird begrenzt.\n' %}
+                {% endif %}
+              {% endfor %}
+              {{ warn.text }}
+            grid_options:
+              columns: full
+            # Ersatz fuer die im WebIF vorhandene Gelb-Markierung ueberschrittener
+            # Laufzeiten - ein per-Zeile gefaerbter Hintergrund liess sich mit den
+            # verfuegbaren Bordmitteln nicht zuverlaessig umsetzen (siehe Log.md), diese
+            # Text-Warnzeile erreicht denselben Zweck zuverlaessig. Zeigt nichts an
+            # (leere/kollabierte Karte), wenn keine Laufzeit die Grenze ueberschreitet.
+
+          - type: markdown
+            content: >-
               Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
               states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
               by Pfanne/26
