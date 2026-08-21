@@ -28,6 +28,15 @@ Repositories erkunden & herunterladen" installieren, danach Browser-Cache leeren
 | **card_mod** | `thomasloven/lovelace-card-mod` | CSS-Override für die Icon-Größe der Mushroom-Karte (`--icon-size`) — Mushroom selbst bietet dafür keine YAML-Option. |
 | **stack-in-card** | `custom-cards/stack-in-card` | Fasst mehrere Karten (z. B. Start/Stop-Button + Programm-Anzeige) zu einer optisch nahtlosen Kachel mit gemeinsamem Rahmen zusammen — ein reiner `horizontal-stack` (Bordmittel) lässt jede Kind-Karte mit eigenem Schatten/Abstand stehen. |
 
+Zusätzlich in der Test-Instanz installiert, aber von dieser Config **nicht** referenziert (nicht
+nötig für den Nachbau, nur zur Vollständigkeit dokumentiert — vermutlich aus der verlorenen
+Copilot-CLI-Session, siehe `docs/Log.md`):
+
+| Card | Repository | Status |
+|---|---|---|
+| custom-card-features | `Nerwyn/custom-card-features` | installiert, ungenutzt |
+| card-mod-studio | `DerTrolli/card-mod-studio` | installiert, ungenutzt |
+
 Grund für die Wahl "Custom Card statt reinem YAML": beide o.g. Board-Mittel-Ansätze
 sind an dieser Stelle nachweislich gescheitert (siehe `docs/Log.md`, Nachtrag
 Phase 10.3) — Mushroom+card_mod ist der Community-Standardweg für zusammengesetzte,
