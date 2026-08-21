@@ -33,25 +33,49 @@ sensor:
     unique_id: gartenwasser_diag_flash
     state_topic: "gartenwasser/diagnostics/flash"
 
-  # V{n}/alias (WebIF-Klartextname je Ventil, z.B. "Rasen Vorgarten") ist retained, aber
-  # ebenfalls keine der 26 Discovery-Entities (siehe docs/requirements.md Topic-Baum) -
-  # fuer die Ventile-Kachel auf der Status-Seite (dashboard-programme.yaml).
+
+# V{n}/alias ist per V{n}/alias/set editierbar (siehe docs/requirements.md Topic-Baum) -
+# als "text"-Plattform statt "sensor" (les- UND schreibbar), fuer die Konfigurationsseite
+# (dashboard-programme.yaml). Ersetzt die vorherigen reinen Lese-Sensoren gleichen Namens -
+# Status-Seite referenziert jetzt text.gartenwasser_v{n}_alias statt sensor.*.
+text:
   - name: "Gartenwasser V0 Alias"
-    unique_id: gartenwasser_v0_alias
+    unique_id: gartenwasser_v0_alias_text
     state_topic: "gartenwasser/V0/alias"
+    command_topic: "gartenwasser/V0/alias/set"
   - name: "Gartenwasser V1 Alias"
-    unique_id: gartenwasser_v1_alias
+    unique_id: gartenwasser_v1_alias_text
     state_topic: "gartenwasser/V1/alias"
+    command_topic: "gartenwasser/V1/alias/set"
   - name: "Gartenwasser V2 Alias"
-    unique_id: gartenwasser_v2_alias
+    unique_id: gartenwasser_v2_alias_text
     state_topic: "gartenwasser/V2/alias"
+    command_topic: "gartenwasser/V2/alias/set"
   - name: "Gartenwasser V3 Alias"
-    unique_id: gartenwasser_v3_alias
+    unique_id: gartenwasser_v3_alias_text
     state_topic: "gartenwasser/V3/alias"
+    command_topic: "gartenwasser/V3/alias/set"
   - name: "Gartenwasser V4 Alias"
-    unique_id: gartenwasser_v4_alias
+    unique_id: gartenwasser_v4_alias_text
     state_topic: "gartenwasser/V4/alias"
+    command_topic: "gartenwasser/V4/alias/set"
   - name: "Gartenwasser V5 Alias"
-    unique_id: gartenwasser_v5_alias
+    unique_id: gartenwasser_v5_alias_text
     state_topic: "gartenwasser/V5/alias"
+    command_topic: "gartenwasser/V5/alias/set"
+
+# main/time/maxTime ist ein direktes Lese-Topic, aber NICHT direkt schreibbar - Setzen laeuft
+# nur ueber main/config/set (JSON, komplett oder teilweise). command_template verpackt den
+# Zahlenwert deshalb in {"maxTime": <wert>}, statt die Zahl roh zu publizieren.
+number:
+  - name: "Gartenwasser Max Time"
+    unique_id: gartenwasser_max_time
+    state_topic: "gartenwasser/main/time/maxTime"
+    command_topic: "gartenwasser/main/config/set"
+    command_template: '{"maxTime": {{ value }}}'
+    min: 0
+    max: 180
+    step: 1
+    mode: box
+    unit_of_measurement: "min"
 

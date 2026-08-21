@@ -115,7 +115,7 @@ views:
                 content: "## Ventile"
 
               - type: custom:mushroom-template-card
-                primary: "{{ states('sensor.gartenwasser_v0_alias') }}"
+                primary: "{{ states('text.gartenwasser_v0_alias') }}"
                 secondary: "{{ 'An' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else 'Aus' }}"
                 icon: mdi:valve
                 icon_color: "{{ 'red' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else 'green' }}"
@@ -126,7 +126,7 @@ views:
                 cards:
                   - type: custom:mushroom-template-card
                     entity: switch.gartenbewasserung_ventil_1
-                    primary: "{{ states('sensor.gartenwasser_v1_alias') }}"
+                    primary: "{{ states('text.gartenwasser_v1_alias') }}"
                     secondary: >-
                       {% if is_state('switch.gartenbewasserung_ventil_1', 'on') %}
                         {{ states('sensor.gartenbewasserung_ventil_1_restlaufzeit') }} min
@@ -168,7 +168,7 @@ views:
                 cards:
                   - type: custom:mushroom-template-card
                     entity: switch.gartenbewasserung_ventil_2
-                    primary: "{{ states('sensor.gartenwasser_v2_alias') }}"
+                    primary: "{{ states('text.gartenwasser_v2_alias') }}"
                     secondary: >-
                       {% if is_state('switch.gartenbewasserung_ventil_2', 'on') %}
                         {{ states('sensor.gartenbewasserung_ventil_2_restlaufzeit') }} min
@@ -210,7 +210,7 @@ views:
                 cards:
                   - type: custom:mushroom-template-card
                     entity: switch.gartenbewasserung_ventil_3
-                    primary: "{{ states('sensor.gartenwasser_v3_alias') }}"
+                    primary: "{{ states('text.gartenwasser_v3_alias') }}"
                     secondary: >-
                       {% if is_state('switch.gartenbewasserung_ventil_3', 'on') %}
                         {{ states('sensor.gartenbewasserung_ventil_3_restlaufzeit') }} min
@@ -252,7 +252,7 @@ views:
                 cards:
                   - type: custom:mushroom-template-card
                     entity: switch.gartenbewasserung_ventil_4
-                    primary: "{{ states('sensor.gartenwasser_v4_alias') }}"
+                    primary: "{{ states('text.gartenwasser_v4_alias') }}"
                     secondary: >-
                       {% if is_state('switch.gartenbewasserung_ventil_4', 'on') %}
                         {{ states('sensor.gartenbewasserung_ventil_4_restlaufzeit') }} min
@@ -294,7 +294,7 @@ views:
                 cards:
                   - type: custom:mushroom-template-card
                     entity: switch.gartenbewasserung_ventil_5
-                    primary: "{{ states('sensor.gartenwasser_v5_alias') }}"
+                    primary: "{{ states('text.gartenwasser_v5_alias') }}"
                     secondary: >-
                       {% if is_state('switch.gartenbewasserung_ventil_5', 'on') %}
                         {{ states('sensor.gartenbewasserung_ventil_5_restlaufzeit') }} min
@@ -354,6 +354,11 @@ views:
               Pfanne/26
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  text-align: center;
+                }
             # Fusszeile nach WebIF-Vorbild (docs/manual/images) - "Gartenbewaesserung" und
             # das Copyright sind bewusst statischer Text (kein passendes MQTT-Topic dafuer),
             # nur die Firmware-Version in der Mitte ist live aus diagnostics/version.
@@ -364,11 +369,57 @@ views:
     show_icon_and_title: true
     cards:
       - type: markdown
+        content: "## Globale Einstellungen"
+
+      - type: entities
+        show_header_toggle: false
+        entities:
+          - entity: number.gartenwasser_max_time
+            name: Maximale Laufzeit
+        # main/time/maxTime ist nicht direkt schreibbar - der zugehoerige MQTT-number
+        # (mqtt.yaml) verpackt den Wert per command_template in main/config/set.
+
+      - type: markdown
         content: >
-          **Noch nicht umgesetzt.** Globale maximale Laufzeit und Ventil-Aliase gibt es
-          bisher nur im WebIF (`gartenwasser/main/config/*`, kein passendes MQTT-Topic
-          fuer HA). Ventil-Laufzeiten koennt ihr schon jetzt ueber die Discovery-Number-
-          Entities (`number.gartenbewasserung_ventil_N_laufzeit`) setzen.
+          Harte Obergrenze pro Ventil (`min(Laufzeit, Max)`) — überschreitet eine
+          konfigurierte Laufzeit diesen Wert, wird das im WebIF gelb markiert (in HA nicht
+          separat abgebildet).
+
+      - type: markdown
+        content: "## Ventile"
+
+      - type: markdown
+        content: >
+          Laufzeit/Alias gelten für den manuellen Betrieb (z. B. Kachel-Klick auf dem
+          Dashboard) und werden beim Verlassen eines Feldes sofort übernommen. Automatik
+          wird ausschließlich über Programme gesetzt — eine hier geänderte Laufzeit setzt
+          das aktive Programm auf „MANUELL" zurück (siehe Hinweis dazu auf der Statusseite).
+
+      - type: entities
+        show_header_toggle: false
+        entities:
+          - entity: text.gartenwasser_v0_alias
+            name: "V0 Alias"
+          - entity: text.gartenwasser_v1_alias
+            name: "V1 Alias"
+          - entity: number.gartenbewasserung_ventil_1_laufzeit
+            name: "V1 Laufzeit"
+          - entity: text.gartenwasser_v2_alias
+            name: "V2 Alias"
+          - entity: number.gartenbewasserung_ventil_2_laufzeit
+            name: "V2 Laufzeit"
+          - entity: text.gartenwasser_v3_alias
+            name: "V3 Alias"
+          - entity: number.gartenbewasserung_ventil_3_laufzeit
+            name: "V3 Laufzeit"
+          - entity: text.gartenwasser_v4_alias
+            name: "V4 Alias"
+          - entity: number.gartenbewasserung_ventil_4_laufzeit
+            name: "V4 Laufzeit"
+          - entity: text.gartenwasser_v5_alias
+            name: "V5 Alias"
+          - entity: number.gartenbewasserung_ventil_5_laufzeit
+            name: "V5 Laufzeit"
 
   - title: Programme
     path: gartenwasser-programme
