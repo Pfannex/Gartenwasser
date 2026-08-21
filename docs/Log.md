@@ -743,6 +743,12 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Konfigurationsseite als zwei native `entities`-Karten gebaut (kein Custom-Card-Risiko): eine fuer "Maximale Laufzeit", eine fuer alle sechs Ventile (Alias-Textfeld + Laufzeit-Zahlenfeld je Zeile, `V{n} Alias`/`V{n} Laufzeit` als Zeilenbeschriftung - eine Karte statt sechs einzelner Ventil-Boxen, funktional statt pixelgenau). Erklaerungstexte aus dem WebIF-Vorbild als separate `markdown`-Karten uebernommen.
 - **Bewusst NICHT selbst getestet, ob das Schreiben tatsaechlich funktioniert** (Speichern eines Alias/einer Laufzeit haette einen echten Befehl ans reale Geraet ausgeloest) - nur Rendering/Werte per Screenshot verifiziert. Funktionstest (Feld aendern, pruefen ob WebIF/Geraet reagiert) bleibt bewusst dem Nutzer ueberlassen.
 - Ventil-Laufzeiten rendern als Slider (Standard-Darstellung von `number`-Entities in `entities`-Karten, kein `mode: box` gesetzt) - "Maximale Laufzeit" dagegen als Eingabefeld (`mode: box` explizit gesetzt). Optische Inkonsistenz, bei Bedarf leicht angleichbar.
+
+### Nachtrag: Status-Seite Layout — Ventile/Diagnose nebeneinander — 2026-08-21
+
+- Nutzer-Wunsch: Diagnose-Karte rechts neben die Ventile-Karte (statt darunter), Start/Programm-Kachel und Fusszeile bleiben ueber/unter beiden volle Breite.
+- Umsetzung: beide Karten von `grid_options: columns: full` auf `columns: 6` (halbe Breite im 12-Spalten-Sections-Grid) umgestellt, Reihenfolge in der Cards-Liste (Ventile vor Diagnose) sorgt fuer die Nebeneinander-Anordnung. Start/Programm-Kachel und Fusszeile unveraendert bei `columns: full`.
+- Per Screenshot mit breiterem Viewport (1000px, vorherige Tests liefen meist auf 500px schmal, wo eine Sections-Grid ohnehin auf eine Spalte umbricht) verifiziert: Layout genau wie gewuenscht. Kleinere optische Nacharbeit offen: Diagnose-Spalte etwas schmal, Zeilenbeschriftungen/-werte brechen um ("Letzter Fehler" -> "Le...", Zahlen zweizeilig) - Nutzer gefragt, ob Spaltenbreiten angepasst werden sollen.
 - **Lehre fuer kuenftige Sensoren**: `name` und `unique_id` IMMER in derselben Sprache/Wortwahl halten (am besten: `name` von vornherein englisch/technisch waehlen, wenn er 1:1 als Entity-ID referenziert werden soll) - das war jetzt zweimal derselbe, vermeidbare Fehler.
 
 ### Nachtrag: Fortschrittsbalken fuer Ventil-Laufzeit (timer-bar-card) — 2026-08-21

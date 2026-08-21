@@ -109,7 +109,7 @@ views:
           # eine reine entities-Karte nicht kann.
           - type: custom:stack-in-card
             grid_options:
-              columns: full
+              columns: 6
             cards:
               - type: markdown
                 content: "## Ventile"
@@ -334,7 +334,7 @@ views:
           - type: entities
             title: Diagnose
             grid_options:
-              columns: full
+              columns: 6
             show_header_toggle: false
             entities:
               - entity: sensor.gartenbewasserung_i2c_status
