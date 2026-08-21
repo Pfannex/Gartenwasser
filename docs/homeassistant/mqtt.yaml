@@ -33,6 +33,52 @@ sensor:
     unique_id: gartenwasser_diag_flash
     state_topic: "gartenwasser/diagnostics/flash"
 
+  # main/info/* - Hardware-/Systeminfo fuer die Info-Seite (dashboard-programme.yaml), alle
+  # retained Plain-Text-Topics, keine Discovery-Entities. partitions (JSON-Array) bewusst
+  # nicht als eigener Sensor angelegt - fuer die Info-Seite reicht die Anzahl, siehe
+  # json_attributes.
+  - name: "Gartenwasser Reset Grund"
+    unique_id: gartenwasser_info_reset_reason
+    state_topic: "gartenwasser/main/info/resetReason"
+  - name: "Gartenwasser Uptime"
+    unique_id: gartenwasser_info_uptime
+    state_topic: "gartenwasser/main/info/uptime"
+    unit_of_measurement: "s"
+  - name: "Gartenwasser Stack Free"
+    unique_id: gartenwasser_info_stack_free
+    state_topic: "gartenwasser/main/info/stackFree"
+    unit_of_measurement: "Byte"
+  - name: "Gartenwasser RSSI"
+    unique_id: gartenwasser_info_rssi
+    state_topic: "gartenwasser/main/info/rssi"
+    unit_of_measurement: "dBm"
+  - name: "Gartenwasser IP"
+    unique_id: gartenwasser_info_ip
+    state_topic: "gartenwasser/main/info/ip"
+  - name: "Gartenwasser Broker"
+    unique_id: gartenwasser_info_broker
+    state_topic: "gartenwasser/main/info/broker"
+  - name: "Gartenwasser Partitionen"
+    unique_id: gartenwasser_info_partitions
+    state_topic: "gartenwasser/main/info/partitions"
+    value_template: "{{ value_json | length }}"
+    unit_of_measurement: "Partitionen"
+    json_attributes_topic: "gartenwasser/main/info/partitions"
+    json_attributes_template: "{{ {'partitions': value_json} | tojson }}"
+    # value_json auf main/info/partitions ist direkt ein Array (kein umschliessendes
+    # Objekt), json_attributes_topic erwartet aber ein Objekt - json_attributes_template
+    # wrapped es in {"partitions": [...]}, damit die Liste als
+    # sensor.gartenwasser_partitionen-Attribut "partitions" nutzbar ist (analog zu
+    # sensor.gartenwasser_programme).
+
+  # main/schedule/state (main/schedule/enabled ist Teil dieses JSON, kein eigenes Topic) -
+  # fuer die Zeitplan-Liste auf der Zeitplan-Seite.
+  - name: "Gartenwasser Zeitplan"
+    unique_id: gartenwasser_schedule_raw
+    state_topic: "gartenwasser/main/schedule/state"
+    value_template: "{{ value_json.schedule | length }}"
+    unit_of_measurement: "Eintraege"
+    json_attributes_topic: "gartenwasser/main/schedule/state"
 
 # V{n}/alias ist per V{n}/alias/set editierbar (siehe docs/requirements.md Topic-Baum) -
 # als "text"-Plattform statt "sensor" (les- UND schreibbar), fuer die Konfigurationsseite
@@ -78,4 +124,16 @@ number:
     step: 1
     mode: box
     unit_of_measurement: "min"
+
+# main/schedule/cmd ist ein reiner Befehls-Topic (ON|OFF), main/schedule/state enthaelt aber
+# ein "enabled"-Feld als Ist-Zustand - deshalb switch (state UND command_topic getrennt) statt
+# text/number wie bei Alias/MaxTime.
+switch:
+  - name: "Gartenwasser Zeitplan Aktiv"
+    unique_id: gartenwasser_schedule_enabled
+    state_topic: "gartenwasser/main/schedule/state"
+    value_template: "{{ 'ON' if value_json.enabled else 'OFF' }}"
+    command_topic: "gartenwasser/main/schedule/cmd"
+    payload_on: "ON"
+    payload_off: "OFF"
 

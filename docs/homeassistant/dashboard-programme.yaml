@@ -512,53 +512,245 @@ views:
     path: gartenwasser-programme
     icon: mdi:playlist-check
     show_icon_and_title: true
-    cards:
-      # Programm-Auswahl passiert jetzt inline auf der Status-Seite (mushroom-select-card,
-      # Dropdown ohne eigenes Fenster) - die fruehere "Programm waehlen"-entities-Karte hier
-      # wurde entfernt, weil eine entities-Karte bei input_select IMMER den more-info-Dialog
-      # (eigenes Fenster) oeffnet - genau das, was hier vermieden werden sollte.
-      - type: markdown
-        content: >
-          **Programm-Editor noch nicht umgesetzt.** Anlegen/Bearbeiten/Loeschen von
-          Programmen (Ventile + Laufzeiten je Programm) gibt es bisher nur im WebIF -
-          dafuer muesste die Firmware zusaetzliche MQTT-Command-Topics anbieten. Die
-          Programm-Auswahl selbst (welches Programm aktiv ist) geht bereits inline
-          auf der Status-Seite.
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: "## Programme"
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+
+          - type: markdown
+            content: |
+              {% set ns = namespace(lines=[]) %}
+              {% for prog in state_attr('sensor.gartenwasser_programme', 'programs') or [] %}
+                {% set vns = namespace(parts=[]) %}
+                {% for n in range(1, 6) %}
+                  {% set vkey = 'V' ~ n %}
+                  {% if prog.auto.get(vkey, false) %}
+                    {% set vns.parts = vns.parts + [vkey ~ ' (' ~ prog.time.get(vkey, 0) ~ ' min)'] %}
+                  {% endif %}
+                {% endfor %}
+                {% set ns.lines = ns.lines + ['**' ~ prog.name ~ '**: ' ~ (vns.parts | join(', ') if vns.parts else '_keine Ventile_')] %}
+              {% endfor %}
+              {% if ns.lines %}
+              {{ ns.lines | join('\n\n') }}
+              {% else %}
+              Keine Programme vorhanden.
+              {% endif %}
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            # Programm-Auswahl passiert inline auf der Status-Seite (mushroom-select-card,
+            # Dropdown ohne eigenes Fenster) - die fruehere "Programm waehlen"-entities-Karte
+            # hier wurde entfernt, weil eine entities-Karte bei input_select IMMER den
+            # more-info-Dialog (eigenes Fenster) oeffnet - genau das, was vermieden werden
+            # sollte. Diese Liste ist rein informativ (Programm-Editor noch nicht
+            # umgesetzt - dafuer muesste main/programs/set von HA aus ein komplettes
+            # Array-Replace zusammenbauen, kein einzelnes Command-Topic pro Programm).
+
+          - type: markdown
+            content: >-
+              Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
+              states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
+              by Pfanne/26
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  text-align: center;
+                  min-width: 700px;
+                }
 
   - title: Zeitplan
     path: gartenwasser-zeitplan
     icon: mdi:calendar-clock
     show_icon_and_title: true
-    cards:
-      - type: markdown
-        content: >
-          **Noch nicht umgesetzt.** Zeitplan-Verwaltung (Eintraege, Wochentage,
-          aktiv/pausiert) hat aktuell kein MQTT-Aequivalent - nur im WebIF verfuegbar.
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: "## Zeitplan"
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+
+          - type: entities
+            show_header_toggle: false
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            entities:
+              - entity: switch.gartenwasser_zeitplan_aktiv
+                name: Zeitplan aktiv
+
+          - type: markdown
+            content: |
+              {% set wd_map = {'mon':'Mo','tue':'Di','wed':'Mi','thu':'Do','fri':'Fr','sat':'Sa','sun':'So'} %}
+              {% set ns = namespace(lines=[]) %}
+              {% for entry in state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] %}
+                {% set status = '✅' if entry.enabled else '⏸️' %}
+                {% if entry.type == 'daily' %}
+                  {% set when = 'Täglich, ' ~ entry.time ~ ' Uhr' %}
+                {% elif entry.type == 'weekly' %}
+                  {% set wdns = namespace(names=[]) %}
+                  {% for wd in entry.weekdays %}
+                    {% set wdns.names = wdns.names + [wd_map.get(wd, wd)] %}
+                  {% endfor %}
+                  {% set when = (wdns.names | join(', ')) ~ ', ' ~ entry.time ~ ' Uhr' %}
+                {% elif entry.type == 'once' %}
+                  {% set d = entry.date.split('-') %}
+                  {% set when = 'Einmalig ' ~ d[2] ~ '.' ~ d[1] ~ '.' ~ d[0] ~ ', ' ~ entry.time ~ ' Uhr' %}
+                {% else %}
+                  {% set when = entry.time %}
+                {% endif %}
+                {% set ns.lines = ns.lines + [status ~ ' **' ~ entry.program ~ '** - ' ~ when] %}
+              {% endfor %}
+              {% if ns.lines %}
+              {{ ns.lines | join('\n\n') }}
+              {% else %}
+              Keine Zeitplan-Eintraege vorhanden.
+              {% endif %}
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            # Reine Anzeige - Zeitplan-Editor (Eintraege anlegen/bearbeiten/loeschen) gibt
+            # es bisher nur im WebIF, dafuer muesste main/schedule/set (komplettes
+            # Array-Replace) von HA aus zusammengebaut werden - kein einzelnes
+            # Command-Topic pro Eintrag. Der globale Ein/Aus-Schalter oben funktioniert
+            # bereits vollstaendig (main/schedule/cmd).
+
+          - type: markdown
+            content: >-
+              Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
+              states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
+              by Pfanne/26
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  text-align: center;
+                  min-width: 700px;
+                }
 
   - title: Log
     path: gartenwasser-log
     icon: mdi:text-box-outline
     show_icon_and_title: true
-    cards:
-      - type: logbook
-        title: Aktivitaet
-        entities:
-          - switch.gartenbewasserung_automatik_sequenz
-          - switch.gartenbewasserung_ventil_1
-          - switch.gartenbewasserung_ventil_2
-          - switch.gartenbewasserung_ventil_3
-          - switch.gartenbewasserung_ventil_4
-          - switch.gartenbewasserung_ventil_5
-        hours_to_show: 24
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: logbook
+            title: Aktivitaet
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            entities:
+              - switch.gartenbewasserung_automatik_sequenz
+              - switch.gartenbewasserung_ventil_1
+              - switch.gartenbewasserung_ventil_2
+              - switch.gartenbewasserung_ventil_3
+              - switch.gartenbewasserung_ventil_4
+              - switch.gartenbewasserung_ventil_5
+            hours_to_show: 24
+
+          - type: markdown
+            content: >-
+              Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
+              states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
+              by Pfanne/26
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  text-align: center;
+                  min-width: 700px;
+                }
 
   - title: Info
     path: gartenwasser-info
     icon: mdi:information-outline
     show_icon_and_title: true
-    cards:
-      - type: markdown
-        content: >
-          **Nur teilweise umgesetzt.** Partitionstabelle, Reset-Grund, RSSI, IP/Broker
-          (aus `main/info/*`) sind noch nicht als Entities verfuegbar. Firmware/RAM/
-          Flash aus `diagnostics/*` sind vorgesehen, aktuell aber noch nicht sauber
-          eingerichtet (siehe Diagnose-Karte auf der Status-Seite).
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: "## System"
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+
+          - type: entities
+            show_header_toggle: false
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            entities:
+              - entity: sensor.gartenwasser_reset_grund
+                name: Reset-Grund
+              - entity: sensor.gartenwasser_uptime
+                name: Uptime
+              - entity: sensor.gartenwasser_stack_free
+                name: Stack Free
+              - entity: sensor.gartenwasser_rssi
+                name: WLAN-Signal (RSSI)
+              - entity: sensor.gartenwasser_ip
+                name: IP-Adresse
+              - entity: sensor.gartenwasser_broker
+                name: MQTT-Broker
+              - entity: sensor.gartenwasser_partitionen
+                name: Partitionen
+
+          - type: markdown
+            content: >-
+              Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{
+              states('sensor.gartenwasser_firmware') }}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;©
+              by Pfanne/26
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  text-align: center;
+                  min-width: 700px;
+                }
