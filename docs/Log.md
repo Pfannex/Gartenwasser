@@ -744,6 +744,15 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - **Bewusst NICHT selbst getestet, ob das Schreiben tatsaechlich funktioniert** (Speichern eines Alias/einer Laufzeit haette einen echten Befehl ans reale Geraet ausgeloest) - nur Rendering/Werte per Screenshot verifiziert. Funktionstest (Feld aendern, pruefen ob WebIF/Geraet reagiert) bleibt bewusst dem Nutzer ueberlassen.
 - Ventil-Laufzeiten rendern als Slider (Standard-Darstellung von `number`-Entities in `entities`-Karten, kein `mode: box` gesetzt) - "Maximale Laufzeit" dagegen als Eingabefeld (`mode: box` explizit gesetzt). Optische Inkonsistenz, bei Bedarf leicht angleichbar.
 
+### Nachtrag: Konfigurationsseite - Alias/Laufzeit in zwei Spalten, Fusszeile ergaenzt — 2026-08-21
+
+- Nutzer-Wunsch: Alias in eine Spalte, Laufzeiten in eine zweite Spalte (statt der bisherigen einzelnen Liste mit abwechselnden Zeilen), plus die auf der Statusseite bereits vorhandene Fusszeile nicht vergessen.
+- **Erster Versuch scheiterte an der Standard-Masonry-Ansicht** dieser View (nur `cards:`, kein `type: sections` wie auf der Statusseite): die Alias/Laufzeit-`stack-in-card` landete durch Home Assistants automatische Mehrspalten-Verteilung in einer ZWEITEN Masonry-Spalte neben allem anderen, die Fusszeile rutschte mitten in Spalte 1 statt ganz unten - unvorhersehbare Reihenfolge, kein Fix ueber Kartenreihenfolge allein moeglich.
+- **Fix**: komplette Konfigurationsseite auf `type: sections` umgestellt (gleiches Muster wie die Statusseite) - jede Karte explizit `grid_options: columns: full`, nur die Alias/Laufzeit-Aufteilung passiert INNERHALB einer einzelnen `custom:stack-in-card` mit `mode: horizontal` (Flexbox, kein Grid-Einheiten-Raten noetig - genau das Verschachtelungsmuster, das schon bei der Start/Programm-Kachel und den Ventil-Balken zuverlaessig funktioniert hat, im Gegensatz zum verworfenen Nebeneinander-Versuch auf der Statusseite).
+- Alias-Spalte hat 6 Zeilen (V0-V5), Laufzeit-Spalte 5 (V1-V5, Hauptventil hat keine Laufzeit) - bewusst so belassen, entspricht dem WebIF-Vorbild.
+- Fusszeile (identisch zur Statusseite, zentriert) als letzte Karte ergaenzt - erscheint jetzt zuverlaessig ganz unten ueber die volle Breite.
+- Per Screenshot verifiziert: Reihenfolge/Layout exakt wie gewuenscht, keine Fehler.
+
 ### Nachtrag: Status-Seite Layout — Ventile/Diagnose nebeneinander — 2026-08-21
 
 - Nutzer-Wunsch: Diagnose-Karte rechts neben die Ventile-Karte (statt darunter), Start/Programm-Kachel und Fusszeile bleiben ueber/unter beiden volle Breite.

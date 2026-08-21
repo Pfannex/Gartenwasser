@@ -367,59 +367,98 @@ views:
     path: gartenwasser-konfiguration
     icon: mdi:cog-outline
     show_icon_and_title: true
-    cards:
-      - type: markdown
-        content: "## Globale Einstellungen"
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: "## Globale Einstellungen"
+            grid_options:
+              columns: full
 
-      - type: entities
-        show_header_toggle: false
-        entities:
-          - entity: number.gartenwasser_max_time
-            name: Maximale Laufzeit
-        # main/time/maxTime ist nicht direkt schreibbar - der zugehoerige MQTT-number
-        # (mqtt.yaml) verpackt den Wert per command_template in main/config/set.
+          - type: entities
+            show_header_toggle: false
+            grid_options:
+              columns: full
+            entities:
+              - entity: number.gartenwasser_max_time
+                name: Maximale Laufzeit
+            # main/time/maxTime ist nicht direkt schreibbar - der zugehoerige MQTT-number
+            # (mqtt.yaml) verpackt den Wert per command_template in main/config/set.
 
-      - type: markdown
-        content: >
-          Harte Obergrenze pro Ventil (`min(Laufzeit, Max)`) — überschreitet eine
-          konfigurierte Laufzeit diesen Wert, wird das im WebIF gelb markiert (in HA nicht
-          separat abgebildet).
+          - type: markdown
+            content: >
+              Harte Obergrenze pro Ventil (`min(Laufzeit, Max)`) — überschreitet eine
+              konfigurierte Laufzeit diesen Wert, wird das im WebIF gelb markiert (in HA
+              nicht separat abgebildet).
+            grid_options:
+              columns: full
 
-      - type: markdown
-        content: "## Ventile"
+          - type: markdown
+            content: "## Ventile"
+            grid_options:
+              columns: full
 
-      - type: markdown
-        content: >
-          Laufzeit/Alias gelten für den manuellen Betrieb (z. B. Kachel-Klick auf dem
-          Dashboard) und werden beim Verlassen eines Feldes sofort übernommen. Automatik
-          wird ausschließlich über Programme gesetzt — eine hier geänderte Laufzeit setzt
-          das aktive Programm auf „MANUELL" zurück (siehe Hinweis dazu auf der Statusseite).
+          - type: markdown
+            content: >
+              Laufzeit/Alias gelten für den manuellen Betrieb (z. B. Kachel-Klick auf dem
+              Dashboard) und werden beim Verlassen eines Feldes sofort übernommen.
+              Automatik wird ausschließlich über Programme gesetzt — eine hier geänderte
+              Laufzeit setzt das aktive Programm auf „MANUELL" zurück (siehe Hinweis dazu
+              auf der Statusseite).
+            grid_options:
+              columns: full
 
-      - type: entities
-        show_header_toggle: false
-        entities:
-          - entity: text.gartenwasser_v0_alias
-            name: "V0 Alias"
-          - entity: text.gartenwasser_v1_alias
-            name: "V1 Alias"
-          - entity: number.gartenbewasserung_ventil_1_laufzeit
-            name: "V1 Laufzeit"
-          - entity: text.gartenwasser_v2_alias
-            name: "V2 Alias"
-          - entity: number.gartenbewasserung_ventil_2_laufzeit
-            name: "V2 Laufzeit"
-          - entity: text.gartenwasser_v3_alias
-            name: "V3 Alias"
-          - entity: number.gartenbewasserung_ventil_3_laufzeit
-            name: "V3 Laufzeit"
-          - entity: text.gartenwasser_v4_alias
-            name: "V4 Alias"
-          - entity: number.gartenbewasserung_ventil_4_laufzeit
-            name: "V4 Laufzeit"
-          - entity: text.gartenwasser_v5_alias
-            name: "V5 Alias"
-          - entity: number.gartenbewasserung_ventil_5_laufzeit
-            name: "V5 Laufzeit"
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            cards:
+              - type: entities
+                title: Alias
+                show_header_toggle: false
+                entities:
+                  - entity: text.gartenwasser_v0_alias
+                    name: "V0"
+                  - entity: text.gartenwasser_v1_alias
+                    name: "V1"
+                  - entity: text.gartenwasser_v2_alias
+                    name: "V2"
+                  - entity: text.gartenwasser_v3_alias
+                    name: "V3"
+                  - entity: text.gartenwasser_v4_alias
+                    name: "V4"
+                  - entity: text.gartenwasser_v5_alias
+                    name: "V5"
+
+              - type: entities
+                title: Laufzeit
+                show_header_toggle: false
+                entities:
+                  - entity: number.gartenbewasserung_ventil_1_laufzeit
+                    name: "V1"
+                  - entity: number.gartenbewasserung_ventil_2_laufzeit
+                    name: "V2"
+                  - entity: number.gartenbewasserung_ventil_3_laufzeit
+                    name: "V3"
+                  - entity: number.gartenbewasserung_ventil_4_laufzeit
+                    name: "V4"
+                  - entity: number.gartenbewasserung_ventil_5_laufzeit
+                    name: "V5"
+            # V0 hat keine Laufzeit (Hauptventil, siehe Topic-Baum) - Alias-Spalte hat
+            # dadurch eine Zeile mehr als die Laufzeit-Spalte, wie auch im WebIF-Vorbild.
+
+          - type: markdown
+            content: >-
+              Gartenbewässerung | {{ states('sensor.gartenwasser_firmware') }} | © by
+              Pfanne/26
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  text-align: center;
+                }
 
   - title: Programme
     path: gartenwasser-programme
