@@ -483,6 +483,11 @@ views:
               {{ warn.text }}
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             # Ersatz fuer die im WebIF vorhandene Gelb-Markierung ueberschrittener
             # Laufzeiten - ein per-Zeile gefaerbter Hintergrund liess sich mit den
             # verfuegbaren Bordmitteln nicht zuverlaessig umsetzen (siehe Log.md), diese
