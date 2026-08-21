@@ -439,12 +439,20 @@ views:
                 show_header_toggle: false
                 card_mod:
                   style:
+                    .: |
+                      .card-content {
+                        padding-top: 64px !important;
+                      }
                     hui-number-entity-row$: |
                       :host {
                         min-height: 64px !important;
                         display: flex !important;
                         align-items: center !important;
                       }
+                # Platzhalter oben (64px, Hoehe einer Alias-Zeile): V0/Hauptventil hat keine
+                # Laufzeit, ohne diesen Abstand stuenden V1-V5 hier eine Zeile zu weit oben
+                # (auf Hoehe von V0 in der Alias-Spalte statt auf Hoehe des jeweils eigenen
+                # Ventils) - siehe Log.md, Nachtrag Zeilenausrichtung.
                 entities:
                   - entity: number.gartenbewasserung_ventil_1_laufzeit
                     name: "V1"
