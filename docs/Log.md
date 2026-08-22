@@ -945,6 +945,15 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Programme-Seite bewusst UNVERAENDERT gelassen (dort existieren Mushroom- und Bubble-Card-Version weiterhin parallel) - diese Aufraeumaktion betraf nur die Status-Seite, wie vom Nutzer angefragt.
 - Per Screenshot verifiziert: Status-Seite zeigt jetzt ausschliesslich Start-Bubble, Hauptventil, 5 Ventilzeilen, Diagnose-Karte, Fusszeile - keine doppelten/alten Elemente mehr, durchgehend einheitliche Breite.
 
+### Diagnose-Karte als Bubble Card nachgebaut
+
+- Nutzer-Wunsch: Diagnose ebenfalls als Bubble Card, I2C als farbiger Sub-Button (gruen=ok/rot=Fehler), RAM/Flash als Sub-Buttons mit Farbverlauf-Fuellstand, "Letzter Fehler" und "Firmware" komplett weglassen.
+- **RAM/Flash-Sensoren liefern Text, keinen reinen Zahlenwert** (`"74% (184/247 KB)"`, per Live-API-Check verifiziert statt angenommen) - ein nativer `sub_button_type: slider` haette das nicht direkt verarbeiten koennen. Stattdessen den Prozentwert per Regex aus dem Text geparst und denselben bewaehrten CSS-Gradient-Ansatz wie beim Ventil-Fuellstand verwendet (kein natives Slider-Element noetig, dadurch auch kein Wiederaufleben des Slider-Haenger-Risikos, da hier ohnehin kein `tap_action` mit einem Regler konkurriert).
+- **Farbverlauf**: fester dreifarbiger Gradient (gruen→gelb→rot) ueber die volle Breite, hart abgeschnitten am aktuellen Prozentwert (`... ${pct}%, transparent ${pct}%`) - zeigt bei niedriger Auslastung nur den gruenen Anfang, bei hoher Auslastung reicht der sichtbare Ausschnitt bis in den roten Bereich, semantisch passend fuer eine Ressourcen-Anzeige.
+- I2C-Sub-Button per selbem Muster wie die Ventil-Icons eingefaerbt: kraeftiger gruener/roter Hintergrund, schwarzes Icon.
+- **Erster Wurf zu breit fuer schmale Bildschirme**: der von Bubble Card automatisch kombinierte Name+Zustand-Text ("RAM · 74% (184/247 KB)") liess den Flash-Button bei 400px Viewportbreite (typische Handybreite, extra getestet statt nur am breiten Desktop-Viewport) abgeschnitten aus der Zeile ragen. Fix: Text pro Sub-Button per JS auf Kurzform gekuerzt ("RAM 74%" statt "RAM · 74% (184/247 KB)") - passt jetzt auch auf schmalen Bildschirmen vollstaendig in die Zeile.
+- Per Screenshot (Desktop- UND Handy-Breite) verifiziert: alle drei Sub-Buttons korrekt farbig/gefuellt und vollstaendig lesbar, "Letzter Fehler"/"Firmware" nicht mehr vorhanden.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.

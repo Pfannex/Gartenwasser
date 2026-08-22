@@ -318,22 +318,50 @@ views:
                 bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
               })()}
 
-          - type: entities
-            title: Diagnose
-            grid_options:
-              columns: full
-            show_header_toggle: false
-            entities:
-              - entity: sensor.gartenbewasserung_i2c_status
-                name: I2C-Bus
-              - entity: sensor.gartenbewasserung_letzter_fehler
-                name: Letzter Fehler
-              - entity: sensor.gartenwasser_firmware
-                name: Firmware
-              - entity: sensor.gartenwasser_ram
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Diagnose"
+            icon: mdi:magnify
+            sub_button:
+              - icon: mdi:chip
+                entity: sensor.gartenbewasserung_i2c_status
+                show_state: true
+                show_name: true
+                name: I2C
+              - icon: mdi:memory
+                entity: sensor.gartenwasser_ram
+                show_state: true
+                show_name: true
                 name: RAM
-              - entity: sensor.gartenwasser_flash
+              - icon: mdi:harddisk
+                entity: sensor.gartenwasser_flash
+                show_state: true
+                show_name: true
                 name: Flash
+            styles: |
+              .bubble-sub-button-1 {
+                background-color: ${hass.states['sensor.gartenbewasserung_i2c_status'].state === 'ok' ? '#43a047' : '#e53935'} !important;
+              }
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: black !important;
+              }
+              ${(() => {
+                const parsePct = (s) => {
+                  const m = s.match(/(\d+)%/);
+                  return m ? parseFloat(m[1]) : 0;
+                };
+                const gradFill = (pct) => `linear-gradient(to right, #43a047 0%, #fdd835 50%, #e53935 ${pct}%, transparent ${pct}%, transparent 100%)`;
+                const ramPct = parsePct(hass.states['sensor.gartenwasser_ram'].state);
+                const flashPct = parsePct(hass.states['sensor.gartenwasser_flash'].state);
+                card.querySelector('.bubble-sub-button-2').style.background = gradFill(ramPct);
+                card.querySelector('.bubble-sub-button-3').style.background = gradFill(flashPct);
+                // Kombinierter Name+Zustand-Text ("RAM · 74% (184/247 KB)") ist auf schmalen
+                // Bildschirmen zu lang (Flash-Button wurde abgeschnitten) - auf Kurzform kuerzen.
+                card.querySelector('.bubble-sub-button-1 .bubble-sub-button-name-container').textContent = 'I2C ' + hass.states['sensor.gartenbewasserung_i2c_status'].state;
+                card.querySelector('.bubble-sub-button-2 .bubble-sub-button-name-container').textContent = 'RAM ' + ramPct + '%';
+                card.querySelector('.bubble-sub-button-3 .bubble-sub-button-name-container').textContent = 'Flash ' + flashPct + '%';
+              })()}
 
           # Fusszeile nach WebIF-Vorbild (docs/manual/images) - "Gartenbewaesserung" und
           # das Copyright sind bewusst statischer Text (kein passendes MQTT-Topic dafuer),
