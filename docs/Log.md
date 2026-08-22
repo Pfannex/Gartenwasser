@@ -962,6 +962,13 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Graue Schriftfarbe nur auf RAM/Flash gesetzt (I2C behaelt seinen weissen Text auf farbigem Hintergrund fuer Kontrast).
 - Per Screenshot bei beiden Breiten (Handy 400px und Desktop) verifiziert: I2C sitzt naeher am Icon, RAM/Flash sind sichtbar breiter, kein Icon mehr, graue Schrift, keine Ueberlappung mehr bei keiner der beiden Breiten.
 
+### Diagnose-Nachschliff: I2C ganz ohne Symbol/Zustandstext, RAM/Flash zurueck auf weiss
+
+- Nutzer-Wunsch: I2C auch ohne Icon, nur der Text "I2C" (die Hintergrundfarbe erklaert den Zustand bereits) - RAM/Flash-Schrift zurueck auf weiss statt grau.
+- `show_icon: false` und `show_state: false` auf I2C ergaenzt, `name: I2C` bleibt ohne angehaengten Zustandstext (vorher per JS zu "I2C ok"/"I2C error" erweitert - dieser JS-Override jetzt entfernt, unnoetig). Graue Farbregel fuer RAM/Flash-Text entfernt (Standard-Weiss).
+- **Sichtbares Artefakt entdeckt und behoben**: nach dem Entfernen des I2C-Icons blitzte zwischen I2C- und RAM-Pille ein einzelnes verzerrtes Zeichen auf (reproduzierbar, kein Einzelbild-Zufall - zweimal frisch nachgeschossen, beide Male sichtbar). Per DOM-Inspektion der I2C-Sub-Button-Struktur ausgeschlossen, dass es zu diesem Element gehoert (outerHTML komplett sauber). Ursache: die Karten-eigene `.bubble-name`("Diagnose")-Textbox liegt im normalen Dokumentfluss UNTER dem absolut positionierten Sub-Button-Container - wo die Pillen sie nicht vollstaendig verdecken, blitzt ein Buchstabenrest durch. Fix: `.bubble-name { display: none !important; }` - der Name war ohnehin redundant (I2C/RAM/Flash-Beschriftungen sprechen fuer sich, Lupe-Icon bleibt als visueller Anker).
+- Per Screenshot verifiziert: kein Artefakt mehr, I2C zeigt nur noch reinen Text ohne Icon, RAM/Flash wieder weiss beschriftet.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.

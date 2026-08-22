@@ -326,8 +326,9 @@ views:
             sub_button:
               - icon: mdi:chip
                 entity: sensor.gartenbewasserung_i2c_status
-                show_state: true
+                show_state: false
                 show_name: true
+                show_icon: false
                 name: I2C
               - icon: mdi:memory
                 entity: sensor.gartenwasser_ram
@@ -342,11 +343,11 @@ views:
                 show_icon: false
                 name: Flash
             styles: |
+              .bubble-name {
+                display: none !important;
+              }
               .bubble-sub-button-1 {
                 background-color: ${hass.states['sensor.gartenbewasserung_i2c_status'].state === 'ok' ? '#43a047' : '#e53935'} !important;
-              }
-              .bubble-sub-button-1 .bubble-sub-button-icon {
-                color: black !important;
               }
               .bubble-sub-button-container {
                 position: absolute !important;
@@ -360,10 +361,6 @@ views:
                 flex: 1 !important;
                 justify-content: center !important;
               }
-              .bubble-sub-button-2 .bubble-sub-button-name-container,
-              .bubble-sub-button-3 .bubble-sub-button-name-container {
-                color: grey !important;
-              }
               ${(() => {
                 const parsePct = (s) => {
                   const m = s.match(/(\d+)%/);
@@ -376,7 +373,6 @@ views:
                 card.querySelector('.bubble-sub-button-3').style.background = gradFill(flashPct);
                 // Kombinierter Name+Zustand-Text ("RAM · 74% (184/247 KB)") ist auf schmalen
                 // Bildschirmen zu lang (Flash-Button wurde abgeschnitten) - auf Kurzform kuerzen.
-                card.querySelector('.bubble-sub-button-1 .bubble-sub-button-name-container').textContent = 'I2C ' + hass.states['sensor.gartenbewasserung_i2c_status'].state;
                 card.querySelector('.bubble-sub-button-2 .bubble-sub-button-name-container').textContent = 'RAM ' + ramPct + '%';
                 card.querySelector('.bubble-sub-button-3 .bubble-sub-button-name-container').textContent = 'Flash ' + flashPct + '%';
               })()}
