@@ -454,16 +454,18 @@ views:
                 # (auf Hoehe von V0 in der Alias-Spalte statt auf Hoehe des jeweils eigenen
                 # Ventils) - siehe Log.md, Nachtrag Zeilenausrichtung.
                 entities:
-                  - entity: number.gartenbewasserung_ventil_1_laufzeit
+                  - entity: number.gartenwasser_v1_laufzeit
                     name: "V1"
-                  - entity: number.gartenbewasserung_ventil_2_laufzeit
+                  - entity: number.gartenwasser_v2_laufzeit
                     name: "V2"
-                  - entity: number.gartenbewasserung_ventil_3_laufzeit
+                  - entity: number.gartenwasser_v3_laufzeit
                     name: "V3"
-                  - entity: number.gartenbewasserung_ventil_4_laufzeit
+                  - entity: number.gartenwasser_v4_laufzeit
                     name: "V4"
-                  - entity: number.gartenbewasserung_ventil_5_laufzeit
+                  - entity: number.gartenwasser_v5_laufzeit
                     name: "V5"
+                # Eigene Entities (mqtt.yaml) statt der Discovery-number-Entities - max=60
+                # statt 180, siehe Kommentar dort. Dieselben Topics, daher immer synchron.
             # V0 hat keine Laufzeit (Hauptventil, siehe Topic-Baum) - Alias-Spalte hat
             # dadurch eine Zeile mehr als die Laufzeit-Spalte, wie auch im WebIF-Vorbild.
 

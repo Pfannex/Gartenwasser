@@ -805,6 +805,14 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Config-Check vor jedem Reload per API verifiziert (`/api/config/core/check_config`), alle vier Seiten per Screenshot mit echten Live-Daten bestaetigt, keine Fehler.
 - **Damit sind alle sieben Dashboard-Seiten (Status/Konfiguration/Programme/Zeitplan/Log/Info) inhaltlich fertig.** Programm-/Zeitplan-Editor bleiben bewusst WebIF-exklusiv (fehlende Einzel-Command-Topics fuer Array-Elemente).
 
+## 2026-08-22
+
+### Konfigurationsseite: Laufzeit-Slider auf max. 60 min begrenzt
+
+- Nutzer-Wunsch: praeziseres Ziehen im relevanten Bereich statt 0-180 min. Discovery-Entities (`number.gartenbewasserung_ventil_N_laufzeit`) haben ihren Wertebereich fest aus der Firmware-Discovery-Config - von HA aus nicht aenderbar.
+- Fix nach demselben Muster wie bei Alias/MaxTime: fuenf neue eigene MQTT-`number`-Entities (`number.gartenwasser_v{n}_laufzeit`, `mqtt.yaml`) auf denselben Topics (`V{n}/time/state`/`set`), aber `max: 60` statt 180 - immer synchron mit der Discovery-Entity, da dieselbe zugrundeliegende Ventil-Laufzeit. Konfigurationsseite auf die neuen Entities umgestellt, Status-Seite (nur Lesezugriff fuer den Fortschrittsbalken) unveraendert gelassen.
+- Per Screenshot verifiziert: Slider nutzen jetzt den vollen Bereich bis 60 min (z. B. V2=55min deutlich weiter am rechten Rand als vorher bei 180er-Skala).
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.

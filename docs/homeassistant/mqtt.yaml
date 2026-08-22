@@ -125,6 +125,53 @@ number:
     mode: box
     unit_of_measurement: "min"
 
+  # V{n}/time/state|set - dieselben Topics wie die Discovery-number-Entities
+  # (number.gartenbewasserung_ventil_N_laufzeit), aber mit engerem max=60 statt 180 (deren
+  # Bereich kommt aus der Firmware-Discovery-Config und ist von HA aus nicht aenderbar) -
+  # fuer die Laufzeit-Slider auf der Konfigurationsseite, praeziseres Ziehen im relevanten
+  # Bereich. Kollisionsfrei: eigene unique_id, dieselben Topics, daher immer synchron mit
+  # der Discovery-Entity (dieselbe zugrundeliegende Ventil-Laufzeit).
+  - name: "Gartenwasser V1 Laufzeit"
+    unique_id: gartenwasser_v1_laufzeit
+    state_topic: "gartenwasser/V1/time/state"
+    command_topic: "gartenwasser/V1/time/set"
+    min: 0
+    max: 60
+    step: 1
+    unit_of_measurement: "min"
+  - name: "Gartenwasser V2 Laufzeit"
+    unique_id: gartenwasser_v2_laufzeit
+    state_topic: "gartenwasser/V2/time/state"
+    command_topic: "gartenwasser/V2/time/set"
+    min: 0
+    max: 60
+    step: 1
+    unit_of_measurement: "min"
+  - name: "Gartenwasser V3 Laufzeit"
+    unique_id: gartenwasser_v3_laufzeit
+    state_topic: "gartenwasser/V3/time/state"
+    command_topic: "gartenwasser/V3/time/set"
+    min: 0
+    max: 60
+    step: 1
+    unit_of_measurement: "min"
+  - name: "Gartenwasser V4 Laufzeit"
+    unique_id: gartenwasser_v4_laufzeit
+    state_topic: "gartenwasser/V4/time/state"
+    command_topic: "gartenwasser/V4/time/set"
+    min: 0
+    max: 60
+    step: 1
+    unit_of_measurement: "min"
+  - name: "Gartenwasser V5 Laufzeit"
+    unique_id: gartenwasser_v5_laufzeit
+    state_topic: "gartenwasser/V5/time/state"
+    command_topic: "gartenwasser/V5/time/set"
+    min: 0
+    max: 60
+    step: 1
+    unit_of_measurement: "min"
+
 # main/schedule/cmd ist ein reiner Befehls-Topic (ON|OFF), main/schedule/state enthaelt aber
 # ein "enabled"-Feld als Ist-Zustand - deshalb switch (state UND command_topic getrennt) statt
 # text/number wie bei Alias/MaxTime.
