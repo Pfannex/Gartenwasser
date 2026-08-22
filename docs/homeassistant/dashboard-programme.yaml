@@ -374,6 +374,11 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
+            sub_button:
+              - icon: mdi:playlist-check
+                entity: input_select.gartenwasser_programm
+                sub_button_type: select
+                select_attribute: options
             tap_action:
               action: call-service
               service: switch.toggle

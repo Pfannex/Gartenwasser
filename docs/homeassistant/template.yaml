@@ -142,6 +142,11 @@
     # Restlaufzeit-Prozent der GESAMTEN Automatik-Sequenz (Start/Stop-Bubble auf der
     # Status-Seite) - gleiches Muster wie je Ventil, nur bezogen auf die geplante
     # Gesamtdauer (sensor.gartenwasser_gesamtlaufzeit) statt einer einzelnen Ventil-Laufzeit.
+    # Rundung auf 1 statt 0 Nachkommastellen (anders als bei den Ventilen): die
+    # Gesamtsequenz laeuft oft deutlich laenger als ein Einzelventil (Summe mehrerer
+    # Laufzeiten), ein ganzer Prozentpunkt dauert dadurch entsprechend laenger - bei
+    # round(0) wirkte der Balken trotz Sekundentakt des Sensors sichtbar sprunghaft
+    # (Nutzer-Feedback "laeuft nicht sekuendlich").
     - name: "Gartenwasser Sequenz Restlaufzeit Prozent"
       unique_id: gartenwasser_sequenz_restlaufzeit_prozent
       unit_of_measurement: "%"
@@ -150,7 +155,7 @@
         {% set sw = states.switch.gartenbewasserung_automatik_sequenz %}
         {% if sw and sw.state == 'on' and duration > 0 %}
           {% set elapsed_min = (now() - sw.last_changed).total_seconds() / 60 %}
-          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(0) }}
+          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(1) }}
         {% else %}
           0
         {% endif %}
