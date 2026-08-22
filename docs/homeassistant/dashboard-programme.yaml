@@ -404,6 +404,15 @@ views:
               .bubble-sub-button-1 .bubble-sub-button-name-container {
                 font-size: 1.3em !important;
               }
+              .bubble-sub-button-container {
+                position: absolute !important;
+                left: 114px !important;
+                top: 68px !important;
+                justify-content: flex-start !important;
+              }
+              ha-select {
+                --bubble-select-list-background-color: var(--secondary-background-color) !important;
+              }
               .bubble-name {
                 font-size: 1.6em !important;
               }
@@ -429,7 +438,7 @@ views:
                   const ss = remainingSec % 60;
                   el.textContent = mm + ':' + String(ss).padStart(2, '0');
                 } else {
-                  el.textContent = hass.states['input_select.gartenwasser_programm'].state;
+                  el.textContent = '';
                 }
               })()}
 
