@@ -547,6 +547,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -568,6 +573,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -606,6 +616,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -627,6 +642,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -665,6 +685,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -686,6 +711,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -724,6 +754,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -745,6 +780,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -783,6 +823,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -804,6 +849,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -842,6 +892,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -863,6 +918,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -901,6 +961,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -922,6 +987,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -960,6 +1030,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -981,6 +1056,11 @@ views:
                   {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
                 icon: mdi:playlist-play
                 layout: vertical
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 3 !important;
+                    }
               - type: custom:mushroom-template-card
                 primary: Aktivieren
                 icon: mdi:play
@@ -1019,6 +1099,11 @@ views:
             content: "Keine Programme vorhanden."
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: sensor.gartenwasser_programme
@@ -1069,6 +1154,11 @@ views:
             mode: horizontal
             grid_options:
               columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
             visibility:
               - condition: numeric_state
                 entity: input_number.gartenwasser_editier_index
