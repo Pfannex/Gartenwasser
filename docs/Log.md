@@ -881,6 +881,12 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - **Ventil-Haupt-Icons: Hintergrund jetzt immer schwarz**, nur noch das Symbol selbst farbig (rot/gruen/grau) - Klarstellung/Erweiterung der vorherigen Sub-Button-Korrektur ("auch die Buttons schwarz"): die zuvor eingefuehrte gruene/graue Hintergrund-Einfaerbung (`--bubble-button-icon-background-color` per Ternary) wurde durch eine feste schwarze Farbe ersetzt, konsistent mit den Power-Sub-Buttons, die schon reine Icon-Faerbung ohne Hintergrund-Aenderung nutzen.
 - Per Screenshot verifiziert: alle 5 Ventil-Icon-Kreise jetzt schwarz mit farbigem Symbol. mm:ss-Format mangels laufender Sequenz noch nicht live gesehen.
 
+### Kontrast-Test umgedreht: schwarze Symbole auf kraeftig farbigen Hintergruenden
+
+- Nutzer-Feedback: Kontrast der schwarzen Buttons mit farbigem Symbol "noch nicht ganz passend" - Testwunsch: umgekehrtes Schema (schwarze Symbole, kraeftig farbige Hintergruende) an denselben Elementen (Ventil-Haupt-Icon + Power-Sub-Button).
+- Umgesetzt fuer alle 5 Ventilzeilen: Icon-Farbe fest auf `black`, `--bubble-button-icon-background-color` (Haupt-Icon) und `.bubble-sub-button-1`s eigene `background-color` (Power-Button, keine dokumentierte CSS-Variable dafuer gefunden - direkt per Klassen-Selektor mit `!important` gesetzt) auf kraeftige, undurchsichtige Farben (`#e53935` rot/an, `#43a047` gruen/auto, `#757575` grau/aus) - dieselbe Logik wie zuvor bei der Icon-Farbe, nur auf den Hintergrund verlagert. Nebeneffekt: laufende Ventile (an) haben jetzt auch farblich (rot) sichtbaren Hintergrund, vorher nur rotes Icon auf schwarzem Grund.
+- Per Screenshot verifiziert: deutlich kraeftigerer, klar lesbarer Kontrast bei allen Ventilzeilen inkl. Power-Buttons.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
