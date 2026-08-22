@@ -362,10 +362,8 @@ views:
             card_type: button
             card_layout: large
             rows: 2
-            button_type: slider
+            button_type: name
             entity: sensor.gartenwasser_sequenz_restlaufzeit_prozent
-            min_value: 0
-            max_value: 100
             show_state: false
             name: "Automatik"
             icon: mdi:play
@@ -413,6 +411,9 @@ views:
               .bubble-dropdown-arrow {
                 background: var(--secondary-background-color) !important;
               }
+              .bubble-sub-button-1 {
+                background-color: var(--secondary-background-color) !important;
+              }
               ha-select {
                 --bubble-select-list-background-color: var(--secondary-background-color) !important;
               }
@@ -444,6 +445,12 @@ views:
                   el.textContent = '';
                 }
               })()}
+              ${(() => {
+                const pct = parseFloat(hass.states['sensor.gartenwasser_sequenz_restlaufzeit_prozent'].state) || 0;
+                const fill = hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
+                const bg = card.querySelector('.bubble-button-background');
+                bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
+              })()}
 
           - type: custom:bubble-card
             card_type: button
@@ -468,10 +475,8 @@ views:
 
           - type: custom:bubble-card
             card_type: button
-            button_type: slider
+            button_type: name
             entity: sensor.gartenwasser_v1_restlaufzeit_prozent
-            min_value: 0
-            max_value: 100
             show_state: false
             name: "V1"
             icon: mdi:sprinkler-variant
@@ -502,13 +507,17 @@ views:
                   ? hass.states['sensor.gartenbewasserung_ventil_1_restlaufzeit'].state + ' min'
                   : hass.states['number.gartenbewasserung_ventil_1_laufzeit'].state + ' min';
               })()}
+              ${(() => {
+                const pct = parseFloat(hass.states['sensor.gartenwasser_v1_restlaufzeit_prozent'].state) || 0;
+                const fill = hass.states['switch.gartenbewasserung_ventil_1'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
+                const bg = card.querySelector('.bubble-button-background');
+                bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
+              })()}
 
           - type: custom:bubble-card
             card_type: button
-            button_type: slider
+            button_type: name
             entity: sensor.gartenwasser_v2_restlaufzeit_prozent
-            min_value: 0
-            max_value: 100
             show_state: false
             name: "V2"
             icon: mdi:sprinkler-variant
@@ -539,13 +548,17 @@ views:
                   ? hass.states['sensor.gartenbewasserung_ventil_2_restlaufzeit'].state + ' min'
                   : hass.states['number.gartenbewasserung_ventil_2_laufzeit'].state + ' min';
               })()}
+              ${(() => {
+                const pct = parseFloat(hass.states['sensor.gartenwasser_v2_restlaufzeit_prozent'].state) || 0;
+                const fill = hass.states['switch.gartenbewasserung_ventil_2'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
+                const bg = card.querySelector('.bubble-button-background');
+                bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
+              })()}
 
           - type: custom:bubble-card
             card_type: button
-            button_type: slider
+            button_type: name
             entity: sensor.gartenwasser_v3_restlaufzeit_prozent
-            min_value: 0
-            max_value: 100
             show_state: false
             name: "V3"
             icon: mdi:sprinkler-variant
@@ -576,13 +589,17 @@ views:
                   ? hass.states['sensor.gartenbewasserung_ventil_3_restlaufzeit'].state + ' min'
                   : hass.states['number.gartenbewasserung_ventil_3_laufzeit'].state + ' min';
               })()}
+              ${(() => {
+                const pct = parseFloat(hass.states['sensor.gartenwasser_v3_restlaufzeit_prozent'].state) || 0;
+                const fill = hass.states['switch.gartenbewasserung_ventil_3'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
+                const bg = card.querySelector('.bubble-button-background');
+                bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
+              })()}
 
           - type: custom:bubble-card
             card_type: button
-            button_type: slider
+            button_type: name
             entity: sensor.gartenwasser_v4_restlaufzeit_prozent
-            min_value: 0
-            max_value: 100
             show_state: false
             name: "V4"
             icon: mdi:sprinkler-variant
@@ -613,13 +630,17 @@ views:
                   ? hass.states['sensor.gartenbewasserung_ventil_4_restlaufzeit'].state + ' min'
                   : hass.states['number.gartenbewasserung_ventil_4_laufzeit'].state + ' min';
               })()}
+              ${(() => {
+                const pct = parseFloat(hass.states['sensor.gartenwasser_v4_restlaufzeit_prozent'].state) || 0;
+                const fill = hass.states['switch.gartenbewasserung_ventil_4'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
+                const bg = card.querySelector('.bubble-button-background');
+                bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
+              })()}
 
           - type: custom:bubble-card
             card_type: button
-            button_type: slider
+            button_type: name
             entity: sensor.gartenwasser_v5_restlaufzeit_prozent
-            min_value: 0
-            max_value: 100
             show_state: false
             name: "V5"
             icon: mdi:sprinkler-variant
@@ -649,6 +670,12 @@ views:
                 el.textContent = sw.state === 'on'
                   ? hass.states['sensor.gartenbewasserung_ventil_5_restlaufzeit'].state + ' min'
                   : hass.states['number.gartenbewasserung_ventil_5_laufzeit'].state + ' min';
+              })()}
+              ${(() => {
+                const pct = parseFloat(hass.states['sensor.gartenwasser_v5_restlaufzeit_prozent'].state) || 0;
+                const fill = hass.states['switch.gartenbewasserung_ventil_5'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
+                const bg = card.querySelector('.bubble-button-background');
+                bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
               })()}
 
           # Fusszeile nach WebIF-Vorbild (docs/manual/images) - "Gartenbewaesserung" und
