@@ -393,6 +393,7 @@ views:
               }
               .bubble-state {
                 font-size: 1.2em !important;
+                margin-top: 4px !important;
               }
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? '#e53935' : '#43a047'} !important;
