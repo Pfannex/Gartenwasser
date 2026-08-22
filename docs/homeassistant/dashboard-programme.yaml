@@ -1210,6 +1210,488 @@ views:
                   action: perform-action
                   perform_action: script.gartenwasser_programm_abbrechen
 
+          # --- Bubble-Card-Test (Nutzerwunsch): dieselbe Funktion (Name+Ventile,
+          # Aktivieren/Bearbeiten/Loeschen) zum Vergleich mit HACS "Bubble Card" statt
+          # Mushroom/stack-in-card nachgebaut. Nutzt dieselben Skripte/Helper wie oben -
+          # "Bearbeiten" oeffnet dasselbe gemeinsame Formular weiter oben. Bubble Card
+          # unterstuetzt KEINE Jinja-Templates (nur JS-Templates in styles:, siehe
+          # https://github.com/Clooos/Bubble-Card) - dynamischer Name/Ventil-Text und
+          # Aktivieren-Einfaerbung laufen deshalb ueber ${...}-JS-Ausdruecke mit Zugriff
+          # auf `hass`/`card`, nicht ueber primary/secondary wie bei Mushroom.
+          - type: markdown
+            content: "## Programme (Bubble Card Test)"
+            grid_options:
+              columns: full
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 0"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 0
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "1"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 0
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 0
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 1 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[0]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[0];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 1"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 1
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "2"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 1
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 1
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 2 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[1]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[1];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 2"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 2
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "3"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 2
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 2
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 3 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[2]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[2];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 3"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 3
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "4"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 3
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 3
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 4 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[3]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[3];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 4"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 4
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "5"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 4
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 4
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 5 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[4]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[4];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 5"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 5
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "6"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 5
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 5
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 6 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[5]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[5];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 6"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 6
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "7"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 6
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 6
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 7 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[6]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[6];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Programm 7"
+            icon: mdi:playlist-play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 7
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:play
+                tap_action:
+                  action: call-service
+                  service: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "8"
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 7
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 7
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 8 ? 'grey' : 'green'} !important;
+              }
+              .bubble-sub-button-3 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[7]?.name || ''}
+              ${card.querySelector('.bubble-state').textContent = (() => {
+                const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[7];
+                if (!prog) return '';
+                const parts = [];
+                for (let n = 1; n <= 5; n++) {
+                  if (prog.auto['V' + n]) parts.push('V' + n + ' ' + (prog.time['V' + n] || 0) + 'min');
+                }
+                return parts.length ? parts.join(', ') : 'keine Ventile';
+              })()}
+
           - type: markdown
             content: >-
               Gartenbewässerung&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;{{

@@ -23,6 +23,8 @@ Repositories erkunden & herunterladen" installieren, danach Browser-Cache leeren
 | **card_mod** | `thomasloven/lovelace-card-mod` | CSS-Override für die Icon-Größe der Mushroom-Karte (`--icon-size`) — Mushroom selbst bietet dafür keine YAML-Option. |
 | **stack-in-card** | `custom-cards/stack-in-card` | Fasst mehrere Karten (z. B. Start/Stop-Button + Programm-Anzeige) zu einer optisch nahtlosen Kachel mit gemeinsamem Rahmen zusammen — ein reiner `horizontal-stack` (Bordmittel) lässt jede Kind-Karte mit eigenem Schatten/Abstand stehen. |
 | **timer-bar-card** | `rianadon/timer-bar-card` | Fortschrittsbalken für Ventil-Laufzeit + Gesamtlaufzeit der Sequenz — berechnet die Restzeit selbst aus Client-Uhrzeit + `duration`, ohne durchgehend auf die nicht-retained `time/remaining`-Topics angewiesen zu sein (Ausnahme: der Gesamtlaufzeit-Balken nutzt `main/remainingTotal` zusätzlich als `remain_time`, siehe `dashboard-programme.yaml`). |
+| **Bubble Card** | `Clooos/Bubble-Card` | Alternativer Nachbau der Programme-Zeile (`card_type: button` + `sub_button`) auf der Programme-Seite unterhalb der Mushroom-Variante, zu Vergleichszwecken auf Nutzerwunsch. Unterstützt keine Jinja-Templates, nur eigene JS-Templates (`${...}`) in `styles:`. |
+| **Bubble Card Tools** (Integration, kein Frontend-Repo) | `Clooos/Bubble-Card-Tools` | Backend für Bubble Cards Module Store/Editor — zusätzlich zur Karte über HACS heruntergeladen und unter Einstellungen → Geräte & Dienste eingerichtet, nach HA-Neustart. |
 
 Zusätzlich in der Test-Instanz installiert, aber von dieser Config **nicht** referenziert (nicht
 nötig für den Nachbau, nur zur Vollständigkeit dokumentiert — vermutlich aus der verlorenen
