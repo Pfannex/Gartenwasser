@@ -360,6 +360,8 @@ views:
 
           - type: custom:bubble-card
             card_type: button
+            card_layout: large
+            rows: 2
             button_type: slider
             entity: sensor.gartenwasser_sequenz_restlaufzeit_prozent
             min_value: 0
@@ -378,8 +380,22 @@ views:
               target:
                 entity_id: switch.gartenbewasserung_automatik_sequenz
             styles: |
+              .bubble-main-icon-container {
+                width: 96px !important;
+                height: 96px !important;
+              }
               .bubble-main-icon-container ha-icon {
-                color: ${hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'red' : 'green'} !important;
+                color: black !important;
+                --mdc-icon-size: 48px !important;
+              }
+              .bubble-name {
+                font-size: 1.6em !important;
+              }
+              .bubble-state {
+                font-size: 1.2em !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? '#e53935' : '#43a047'} !important;
               }
               ${card.querySelector('.bubble-main-icon-container ha-icon').setAttribute('icon', hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'mdi:stop' : 'mdi:play')}
               ${card.querySelector('.bubble-name').textContent = hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'STOP' : 'START'}
@@ -413,7 +429,10 @@ views:
                 }
             styles: |
               .bubble-main-icon-container ha-icon {
-                color: ${hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? 'red' : 'green'} !important;
+                color: black !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? '#e53935' : '#43a047'} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v0_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? 'An' : 'Aus'}
