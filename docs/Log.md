@@ -954,6 +954,14 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - **Erster Wurf zu breit fuer schmale Bildschirme**: der von Bubble Card automatisch kombinierte Name+Zustand-Text ("RAM · 74% (184/247 KB)") liess den Flash-Button bei 400px Viewportbreite (typische Handybreite, extra getestet statt nur am breiten Desktop-Viewport) abgeschnitten aus der Zeile ragen. Fix: Text pro Sub-Button per JS auf Kurzform gekuerzt ("RAM 74%" statt "RAM · 74% (184/247 KB)") - passt jetzt auch auf schmalen Bildschirmen vollstaendig in die Zeile.
 - Per Screenshot (Desktop- UND Handy-Breite) verifiziert: alle drei Sub-Buttons korrekt farbig/gefuellt und vollstaendig lesbar, "Letzter Fehler"/"Firmware" nicht mehr vorhanden.
 
+### Diagnose-Layout: I2C nach links, RAM/Flash breiter, ohne Icon, graue Schrift
+
+- Nutzer-Wunsch: I2C-Button weiter nach links, RAM/Flash entsprechend groesser, keine Icons mehr auf den beiden Fuellstand-Buttons, deren Schrift grau.
+- `show_icon: false` auf RAM/Flash (I2C behaelt sein Chip-Icon, war nicht gemeint). Sub-Button-Container per `position: absolute; left: 52px` naeher an das Karten-Icon gerueckt (vorher rechtsbuendig, dadurch war viel Platz zwischen "Diagnose"-Text und den Buttons).
+- **Erster Versuch mit festem `min-width: 120px`** fuer RAM/Flash lief auf schmalen Bildschirmen (400px, Handy-typisch) wieder aus der Zeile - fest addierte Pixelbreiten (Icon-Versatz + I2C + 2x120px + Gaps) passten nicht mehr in die verfuegbare Breite. Fix: von fester Breite auf `flex: 1` umgestellt (RAM/Flash teilen sich den verbleibenden Platz nach I2C und dem linken Versatz automatisch je nach Viewportbreite) plus `right: 8px` am Container, damit der absolut positionierte Flex-Container ueberhaupt eine definierte Breite zum Verteilen hat - dadurch responsiv statt mit einem festen Pixelwert geraten.
+- Graue Schriftfarbe nur auf RAM/Flash gesetzt (I2C behaelt seinen weissen Text auf farbigem Hintergrund fuer Kontrast).
+- Per Screenshot bei beiden Breiten (Handy 400px und Desktop) verifiziert: I2C sitzt naeher am Icon, RAM/Flash sind sichtbar breiter, kein Icon mehr, graue Schrift, keine Ueberlappung mehr bei keiner der beiden Breiten.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.

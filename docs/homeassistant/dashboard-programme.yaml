@@ -333,11 +333,13 @@ views:
                 entity: sensor.gartenwasser_ram
                 show_state: true
                 show_name: true
+                show_icon: false
                 name: RAM
               - icon: mdi:harddisk
                 entity: sensor.gartenwasser_flash
                 show_state: true
                 show_name: true
+                show_icon: false
                 name: Flash
             styles: |
               .bubble-sub-button-1 {
@@ -345,6 +347,22 @@ views:
               }
               .bubble-sub-button-1 .bubble-sub-button-icon {
                 color: black !important;
+              }
+              .bubble-sub-button-container {
+                position: absolute !important;
+                left: 52px !important;
+                top: 10px !important;
+                right: 8px !important;
+                justify-content: flex-start !important;
+                gap: 6px !important;
+              }
+              .bubble-sub-button-2, .bubble-sub-button-3 {
+                flex: 1 !important;
+                justify-content: center !important;
+              }
+              .bubble-sub-button-2 .bubble-sub-button-name-container,
+              .bubble-sub-button-3 .bubble-sub-button-name-container {
+                color: grey !important;
               }
               ${(() => {
                 const parsePct = (s) => {
