@@ -352,11 +352,6 @@ views:
             content: "## Status (Bubble Card Test)"
             grid_options:
               columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
 
           - type: custom:bubble-card
             card_type: button
@@ -367,11 +362,6 @@ views:
             show_state: false
             name: "Automatik"
             icon: mdi:play
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             sub_button:
               - icon: mdi:playlist-check
                 entity: input_select.gartenwasser_programm
@@ -458,11 +448,6 @@ views:
             show_state: true
             name: "Hauptventil"
             icon: mdi:valve
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
@@ -480,11 +465,6 @@ views:
             show_state: false
             name: "V1"
             icon: mdi:sprinkler-variant
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             tap_action:
               action: call-service
               service: switch.toggle
@@ -521,11 +501,6 @@ views:
             show_state: false
             name: "V2"
             icon: mdi:sprinkler-variant
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             tap_action:
               action: call-service
               service: switch.toggle
@@ -562,11 +537,6 @@ views:
             show_state: false
             name: "V3"
             icon: mdi:sprinkler-variant
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             tap_action:
               action: call-service
               service: switch.toggle
@@ -603,11 +573,6 @@ views:
             show_state: false
             name: "V4"
             icon: mdi:sprinkler-variant
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             tap_action:
               action: call-service
               service: switch.toggle
@@ -644,11 +609,6 @@ views:
             show_state: false
             name: "V5"
             icon: mdi:sprinkler-variant
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
             tap_action:
               action: call-service
               service: switch.toggle

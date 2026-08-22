@@ -928,8 +928,14 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - `min_value`/`max_value` (nur fuer den nativen Slider relevant) bei allen 6 Karten entfernt, `entity:`-Bindung bewusst beibehalten (loest weiterhin das Re-Rendering bei State-Aenderungen aus, das fuer den `${...}`-Gradient-Code noetig ist).
 - Per Screenshot verifiziert: keinerlei optische Regression im Ruhezustand (alle Icons/Texte/Farben identisch zu vorher), Dropdown-Hintergrund jetzt tatsaechlich nahtlos. Der Slider-Haenger-Bug kann naturgemaess nicht per Screenshot als "behoben" bestaetigt werden (war immer nur gelegentlich reproduzierbar) - die strukturelle Ursache (natives Slider-Gesten-Handling) ist aber vollstaendig entfernt, ein erneutes Auftreten waere damit ueberraschend.
 
+### Bubble-Card-Testbereich auf Fusszeilenbreite verkleinert
+
+- Nutzer-Merker aus der Vorsession umgesetzt: die 8 Karten im "Status (Bubble Card Test)"-Bereich (Kopfzeile + Start + Hauptventil + 5 Ventile) hatten alle ein per `card_mod` erzwungenes `min-width: 700px`, das mit dem Viewport mitwuchs - die Fusszeile darunter hatte diese Vorgabe nie und blieb dadurch schmaler, sichtbar unpassend zum Rest des Testbereichs.
+- Fix: alle 8 `min-width: 700px`-`card_mod`-Bloecke im Testbereich entfernt - die Karten nutzen jetzt dieselbe natuerliche Breite wie Fusszeile UND wie die urspruengliche Status-Seite oberhalb (Start/Stop-Kachel, Ventile-Liste, Diagnose-Karte, die alle nie eine min-width hatten).
+- Per Screenshot verifiziert: gesamter Testbereich jetzt bündig mit Fusszeile und restlicher Seite.
+- Session-Hinweis: neue Session, `R:\` war nicht verbunden (`net use R: ...` erneut noetig, siehe Log-Muster von frueher), Playwright-Login-State (`ha_state.json`) aus der Vorsession war noch gueltig und wurde direkt weiterverwendet statt neu einzuloggen.
+
 ## Offene Punkte / nächste Schritte
-- **Merker (naechste Session)**: Breite der Bubble-Card-Testseite (Status-Seite, "Status (Bubble Card Test)") auf die Breite der Fusszeile verringern - Bubble-Card-Zeilen wachsen aktuell per `min-width: 700px` mit dem Viewport mit, die Fusszeile bleibt vermutlich schmaler. Noch nicht umgesetzt, Nutzer wollte pausieren.
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
 - **Moegliche Firmware-Erweiterung**: Einzel-Command-Topics fuer Programme/Zeitplan-Eintraege (statt nur komplettes Array-Replace) wuerden HA-seitige Editoren fuer diese beiden Seiten ermoeglichen - aktuell bewusst nicht umgesetzt, WebIF bleibt dafuer die Referenz.
