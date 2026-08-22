@@ -1,0 +1,23 @@
+# Neue Datei fuer Home Assistant - noch NICHT in configuration.yaml eingebunden.
+# Erfordert einen NEUEN Include in der Haupt-configuration.yaml (input_boolean gibt es
+# dort aktuell noch nicht):
+#
+#   input_boolean: !include configurations/input_boolean.yaml
+#
+# Diese Datei dann als configurations/input_boolean.yaml ablegen.
+#
+# Entwurfs-Auto-Flags fuer den Programm-Editor auf der Programme-Seite
+# (dashboard-programme.yaml) - je Ventil, gefuellt von
+# script.gartenwasser_programm_bearbeiten_starten, ausgelesen von
+# script.gartenwasser_programm_speichern.
+
+gartenwasser_entwurf_v1_auto:
+  name: "Gartenwasser Entwurf V1 Auto"
+gartenwasser_entwurf_v2_auto:
+  name: "Gartenwasser Entwurf V2 Auto"
+gartenwasser_entwurf_v3_auto:
+  name: "Gartenwasser Entwurf V3 Auto"
+gartenwasser_entwurf_v4_auto:
+  name: "Gartenwasser Entwurf V4 Auto"
+gartenwasser_entwurf_v5_auto:
+  name: "Gartenwasser Entwurf V5 Auto"

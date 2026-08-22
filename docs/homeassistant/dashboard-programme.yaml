@@ -528,24 +528,508 @@ views:
                   min-width: 700px;
                 }
 
+          # Programm-Auswahl (welches Programm die Automatik faehrt) passiert weiterhin
+          # inline auf der Status-Seite (mushroom-select-card, Dropdown ohne eigenes
+          # Fenster). Hier: die vollstaendige Programmliste mit Aktivieren/Bearbeiten/
+          # Loeschen je Zeile, nach WebIF-Vorbild. main/programs/set ersetzt immer das
+          # komplette Array (kein Einzel-Command-Topic pro Programm/Aenderung) - deshalb
+          # laufen Bearbeiten/Loeschen ueber Skripte (configurations/script.yaml), die das
+          # Array lesen, veraendern und komplett neu publizieren. Acht feste "Slots"
+          # (Obergrenze laut docs/requirements.md), je per visibility ein-/ausgeblendet -
+          # dasselbe Muster wie die 5 Ventil-Zeilen auf der Status-Seite.
+          #
+          # Bearbeiten oeffnet ein EINZIGES gemeinsames Formular weiter unten (nicht 8x
+          # dupliziert) - die Liste blendet sich dabei komplett aus, das Formular ein
+          # (beides an input_number.gartenwasser_editier_index gekoppelt). Erfuellt densel-
+          # ben Effekt wie ein Inline-Formular je Zeile, ist aber wartbar.
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 0
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[0].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[0] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 1 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "1"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 0
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 0
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 1
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[1].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[1] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 2 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "2"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 1
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 1
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 2
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[2].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[2] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 3 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "3"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 2
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 2
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 3
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[3].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[3] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 4 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "4"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 3
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 3
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 4
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[4].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[4] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 5 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "5"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 4
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 4
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 5
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[5].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[5] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 6 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "6"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 5
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 5
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 6
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[6].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[6] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 7 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "7"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 6
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 6
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                above: 7
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+            cards:
+              - type: custom:mushroom-template-card
+                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[7].name }}"
+                secondary: >-
+                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[7] %}
+                  {% set vns = namespace(parts=[]) %}
+                  {% for n in range(1, 6) %}
+                    {% if prog.auto.get('V' ~ n, false) %}
+                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
+                icon: mdi:playlist-play
+                layout: vertical
+              - type: custom:mushroom-template-card
+                primary: Aktivieren
+                icon: mdi:play
+                layout: vertical
+                icon_color: >-
+                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 8 else 'green' }}
+                tap_action:
+                  action: perform-action
+                  perform_action: mqtt.publish
+                  data:
+                    topic: "gartenwasser/main/program/cmd"
+                    payload: "8"
+              - type: custom:mushroom-template-card
+                primary: Bearbeiten
+                icon: mdi:pencil
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_bearbeiten_starten
+                  data:
+                    index: 7
+              - type: custom:mushroom-template-card
+                primary: Löschen
+                icon: mdi:delete
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_loeschen
+                  data:
+                    index: 7
+                  confirmation:
+                    text: "Programm wirklich löschen?"
+
           - type: markdown
-            content: |
-              {% set ns = namespace(lines=[]) %}
-              {% for prog in state_attr('sensor.gartenwasser_programme', 'programs') or [] %}
-                {% set vns = namespace(parts=[]) %}
-                {% for n in range(1, 6) %}
-                  {% set vkey = 'V' ~ n %}
-                  {% if prog.auto.get(vkey, false) %}
-                    {% set vns.parts = vns.parts + [vkey ~ ' (' ~ prog.time.get(vkey, 0) ~ ' min)'] %}
-                  {% endif %}
-                {% endfor %}
-                {% set ns.lines = ns.lines + ['**' ~ prog.name ~ '**: ' ~ (vns.parts | join(', ') if vns.parts else '_keine Ventile_')] %}
-              {% endfor %}
-              {% if ns.lines %}
-              {{ ns.lines | join('\n\n') }}
-              {% else %}
-              Keine Programme vorhanden.
-              {% endif %}
+            content: "Keine Programme vorhanden."
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_programme
+                below: 1
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                below: 0
+
+          - type: entities
+            title: Programm bearbeiten
+            show_header_toggle: false
             grid_options:
               columns: full
             card_mod:
@@ -553,13 +1037,58 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
-            # Programm-Auswahl passiert inline auf der Status-Seite (mushroom-select-card,
-            # Dropdown ohne eigenes Fenster) - die fruehere "Programm waehlen"-entities-Karte
-            # hier wurde entfernt, weil eine entities-Karte bei input_select IMMER den
-            # more-info-Dialog (eigenes Fenster) oeffnet - genau das, was vermieden werden
-            # sollte. Diese Liste ist rein informativ (Programm-Editor noch nicht
-            # umgesetzt - dafuer muesste main/programs/set von HA aus ein komplettes
-            # Array-Replace zusammenbauen, kein einzelnes Command-Topic pro Programm).
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            entities:
+              - entity: input_text.gartenwasser_entwurf_name
+                name: Name
+              - entity: input_boolean.gartenwasser_entwurf_v1_auto
+                name: V1 aktiv
+              - entity: input_number.gartenwasser_entwurf_v1_zeit
+                name: V1 Laufzeit
+              - entity: input_boolean.gartenwasser_entwurf_v2_auto
+                name: V2 aktiv
+              - entity: input_number.gartenwasser_entwurf_v2_zeit
+                name: V2 Laufzeit
+              - entity: input_boolean.gartenwasser_entwurf_v3_auto
+                name: V3 aktiv
+              - entity: input_number.gartenwasser_entwurf_v3_zeit
+                name: V3 Laufzeit
+              - entity: input_boolean.gartenwasser_entwurf_v4_auto
+                name: V4 aktiv
+              - entity: input_number.gartenwasser_entwurf_v4_zeit
+                name: V4 Laufzeit
+              - entity: input_boolean.gartenwasser_entwurf_v5_auto
+                name: V5 aktiv
+              - entity: input_number.gartenwasser_entwurf_v5_zeit
+                name: V5 Laufzeit
+
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: full
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            cards:
+              - type: custom:mushroom-template-card
+                primary: Speichern
+                icon: mdi:content-save
+                icon_color: green
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_speichern
+              - type: custom:mushroom-template-card
+                primary: Abbrechen
+                icon: mdi:close
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_abbrechen
 
           - type: markdown
             content: >-

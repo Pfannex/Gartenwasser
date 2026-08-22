@@ -1,0 +1,15 @@
+# Neue Datei fuer Home Assistant - noch NICHT in configuration.yaml eingebunden.
+# Erfordert einen NEUEN Include in der Haupt-configuration.yaml (input_text gibt es
+# dort aktuell noch nicht):
+#
+#   input_text: !include configurations/input_text.yaml
+#
+# Diese Datei dann als configurations/input_text.yaml ablegen.
+#
+# Entwurfs-Programmname fuer den Programm-Editor auf der Programme-Seite
+# (dashboard-programme.yaml).
+
+gartenwasser_entwurf_name:
+  name: "Gartenwasser Entwurf Programmname"
+  icon: mdi:form-textbox
+  max: 40

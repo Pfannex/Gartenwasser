@@ -1,0 +1,194 @@
+# Ergaenzung fuer Home Assistant - Inhalt an deine BESTEHENDE Skript-Datei anhaengen
+# (bei einer frischen Instanz meist scripts.yaml im Config-Wurzelverzeichnis, worauf
+# `script: !include scripts.yaml` in configuration.yaml von Haus aus zeigt - KEIN neuer
+# Include noetig, anders als bei input_boolean.yaml/input_text.yaml unten). Falls du
+# schon eigene Skripte hast, einfach unten anhaengen, nicht ersetzen.
+#
+# Drei Skripte fuer den Programm-Editor auf der Programme-Seite (dashboard-programme.yaml):
+# Bearbeiten starten (Entwurfs-Helper aus dem gewaehlten Programm fuellen), Speichern
+# (Entwurf zurueck ins komplette Array schreiben, main/programs/set published - das Topic
+# ersetzt immer das ganze Array, siehe docs/requirements.md Topic-Baum) und Loeschen
+# (Programm aus dem Array entfernen, published).
+#
+# Wichtig: main/programs/state liefert "time" SPARSE (nur Ventile mit auto=true haben
+# einen Eintrag, siehe echte Live-Daten in docs/Log.md) - Speichern/Loeschen bauen das
+# Array deshalb im selben sparsen Format neu zusammen, um die Firmware nicht mit
+# unerwarteten zusaetzlichen Keys zu ueberraschen.
+
+gartenwasser_programm_bearbeiten_starten:
+  alias: "Gartenwasser: Programm-Bearbeitung starten"
+  fields:
+    index:
+      description: "0-basierter Index des zu bearbeitenden Programms im programs-Array"
+      example: 0
+  sequence:
+    - variables:
+        prog: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[index] }}"
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.gartenwasser_entwurf_name
+      data:
+        value: "{{ prog.name }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v1_zeit
+      data:
+        value: "{{ prog.time.get('V1', 5) }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v2_zeit
+      data:
+        value: "{{ prog.time.get('V2', 5) }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v3_zeit
+      data:
+        value: "{{ prog.time.get('V3', 5) }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v4_zeit
+      data:
+        value: "{{ prog.time.get('V4', 5) }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v5_zeit
+      data:
+        value: "{{ prog.time.get('V5', 5) }}"
+    - if:
+        - condition: template
+          value_template: "{{ prog.auto.get('V1', false) }}"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v1_auto
+      else:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v1_auto
+    - if:
+        - condition: template
+          value_template: "{{ prog.auto.get('V2', false) }}"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v2_auto
+      else:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v2_auto
+    - if:
+        - condition: template
+          value_template: "{{ prog.auto.get('V3', false) }}"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v3_auto
+      else:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v3_auto
+    - if:
+        - condition: template
+          value_template: "{{ prog.auto.get('V4', false) }}"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v4_auto
+      else:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v4_auto
+    - if:
+        - condition: template
+          value_template: "{{ prog.auto.get('V5', false) }}"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v5_auto
+      else:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.gartenwasser_entwurf_v5_auto
+    # Editier-Index zuletzt setzen - erst wenn alle Entwurfs-Helper befuellt sind, damit
+    # das Formular (das per visibility an editier_index haengt) nie mit alten/leeren
+    # Werten kurz aufblitzt.
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_editier_index
+      data:
+        value: "{{ index }}"
+
+gartenwasser_programm_abbrechen:
+  alias: "Gartenwasser: Programm-Bearbeitung abbrechen"
+  sequence:
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_editier_index
+      data:
+        value: -1
+
+gartenwasser_programm_speichern:
+  alias: "Gartenwasser: Programm speichern"
+  sequence:
+    - variables:
+        idx: "{{ states('input_number.gartenwasser_editier_index') | int }}"
+        programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
+        active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
+    - variables:
+        new_time: >-
+          {% set ns = namespace(d={}) %}
+          {% for n in range(1, 6) %}
+            {% if is_state('input_boolean.gartenwasser_entwurf_v' ~ n ~ '_auto', 'on') %}
+              {% set ns.d = dict(ns.d, **{'V' ~ n: states('input_number.gartenwasser_entwurf_v' ~ n ~ '_zeit') | int}) %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.d }}
+        new_auto: >-
+          {% set ns = namespace(d={}) %}
+          {% for n in range(1, 6) %}
+            {% set ns.d = dict(ns.d, **{'V' ~ n: is_state('input_boolean.gartenwasser_entwurf_v' ~ n ~ '_auto', 'on')}) %}
+          {% endfor %}
+          {{ ns.d }}
+    - variables:
+        new_prog:
+          name: "{{ states('input_text.gartenwasser_entwurf_name') }}"
+          time: "{{ new_time }}"
+          auto: "{{ new_auto }}"
+        new_programs: "{{ programs[:idx] + [new_prog] + programs[idx + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/programs/set"
+        payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_editier_index
+      data:
+        value: -1
+
+gartenwasser_programm_loeschen:
+  alias: "Gartenwasser: Programm loeschen"
+  fields:
+    index:
+      description: "0-basierter Index des zu loeschenden Programms im programs-Array"
+      example: 0
+  sequence:
+    - variables:
+        programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
+        active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
+        new_programs: "{{ programs[:index] + programs[index + 1:] }}"
+        # activeProgram ist 1-basiert (main/program/cmd-Konvention, 0 = keins) - beim
+        # Loeschen verschieben sich alle Indizes NACH dem geloeschten Programm um 1 nach
+        # unten, das aktive Programm muss deshalb mitwandern (oder auf 0/keins gesetzt
+        # werden, falls genau das geloeschte Programm aktiv war).
+        new_active: >-
+          {% if active == (index + 1) %}
+            0
+          {% elif active > (index + 1) %}
+            {{ active - 1 }}
+          {% else %}
+            {{ active }}
+          {% endif %}
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/programs/set"
+        payload: "{{ {'programs': new_programs, 'activeProgram': new_active | int} | tojson }}"

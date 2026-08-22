@@ -1,0 +1,53 @@
+# Ergaenzung zu configurations/input_number.yaml (Home Assistant) - unter bestehende
+# Eintraege anhaengen, NICHT ersetzen. `input_number:` ist bei dir bereits eingebunden.
+#
+# Editier-Zustand + Entwurfswerte fuer den Programm-Editor auf der Programme-Seite
+# (dashboard-programme.yaml) - siehe auch input_boolean.yaml/input_text.yaml/script.yaml
+# in diesem Ordner.
+
+gartenwasser_editier_index:
+  name: "Gartenwasser Editier-Index"
+  icon: mdi:pencil
+  min: -1
+  max: 7
+  step: 1
+  mode: box
+  # -1 = kein Programm wird gerade bearbeitet (Liste sichtbar), 0-7 = Index des Programms
+  # im "programs"-Array, das gerade im Formular bearbeitet wird (Liste ausgeblendet,
+  # Formular sichtbar) - siehe visibility-Bedingungen im Dashboard.
+
+gartenwasser_entwurf_v1_zeit:
+  name: "Gartenwasser Entwurf V1 Zeit"
+  min: 0
+  max: 60
+  step: 1
+  mode: box
+  unit_of_measurement: "min"
+gartenwasser_entwurf_v2_zeit:
+  name: "Gartenwasser Entwurf V2 Zeit"
+  min: 0
+  max: 60
+  step: 1
+  mode: box
+  unit_of_measurement: "min"
+gartenwasser_entwurf_v3_zeit:
+  name: "Gartenwasser Entwurf V3 Zeit"
+  min: 0
+  max: 60
+  step: 1
+  mode: box
+  unit_of_measurement: "min"
+gartenwasser_entwurf_v4_zeit:
+  name: "Gartenwasser Entwurf V4 Zeit"
+  min: 0
+  max: 60
+  step: 1
+  mode: box
+  unit_of_measurement: "min"
+gartenwasser_entwurf_v5_zeit:
+  name: "Gartenwasser Entwurf V5 Zeit"
+  min: 0
+  max: 60
+  step: 1
+  mode: box
+  unit_of_measurement: "min"
