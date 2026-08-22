@@ -349,7 +349,7 @@ views:
                 name: Flash
 
           - type: markdown
-            content: "## Ventile (Bubble Card Test)"
+            content: "## Status (Bubble Card Test)"
             grid_options:
               columns: full
             card_mod:
@@ -357,6 +357,51 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: slider
+            entity: sensor.gartenwasser_sequenz_restlaufzeit_prozent
+            min_value: 0
+            max_value: 100
+            show_state: true
+            name: "Automatik"
+            icon: mdi:play
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            tap_action:
+              action: call-service
+              service: switch.toggle
+              target:
+                entity_id: switch.gartenbewasserung_automatik_sequenz
+            styles: |
+              .bubble-main-icon-container ha-icon {
+                color: ${hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'red' : 'green'} !important;
+              }
+              ${card.querySelector('.bubble-main-icon-container ha-icon').setAttribute('icon', hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'mdi:stop' : 'mdi:play')}
+              ${card.querySelector('.bubble-name').textContent = hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'STOP' : 'START'}
+              ${card.querySelector('.bubble-state').textContent = hass.states['input_select.gartenwasser_programm'].state}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Hauptventil"
+            icon: mdi:valve
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 700px;
+                }
+            styles: |
+              .bubble-main-icon-container ha-icon {
+                color: ${hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? 'red' : 'green'} !important;
+              }
+              ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v0_alias'].state}
+              ${card.querySelector('.bubble-state').textContent = hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? 'An' : 'Aus'}
 
           - type: custom:bubble-card
             card_type: button
