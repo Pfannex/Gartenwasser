@@ -380,6 +380,7 @@ views:
                 sub_button_type: select
                 select_attribute: options
                 show_state: true
+                show_icon: false
                 # Nur im Ruhezustand aenderbar - waehrend die Automatik laeuft, soll das
                 # laufende Programm nicht mehr gewechselt werden koennen.
                 visibility:
@@ -399,6 +400,9 @@ views:
               .bubble-main-icon-container ha-icon {
                 color: black !important;
                 --mdc-icon-size: 48px !important;
+              }
+              .bubble-sub-button-1 .bubble-sub-button-name-container {
+                font-size: 1.3em !important;
               }
               .bubble-name {
                 font-size: 1.6em !important;
