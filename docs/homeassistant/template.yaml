@@ -64,13 +64,13 @@
 # Bubble-Card-Nachbau der Status-Seite: `button_type: slider` faerbt die Bubble selbst als
 # Fuellstand-Balken ein, aktualisiert sich dabei aber NUR bei echten State-Aenderungen des
 # gebundenen Entities (Bubble Card hat kein eigenes Zeit-Ticking wie timer-bar-card) - dieser
-# trigger-basierte Sensor (alle 10s neu berechnet) liefert deshalb die noetigen periodischen
-# State-Updates, damit der Balken beim Laufen sichtbar "abschmilzt" statt nur bei Start/Stop
-# zu springen. 10s statt 30s (wie beim Gesamtlaufzeit-Sensor oben), da hier ein einzelnes
-# Ventil oft nur wenige Minuten laeuft und 30s-Spruenge dort staerker auffallen wuerden.
+# trigger-basierte Sensor liefert deshalb die noetigen periodischen State-Updates, damit der
+# Balken beim Laufen sichtbar "abschmilzt" statt nur bei Start/Stop zu springen. Jede Sekunde
+# statt z. B. 10s (Nutzer-Feedback: 10s wirkte spuerbar unregelmaessig) - fuenf einfache
+# Jinja-Berechnungen pro Sekunde sind fuer HA vernachlaessigbare Last.
 - trigger:
     - platform: time_pattern
-      seconds: "/10"
+      seconds: "/1"
     - platform: state
       entity_id:
         - switch.gartenbewasserung_ventil_1
