@@ -388,6 +388,9 @@ views:
               .bubble-main-icon-container ha-icon {
                 color: ${hass.states['switch.gartenbewasserung_ventil_1'].state === 'on' ? 'red' : (hass.states['binary_sensor.gartenbewasserung_ventil_1_automatik'].state === 'on' ? 'green' : 'grey')} !important;
               }
+              ha-card {
+                --bubble-button-icon-background-color: ${(hass.states['switch.gartenbewasserung_ventil_1'].state !== 'on' && hass.states['binary_sensor.gartenbewasserung_ventil_1_automatik'].state === 'on') ? 'rgba(46, 160, 67, 0.35)' : 'rgba(128, 128, 128, 0.15)'} !important;
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v1_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['switch.gartenbewasserung_ventil_1'].state === 'on' ? hass.states['sensor.gartenbewasserung_ventil_1_restlaufzeit'].state + ' min' : hass.states['number.gartenbewasserung_ventil_1_laufzeit'].state + ' min'}
 
@@ -420,6 +423,9 @@ views:
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: ${hass.states['switch.gartenbewasserung_ventil_2'].state === 'on' ? 'red' : (hass.states['binary_sensor.gartenbewasserung_ventil_2_automatik'].state === 'on' ? 'green' : 'grey')} !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${(hass.states['switch.gartenbewasserung_ventil_2'].state !== 'on' && hass.states['binary_sensor.gartenbewasserung_ventil_2_automatik'].state === 'on') ? 'rgba(46, 160, 67, 0.35)' : 'rgba(128, 128, 128, 0.15)'} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v2_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['switch.gartenbewasserung_ventil_2'].state === 'on' ? hass.states['sensor.gartenbewasserung_ventil_2_restlaufzeit'].state + ' min' : hass.states['number.gartenbewasserung_ventil_2_laufzeit'].state + ' min'}
@@ -454,6 +460,9 @@ views:
               .bubble-main-icon-container ha-icon {
                 color: ${hass.states['switch.gartenbewasserung_ventil_3'].state === 'on' ? 'red' : (hass.states['binary_sensor.gartenbewasserung_ventil_3_automatik'].state === 'on' ? 'green' : 'grey')} !important;
               }
+              ha-card {
+                --bubble-button-icon-background-color: ${(hass.states['switch.gartenbewasserung_ventil_3'].state !== 'on' && hass.states['binary_sensor.gartenbewasserung_ventil_3_automatik'].state === 'on') ? 'rgba(46, 160, 67, 0.35)' : 'rgba(128, 128, 128, 0.15)'} !important;
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v3_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['switch.gartenbewasserung_ventil_3'].state === 'on' ? hass.states['sensor.gartenbewasserung_ventil_3_restlaufzeit'].state + ' min' : hass.states['number.gartenbewasserung_ventil_3_laufzeit'].state + ' min'}
 
@@ -487,6 +496,9 @@ views:
               .bubble-main-icon-container ha-icon {
                 color: ${hass.states['switch.gartenbewasserung_ventil_4'].state === 'on' ? 'red' : (hass.states['binary_sensor.gartenbewasserung_ventil_4_automatik'].state === 'on' ? 'green' : 'grey')} !important;
               }
+              ha-card {
+                --bubble-button-icon-background-color: ${(hass.states['switch.gartenbewasserung_ventil_4'].state !== 'on' && hass.states['binary_sensor.gartenbewasserung_ventil_4_automatik'].state === 'on') ? 'rgba(46, 160, 67, 0.35)' : 'rgba(128, 128, 128, 0.15)'} !important;
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v4_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['switch.gartenbewasserung_ventil_4'].state === 'on' ? hass.states['sensor.gartenbewasserung_ventil_4_restlaufzeit'].state + ' min' : hass.states['number.gartenbewasserung_ventil_4_laufzeit'].state + ' min'}
 
@@ -519,6 +531,9 @@ views:
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: ${hass.states['switch.gartenbewasserung_ventil_5'].state === 'on' ? 'red' : (hass.states['binary_sensor.gartenbewasserung_ventil_5_automatik'].state === 'on' ? 'green' : 'grey')} !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${(hass.states['switch.gartenbewasserung_ventil_5'].state !== 'on' && hass.states['binary_sensor.gartenbewasserung_ventil_5_automatik'].state === 'on') ? 'rgba(46, 160, 67, 0.35)' : 'rgba(128, 128, 128, 0.15)'} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v5_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['switch.gartenbewasserung_ventil_5'].state === 'on' ? hass.states['sensor.gartenbewasserung_ventil_5_restlaufzeit'].state + ' min' : hass.states['number.gartenbewasserung_ventil_5_laufzeit'].state + ' min'}
