@@ -59,3 +59,83 @@
       # oben laufend mit der seit dem Einschalten verstrichenen Zeit (+5 min Puffer) mit -
       # kann dadurch nie kleiner als die tatsaechlich schon verstrichene Laufzeit werden,
       # egal wie lange dieser Randfall anhaelt.
+
+# Restlaufzeit-Prozent je Ventil (0=fertig/aus, 100=gerade gestartet) - fuer den
+# Bubble-Card-Nachbau der Status-Seite: `button_type: slider` faerbt die Bubble selbst als
+# Fuellstand-Balken ein, aktualisiert sich dabei aber NUR bei echten State-Aenderungen des
+# gebundenen Entities (Bubble Card hat kein eigenes Zeit-Ticking wie timer-bar-card) - dieser
+# trigger-basierte Sensor (alle 10s neu berechnet) liefert deshalb die noetigen periodischen
+# State-Updates, damit der Balken beim Laufen sichtbar "abschmilzt" statt nur bei Start/Stop
+# zu springen. 10s statt 30s (wie beim Gesamtlaufzeit-Sensor oben), da hier ein einzelnes
+# Ventil oft nur wenige Minuten laeuft und 30s-Spruenge dort staerker auffallen wuerden.
+- trigger:
+    - platform: time_pattern
+      seconds: "/10"
+    - platform: state
+      entity_id:
+        - switch.gartenbewasserung_ventil_1
+        - switch.gartenbewasserung_ventil_2
+        - switch.gartenbewasserung_ventil_3
+        - switch.gartenbewasserung_ventil_4
+        - switch.gartenbewasserung_ventil_5
+  sensor:
+    - name: "Gartenwasser V1 Restlaufzeit Prozent"
+      unique_id: gartenwasser_v1_restlaufzeit_prozent
+      unit_of_measurement: "%"
+      state: >-
+        {% set duration = states('number.gartenbewasserung_ventil_1_laufzeit') | float(0) %}
+        {% set sw = states.switch.gartenbewasserung_ventil_1 %}
+        {% if sw and sw.state == 'on' and duration > 0 %}
+          {% set elapsed_min = (now() - sw.last_changed).total_seconds() / 60 %}
+          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(0) }}
+        {% else %}
+          0
+        {% endif %}
+    - name: "Gartenwasser V2 Restlaufzeit Prozent"
+      unique_id: gartenwasser_v2_restlaufzeit_prozent
+      unit_of_measurement: "%"
+      state: >-
+        {% set duration = states('number.gartenbewasserung_ventil_2_laufzeit') | float(0) %}
+        {% set sw = states.switch.gartenbewasserung_ventil_2 %}
+        {% if sw and sw.state == 'on' and duration > 0 %}
+          {% set elapsed_min = (now() - sw.last_changed).total_seconds() / 60 %}
+          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(0) }}
+        {% else %}
+          0
+        {% endif %}
+    - name: "Gartenwasser V3 Restlaufzeit Prozent"
+      unique_id: gartenwasser_v3_restlaufzeit_prozent
+      unit_of_measurement: "%"
+      state: >-
+        {% set duration = states('number.gartenbewasserung_ventil_3_laufzeit') | float(0) %}
+        {% set sw = states.switch.gartenbewasserung_ventil_3 %}
+        {% if sw and sw.state == 'on' and duration > 0 %}
+          {% set elapsed_min = (now() - sw.last_changed).total_seconds() / 60 %}
+          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(0) }}
+        {% else %}
+          0
+        {% endif %}
+    - name: "Gartenwasser V4 Restlaufzeit Prozent"
+      unique_id: gartenwasser_v4_restlaufzeit_prozent
+      unit_of_measurement: "%"
+      state: >-
+        {% set duration = states('number.gartenbewasserung_ventil_4_laufzeit') | float(0) %}
+        {% set sw = states.switch.gartenbewasserung_ventil_4 %}
+        {% if sw and sw.state == 'on' and duration > 0 %}
+          {% set elapsed_min = (now() - sw.last_changed).total_seconds() / 60 %}
+          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(0) }}
+        {% else %}
+          0
+        {% endif %}
+    - name: "Gartenwasser V5 Restlaufzeit Prozent"
+      unique_id: gartenwasser_v5_restlaufzeit_prozent
+      unit_of_measurement: "%"
+      state: >-
+        {% set duration = states('number.gartenbewasserung_ventil_5_laufzeit') | float(0) %}
+        {% set sw = states.switch.gartenbewasserung_ventil_5 %}
+        {% if sw and sw.state == 'on' and duration > 0 %}
+          {% set elapsed_min = (now() - sw.last_changed).total_seconds() / 60 %}
+          {{ [((duration - elapsed_min) / duration * 100), 0] | max | round(0) }}
+        {% else %}
+          0
+        {% endif %}
