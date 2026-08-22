@@ -410,6 +410,9 @@ views:
                 top: 68px !important;
                 justify-content: flex-start !important;
               }
+              .bubble-dropdown-arrow {
+                background: var(--secondary-background-color) !important;
+              }
               ha-select {
                 --bubble-select-list-background-color: var(--secondary-background-color) !important;
               }
@@ -477,25 +480,17 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
-            sub_button:
-              - icon: mdi:power
-                tap_action:
-                  action: call-service
-                  service: switch.toggle
-                  target:
-                    entity_id: switch.gartenbewasserung_ventil_1
+            tap_action:
+              action: call-service
+              service: switch.toggle
+              target:
+                entity_id: switch.gartenbewasserung_ventil_1
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
               }
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_ventil_1'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_1_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
-              }
-              .bubble-sub-button-1 .bubble-sub-button-icon {
-                color: black !important;
-              }
-              .bubble-sub-button-1 {
-                background-color: ${hass.states['switch.gartenbewasserung_ventil_1'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_1_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v1_alias'].state}
               ${(() => {
@@ -522,25 +517,17 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
-            sub_button:
-              - icon: mdi:power
-                tap_action:
-                  action: call-service
-                  service: switch.toggle
-                  target:
-                    entity_id: switch.gartenbewasserung_ventil_2
+            tap_action:
+              action: call-service
+              service: switch.toggle
+              target:
+                entity_id: switch.gartenbewasserung_ventil_2
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
               }
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_ventil_2'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_2_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
-              }
-              .bubble-sub-button-1 .bubble-sub-button-icon {
-                color: black !important;
-              }
-              .bubble-sub-button-1 {
-                background-color: ${hass.states['switch.gartenbewasserung_ventil_2'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_2_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v2_alias'].state}
               ${(() => {
@@ -567,25 +554,17 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
-            sub_button:
-              - icon: mdi:power
-                tap_action:
-                  action: call-service
-                  service: switch.toggle
-                  target:
-                    entity_id: switch.gartenbewasserung_ventil_3
+            tap_action:
+              action: call-service
+              service: switch.toggle
+              target:
+                entity_id: switch.gartenbewasserung_ventil_3
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
               }
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_ventil_3'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_3_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
-              }
-              .bubble-sub-button-1 .bubble-sub-button-icon {
-                color: black !important;
-              }
-              .bubble-sub-button-1 {
-                background-color: ${hass.states['switch.gartenbewasserung_ventil_3'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_3_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v3_alias'].state}
               ${(() => {
@@ -612,25 +591,17 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
-            sub_button:
-              - icon: mdi:power
-                tap_action:
-                  action: call-service
-                  service: switch.toggle
-                  target:
-                    entity_id: switch.gartenbewasserung_ventil_4
+            tap_action:
+              action: call-service
+              service: switch.toggle
+              target:
+                entity_id: switch.gartenbewasserung_ventil_4
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
               }
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_ventil_4'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_4_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
-              }
-              .bubble-sub-button-1 .bubble-sub-button-icon {
-                color: black !important;
-              }
-              .bubble-sub-button-1 {
-                background-color: ${hass.states['switch.gartenbewasserung_ventil_4'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_4_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v4_alias'].state}
               ${(() => {
@@ -657,25 +628,17 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
-            sub_button:
-              - icon: mdi:power
-                tap_action:
-                  action: call-service
-                  service: switch.toggle
-                  target:
-                    entity_id: switch.gartenbewasserung_ventil_5
+            tap_action:
+              action: call-service
+              service: switch.toggle
+              target:
+                entity_id: switch.gartenbewasserung_ventil_5
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
               }
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_ventil_5'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_5_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
-              }
-              .bubble-sub-button-1 .bubble-sub-button-icon {
-                color: black !important;
-              }
-              .bubble-sub-button-1 {
-                background-color: ${hass.states['switch.gartenbewasserung_ventil_5'].state === 'on' ? '#e53935' : (hass.states['binary_sensor.gartenbewasserung_ventil_5_automatik'].state === 'on' ? '#43a047' : '#757575')} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v5_alias'].state}
               ${(() => {
