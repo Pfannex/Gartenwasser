@@ -935,6 +935,16 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Per Screenshot verifiziert: gesamter Testbereich jetzt bündig mit Fusszeile und restlicher Seite.
 - Session-Hinweis: neue Session, `R:\` war nicht verbunden (`net use R: ...` erneut noetig, siehe Log-Muster von frueher), Playwright-Login-State (`ha_state.json`) aus der Vorsession war noch gueltig und wurde direkt weiterverwendet statt neu einzuloggen.
 
+### Status-Seite: alter Mushroom-Vergleichsinhalt entfernt, Bubble Card ist jetzt die einzige Version
+
+- Nutzer-Entscheidung nach dem Breiten-Fix: die alte Mushroom/stack-in-card/timer-bar-card-Version oberhalb des Bubble-Card-Bereichs entfernen - der Vergleich ist damit entschieden, Bubble Card ersetzt Mushroom auf der Status-Seite vollstaendig.
+- Entfernt: alte Start/Stop-Kachel + "Aktives Programm"-Anzeige (zwei separate Mushroom-Karten + timer-bar-card fuer den Gesamtlaufzeit-Balken), alte "## Ventile"-Ueberschrift, Hauptventil-Zeile und alle 5 Ventilzeilen (je Mushroom-Karte + timer-bar-card in einem verschachtelten `stack-in-card`).
+- **Diagnose-Karte bewusst NICHT geloescht**, obwohl sie technisch noch "oberhalb" im alten Sinne stand: sie ist reiner Diagnosewert-Block ohne Bezug zum Mushroom/Bubble-Vergleich (I2C-Bus/Letzter Fehler/Firmware/RAM/Flash) und wurde stattdessen ans Ende verschoben (nach den Ventilzeilen, vor der Fusszeile) - eine woertliche Interpretation der Anweisung haette funktionierende Diagnosewerte ersatzlos entfernt.
+- "## Status (Bubble Card Test)"-Zwischenueberschrift entfernt (kein Vergleich mehr noetig, Seiten-Tab-Titel "Status" reicht).
+- Kopfkommentar der Datei korrigiert: beschrieb bisher "die Status-View nutzt custom:mushroom-template-card" - das stimmt jetzt nicht mehr (Status ist komplett auf Bubble Card umgestellt), Mushroom wird aber weiterhin auf der Programme- und Konfigurationsseite genutzt, Kommentar entsprechend praezisiert.
+- Programme-Seite bewusst UNVERAENDERT gelassen (dort existieren Mushroom- und Bubble-Card-Version weiterhin parallel) - diese Aufraeumaktion betraf nur die Status-Seite, wie vom Nutzer angefragt.
+- Per Screenshot verifiziert: Status-Seite zeigt jetzt ausschliesslich Start-Bubble, Hauptventil, 5 Ventilzeilen, Diagnose-Karte, Fusszeile - keine doppelten/alten Elemente mehr, durchgehend einheitliche Breite.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
