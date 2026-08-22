@@ -192,3 +192,64 @@ gartenwasser_programm_loeschen:
       data:
         topic: "gartenwasser/main/programs/set"
         payload: "{{ {'programs': new_programs, 'activeProgram': new_active | int} | tojson }}"
+
+gartenwasser_programm_neu_starten:
+  alias: "Gartenwasser: Neues Programm anlegen"
+  sequence:
+    # Neuer Index = aktuelle Anzahl (naechster freier Slot, 0-basiert) - dasselbe
+    # gemeinsame Formular wie beim Bearbeiten, nur mit leeren/neutralen Startwerten
+    # statt eines bestehenden Programms. gartenwasser_programm_speichern braucht dafuer
+    # keine Aenderung: programs[:idx] + [new_prog] + programs[idx+1:] haengt bei
+    # idx == programs|count einfach an (programs[idx+1:] ist dann leer).
+    - variables:
+        idx: "{{ state_attr('sensor.gartenwasser_programme', 'programs') | count }}"
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.gartenwasser_entwurf_name
+      data:
+        value: "Neues Programm"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v1_zeit
+      data:
+        value: 5
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v2_zeit
+      data:
+        value: 5
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v3_zeit
+      data:
+        value: 5
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v4_zeit
+      data:
+        value: 5
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_entwurf_v5_zeit
+      data:
+        value: 5
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.gartenwasser_entwurf_v1_auto
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.gartenwasser_entwurf_v2_auto
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.gartenwasser_entwurf_v3_auto
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.gartenwasser_entwurf_v4_auto
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.gartenwasser_entwurf_v5_auto
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_editier_index
+      data:
+        value: "{{ idx }}"

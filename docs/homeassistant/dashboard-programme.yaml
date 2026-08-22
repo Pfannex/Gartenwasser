@@ -518,8 +518,8 @@ views:
     sections:
       - type: grid
         cards:
-          - type: markdown
-            content: "## Programme"
+          - type: custom:stack-in-card
+            mode: horizontal
             grid_options:
               columns: full
             card_mod:
@@ -527,6 +527,36 @@ views:
                 ha-card {
                   min-width: 700px;
                 }
+            cards:
+              - type: markdown
+                content: "## Programme"
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 1 !important;
+                    }
+              - type: custom:mushroom-template-card
+                primary: ""
+                icon: mdi:plus
+                icon_color: green
+                layout: vertical
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_programm_neu_starten
+                card_mod:
+                  style: |
+                    :host {
+                      flex: 0 0 90px !important;
+                    }
+                # Ausgeblendet, wenn alle 8 Slots belegt sind (docs/requirements.md-
+                # Obergrenze) oder waehrend gerade ein Programm bearbeitet wird.
+                visibility:
+                  - condition: numeric_state
+                    entity: sensor.gartenwasser_programme
+                    below: 8
+                  - condition: numeric_state
+                    entity: input_number.gartenwasser_editier_index
+                    below: 0
 
           # Programm-Auswahl (welches Programm die Automatik faehrt) passiert weiterhin
           # inline auf der Status-Seite (mushroom-select-card, Dropdown ohne eigenes
