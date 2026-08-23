@@ -370,7 +370,12 @@ views:
                   const m = s.match(/(\d+)%/);
                   return m ? parseFloat(m[1]) : 0;
                 };
-                const gradFill = (pct) => `linear-gradient(to right, #43a047 0%, #fdd835 50%, #e53935 ${pct}%, transparent ${pct}%, transparent 100%)`;
+                // Gelb-Stopp skaliert MIT dem Fuellstand (immer bei der Haelfte des aktuellen
+                // Werts), nicht fest bei 50% - sonst erzwingt CSS bei pct < 50 eine aufsteigende
+                // Stopp-Reihenfolge und zieht den sichtbaren Fuellstand auf 50% hoch (Bug: 31%
+                // sah aus wie 50%, weil der Rot-Stopp bei 31% VOR dem festen Gelb-Stopp bei 50%
+                // lag und CSS ihn deshalb auf 50% geklemmt hat).
+                const gradFill = (pct) => `linear-gradient(to right, #43a047 0%, #fdd835 ${pct / 2}%, #e53935 ${pct}%, transparent ${pct}%, transparent 100%)`;
                 const ramPct = parsePct(hass.states['sensor.gartenwasser_ram'].state);
                 const flashPct = parsePct(hass.states['sensor.gartenwasser_flash'].state);
                 card.querySelector('.bubble-sub-button-2').style.background = gradFill(ramPct);
