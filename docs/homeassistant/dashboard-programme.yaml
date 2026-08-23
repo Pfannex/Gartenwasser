@@ -128,6 +128,8 @@ views:
             show_state: true
             name: "Hauptventil"
             icon: mdi:valve
+            grid_options:
+              columns: 6
             styles: |
               .bubble-main-icon-container ha-icon {
                 color: black !important;
@@ -145,6 +147,8 @@ views:
             show_state: false
             name: "V1"
             icon: mdi:sprinkler-variant
+            grid_options:
+              columns: 6
             tap_action:
               action: call-service
               service: switch.toggle
@@ -181,6 +185,8 @@ views:
             show_state: false
             name: "V2"
             icon: mdi:sprinkler-variant
+            grid_options:
+              columns: 6
             tap_action:
               action: call-service
               service: switch.toggle
@@ -217,6 +223,8 @@ views:
             show_state: false
             name: "V3"
             icon: mdi:sprinkler-variant
+            grid_options:
+              columns: 6
             tap_action:
               action: call-service
               service: switch.toggle
@@ -253,6 +261,8 @@ views:
             show_state: false
             name: "V4"
             icon: mdi:sprinkler-variant
+            grid_options:
+              columns: 6
             tap_action:
               action: call-service
               service: switch.toggle
@@ -289,6 +299,8 @@ views:
             show_state: false
             name: "V5"
             icon: mdi:sprinkler-variant
+            grid_options:
+              columns: 6
             tap_action:
               action: call-service
               service: switch.toggle

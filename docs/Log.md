@@ -985,6 +985,12 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Umsetzung: `gradFill`-Funktion von dreistufigem Farbverlauf auf einfarbigen Fuellstand (`#607d8b 0%, #607d8b pct%, transparent pct%, transparent 100%`) vereinfacht - schliesst beide Gradient-Bugs strukturell aus (kein fester Zwischenstopp mehr, keine Kompression einer Mehrfarben-Skala in den Fuellbereich). Den zuvor testweise gesetzten `text-shadow` (aus der Artifact-Vergleichsphase noch ohne Schatten) wieder entfernt, passend zum aktuellen Stand.
 - Per Screenshot verifiziert: RAM 74% und Flash 31% beide korrekt proportional gefuellt, einheitliche Schiefergrau-Blau-Farbe, Text auf Farbe UND auf dunklem Hintergrund lesbar. Ventil-/Start-Timer-Balken unveraendert (rot, wie vom Nutzer gewuenscht).
 
+### Ventile: 2-spaltiges Layout (3 Zeilen x 2 Spalten)
+
+- Nutzer-Wunsch: Hauptventil + 5 Ventilzeilen sind durch die Verkleinerung/Optimierung jetzt kompakt genug fuer eine 2-Spalten-Anordnung statt der bisherigen einspaltigen Liste - 3 Zeilen, 2 Spalten (= 6 Karten: Hauptventil + V1-V5).
+- Umsetzung: `grid_options: columns: 6` (halbe Breite des 12-Spalten-Sections-Grids) auf allen 6 betroffenen Karten ergaenzt - vorher hatte keine dieser Karten ueberhaupt ein explizites `grid_options`, sie liefen einfach volle Breite ueber HAs Section-Grid-Standardverhalten. Keine der Karten hatte mehr eine `min-width`-Vorgabe (schon in einer frueheren Runde entfernt), dadurch konnten sie ohne weitere Anpassung auf Halbbreite schrumpfen.
+- Per Screenshot verifiziert: Reihenfolge Hauptventil/Sprenger Rasen, Sprenger Seite/Kuebelpflanzen, Hecke/Gewaechshaus - exakt 3 Zeilen, 2 Spalten, deutlich kompakter als vorher.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
