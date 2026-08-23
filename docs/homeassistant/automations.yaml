@@ -20,7 +20,12 @@
   action:
     - service: input_select.set_options
       target:
-        entity_id: input_select.gartenwasser_programm
+        # Beide Dropdowns hier mitpflegen: das Automatik-Dropdown (Status-Seite) UND das
+        # Programm-Dropdown im Zeitplan-Editor - eigene Automation dafuer waere nur
+        # Duplikat derselben Options-Liste bei demselben Trigger.
+        entity_id:
+          - input_select.gartenwasser_programm
+          - input_select.gartenwasser_zeitplan_entwurf_program
       data:
         options: >
           {{ ['Kein Programm'] + (state_attr('sensor.gartenwasser_programme', 'programs') | default([]) | map(attribute='name') | list) }}

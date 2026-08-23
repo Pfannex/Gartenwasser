@@ -446,7 +446,6 @@ views:
                     font-size: 0.78rem;
                     color: var(--secondary-text-color);
                     margin: 0;
-                    max-width: 56ch;
                   }
             # h5/p liegen im SHADOW ROOT von <ha-markdown> (eigenes Custom Element, siehe
             # Log.md) - ein normaler card_mod "style: |"-String scoped nur auf ha-card selbst
@@ -557,7 +556,6 @@ views:
                     font-size: 0.78rem;
                     color: var(--secondary-text-color);
                     margin: 0;
-                    max-width: 56ch;
                   }
 
           - type: custom:bubble-card
@@ -1142,11 +1140,24 @@ views:
                 ha-card {
                   min-width: 500px;
                 }
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set warn = namespace(found=false) %}
+                  {% for n in range(1, 6) %}
+                    {% set laufzeit = states('number.gartenbewasserung_ventil_' ~ n ~
+                  '_laufzeit') | float(0) %}
+                    {% set maxt = states('number.gartenwasser_max_time') | float(9999) %}
+                    {% if laufzeit > maxt %}{% set warn.found = true %}{% endif %}
+                  {% endfor %}
+                  {{ warn.found }}
             # Ersatz fuer die im WebIF vorhandene Gelb-Markierung ueberschrittener
             # Laufzeiten - ein per-Zeile gefaerbter Hintergrund liess sich mit den
             # verfuegbaren Bordmitteln nicht zuverlaessig umsetzen (siehe Log.md), diese
-            # Text-Warnzeile erreicht denselben Zweck zuverlaessig. Zeigt nichts an
-            # (leere/kollabierte Karte), wenn keine Laufzeit die Grenze ueberschreitet.
+            # Text-Warnzeile erreicht denselben Zweck zuverlaessig. Vorher blieb bei leerem
+            # Inhalt eine leere, umrandete Karte sichtbar (Nutzer-Meldung) - per "visibility"
+            # (gleiche Bedingung wie im Content-Template) blendet sich die Karte jetzt
+            # komplett aus, wenn keine Laufzeit die Grenze ueberschreitet.
 
           - type: markdown
             content: >-
@@ -1170,38 +1181,27 @@ views:
     sections:
       - type: grid
         cards:
-          - type: custom:stack-in-card
-            mode: horizontal
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Programme"
+            icon: mdi:playlist-check
+            show_state: false
+            tap_action:
+              action: none
             grid_options:
               columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            cards:
-              - type: markdown
-                content: "## Programme"
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 1 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: ""
-                icon: mdi:plus
-                icon_color: green
-                layout: vertical
+            sub_button:
+              - icon: mdi:plus
+                name: "Neues Programm"
+                show_name: true
                 tap_action:
                   action: perform-action
                   perform_action: script.gartenwasser_programm_neu_starten
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 0 0 90px !important;
-                    }
                 # Ausgeblendet, wenn alle 8 Slots belegt sind (docs/requirements.md-
-                # Obergrenze) oder waehrend gerade ein Programm bearbeitet wird.
+                # Obergrenze) oder waehrend gerade ein Programm bearbeitet wird. Auf dem
+                # Sub-Button selbst statt auf der ganzen Karte, damit der "Programme"-Titel
+                # in jedem Fall sichtbar bleibt.
                 visibility:
                   - condition: numeric_state
                     entity: sensor.gartenwasser_programme
@@ -1209,573 +1209,14 @@ views:
                   - condition: numeric_state
                     entity: input_number.gartenwasser_editier_index
                     below: 0
-
-          # Programm-Auswahl (welches Programm die Automatik faehrt) passiert weiterhin
-          # inline auf der Status-Seite (mushroom-select-card, Dropdown ohne eigenes
-          # Fenster). Hier: die vollstaendige Programmliste mit Aktivieren/Bearbeiten/
-          # Loeschen je Zeile, nach WebIF-Vorbild. main/programs/set ersetzt immer das
-          # komplette Array (kein Einzel-Command-Topic pro Programm/Aenderung) - deshalb
-          # laufen Bearbeiten/Loeschen ueber Skripte (configurations/script.yaml), die das
-          # Array lesen, veraendern und komplett neu publizieren. Acht feste "Slots"
-          # (Obergrenze laut docs/requirements.md), je per visibility ein-/ausgeblendet -
-          # dasselbe Muster wie die 5 Ventil-Zeilen auf der Status-Seite.
-          #
-          # Bearbeiten oeffnet ein EINZIGES gemeinsames Formular weiter unten (nicht 8x
-          # dupliziert) - die Liste blendet sich dabei komplett aus, das Formular ein
-          # (beides an input_number.gartenwasser_editier_index gekoppelt). Erfuellt densel-
-          # ben Effekt wie ein Inline-Formular je Zeile, ist aber wartbar.
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: #43a047 !important;
+              }
             visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 0
               - condition: numeric_state
                 entity: input_number.gartenwasser_editier_index
                 below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[0].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[0] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 1 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "1"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 0
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 0
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 1
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[1].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[1] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 2 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "2"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 1
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 1
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 2
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[2].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[2] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 3 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "3"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 2
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 2
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 3
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[3].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[3] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 4 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "4"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 3
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 3
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 4
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[4].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[4] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 5 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "5"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 4
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 4
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 5
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[5].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[5] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 6 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "6"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 5
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 5
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 6
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[6].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[6] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 7 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "7"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 6
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 6
-                  confirmation:
-                    text: "Programm wirklich löschen?"
-
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: sensor.gartenwasser_programme
-                above: 7
-              - condition: numeric_state
-                entity: input_number.gartenwasser_editier_index
-                below: 0
-            cards:
-              - type: custom:mushroom-template-card
-                primary: "{{ state_attr('sensor.gartenwasser_programme', 'programs')[7].name }}"
-                secondary: >-
-                  {% set prog = state_attr('sensor.gartenwasser_programme', 'programs')[7] %}
-                  {% set vns = namespace(parts=[]) %}
-                  {% for n in range(1, 6) %}
-                    {% if prog.auto.get('V' ~ n, false) %}
-                      {% set vns.parts = vns.parts + ['V' ~ n ~ ' ' ~ prog.time.get('V' ~ n, 0) ~ 'min'] %}
-                    {% endif %}
-                  {% endfor %}
-                  {{ vns.parts | join(', ') if vns.parts else 'keine Ventile' }}
-                icon: mdi:playlist-play
-                layout: vertical
-                card_mod:
-                  style: |
-                    :host {
-                      flex: 3 !important;
-                    }
-              - type: custom:mushroom-template-card
-                primary: Aktivieren
-                icon: mdi:play
-                layout: vertical
-                icon_color: >-
-                  {{ 'grey' if state_attr('sensor.gartenwasser_programme', 'activeProgram') | int == 8 else 'green' }}
-                tap_action:
-                  action: perform-action
-                  perform_action: mqtt.publish
-                  data:
-                    topic: "gartenwasser/main/program/cmd"
-                    payload: "8"
-              - type: custom:mushroom-template-card
-                primary: Bearbeiten
-                icon: mdi:pencil
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_bearbeiten_starten
-                  data:
-                    index: 7
-              - type: custom:mushroom-template-card
-                primary: Löschen
-                icon: mdi:delete
-                icon_color: red
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: script.gartenwasser_programm_loeschen
-                  data:
-                    index: 7
-                  confirmation:
-                    text: "Programm wirklich löschen?"
 
           - type: markdown
             content: "Keine Programme vorhanden."
@@ -1784,7 +1225,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -1794,92 +1235,753 @@ views:
                 entity: input_number.gartenwasser_editier_index
                 below: 0
 
-          - type: entities
-            title: Programm bearbeiten
-            show_header_toggle: false
+          # --- Programm-Editor, vollstaendig auf Bubble Card umgestellt (vorher
+          # type: entities + stack-in-card/mushroom) - Design 1:1 nach dem Muster der
+          # Konfigurationsseite (Abschnitts-Header ohne Box, injiziertes Textfeld fuer
+          # den Namen, injizierter Laufzeit-Slider je Ventil) und der Programme-Kopfzeile
+          # (Speichern/Abbrechen als Bubble-Card-Buttons statt mushroom-template-card).
+          - type: markdown
+            content: |
+              ##### Programm bearbeiten
+              Name, aktive Ventile und Laufzeiten fuer dieses Programm.
             grid_options:
               columns: full
             card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+                  p {
+                    font-size: 0.78rem;
+                    color: var(--secondary-text-color);
+                    margin: 0;
+                  }
             visibility:
               - condition: numeric_state
                 entity: input_number.gartenwasser_editier_index
                 above: -1
-            entities:
-              - entity: input_text.gartenwasser_entwurf_name
-                name: Name
-              - entity: input_boolean.gartenwasser_entwurf_v1_auto
-                name: V1 aktiv
-              - entity: input_number.gartenwasser_entwurf_v1_zeit
-                name: V1 Laufzeit
-              - entity: input_boolean.gartenwasser_entwurf_v2_auto
-                name: V2 aktiv
-              - entity: input_number.gartenwasser_entwurf_v2_zeit
-                name: V2 Laufzeit
-              - entity: input_boolean.gartenwasser_entwurf_v3_auto
-                name: V3 aktiv
-              - entity: input_number.gartenwasser_entwurf_v3_zeit
-                name: V3 Laufzeit
-              - entity: input_boolean.gartenwasser_entwurf_v4_auto
-                name: V4 aktiv
-              - entity: input_number.gartenwasser_entwurf_v4_zeit
-                name: V4 Laufzeit
-              - entity: input_boolean.gartenwasser_entwurf_v5_auto
-                name: V5 aktiv
-              - entity: input_number.gartenwasser_entwurf_v5_zeit
-                name: V5 Laufzeit
 
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:pencil
+            name: "Name"
+            show_name: false
+            show_state: false
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
                 entity: input_number.gartenwasser_editier_index
                 above: -1
-            cards:
-              - type: custom:mushroom-template-card
-                primary: Speichern
-                icon: mdi:content-save
-                icon_color: green
-                layout: vertical
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #607d8b !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                let input = nc.querySelector('input.name-input');
+                if (!input) {
+                  nc.style.cssText = 'flex:1 1 auto; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Name</div>';
+                  input = document.createElement('input');
+                  input.type = 'text';
+                  input.className = 'name-input';
+                  input.style.cssText = 'width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.18);color:#eceef2;font-family:inherit;font-size:0.86rem;font-weight:600;padding:4px 2px;outline:none;';
+                  input.addEventListener('change', () => {
+                    hass.callService('input_text', 'set_value', { entity_id: 'input_text.gartenwasser_entwurf_name', value: input.value });
+                  });
+                  nc.appendChild(input);
+                }
+                if (document.activeElement !== input) {
+                  input.value = hass.states['input_text.gartenwasser_entwurf_name'].state;
+                }
+              })()}
+
+          - type: markdown
+            content: |
+              ##### Ventile
+            grid_options:
+              columns: full
+            card_mod:
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+                  p {
+                    font-size: 0.78rem;
+                    color: var(--secondary-text-color);
+                    margin: 0;
+                  }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V1"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_entwurf_v1_auto'].state === 'on' ? '#43a047' : '#757575'} !important;
+                ${hass.states['input_boolean.gartenwasser_entwurf_v1_auto'].state === 'on' ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_entwurf_v1_auto' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V1';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasLabel = cc.querySelector('.alias-label');
+                if (!aliasLabel) {
+                  aliasLabel = document.createElement('div');
+                  aliasLabel.className = 'alias-label';
+                  aliasLabel.style.cssText = 'flex:0 0 150px; font-size:0.86rem; font-weight:600; color:#eceef2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+                  cc.insertBefore(aliasLabel, nc);
+                }
+                aliasLabel.textContent = hass.states['text.gartenwasser_v1_alias']?.state || '';
+                nc.style.display = 'none';
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:1 1 auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.ev1-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .ev1-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="ev1-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.ev1-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('input_number', 'set_value', { entity_id: 'input_number.gartenwasser_entwurf_v1_zeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.ev1-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['input_number.gartenwasser_entwurf_v1_zeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V2"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_entwurf_v2_auto'].state === 'on' ? '#43a047' : '#757575'} !important;
+                ${hass.states['input_boolean.gartenwasser_entwurf_v2_auto'].state === 'on' ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_entwurf_v2_auto' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V2';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasLabel = cc.querySelector('.alias-label');
+                if (!aliasLabel) {
+                  aliasLabel = document.createElement('div');
+                  aliasLabel.className = 'alias-label';
+                  aliasLabel.style.cssText = 'flex:0 0 150px; font-size:0.86rem; font-weight:600; color:#eceef2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+                  cc.insertBefore(aliasLabel, nc);
+                }
+                aliasLabel.textContent = hass.states['text.gartenwasser_v2_alias']?.state || '';
+                nc.style.display = 'none';
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:1 1 auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.ev2-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .ev2-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="ev2-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.ev2-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('input_number', 'set_value', { entity_id: 'input_number.gartenwasser_entwurf_v2_zeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.ev2-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['input_number.gartenwasser_entwurf_v2_zeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V3"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_entwurf_v3_auto'].state === 'on' ? '#43a047' : '#757575'} !important;
+                ${hass.states['input_boolean.gartenwasser_entwurf_v3_auto'].state === 'on' ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_entwurf_v3_auto' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V3';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasLabel = cc.querySelector('.alias-label');
+                if (!aliasLabel) {
+                  aliasLabel = document.createElement('div');
+                  aliasLabel.className = 'alias-label';
+                  aliasLabel.style.cssText = 'flex:0 0 150px; font-size:0.86rem; font-weight:600; color:#eceef2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+                  cc.insertBefore(aliasLabel, nc);
+                }
+                aliasLabel.textContent = hass.states['text.gartenwasser_v3_alias']?.state || '';
+                nc.style.display = 'none';
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:1 1 auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.ev3-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .ev3-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="ev3-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.ev3-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('input_number', 'set_value', { entity_id: 'input_number.gartenwasser_entwurf_v3_zeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.ev3-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['input_number.gartenwasser_entwurf_v3_zeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V4"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_entwurf_v4_auto'].state === 'on' ? '#43a047' : '#757575'} !important;
+                ${hass.states['input_boolean.gartenwasser_entwurf_v4_auto'].state === 'on' ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_entwurf_v4_auto' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V4';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasLabel = cc.querySelector('.alias-label');
+                if (!aliasLabel) {
+                  aliasLabel = document.createElement('div');
+                  aliasLabel.className = 'alias-label';
+                  aliasLabel.style.cssText = 'flex:0 0 150px; font-size:0.86rem; font-weight:600; color:#eceef2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+                  cc.insertBefore(aliasLabel, nc);
+                }
+                aliasLabel.textContent = hass.states['text.gartenwasser_v4_alias']?.state || '';
+                nc.style.display = 'none';
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:1 1 auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.ev4-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .ev4-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="ev4-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.ev4-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('input_number', 'set_value', { entity_id: 'input_number.gartenwasser_entwurf_v4_zeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.ev4-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['input_number.gartenwasser_entwurf_v4_zeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V5"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_entwurf_v5_auto'].state === 'on' ? '#43a047' : '#757575'} !important;
+                ${hass.states['input_boolean.gartenwasser_entwurf_v5_auto'].state === 'on' ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_entwurf_v5_auto' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V5';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasLabel = cc.querySelector('.alias-label');
+                if (!aliasLabel) {
+                  aliasLabel = document.createElement('div');
+                  aliasLabel.className = 'alias-label';
+                  aliasLabel.style.cssText = 'flex:0 0 150px; font-size:0.86rem; font-weight:600; color:#eceef2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+                  cc.insertBefore(aliasLabel, nc);
+                }
+                aliasLabel.textContent = hass.states['text.gartenwasser_v5_alias']?.state || '';
+                nc.style.display = 'none';
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:1 1 auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.ev5-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .ev5-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="ev5-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.ev5-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('input_number', 'set_value', { entity_id: 'input_number.gartenwasser_entwurf_v5_zeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.ev5-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['input_number.gartenwasser_entwurf_v5_zeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Programm"
+            icon: mdi:playlist-edit
+            show_name: false
+            show_state: false
+            grid_options:
+              columns: full
+            tap_action:
+              action: none
+            sub_button:
+              - icon: mdi:content-save
                 tap_action:
                   action: perform-action
                   perform_action: script.gartenwasser_programm_speichern
-              - type: custom:mushroom-template-card
-                primary: Abbrechen
-                icon: mdi:close
-                layout: vertical
+              - icon: mdi:close
                 tap_action:
                   action: perform-action
                   perform_action: script.gartenwasser_programm_abbrechen
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: #43a047 !important;
+              }
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: #757575 !important;
+              }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_editier_index
+                above: -1
 
-          # --- Bubble-Card-Test (Nutzerwunsch): dieselbe Funktion (Name+Ventile,
-          # Aktivieren/Bearbeiten/Loeschen) zum Vergleich mit HACS "Bubble Card" statt
-          # Mushroom/stack-in-card nachgebaut. Nutzt dieselben Skripte/Helper wie oben -
-          # "Bearbeiten" oeffnet dasselbe gemeinsame Formular weiter oben. Bubble Card
-          # unterstuetzt KEINE Jinja-Templates (nur JS-Templates in styles:, siehe
-          # https://github.com/Clooos/Bubble-Card) - dynamischer Name/Ventil-Text und
-          # Aktivieren-Einfaerbung laufen deshalb ueber ${...}-JS-Ausdruecke mit Zugriff
-          # auf `hass`/`card`, nicht ueber primary/secondary wie bei Mushroom.
-          - type: markdown
-            content: "## Programme (Bubble Card Test)"
-            grid_options:
-              columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
-
+          # Bubble-Card-Programmliste - nutzt dieselben Skripte/Helper wie das
+          # Bearbeiten-Formular oben. Bubble Card unterstuetzt KEINE Jinja-Templates (nur
+          # JS-Templates in styles:, siehe https://github.com/Clooos/Bubble-Card) -
+          # dynamischer Name/Ventil-Text und Aktivieren-/Aktiv-Einfaerbung laufen deshalb
+          # ueber ${...}-JS-Ausdruecke mit Zugriff auf `hass`/`card`.
           - type: custom:bubble-card
             card_type: button
             button_type: name
@@ -1889,7 +1991,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -1900,12 +2002,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "1"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 1 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -1927,6 +2034,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 1 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[0]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[0];
@@ -1947,7 +2057,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -1958,12 +2068,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "2"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 2 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -1985,6 +2100,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 2 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[1]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[1];
@@ -2005,7 +2123,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -2016,12 +2134,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "3"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 3 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -2043,6 +2166,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 3 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[2]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[2];
@@ -2063,7 +2189,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -2074,12 +2200,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "4"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 4 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -2101,6 +2232,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 4 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[3]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[3];
@@ -2121,7 +2255,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -2132,12 +2266,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "5"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 5 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -2159,6 +2298,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 5 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[4]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[4];
@@ -2179,7 +2321,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -2190,12 +2332,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "6"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 6 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -2217,6 +2364,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 6 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[5]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[5];
@@ -2237,7 +2387,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -2248,12 +2398,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "7"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 7 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -2275,6 +2430,9 @@ views:
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
               }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 7 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
+              }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[6]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
                 const prog = hass.states['sensor.gartenwasser_programme'].attributes.programs[6];
@@ -2295,7 +2453,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             visibility:
               - condition: numeric_state
@@ -2306,12 +2464,17 @@ views:
                 below: 0
             sub_button:
               - icon: mdi:play
+                name: "Aktivieren"
+                show_name: true
                 tap_action:
                   action: call-service
                   service: mqtt.publish
                   data:
                     topic: "gartenwasser/main/program/cmd"
                     payload: "8"
+                visibility:
+                  - condition: template
+                    value_template: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') | int(0) != 8 }}"
               - icon: mdi:pencil
                 tap_action:
                   action: call-service
@@ -2332,6 +2495,9 @@ views:
               }
               .bubble-sub-button-3 .bubble-sub-button-icon {
                 color: red !important;
+              }
+              ha-card {
+                ${hass.states['sensor.gartenwasser_programme'].attributes.activeProgram == 8 ? '--bubble-button-main-background-color: #43a047 !important;' : ''}
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['sensor.gartenwasser_programme'].attributes.programs[7]?.name || ''}
               ${card.querySelector('.bubble-state').textContent = (() => {
@@ -2355,7 +2521,7 @@ views:
               style: |
                 ha-card {
                   text-align: center;
-                  min-width: 700px;
+                  min-width: 500px;
                 }
 
   - title: Zeitplan
@@ -2366,68 +2532,1286 @@ views:
     sections:
       - type: grid
         cards:
-          - type: markdown
-            content: "## Zeitplan"
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Zeitplan"
+            icon: mdi:calendar-clock
+            show_state: false
+            tap_action:
+              action: none
             grid_options:
               columns: full
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
+            sub_button:
+              - icon: mdi:plus
+                name: "Neuer Eintrag"
+                show_name: true
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_zeitplan_eintrag_neu_starten
+                # Ausgeblendet, wenn alle 16 Slots belegt sind (kMaxScheduleEntries,
+                # docs/spec/15-wochenplan.md) oder waehrend ein Eintrag bearbeitet wird.
+                visibility:
+                  - condition: numeric_state
+                    entity: sensor.gartenwasser_zeitplan
+                    below: 16
+                  - condition: numeric_state
+                    entity: input_number.gartenwasser_zeitplan_editier_index
+                    below: 0
+            styles: |
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: #43a047 !important;
+              }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
 
-          - type: entities
-            show_header_toggle: false
-            grid_options:
-              columns: full
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Zeitplan aktiv"
+            icon: mdi:calendar-check
+            entity: switch.gartenwasser_zeitplan_aktiv
+            show_state: false
+            tap_action:
+              action: none
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
-            entities:
-              - entity: switch.gartenwasser_zeitplan_aktiv
-                name: Zeitplan aktiv
+            styles: |
+              ha-card {
+                --bubble-button-icon-background-color: ${hass.states['switch.gartenwasser_zeitplan_aktiv'].state === 'on' ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('switch', 'toggle', { entity_id: 'switch.gartenwasser_zeitplan_aktiv' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 0"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 0
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 0
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 0
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[0]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[0];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 0 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 1"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 1
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 1
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 1
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[1]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[1];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 1 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 2"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 2
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 2
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 2
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[2]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[2];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 2 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 3"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 3
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 3
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 3
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[3]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[3];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 3 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 4"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 4
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 4
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 4
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[4]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[4];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 4 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 5"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 5
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 5
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 5
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[5]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[5];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 5 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 6"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 6
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 6
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 6
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[6]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[6];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 6 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 7"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 7
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 7
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 7
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[7]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[7];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 7 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 8"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 8
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 8
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 8
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[8]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[8];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 8 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 9"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 9
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 9
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 9
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[9]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[9];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 9 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 10"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 10
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 10
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 10
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[10]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[10];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 10 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 11"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 11
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 11
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 11
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[11]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[11];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 11 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 12"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 12
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 12
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 12
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[12]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[12];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 12 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 13"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 13
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 13
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 13
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[13]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[13];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 13 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 14"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 14
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 14
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 14
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[14]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[14];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 14 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            show_state: true
+            name: "Eintrag 15"
+            icon: mdi:calendar-clock
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: sensor.gartenwasser_zeitplan
+                above: 15
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                below: 0
+            sub_button:
+              - icon: mdi:pencil
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_bearbeiten_starten
+                  data:
+                    index: 15
+              - icon: mdi:delete
+                tap_action:
+                  action: call-service
+                  service: script.gartenwasser_zeitplan_eintrag_loeschen
+                  data:
+                    index: 15
+                  confirmation:
+                    text: "Eintrag wirklich löschen?"
+            styles: |
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: red !important;
+              }
+              ha-card {
+                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[15]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[15];
+                if (!entry) return '';
+                const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
+                let when = '';
+                if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
+                else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
+                else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
+                card.querySelector('.bubble-name').textContent = entry.program;
+                card.querySelector('.bubble-state').textContent = when;
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 15 });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
 
           - type: markdown
             content: |
-              {% set wd_map = {'mon':'Mo','tue':'Di','wed':'Mi','thu':'Do','fri':'Fr','sat':'Sa','sun':'So'} %}
-              {% set ns = namespace(lines=[]) %}
-              {% for entry in state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] %}
-                {% set status = '✅' if entry.enabled else '⏸️' %}
-                {% if entry.type == 'daily' %}
-                  {% set when = 'Täglich, ' ~ entry.time ~ ' Uhr' %}
-                {% elif entry.type == 'weekly' %}
-                  {% set wdns = namespace(names=[]) %}
-                  {% for wd in entry.weekdays %}
-                    {% set wdns.names = wdns.names + [wd_map.get(wd, wd)] %}
-                  {% endfor %}
-                  {% set when = (wdns.names | join(', ')) ~ ', ' ~ entry.time ~ ' Uhr' %}
-                {% elif entry.type == 'once' %}
-                  {% set d = entry.date.split('-') %}
-                  {% set when = 'Einmalig ' ~ d[2] ~ '.' ~ d[1] ~ '.' ~ d[0] ~ ', ' ~ entry.time ~ ' Uhr' %}
-                {% else %}
-                  {% set when = entry.time %}
-                {% endif %}
-                {% set ns.lines = ns.lines + [status ~ ' **' ~ entry.program ~ '** - ' ~ when] %}
-              {% endfor %}
-              {% if ns.lines %}
-              {{ ns.lines | join('\n\n') }}
-              {% else %}
-              Keine Zeitplan-Eintraege vorhanden.
-              {% endif %}
+              ##### Zeitplan-Eintrag bearbeiten
             grid_options:
               columns: full
             card_mod:
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Programm"
+            icon: mdi:sprinkler-variant
+            show_state: false
+            card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
-            # Reine Anzeige - Zeitplan-Editor (Eintraege anlegen/bearbeiten/loeschen) gibt
-            # es bisher nur im WebIF, dafuer muesste main/schedule/set (komplettes
-            # Array-Replace) von HA aus zusammengebaut werden - kein einzelnes
-            # Command-Topic pro Eintrag. Der globale Ein/Aus-Schalter oben funktioniert
-            # bereits vollstaendig (main/schedule/cmd).
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+            sub_button:
+              - entity: input_select.gartenwasser_zeitplan_entwurf_program
+                sub_button_type: select
+                select_attribute: options
+                show_state: true
+                show_icon: false
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Typ"
+            icon: mdi:calendar-sync
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+            sub_button:
+              - entity: input_select.gartenwasser_zeitplan_entwurf_type
+                sub_button_type: select
+                select_attribute: options
+                show_state: true
+                show_icon: false
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Zeit"
+            icon: mdi:clock-outline
+            entity: input_datetime.gartenwasser_zeitplan_entwurf_zeit
+            show_state: true
+            tap_action:
+              action: more-info
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              ha-card {
+                --bubble-button-icon-background-color: #607d8b !important;
+              }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Datum"
+            icon: mdi:calendar
+            entity: input_datetime.gartenwasser_zeitplan_entwurf_datum
+            show_state: true
+            tap_action:
+              action: more-info
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              ha-card {
+                --bubble-button-icon-background-color: #607d8b !important;
+              }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+              - condition: state
+                entity: input_select.gartenwasser_zeitplan_entwurf_type
+                state: "Einmalig"
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Wochentage"
+            icon: mdi:calendar-week
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+              - condition: state
+                entity: input_select.gartenwasser_zeitplan_entwurf_type
+                state: "Woechentlich"
+            sub_button:
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_mon
+                name: "Mo"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_tue
+                name: "Di"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_wed
+                name: "Mi"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_thu
+                name: "Do"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_fri
+                name: "Fr"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_sat
+                name: "Sa"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+              - entity: input_boolean.gartenwasser_zeitplan_entwurf_sun
+                name: "So"
+                show_name: true
+                show_icon: false
+                tap_action:
+                  action: toggle
+            styles: |
+              ha-card {
+                --bubble-accent-color: #43a047 !important;
+              }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Aktiv"
+            icon: mdi:water
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+            styles: |
+              ha-card {
+                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_zeitplan_entwurf_aktiv'].state === 'on' ? '#43a047' : '#757575'} !important;
+              }
+              ${(() => {
+                const icon = card.querySelector('.bubble-main-icon-container');
+                if (!icon.dataset.toggleWired) {
+                  icon.style.cursor = 'pointer';
+                  icon.addEventListener('click', () => {
+                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_zeitplan_entwurf_aktiv' });
+                  });
+                  icon.dataset.toggleWired = '1';
+                }
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "Eintrag"
+            icon: mdi:content-save
+            show_name: false
+            show_state: false
+            grid_options:
+              columns: full
+            tap_action:
+              action: none
+            sub_button:
+              - icon: mdi:content-save
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_zeitplan_eintrag_speichern
+              - icon: mdi:close
+                tap_action:
+                  action: perform-action
+                  perform_action: script.gartenwasser_zeitplan_eintrag_abbrechen
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              .bubble-sub-button-1 .bubble-sub-button-icon {
+                color: #43a047 !important;
+              }
+              .bubble-sub-button-2 .bubble-sub-button-icon {
+                color: #757575 !important;
+              }
+            visibility:
+              - condition: numeric_state
+                entity: input_number.gartenwasser_zeitplan_editier_index
+                above: -1
+
 
           - type: markdown
             content: >-
@@ -2440,7 +3824,7 @@ views:
               style: |
                 ha-card {
                   text-align: center;
-                  min-width: 700px;
+                  min-width: 500px;
                 }
 
   - title: Log

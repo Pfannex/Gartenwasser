@@ -16,6 +16,18 @@ gartenwasser_editier_index:
   # im "programs"-Array, das gerade im Formular bearbeitet wird (Liste ausgeblendet,
   # Formular sichtbar) - siehe visibility-Bedingungen im Dashboard.
 
+gartenwasser_zeitplan_editier_index:
+  name: "Gartenwasser Zeitplan Editier-Index"
+  icon: mdi:pencil
+  min: -1
+  max: 15
+  step: 1
+  mode: box
+  # Gleiches Muster wie gartenwasser_editier_index, nur fuer den Zeitplan-Editor
+  # (dashboard-programme.yaml, Zeitplan-Seite) - -1 = Liste sichtbar, 0-15 = Index des
+  # Eintrags im "schedule"-Array (kMaxScheduleEntries = 16 in der Firmware, siehe
+  # docs/spec/15-wochenplan.md).
+
 gartenwasser_entwurf_v1_zeit:
   name: "Gartenwasser Entwurf V1 Zeit"
   min: 0

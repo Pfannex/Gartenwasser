@@ -253,3 +253,193 @@ gartenwasser_programm_neu_starten:
         entity_id: input_number.gartenwasser_editier_index
       data:
         value: "{{ idx }}"
+
+# Fuenf Skripte fuer den Zeitplan-Editor (Zeitplan-Seite) - gleiches Grundmuster wie die
+# Programm-Skripte oben (Bearbeiten starten/Speichern/Loeschen/Neu, plus Abbrechen), auf
+# das schedule-Array statt programs-Array angewendet (main/schedule/set ersetzt ebenfalls
+# immer das komplette Array, siehe docs/spec/15-wochenplan.md). Zusaetzlich ein
+# Toggle-Skript fuer die schnelle Pause/Aktivierung eines Eintrags direkt aus der Liste,
+# ohne das volle Formular zu oeffnen (das Feld "enabled" sitzt im Array-Objekt selbst,
+# es gibt dafuer keinen einzelnen Helper wie bei den Ventil-"auto"-Flags).
+#
+# Wochentage per repeat/for_each statt 7x ausgeschriebenem if/then/else (anders als beim
+# Programm-Editor oben) - bei 7 Tagen wird die ausgeschriebene Variante unuebersichtlich
+# lang, der Loop bleibt uebersichtlich UND wartbar (ein einziger Ort fuer die 7 Tage).
+
+gartenwasser_zeitplan_eintrag_bearbeiten_starten:
+  alias: "Gartenwasser: Zeitplan-Eintrag-Bearbeitung starten"
+  fields:
+    index:
+      description: "0-basierter Index des zu bearbeitenden Eintrags im schedule-Array"
+      example: 0
+  sequence:
+    - variables:
+        entry: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule')[index] }}"
+        type_map: {'daily': 'Taeglich', 'weekly': 'Woechentlich', 'once': 'Einmalig'}
+        wd_list: "{{ entry.weekdays | default([]) }}"
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.gartenwasser_zeitplan_entwurf_program
+      data:
+        option: "{{ entry.program }}"
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.gartenwasser_zeitplan_entwurf_type
+      data:
+        option: "{{ type_map.get(entry.type, 'Taeglich') }}"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.gartenwasser_zeitplan_entwurf_zeit
+      data:
+        time: "{{ entry.time }}:00"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.gartenwasser_zeitplan_entwurf_datum
+      data:
+        date: "{{ entry.date | default(now().strftime('%Y-%m-%d'), true) }}"
+    - if:
+        - condition: template
+          value_template: "{{ entry.enabled | default(true) }}"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.gartenwasser_zeitplan_entwurf_aktiv
+      else:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.gartenwasser_zeitplan_entwurf_aktiv
+    - repeat:
+        for_each: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+        sequence:
+          - action: "{{ 'input_boolean.turn_on' if repeat.item in wd_list else 'input_boolean.turn_off' }}"
+            target:
+              entity_id: "input_boolean.gartenwasser_zeitplan_entwurf_{{ repeat.item }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_zeitplan_editier_index
+      data:
+        value: "{{ index }}"
+
+gartenwasser_zeitplan_eintrag_abbrechen:
+  alias: "Gartenwasser: Zeitplan-Eintrag-Bearbeitung abbrechen"
+  sequence:
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_zeitplan_editier_index
+      data:
+        value: -1
+
+gartenwasser_zeitplan_eintrag_speichern:
+  alias: "Gartenwasser: Zeitplan-Eintrag speichern"
+  sequence:
+    - variables:
+        idx: "{{ states('input_number.gartenwasser_zeitplan_editier_index') | int }}"
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        type_map: {'Taeglich': 'daily', 'Woechentlich': 'weekly', 'Einmalig': 'once'}
+        sel_type: "{{ type_map.get(states('input_select.gartenwasser_zeitplan_entwurf_type'), 'daily') }}"
+    - variables:
+        new_entry_base:
+          enabled: "{{ is_state('input_boolean.gartenwasser_zeitplan_entwurf_aktiv', 'on') }}"
+          type: "{{ sel_type }}"
+          time: "{{ states('input_datetime.gartenwasser_zeitplan_entwurf_zeit')[:5] }}"
+          program: "{{ states('input_select.gartenwasser_zeitplan_entwurf_program') }}"
+    - variables:
+        new_entry: >-
+          {% if sel_type == 'weekly' %}
+            {% set wds = namespace(l=[]) %}
+            {% for d in ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] %}
+              {% if is_state('input_boolean.gartenwasser_zeitplan_entwurf_' ~ d, 'on') %}
+                {% set wds.l = wds.l + [d] %}
+              {% endif %}
+            {% endfor %}
+            {{ dict(new_entry_base, weekdays=wds.l) }}
+          {% elif sel_type == 'once' %}
+            {{ dict(new_entry_base, date=states('input_datetime.gartenwasser_zeitplan_entwurf_datum')) }}
+          {% else %}
+            {{ new_entry_base }}
+          {% endif %}
+        new_schedule: "{{ schedule[:idx] + [new_entry] + schedule[idx + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_zeitplan_editier_index
+      data:
+        value: -1
+
+gartenwasser_zeitplan_eintrag_loeschen:
+  alias: "Gartenwasser: Zeitplan-Eintrag loeschen"
+  fields:
+    index:
+      description: "0-basierter Index des zu loeschenden Eintrags im schedule-Array"
+      example: 0
+  sequence:
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        new_schedule: "{{ schedule[:index] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+
+gartenwasser_zeitplan_eintrag_toggle_aktiv:
+  alias: "Gartenwasser: Zeitplan-Eintrag Aktiv umschalten"
+  fields:
+    index:
+      description: "0-basierter Index des Eintrags im schedule-Array"
+      example: 0
+  sequence:
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        entry: "{{ schedule[index] }}"
+        new_entry: "{{ dict(entry, enabled=not (entry.enabled | default(true))) }}"
+        new_schedule: "{{ schedule[:index] + [new_entry] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+
+gartenwasser_zeitplan_eintrag_neu_starten:
+  alias: "Gartenwasser: Neuen Zeitplan-Eintrag anlegen"
+  sequence:
+    - variables:
+        idx: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') | count }}"
+        first_program: >-
+          {% set names = state_attr('sensor.gartenwasser_programme', 'programs') | default([]) | map(attribute='name') | list %}
+          {{ names[0] if names else 'Kein Programm' }}
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.gartenwasser_zeitplan_entwurf_program
+      data:
+        option: "{{ first_program }}"
+    - action: input_select.select_option
+      target:
+        entity_id: input_select.gartenwasser_zeitplan_entwurf_type
+      data:
+        option: "Taeglich"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.gartenwasser_zeitplan_entwurf_zeit
+      data:
+        time: "21:00:00"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.gartenwasser_zeitplan_entwurf_datum
+      data:
+        date: "{{ now().strftime('%Y-%m-%d') }}"
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.gartenwasser_zeitplan_entwurf_aktiv
+    - repeat:
+        for_each: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: "input_boolean.gartenwasser_zeitplan_entwurf_{{ repeat.item }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.gartenwasser_zeitplan_editier_index
+      data:
+        value: "{{ idx }}"

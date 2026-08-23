@@ -21,3 +21,24 @@ gartenwasser_entwurf_v4_auto:
   name: "Gartenwasser Entwurf V4 Auto"
 gartenwasser_entwurf_v5_auto:
   name: "Gartenwasser Entwurf V5 Auto"
+
+# Entwurfs-Helper fuer den Zeitplan-Editor (dashboard-programme.yaml, Zeitplan-Seite) -
+# gleiches Muster wie die Programm-Entwurfs-Helper oben. "aktiv" = Eintrag pausieren ohne
+# ihn zu loeschen (entry.enabled im schedule-Array), mon-sun = angehakte Wochentage bei
+# type "weekly" (entry.weekdays, siehe docs/spec/15-wochenplan.md).
+gartenwasser_zeitplan_entwurf_aktiv:
+  name: "Gartenwasser Zeitplan Entwurf Aktiv"
+gartenwasser_zeitplan_entwurf_mon:
+  name: "Gartenwasser Zeitplan Entwurf Montag"
+gartenwasser_zeitplan_entwurf_tue:
+  name: "Gartenwasser Zeitplan Entwurf Dienstag"
+gartenwasser_zeitplan_entwurf_wed:
+  name: "Gartenwasser Zeitplan Entwurf Mittwoch"
+gartenwasser_zeitplan_entwurf_thu:
+  name: "Gartenwasser Zeitplan Entwurf Donnerstag"
+gartenwasser_zeitplan_entwurf_fri:
+  name: "Gartenwasser Zeitplan Entwurf Freitag"
+gartenwasser_zeitplan_entwurf_sat:
+  name: "Gartenwasser Zeitplan Entwurf Samstag"
+gartenwasser_zeitplan_entwurf_sun:
+  name: "Gartenwasser Zeitplan Entwurf Sonntag"

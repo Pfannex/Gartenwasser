@@ -16,3 +16,23 @@ gartenwasser_programm:
   # ("Gartenwasser: Programme-Liste synchronisieren"), die die Liste bei jeder
   # Aenderung von main/programs/state per input_select.set_options aktualisiert.
   # Der hier eingetragene Startzustand ist nur ein Platzhalter bis zum ersten Sync.
+
+# Entwurfs-Helper fuer den Zeitplan-Editor (Zeitplan-Seite) - eigenes Dropdown statt
+# input_select.gartenwasser_programm wiederzuverwenden, weil letzteres eine eigene
+# Automation hat, die JEDE Aenderung sofort als main/program/cmd (= Automatik-Programm
+# waehlen) publiziert - im Zeitplan-Formular soll die Auswahl nur den Entwurf befuellen,
+# nicht sofort ein Programm aktivieren. Optionen werden per derselben
+# "Programme-Liste synchronisieren"-Automation (automations.yaml) mitgepflegt.
+gartenwasser_zeitplan_entwurf_program:
+  name: "Gartenwasser Zeitplan Entwurf Programm"
+  icon: mdi:sprinkler-variant
+  options:
+    - "Kein Programm"
+
+gartenwasser_zeitplan_entwurf_type:
+  name: "Gartenwasser Zeitplan Entwurf Typ"
+  icon: mdi:calendar-sync
+  options:
+    - "Taeglich"
+    - "Woechentlich"
+    - "Einmalig"

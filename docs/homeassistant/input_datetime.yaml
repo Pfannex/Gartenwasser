@@ -1,0 +1,21 @@
+# Neue Datei fuer Home Assistant - noch NICHT in configuration.yaml eingebunden.
+# Erfordert einen NEUEN Include in der Haupt-configuration.yaml (input_datetime gibt es
+# dort aktuell noch nicht, gleiches Muster wie input_select.yaml):
+#
+#   input_datetime: !include configurations/input_datetime.yaml
+#
+# Diese Datei dann als configurations/input_datetime.yaml ablegen.
+#
+# Entwurfs-Helper fuer den Zeitplan-Editor (dashboard-programme.yaml, Zeitplan-Seite) -
+# Uhrzeit gilt fuer alle drei Eintragstypen (daily/weekly/once), Datum nur fuer "once"
+# (siehe docs/spec/15-wochenplan.md, Feldreferenz).
+
+gartenwasser_zeitplan_entwurf_zeit:
+  name: "Gartenwasser Zeitplan Entwurf Zeit"
+  has_date: false
+  has_time: true
+
+gartenwasser_zeitplan_entwurf_datum:
+  name: "Gartenwasser Zeitplan Entwurf Datum"
+  has_date: true
+  has_time: false
