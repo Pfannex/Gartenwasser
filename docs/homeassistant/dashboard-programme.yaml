@@ -361,6 +361,10 @@ views:
                 flex: 1 !important;
                 justify-content: center !important;
               }
+              .bubble-sub-button-2 .bubble-sub-button-name-container,
+              .bubble-sub-button-3 .bubble-sub-button-name-container {
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.7) !important;
+              }
               ${(() => {
                 const parsePct = (s) => {
                   const m = s.match(/(\d+)%/);

@@ -969,6 +969,12 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - **Sichtbares Artefakt entdeckt und behoben**: nach dem Entfernen des I2C-Icons blitzte zwischen I2C- und RAM-Pille ein einzelnes verzerrtes Zeichen auf (reproduzierbar, kein Einzelbild-Zufall - zweimal frisch nachgeschossen, beide Male sichtbar). Per DOM-Inspektion der I2C-Sub-Button-Struktur ausgeschlossen, dass es zu diesem Element gehoert (outerHTML komplett sauber). Ursache: die Karten-eigene `.bubble-name`("Diagnose")-Textbox liegt im normalen Dokumentfluss UNTER dem absolut positionierten Sub-Button-Container - wo die Pillen sie nicht vollstaendig verdecken, blitzt ein Buchstabenrest durch. Fix: `.bubble-name { display: none !important; }` - der Name war ohnehin redundant (I2C/RAM/Flash-Beschriftungen sprechen fuer sich, Lupe-Icon bleibt als visueller Anker).
 - Per Screenshot verifiziert: kein Artefakt mehr, I2C zeigt nur noch reinen Text ohne Icon, RAM/Flash wieder weiss beschriftet.
 
+### RAM/Flash: Groessen-Check und Lesbarkeit im Farbverlauf
+
+- Nutzer-Frage/Sorge: RAM- und Flash-Slider muessten gleich gross sein, und ob es einen Farbton gibt, der die Werte auf dem Farbverlauf lesbar macht - sonst Rueckfall auf einfarbige Slider.
+- **Groesse per Live-Messung geprueft statt angenommen**: beide Sub-Buttons sind bereits exakt gleich breit (`getBoundingClientRect()`: 196px/196px, `flex: 1` funktioniert wie vorgesehen) - kein Bug gefunden, nur bestaetigt.
+- **Lesbarkeit geloest, ohne auf einfarbig umzustellen**: `text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.7)` auf den RAM/Flash-Namenscontainer ergaenzt - haelt den weissen Text unabhaengig von der Untergrundfarbe (Gruen/Gelb/Rot) lesbar, auch genau im Gelb-Uebergang (klassisches Kontrastproblem bei hellem Text auf Gelb). Per Screenshot mit Zoom verifiziert: "Flash 31%" sitzt direkt im Gelbbereich und ist trotzdem klar lesbar.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
