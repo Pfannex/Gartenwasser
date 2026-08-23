@@ -495,7 +495,7 @@ views:
                 const nc = card.querySelector('.bubble-name-container');
                 let input = nc.querySelector('input.slider-range');
                 if (!input) {
-                  nc.style.cssText = 'flex:1 1 auto; margin:0; display:flex; flex-direction:column; gap:5px;';
+                  nc.style.cssText = 'flex:1 1 auto; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
                   nc.innerHTML = `
                     <style>.slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
                     .slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
@@ -611,7 +611,7 @@ views:
 
                 let aliasInput = nc.querySelector('input.alias-input');
                 if (!aliasInput) {
-                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; display:flex; flex-direction:column; gap:5px;';
+                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
                   nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Alias</div>';
                   aliasInput = document.createElement('input');
                   aliasInput.type = 'text';
@@ -633,7 +633,7 @@ views:
                 if (!sliderCol) {
                   sliderCol = document.createElement('div');
                   sliderCol.className = 'slider-col';
-                  sliderCol.style.cssText = 'flex:0 0 210px; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.style.cssText = 'flex:0 0 210px; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
                   sliderCol.innerHTML = `
                     <style>.v1-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
                     .v1-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
@@ -676,6 +676,450 @@ views:
             # aufgebaut (nur EINMAL erzeugt, siehe "if (!...)"), sonst wuerde jeder Re-Render
             # Fokus/Cursor bzw. eine laufende Drag-Geste zerstoeren. Committen direkt per
             # hass.callService() (kein tap_action/Sub-Button noetig).
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V2"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #43a047 !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V2';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasInput = nc.querySelector('input.alias-input');
+                if (!aliasInput) {
+                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Alias</div>';
+                  aliasInput = document.createElement('input');
+                  aliasInput.type = 'text';
+                  aliasInput.className = 'alias-input';
+                  aliasInput.style.cssText = 'width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.18);color:#eceef2;font-family:inherit;font-size:0.86rem;font-weight:600;padding:4px 2px;outline:none;';
+                  aliasInput.addEventListener('change', () => {
+                    hass.callService('text', 'set_value', { entity_id: 'text.gartenwasser_v2_alias', value: aliasInput.value });
+                  });
+                  nc.appendChild(aliasInput);
+                }
+                // Wert nur aktualisieren, wenn das Feld gerade NICHT fokussiert ist - sonst
+                // wuerde ein Re-Render waehrend des Tippens den eingegebenen Text ueberschreiben.
+                if (document.activeElement !== aliasInput) {
+                  aliasInput.value = hass.states['text.gartenwasser_v2_alias'].state;
+                }
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:0 0 210px; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.v2-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .v2-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="v2-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.v2-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('number', 'set_value', { entity_id: 'number.gartenwasser_v2_laufzeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.v2-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['number.gartenwasser_v2_laufzeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V3"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #43a047 !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V3';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasInput = nc.querySelector('input.alias-input');
+                if (!aliasInput) {
+                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Alias</div>';
+                  aliasInput = document.createElement('input');
+                  aliasInput.type = 'text';
+                  aliasInput.className = 'alias-input';
+                  aliasInput.style.cssText = 'width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.18);color:#eceef2;font-family:inherit;font-size:0.86rem;font-weight:600;padding:4px 2px;outline:none;';
+                  aliasInput.addEventListener('change', () => {
+                    hass.callService('text', 'set_value', { entity_id: 'text.gartenwasser_v3_alias', value: aliasInput.value });
+                  });
+                  nc.appendChild(aliasInput);
+                }
+                // Wert nur aktualisieren, wenn das Feld gerade NICHT fokussiert ist - sonst
+                // wuerde ein Re-Render waehrend des Tippens den eingegebenen Text ueberschreiben.
+                if (document.activeElement !== aliasInput) {
+                  aliasInput.value = hass.states['text.gartenwasser_v3_alias'].state;
+                }
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:0 0 210px; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.v3-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .v3-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="v3-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.v3-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('number', 'set_value', { entity_id: 'number.gartenwasser_v3_laufzeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.v3-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['number.gartenwasser_v3_laufzeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V4"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #43a047 !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V4';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasInput = nc.querySelector('input.alias-input');
+                if (!aliasInput) {
+                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Alias</div>';
+                  aliasInput = document.createElement('input');
+                  aliasInput.type = 'text';
+                  aliasInput.className = 'alias-input';
+                  aliasInput.style.cssText = 'width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.18);color:#eceef2;font-family:inherit;font-size:0.86rem;font-weight:600;padding:4px 2px;outline:none;';
+                  aliasInput.addEventListener('change', () => {
+                    hass.callService('text', 'set_value', { entity_id: 'text.gartenwasser_v4_alias', value: aliasInput.value });
+                  });
+                  nc.appendChild(aliasInput);
+                }
+                // Wert nur aktualisieren, wenn das Feld gerade NICHT fokussiert ist - sonst
+                // wuerde ein Re-Render waehrend des Tippens den eingegebenen Text ueberschreiben.
+                if (document.activeElement !== aliasInput) {
+                  aliasInput.value = hass.states['text.gartenwasser_v4_alias'].state;
+                }
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:0 0 210px; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.v4-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .v4-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="v4-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.v4-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('number', 'set_value', { entity_id: 'number.gartenwasser_v4_laufzeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.v4-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['number.gartenwasser_v4_laufzeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V5"
+            show_name: false
+            show_state: false
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #43a047 !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
+
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V5';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasInput = nc.querySelector('input.alias-input');
+                if (!aliasInput) {
+                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Alias</div>';
+                  aliasInput = document.createElement('input');
+                  aliasInput.type = 'text';
+                  aliasInput.className = 'alias-input';
+                  aliasInput.style.cssText = 'width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.18);color:#eceef2;font-family:inherit;font-size:0.86rem;font-weight:600;padding:4px 2px;outline:none;';
+                  aliasInput.addEventListener('change', () => {
+                    hass.callService('text', 'set_value', { entity_id: 'text.gartenwasser_v5_alias', value: aliasInput.value });
+                  });
+                  nc.appendChild(aliasInput);
+                }
+                // Wert nur aktualisieren, wenn das Feld gerade NICHT fokussiert ist - sonst
+                // wuerde ein Re-Render waehrend des Tippens den eingegebenen Text ueberschreiben.
+                if (document.activeElement !== aliasInput) {
+                  aliasInput.value = hass.states['text.gartenwasser_v5_alias'].state;
+                }
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:0 0 210px; pointer-events:auto; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.v5-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .v5-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="v5-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.v5-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('number', 'set_value', { entity_id: 'number.gartenwasser_v5_laufzeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.v5-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['number.gartenwasser_v5_laufzeit'].state;
+                }
+                rangeInput._sync();
+              })()}
 
           - type: markdown
             content: >-
