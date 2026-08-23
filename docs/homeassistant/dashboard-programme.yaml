@@ -417,102 +417,265 @@ views:
     sections:
       - type: grid
         cards:
+          # --- Globale Einstellungen (Bubble Card, siehe Log.md fuer die Mockup-Iteration) ---
           - type: markdown
-            content: "## Globale Einstellungen"
+            content: |
+              ##### Globale Einstellungen
+              Harte Obergrenze pro Ventil, überschreitet eine Laufzeit dieses Limit, schaltet es automatisch ab.
             grid_options:
               columns: full
             card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+                  p {
+                    font-size: 0.78rem;
+                    color: var(--secondary-text-color);
+                    margin: 0;
+                    max-width: 56ch;
+                  }
+            # h5/p liegen im SHADOW ROOT von <ha-markdown> (eigenes Custom Element, siehe
+            # Log.md) - ein normaler card_mod "style: |"-String scoped nur auf ha-card selbst
+            # und erreicht diese Tags NICHT. Erst durch die "ha-markdown$:"-Syntax (card_mod
+            # piercing) wirkt das CSS tatsaechlich - vorher blieb text-transform etc. wirkungslos.
 
-          - type: entities
-            show_header_toggle: false
-            grid_options:
-              columns: full
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            entity: number.gartenwasser_max_time
+            icon: mdi:clock-outline
+            name: "Maximale Laufzeit"
+            show_name: false
+            show_state: false
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
-            entities:
-              - entity: number.gartenwasser_max_time
-                name: Maximale Laufzeit
-            # main/time/maxTime ist nicht direkt schreibbar - der zugehoerige MQTT-number
-            # (mqtt.yaml) verpackt den Wert per command_template in main/config/set.
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+                align-items: center !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #607d8b !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                let input = nc.querySelector('input.slider-range');
+                if (!input) {
+                  nc.style.cssText = 'flex:1 1 auto; margin:0; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = `
+                    <style>.slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Maximale Laufzeit</div>
+                    <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;">
+                      <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                      <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                      <input type="range" class="slider-range" min="0" max="180" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                    </div>`;
+                  input = nc.querySelector('input.slider-range');
+                  const fill = nc.querySelector('.slider-fill');
+                  const label = nc.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (input.value / input.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(input.value) + ' min';
+                  };
+                  input.addEventListener('input', sync);
+                  input.addEventListener('change', () => {
+                    hass.callService('number', 'set_value', { entity_id: 'number.gartenwasser_max_time', value: input.value });
+                  });
+                  input._sync = sync;
+                }
+                if (document.activeElement !== input) {
+                  input.value = hass.states['number.gartenwasser_max_time'].state;
+                }
+                input._sync();
+              })()}
+            # Kein nativer Slider mehr (button_type: name statt slider) - Slider ist ein
+            # 1:1-Nachbau des Artifact-Mockups (Label oberhalb, Wert zentriert im Fuellstand,
+            # siehe valve-config-mockup.html), analog zum Alias-Textfeld per innerHTML injiziert.
+            # Echtes number-Entity: min:0 max:180 (mqtt.yaml).
 
           - type: markdown
-            content: "## Ventile"
+            content: |
+              ##### Ventile
+              Laufzeit und Alias gelten für den manuellen Betrieb. Die Automatik wird ausschließlich über Programme gesetzt — eine hier geänderte Laufzeit deaktiviert das aktive Programm.
             grid_options:
               columns: full
             card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+                  p {
+                    font-size: 0.78rem;
+                    color: var(--secondary-text-color);
+                    margin: 0;
+                    max-width: 56ch;
+                  }
 
-          - type: custom:stack-in-card
-            mode: horizontal
-            grid_options:
-              columns: full
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            icon: mdi:sprinkler-variant
+            name: "V1"
+            show_name: false
+            show_state: false
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
-            cards:
-              - type: entities
-                title: Alias
-                show_header_toggle: false
-                entities:
-                  - entity: text.gartenwasser_v0_alias
-                    name: "V0"
-                  - entity: text.gartenwasser_v1_alias
-                    name: "V1"
-                  - entity: text.gartenwasser_v2_alias
-                    name: "V2"
-                  - entity: text.gartenwasser_v3_alias
-                    name: "V3"
-                  - entity: text.gartenwasser_v4_alias
-                    name: "V4"
-                  - entity: text.gartenwasser_v5_alias
-                    name: "V5"
+            styles: |
+              .bubble-wrapper {
+                box-sizing: border-box !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+              }
+              .bubble-buttons-container {
+                display: none !important;
+              }
+              .bubble-main-icon-container {
+                width: 36px !important;
+                height: 36px !important;
+                min-width: 36px !important;
+                min-height: 36px !important;
+                margin: 0 !important;
+              }
+              .bubble-main-icon-container ha-icon {
+                color: black !important;
+                --mdc-icon-size: 20px !important;
+              }
+              ha-card {
+                --row-height: 72px !important;
+                --bubble-button-icon-background-color: #43a047 !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                const cc = nc.parentElement;
+                const icon = card.querySelector('.bubble-main-icon-container');
 
-              - type: entities
-                title: Laufzeit
-                show_header_toggle: false
-                card_mod:
-                  style:
-                    .: |
-                      .card-content {
-                        padding-top: 64px !important;
-                      }
-                    hui-number-entity-row$: |
-                      :host {
-                        min-height: 64px !important;
-                        display: flex !important;
-                        align-items: center !important;
-                      }
-                # Platzhalter oben (64px, Hoehe einer Alias-Zeile): V0/Hauptventil hat keine
-                # Laufzeit, ohne diesen Abstand stuenden V1-V5 hier eine Zeile zu weit oben
-                # (auf Hoehe von V0 in der Alias-Spalte statt auf Hoehe des jeweils eigenen
-                # Ventils) - siehe Log.md, Nachtrag Zeilenausrichtung.
-                entities:
-                  - entity: number.gartenwasser_v1_laufzeit
-                    name: "V1"
-                  - entity: number.gartenwasser_v2_laufzeit
-                    name: "V2"
-                  - entity: number.gartenwasser_v3_laufzeit
-                    name: "V3"
-                  - entity: number.gartenwasser_v4_laufzeit
-                    name: "V4"
-                  - entity: number.gartenwasser_v5_laufzeit
-                    name: "V5"
-                # Eigene Entities (mqtt.yaml) statt der Discovery-number-Entities - max=60
-                # statt 180, siehe Kommentar dort. Dieselben Topics, daher immer synchron.
-            # V0 hat keine Laufzeit (Hauptventil, siehe Topic-Baum) - Alias-Spalte hat
-            # dadurch eine Zeile mehr als die Laufzeit-Spalte, wie auch im WebIF-Vorbild.
+                if (!cc.querySelector('.valve-index')) {
+                  const idx = document.createElement('div');
+                  idx.className = 'valve-index';
+                  idx.textContent = 'V1';
+                  idx.style.cssText = 'font-size:0.9rem;font-weight:700;color:#eceef2;flex-shrink:0;';
+                  cc.insertBefore(idx, icon);
+                }
+
+                let aliasInput = nc.querySelector('input.alias-input');
+                if (!aliasInput) {
+                  nc.style.cssText = 'flex:1 1 230px; min-width:0; margin:0; display:flex; flex-direction:column; gap:5px;';
+                  nc.innerHTML = '<div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Alias</div>';
+                  aliasInput = document.createElement('input');
+                  aliasInput.type = 'text';
+                  aliasInput.className = 'alias-input';
+                  aliasInput.style.cssText = 'width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.18);color:#eceef2;font-family:inherit;font-size:0.86rem;font-weight:600;padding:4px 2px;outline:none;';
+                  aliasInput.addEventListener('change', () => {
+                    hass.callService('text', 'set_value', { entity_id: 'text.gartenwasser_v1_alias', value: aliasInput.value });
+                  });
+                  nc.appendChild(aliasInput);
+                }
+                // Wert nur aktualisieren, wenn das Feld gerade NICHT fokussiert ist - sonst
+                // wuerde ein Re-Render waehrend des Tippens den eingegebenen Text ueberschreiben.
+                if (document.activeElement !== aliasInput) {
+                  aliasInput.value = hass.states['text.gartenwasser_v1_alias'].state;
+                }
+
+                let sliderCol = cc.querySelector('.slider-col');
+                let rangeInput;
+                if (!sliderCol) {
+                  sliderCol = document.createElement('div');
+                  sliderCol.className = 'slider-col';
+                  sliderCol.style.cssText = 'flex:0 0 210px; display:flex; flex-direction:column; gap:5px;';
+                  sliderCol.innerHTML = `
+                    <style>.v1-slider-range::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:36px;}
+                    .v1-slider-range::-moz-range-thumb{width:0;height:36px;border:none;background:transparent;}</style>
+                    <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#9aa1ad;">Laufzeit</div>
+                    <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                      <div style="width:28px;height:28px;border-radius:50%;background:#607d8b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <ha-icon icon="mdi:clock-outline" style="color:black;--mdc-icon-size:16px;"></ha-icon>
+                      </div>
+                      <div class="slider-field" style="position:relative;height:36px;border-radius:18px;background:#282828;display:flex;align-items:center;overflow:hidden;flex:1 1 auto;">
+                        <div class="slider-fill" style="position:absolute;left:0;top:0;bottom:0;background:#607d8b;border-radius:18px 0 0 18px;pointer-events:none;"></div>
+                        <div class="slider-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none;z-index:1;font-variant-numeric:tabular-nums;"></div>
+                        <input type="range" class="v1-slider-range" min="0" max="60" step="1" style="position:relative;z-index:2;-webkit-appearance:none;appearance:none;width:100%;height:100%;margin:0;background:transparent;cursor:pointer;">
+                      </div>
+                    </div>`;
+                  cc.appendChild(sliderCol);
+                  rangeInput = sliderCol.querySelector('input.v1-slider-range');
+                  const fill = sliderCol.querySelector('.slider-fill');
+                  const label = sliderCol.querySelector('.slider-label');
+                  const sync = () => {
+                    const pct = (rangeInput.value / rangeInput.max) * 100;
+                    fill.style.width = pct + '%';
+                    label.textContent = Math.round(rangeInput.value) + ' min';
+                  };
+                  rangeInput.addEventListener('input', sync);
+                  rangeInput.addEventListener('change', () => {
+                    hass.callService('number', 'set_value', { entity_id: 'number.gartenwasser_v1_laufzeit', value: rangeInput.value });
+                  });
+                  rangeInput._sync = sync;
+                } else {
+                  rangeInput = sliderCol.querySelector('input.v1-slider-range');
+                }
+                if (document.activeElement !== rangeInput) {
+                  rangeInput.value = hass.states['number.gartenwasser_v1_laufzeit'].state;
+                }
+                rangeInput._sync();
+              })()}
+            # Alias-Textfeld UND Laufzeit-Slider sind 1:1-Nachbauten des Artifact-Mockups
+            # (valve-config-mockup.html) statt Bubble-Card-Bordmitteln (kein Text-Sub-Button,
+            # kein nativer Slider-Sub-Button) - beide per innerHTML/DOM injiziert, idempotent
+            # aufgebaut (nur EINMAL erzeugt, siehe "if (!...)"), sonst wuerde jeder Re-Render
+            # Fokus/Cursor bzw. eine laufende Drag-Geste zerstoeren. Committen direkt per
+            # hass.callService() (kein tap_action/Sub-Button noetig).
 
           - type: markdown
             content: >-
@@ -533,7 +696,7 @@ views:
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
             # Ersatz fuer die im WebIF vorhandene Gelb-Markierung ueberschrittener
             # Laufzeiten - ein per-Zeile gefaerbter Hintergrund liess sich mit den
@@ -552,7 +715,7 @@ views:
               style: |
                 ha-card {
                   text-align: center;
-                  min-width: 700px;
+                  min-width: 500px;
                 }
 
   - title: Programme
