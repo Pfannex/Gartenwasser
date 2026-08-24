@@ -1,1 +1,23 @@
-objects: []
+objects:
+  - obj: "p0b3"
+    event:
+      "up":
+        - choose:
+            - conditions: "{{ text == '<' }}"
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    topic: hasp/plate_wz/command/page
+                    payload: "prev"
+            - conditions: "{{ text == '>' }}"
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    topic: hasp/plate_wz/command/page
+                    payload: "next"
+            - conditions: "{{ text == 'Home' }}"
+              sequence:
+                - service: mqtt.publish
+                  data:
+                    topic: hasp/plate_wz/command/page
+                    payload: "1"
