@@ -2623,7 +2623,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -2698,7 +2698,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -2773,7 +2773,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -2848,7 +2848,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -2923,7 +2923,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -2998,7 +2998,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3073,7 +3073,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3148,7 +3148,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3223,7 +3223,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3298,7 +3298,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3373,7 +3373,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3448,7 +3448,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3523,7 +3523,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3598,7 +3598,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3673,7 +3673,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
@@ -3748,7 +3748,7 @@ views:
                   if (!entry) return '';
                   const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
                   if (!names.includes(entry.program)) {
-                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                    return '--bubble-button-main-background-color: #ffb74d !important; --bubble-button-icon-background-color: #757575 !important;';
                   }
                   const on = entry.enabled ?? true;
                   return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
