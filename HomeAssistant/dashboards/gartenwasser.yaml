@@ -95,14 +95,27 @@ views:
                 margin-top: 4px !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? '#e53935' : '#43a047'} !important;
+                --bubble-button-icon-background-color: ${hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable' ? '#e53935' : (hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? '#e53935' : '#43a047')} !important;
+                ${hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable' ? '--bubble-button-main-background-color: #e53935 !important;' : ''}
               }
-              ${card.querySelector('.bubble-main-icon-container ha-icon').setAttribute('icon', hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'mdi:stop' : 'mdi:play')}
-              ${card.querySelector('.bubble-name').textContent = hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'STOP' : 'START'}
+              ${(() => {
+                const offline = hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable';
+                const on = hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on';
+                card.querySelector('.bubble-main-icon-container ha-icon').setAttribute('icon', offline ? 'mdi:wifi-off' : (on ? 'mdi:stop' : 'mdi:play'));
+                card.querySelector('.bubble-name').textContent = offline ? 'Offline' : (on ? 'STOP' : 'START');
+                // Start/Stop nur bei erreichbarem Geraet erlauben - ein Toggle auf die
+                // unavailable-Entity haette ohnehin keine Wirkung, aber soll erst gar
+                // nicht antippbar wirken (visuell + tatsaechlich gesperrt).
+                card.style.pointerEvents = offline ? 'none' : '';
+              })()}
               ${(() => {
                 const el = card.querySelector('.bubble-state');
                 el.classList.remove('hidden');
                 el.style.display = '';
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  el.textContent = 'Gerät nicht erreichbar';
+                  return;
+                }
                 const sw = hass.states['switch.gartenbewasserung_automatik_sequenz'];
                 if (sw.state === 'on') {
                   const durSec = (parseFloat(hass.states['sensor.gartenwasser_gesamtlaufzeit'].state) || 0) * 60;
@@ -116,9 +129,13 @@ views:
                 }
               })()}
               ${(() => {
+                const bg = card.querySelector('.bubble-button-background');
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  bg.style.background = 'transparent';
+                  return;
+                }
                 const pct = parseFloat(hass.states['sensor.gartenwasser_sequenz_restlaufzeit_prozent'].state) || 0;
                 const fill = hass.states['switch.gartenbewasserung_automatik_sequenz'].state === 'on' ? 'rgba(229, 57, 53, 0.35)' : 'transparent';
-                const bg = card.querySelector('.bubble-button-background');
                 bg.style.background = `linear-gradient(to right, ${fill} 0%, ${fill} ${pct}%, transparent ${pct}%, transparent 100%)`;
               })()}
 
