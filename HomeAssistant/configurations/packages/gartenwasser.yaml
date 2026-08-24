@@ -1,0 +1,9 @@
+input_number: !include ../gartenwasser/input_number.yaml
+input_boolean: !include ../gartenwasser/input_boolean.yaml
+input_select: !include ../gartenwasser/input_select.yaml
+input_text: !include ../gartenwasser/input_text.yaml
+input_datetime: !include ../gartenwasser/input_datetime.yaml
+automation: !include ../gartenwasser/automations.yaml
+script: !include ../gartenwasser/scripts.yaml
+mqtt: !include ../gartenwasser/mqtt.yaml
+template: !include ../gartenwasser/template.yaml

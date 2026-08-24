@@ -1,5 +1,6 @@
 homeassistant:
   customize: !include customize.yaml
+  packages: !include_dir_named configurations/packages
 
 # Loads default set of integrations. Do not remove.
 default_config:
@@ -8,10 +9,16 @@ default_config:
 frontend:
   themes: !include_dir_merge_named themes
 
-script: !include scripts.yaml
 scene: !include scenes.yaml
 
-input_number: !include configurations/input_number.yaml
-automation: !include configurations/automations.yaml
 openhasp: !include configurations/openHASP.yaml
-mqtt: !include configurations/mqtt.yaml
+
+lovelace:
+  mode: storage
+  dashboards:
+    gartenwasser-dashboard:
+      mode: yaml
+      title: Gartenwasser
+      icon: mdi:sprinkler-variant
+      show_in_sidebar: true
+      filename: dashboards/gartenwasser.yaml

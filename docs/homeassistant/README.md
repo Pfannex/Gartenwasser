@@ -40,56 +40,55 @@ sind an dieser Stelle nachweislich gescheitert (siehe `docs/Log.md`, Nachtrag
 Phase 10.3) — Mushroom+card_mod ist der Community-Standardweg für zusammengesetzte,
 gestylte Dashboard-Kacheln in Home Assistant.
 
-## Dateien in diesem Ordner
+## Wo die eigentlichen Dateien liegen
 
-Seit 2026-08-24 als HA **Package** organisiert (siehe [Configuration packages](https://www.home-assistant.io/docs/configuration/packages/))
+Dieser Ordner enthält seit 2026-08-24 nur noch diese Erklärung — die tatsächlichen
+Konfigurationsdaten liegen im Repo-Root unter [`HomeAssistant/`](../../HomeAssistant/),
+als 1:1-Spiegel der Verzeichnisstruktur, die auch auf der echten HA-Instanz liegt (statt
+als "hier reinkopieren"-Anleitung mit Zieltabelle wie zuvor). Wer die Konfiguration neu
+aufsetzt, kopiert `HomeAssistant/` einfach direkt in den Config-Root der eigenen
+HA-Instanz.
+
+Organisiert als HA **Package** (siehe [Configuration packages](https://www.home-assistant.io/docs/configuration/packages/))
 statt als einzelne Direkt-Includes in der Haupt-`configuration.yaml` — bündelt alle
 Gartenwasser-Domains (Helper, Skripte, Automation, MQTT, Template) an einem Ort, statt
-über mehrere domain-weite Dateien verstreut zu sein, in denen sich Gartenwasser sonst
-mit fremden, unrelated Konfigurationen mischen würde.
+über mehrere domain-weite Dateien verstreut zu sein, in denen sich Gartenwasser sonst mit
+fremden, unrelated Konfigurationen mischen würde:
 
-| Datei | Ziel in deiner HA-Konfiguration |
-|---|---|
-| `input_number.yaml` | `configurations/gartenwasser/input_number.yaml` |
-| `input_boolean.yaml` | `configurations/gartenwasser/input_boolean.yaml` |
-| `input_select.yaml` | `configurations/gartenwasser/input_select.yaml` |
-| `input_text.yaml` | `configurations/gartenwasser/input_text.yaml` |
-| `input_datetime.yaml` | `configurations/gartenwasser/input_datetime.yaml` |
-| `automations.yaml` | `configurations/gartenwasser/automations.yaml` |
-| `script.yaml` | `configurations/gartenwasser/scripts.yaml` |
-| `mqtt.yaml` | `configurations/gartenwasser/mqtt.yaml` (kompletter Inhalt, kein Anhängen mehr nötig — eigene Datei statt gemeinsamer `mqtt.yaml`) |
-| `template.yaml` | `configurations/gartenwasser/template.yaml` |
-| `dashboard-programme.yaml` | Als neues Dashboard einfügen (siehe Kommentar in der Datei) |
+```
+HomeAssistant/
+  configuration.yaml              # Root-Config, referenziert alles Weitere per !include
+  customize.yaml
+  configurations/
+    openHASP.yaml                 # Touch-Panel-Integration, aktuell leer ({})
+    packages/
+      gartenwasser.yaml           # buendelt die 9 Domains unten in die echten Top-Level-Keys
+    gartenwasser/                 # die rohen Domain-Dateien, vom Package eingebunden
+      input_number.yaml
+      input_boolean.yaml
+      input_select.yaml
+      input_text.yaml
+      input_datetime.yaml
+      automations.yaml
+      scripts.yaml
+      mqtt.yaml
+      template.yaml
+  dashboards/
+    gartenwasser.yaml             # das Lovelace-Dashboard (YAML-Modus)
+  themes/
+```
 
 ## Einrichtungsschritte
 
-1. Die neun Dateien oben 1:1 (Dateiname bleibt gleich, `script.yaml` wird zu
-   `scripts.yaml`) nach `configurations/gartenwasser/` kopieren.
-2. Neue Datei `configurations/packages/gartenwasser.yaml` anlegen, die alle neun
-   Domains bündelt:
-   ```yaml
-   input_number: !include ../gartenwasser/input_number.yaml
-   input_boolean: !include ../gartenwasser/input_boolean.yaml
-   input_select: !include ../gartenwasser/input_select.yaml
-   input_text: !include ../gartenwasser/input_text.yaml
-   input_datetime: !include ../gartenwasser/input_datetime.yaml
-   automation: !include ../gartenwasser/automations.yaml
-   script: !include ../gartenwasser/scripts.yaml
-   mqtt: !include ../gartenwasser/mqtt.yaml
-   template: !include ../gartenwasser/template.yaml
-   ```
-   Pfade sind relativ zur Package-Datei selbst (empirisch verifiziert per
-   `POST /api/config/core/check_config`, nicht relativ zum Config-Root).
-3. In der Haupt-`configuration.yaml` **eine einzige neue Zeile** im `homeassistant:`-Block
-   ergänzen (keine der neun Domains braucht mehr eine eigene Include-Zeile):
-   ```yaml
-   homeassistant:
-     packages: !include_dir_named configurations/packages
-   ```
-4. Vor dem Neustart validieren, ohne etwas zu riskieren: `POST /api/config/core/check_config`
+1. Inhalt von `HomeAssistant/` in den Config-Root der eigenen HA-Instanz kopieren
+   (bzw. mergen, falls dort schon andere, unrelated Konfiguration liegt — `packages:`,
+   `scene:`, `openhasp:` und `lovelace.dashboards.gartenwasser-dashboard` muessen dann von
+   Hand in die eigene `configuration.yaml` uebernommen werden statt die Datei zu
+   ueberschreiben).
+2. Vor dem Neustart validieren, ohne etwas zu riskieren: `POST /api/config/core/check_config`
    (Bearer-Token aus `localStorage.hassTokens`) meldet `"result": "valid"` bei korrekter
    Konfiguration, ohne die laufende Instanz anzufassen.
-5. **Home Assistant komplett neu starten** (Einstellungen → System → Neu starten, NICHT
+3. **Home Assistant komplett neu starten** (Einstellungen → System → Neu starten, NICHT
    nur „Alle YAML-Konfigurationen neu laden“) — ein brandneuer Top-Level-Schlüssel wie
    `packages:`, der vorher noch nie in der `configuration.yaml` stand, wird von einem
    reinen YAML-/Core-Config-Reload nachweislich NICHT aktiviert (getestet: Test-Entity
@@ -97,29 +96,14 @@ mit fremden, unrelated Konfigurationen mischen würde.
    Package-Einbindung ein. Bereits bestehende, im Package gebündelte Domains
    (`input_number`/`script`/`automation`/...) reloaden sich danach einzeln wieder ohne
    Neustart zuverlässig.
-6. Nach dem Neustart prüfen: alle Gartenwasser-Entities (`input_number.gartenwasser_*`,
+4. Nach dem Neustart prüfen: alle Gartenwasser-Entities (`input_number.gartenwasser_*`,
    `sensor.gartenwasser_*`, `script.gartenwasser_*`, `automation.gartenwasser_*` usw.)
-   sollten wieder unter denselben Entity-IDs wie vorher erreichbar sein — Package-Merge
-   ändert nichts an Entity-IDs/unique_ids, nur am Speicherort der YAML-Quelle.
-7. **`dashboard-programme.yaml`**: entweder über Einstellungen → Dashboards → „+
-   Dashboard hinzufügen“ → „Neues Dashboard aus YAML erstellen“ einfügen, oder als
-   Datei ablegen (z. B. `dashboards/gartenwasser.yaml`) und in `configuration.yaml`
-   registrieren:
-   ```yaml
-   lovelace:
-     mode: storage
-     dashboards:
-       gartenwasser-dashboard:   # url_path braucht zwingend einen Bindestrich, sonst
-         mode: yaml              # "Invalid config for 'lovelace'" beim Config-Check
-         title: Gartenwasser
-         icon: mdi:sprinkler-variant
-         show_in_sidebar: true
-         filename: dashboards/gartenwasser.yaml
-   ```
-   Vorher die Entity-IDs gegen deine tatsächliche Installation prüfen (Einstellungen →
-   Geräte & Dienste → Entitäten) — die Datei enthält bereits die per Entity-Registry
-   verifizierten IDs (Präfix `gartenbewasserung_`), bei Namenskollisionen kann HA aber
-   einen abweichenden Suffix („_2") vergeben.
+   sollten unter denselben Entity-IDs erreichbar sein wie in einer bereits laufenden
+   Installation.
+5. Entity-IDs im Dashboard vorher gegen die eigene Installation prüfen (Einstellungen →
+   Geräte & Dienste → Entitäten) — `dashboards/gartenwasser.yaml` enthält bereits die per
+   Entity-Registry verifizierten IDs (Präfix `gartenbewasserung_`), bei Namenskollisionen
+   kann HA aber einen abweichenden Suffix („_2") vergeben.
 
 ## Funktionsweise (kurz)
 
