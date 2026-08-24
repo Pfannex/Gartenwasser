@@ -4049,39 +4049,349 @@ views:
       - type: grid
         cards:
           - type: markdown
-            content: "## System"
+            content: |
+              ##### Firmware
             grid_options:
               columns: full
             card_mod:
-              style: |
-                ha-card {
-                  min-width: 700px;
-                }
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
 
-          - type: entities
-            show_header_toggle: false
-            grid_options:
-              columns: full
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "info"
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
             card_mod:
               style: |
                 ha-card {
-                  min-width: 700px;
+                  min-width: 500px;
                 }
-            entities:
-              - entity: sensor.gartenwasser_reset_grund
-                name: Reset-Grund
-              - entity: sensor.gartenwasser_uptime
-                name: Uptime
-              - entity: sensor.gartenwasser_stack_free
-                name: Stack Free
-              - entity: sensor.gartenwasser_rssi
-                name: WLAN-Signal (RSSI)
-              - entity: sensor.gartenwasser_ip
-                name: IP-Adresse
-              - entity: sensor.gartenwasser_broker
-                name: MQTT-Broker
-              - entity: sensor.gartenwasser_partitionen
-                name: Partitionen
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              ha-card {
+                --row-height: 150px !important;
+                --bubble-button-border-radius: 16px !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                nc.style.cssText = 'flex:1 1 auto; margin:0; padding:10px 12px; display:flex; flex-direction:column; justify-content:center; gap:9px;';
+
+                const rows = [
+                  ['Version', hass.states['sensor.gartenwasser_firmware'].state],
+                  ['Uptime', (() => {
+                    const upSec = parseInt(hass.states['sensor.gartenwasser_uptime'].state) || 0;
+                    const d = Math.floor(upSec / 86400);
+                    const h = Math.floor((upSec % 86400) / 3600);
+                    const m = Math.floor((upSec % 3600) / 60);
+                    const boot = new Date(Date.now() - upSec * 1000);
+                    const pad = n => String(n).padStart(2, '0');
+                    const dateStr = pad(boot.getDate()) + '/' + pad(boot.getMonth() + 1) + '/' + String(boot.getFullYear()).slice(-2);
+                    const timeStr = pad(boot.getHours()) + ':' + pad(boot.getMinutes());
+                    return pad(d) + 'd:' + pad(h) + 'h:' + pad(m) + 'm seit ' + dateStr + ' | ' + timeStr;
+                  })()],
+                  ['Letzter Neustart', hass.states['sensor.gartenwasser_reset_grund'].state],
+                ];
+                nc.innerHTML = rows.map(([label, value]) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                    <span style="color:#9aa1ad; font-size:0.86rem;">${label}</span>
+                    <span style="color:#eceef2; font-weight:600; font-size:0.86rem; text-align:right;">${value}</span>
+                  </div>
+                `).join('');
+
+              })()}
+
+          - type: markdown
+            content: |
+              ##### Hardware
+            grid_options:
+              columns: full
+            card_mod:
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "info"
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              ha-card {
+                --row-height: 300px !important;
+                --bubble-button-border-radius: 16px !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                nc.style.cssText = 'flex:1 1 auto; margin:0; padding:10px 12px; display:flex; flex-direction:column; justify-content:center; gap:9px;';
+
+                const rows = [
+                  ['Board', 'ESP32-C6FH8'],
+                  ['RAM', '512 KB'],
+                  ['Flash', '8 MB'],
+                  ['TFT', 'SPI-JD9853'],
+                  ['Größe', '172×320'],
+                  ['Touch', 'AXS5106L'],
+                  ['I/O', 'MCP23017'],
+                ];
+                nc.innerHTML = rows.map(([label, value]) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                    <span style="color:#9aa1ad; font-size:0.86rem;">${label}</span>
+                    <span style="color:#eceef2; font-weight:600; font-size:0.86rem; text-align:right;">${value}</span>
+                  </div>
+                `).join('');
+
+              })()}
+
+          - type: markdown
+            content: |
+              ##### Speicher
+            grid_options:
+              columns: full
+            card_mod:
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "info"
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              ha-card {
+                --row-height: 150px !important;
+                --bubble-button-border-radius: 16px !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                nc.style.cssText = 'flex:1 1 auto; margin:0; padding:10px 12px; display:flex; flex-direction:column; justify-content:center; gap:9px;';
+
+                const rows = [
+                  ['RAM', hass.states['sensor.gartenwasser_ram'].state],
+                  ['Flash', hass.states['sensor.gartenwasser_flash'].state],
+                  ['Freier Stack (LoopTask)', (() => {
+                    const b = parseInt(hass.states['sensor.gartenwasser_stack_free'].state) || 0;
+                    return (b / 1024).toFixed(1) + ' KB';
+                  })()],
+                ];
+                nc.innerHTML = rows.map(([label, value]) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                    <span style="color:#9aa1ad; font-size:0.86rem;">${label}</span>
+                    <span style="color:#eceef2; font-weight:600; font-size:0.86rem; text-align:right;">${value}</span>
+                  </div>
+                `).join('');
+
+              })()}
+
+          - type: markdown
+            content: |
+              ##### Partitionen
+            grid_options:
+              columns: full
+            card_mod:
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "info"
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              ha-card {
+                --row-height: 330px !important;
+                --bubble-button-border-radius: 16px !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                nc.style.cssText = 'flex:1 1 auto; margin:0; padding:10px 12px; display:flex; flex-direction:column; justify-content:center; gap:9px;';
+
+                const parts = hass.states['sensor.gartenwasser_partitionen'].attributes.partitions || [];
+                const rowsHtml = parts.map(p => {
+                  const sizeKb = Math.round(p.size / 1024);
+                  let usedTxt = '–';
+                  if (p.used !== undefined) {
+                    const usedKb = Math.round(p.used / 1024);
+                    const pct = Math.round((p.used / p.size) * 100);
+                    usedTxt = usedKb + ' KB (' + pct + '%)';
+                  }
+                  const badge = p.active ? '<span style="background:#43a047;color:black;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:8px;letter-spacing:0.03em;">AKTIV</span>' : '';
+                  return `
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1.4fr; align-items:center; gap:8px; padding:5px 0;">
+                      <span style="color:#eceef2; font-weight:600; font-size:0.82rem; display:flex; align-items:center;">${p.label}${badge}</span>
+                      <span style="color:#9aa1ad; font-size:0.82rem;">${sizeKb} KB</span>
+                      <span style="color:#9aa1ad; font-size:0.82rem;">${usedTxt}</span>
+                    </div>
+                  `;
+                }).join('');
+                nc.innerHTML = `
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:8px; padding-bottom:6px; margin-bottom:2px; border-bottom:1px solid rgba(255,255,255,0.12); font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#757575;">
+                    <span>Partition</span><span>Größe</span><span>Belegung</span>
+                  </div>
+                  ${rowsHtml}
+                `;
+
+              })()}
+
+          - type: markdown
+            content: |
+              ##### Netzwerk
+            grid_options:
+              columns: full
+            card_mod:
+              style:
+                .: |
+                  ha-card {
+                    min-width: 500px;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                  }
+                ha-markdown$: |
+                  h5 {
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--secondary-text-color);
+                    margin: 0 0 6px;
+                  }
+
+          - type: custom:bubble-card
+            card_type: button
+            button_type: name
+            name: "info"
+            show_name: false
+            show_state: false
+            tap_action:
+              action: none
+            card_mod:
+              style: |
+                ha-card {
+                  min-width: 500px;
+                }
+            styles: |
+              .bubble-main-icon-container {
+                display: none !important;
+              }
+              ha-card {
+                --row-height: 150px !important;
+                --bubble-button-border-radius: 16px !important;
+              }
+              ${(() => {
+                const nc = card.querySelector('.bubble-name-container');
+                nc.style.cssText = 'flex:1 1 auto; margin:0; padding:10px 12px; display:flex; flex-direction:column; justify-content:center; gap:9px;';
+
+                const rows = [
+                  ['IP-Adresse', hass.states['sensor.gartenwasser_ip'].state],
+                  ['WLAN-Signal', hass.states['sensor.gartenwasser_rssi'].state + ' dBm'],
+                  ['MQTT-Broker', hass.states['sensor.gartenwasser_broker'].state],
+                ];
+                nc.innerHTML = rows.map(([label, value]) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                    <span style="color:#9aa1ad; font-size:0.86rem;">${label}</span>
+                    <span style="color:#eceef2; font-weight:600; font-size:0.86rem; text-align:right;">${value}</span>
+                  </div>
+                `).join('');
+
+              })()}
 
           - type: markdown
             content: >-
@@ -4094,5 +4404,5 @@ views:
               style: |
                 ha-card {
                   text-align: center;
-                  min-width: 700px;
+                  min-width: 500px;
                 }
