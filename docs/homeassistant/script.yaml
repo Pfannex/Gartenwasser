@@ -277,11 +277,17 @@ gartenwasser_zeitplan_eintrag_bearbeiten_starten:
         entry: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule')[index] }}"
         type_map: {'daily': 'Taeglich', 'weekly': 'Woechentlich', 'once': 'Einmalig'}
         wd_list: "{{ entry.weekdays | default([]) }}"
+        program_names: "{{ state_attr('sensor.gartenwasser_programme', 'programs') | default([]) | map(attribute='name') | list }}"
     - action: input_select.select_option
       target:
         entity_id: input_select.gartenwasser_zeitplan_entwurf_program
       data:
-        option: "{{ entry.program }}"
+        # Faellt auf "Kein Programm" zurueck, wenn das referenzierte Programm
+        # zwischenzeitlich umbenannt/geloescht wurde (input_select.select_option wuerde
+        # sonst mit "Invalid option" abbrechen, siehe Zeitplan-Hauptseite: verwaiste
+        # Eintraege werden dort orange markiert) - damit bleibt der Eintrag bearbeitbar,
+        # der Nutzer kann ein gueltiges Programm neu zuweisen.
+        option: "{{ entry.program if entry.program in program_names else 'Kein Programm' }}"
     - action: input_select.select_option
       target:
         entity_id: input_select.gartenwasser_zeitplan_entwurf_type
@@ -297,17 +303,6 @@ gartenwasser_zeitplan_eintrag_bearbeiten_starten:
         entity_id: input_datetime.gartenwasser_zeitplan_entwurf_datum
       data:
         date: "{{ entry.date | default(now().strftime('%Y-%m-%d'), true) }}"
-    - if:
-        - condition: template
-          value_template: "{{ entry.enabled | default(true) }}"
-      then:
-        - action: input_boolean.turn_on
-          target:
-            entity_id: input_boolean.gartenwasser_zeitplan_entwurf_aktiv
-      else:
-        - action: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.gartenwasser_zeitplan_entwurf_aktiv
     - repeat:
         for_each: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
         sequence:
@@ -338,8 +333,12 @@ gartenwasser_zeitplan_eintrag_speichern:
         type_map: {'Taeglich': 'daily', 'Woechentlich': 'weekly', 'Einmalig': 'once'}
         sel_type: "{{ type_map.get(states('input_select.gartenwasser_zeitplan_entwurf_type'), 'daily') }}"
     - variables:
+        # "enabled" wird NICHT im Formular bearbeitet (Aktivierung/Pause laeuft
+        # ausschliesslich ueber den Icon-Toggle auf der Zeitplan-Hauptseite) - beim
+        # Speichern deshalb 1:1 vom bestehenden Eintrag uebernommen, bei einem neuen
+        # Eintrag (idx == Array-Laenge, noch kein bestehender Wert) Default true.
         new_entry_base:
-          enabled: "{{ is_state('input_boolean.gartenwasser_zeitplan_entwurf_aktiv', 'on') }}"
+          enabled: "{{ (schedule[idx].enabled | default(true)) if idx < (schedule | count) else true }}"
           type: "{{ sel_type }}"
           time: "{{ states('input_datetime.gartenwasser_zeitplan_entwurf_zeit')[:5] }}"
           program: "{{ states('input_select.gartenwasser_zeitplan_entwurf_program') }}"
@@ -429,9 +428,6 @@ gartenwasser_zeitplan_eintrag_neu_starten:
         entity_id: input_datetime.gartenwasser_zeitplan_entwurf_datum
       data:
         date: "{{ now().strftime('%Y-%m-%d') }}"
-    - action: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.gartenwasser_zeitplan_entwurf_aktiv
     - repeat:
         for_each: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
         sequence:

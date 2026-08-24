@@ -2535,8 +2535,8 @@ views:
           - type: custom:bubble-card
             card_type: button
             button_type: name
-            name: "Zeitplan"
-            icon: mdi:calendar-clock
+            name: "Zeitplan aktiv"
+            icon: mdi:calendar-check
             show_state: false
             tap_action:
               action: none
@@ -2562,26 +2562,6 @@ views:
               .bubble-sub-button-1 .bubble-sub-button-icon {
                 color: #43a047 !important;
               }
-            visibility:
-              - condition: numeric_state
-                entity: input_number.gartenwasser_zeitplan_editier_index
-                below: 0
-
-          - type: custom:bubble-card
-            card_type: button
-            button_type: name
-            name: "Zeitplan aktiv"
-            icon: mdi:calendar-check
-            entity: switch.gartenwasser_zeitplan_aktiv
-            show_state: false
-            tap_action:
-              action: none
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 500px;
-                }
-            styles: |
               ha-card {
                 --bubble-button-icon-background-color: ${hass.states['switch.gartenwasser_zeitplan_aktiv'].state === 'on' ? '#43a047' : '#757575'} !important;
               }
@@ -2638,22 +2618,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[0]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[0];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[0];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 0 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -2698,22 +2693,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[1]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[1];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[1];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 1 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -2758,22 +2768,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[2]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[2];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[2];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 2 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -2818,22 +2843,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[3]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[3];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[3];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 3 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -2878,22 +2918,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[4]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[4];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[4];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 4 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -2938,22 +2993,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[5]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[5];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[5];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 5 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -2998,22 +3068,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[6]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[6];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[6];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 6 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3058,22 +3143,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[7]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[7];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[7];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 7 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3118,22 +3218,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[8]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[8];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[8];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 8 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3178,22 +3293,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[9]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[9];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[9];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 9 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3238,22 +3368,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[10]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[10];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[10];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 10 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3298,22 +3443,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[11]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[11];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[11];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 11 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3358,22 +3518,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[12]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[12];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[12];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 12 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3418,22 +3593,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[13]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[13];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[13];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 13 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3478,22 +3668,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[14]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[14];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[14];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 14 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3538,22 +3743,37 @@ views:
                 color: red !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${((hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[15]?.enabled ?? true) ? '#43a047' : '#757575'} !important;
+                ${(() => {
+                  const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[15];
+                  if (!entry) return '';
+                  const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                  if (!names.includes(entry.program)) {
+                    return '--bubble-button-main-background-color: #ff9800 !important; --bubble-button-icon-background-color: #757575 !important;';
+                  }
+                  const on = entry.enabled ?? true;
+                  return '--bubble-button-icon-background-color: ' + (on ? '#43a047' : '#757575') + ' !important;';
+                })()}
               }
               ${(() => {
                 const entry = (hass.states['sensor.gartenwasser_zeitplan'].attributes.schedule || [])[15];
                 if (!entry) return '';
+                const names = (hass.states['sensor.gartenwasser_programme'].attributes.programs || []).map(p => p.name);
+                const missing = !names.includes(entry.program);
                 const wd = {mon:'Mo',tue:'Di',wed:'Mi',thu:'Do',fri:'Fr',sat:'Sa',sun:'So'};
                 let when = '';
                 if (entry.type === 'daily') when = 'Täglich, ' + entry.time + ' Uhr';
                 else if (entry.type === 'weekly') when = (entry.weekdays || []).map(d => wd[d] || d).join(', ') + ', ' + entry.time + ' Uhr';
                 else if (entry.type === 'once') { const p = (entry.date || '').split('-'); when = 'Einmalig ' + p[2] + '.' + p[1] + '.' + p[0] + ', ' + entry.time + ' Uhr'; }
                 card.querySelector('.bubble-name').textContent = entry.program;
-                card.querySelector('.bubble-state').textContent = when;
+                const stateEl = card.querySelector('.bubble-state');
+                stateEl.textContent = missing ? ('Programm nicht gefunden! · ' + when) : when;
+                stateEl.style.color = missing ? 'black' : '';
                 const icon = card.querySelector('.bubble-main-icon-container');
+                icon.style.cursor = missing ? 'default' : 'pointer';
+                icon.dataset.disabled = missing ? '1' : '0';
                 if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
                   icon.addEventListener('click', () => {
+                    if (icon.dataset.disabled === '1') return;
                     hass.callService('script', 'gartenwasser_zeitplan_eintrag_toggle_aktiv', { index: 15 });
                   });
                   icon.dataset.toggleWired = '1';
@@ -3609,23 +3829,6 @@ views:
                 select_attribute: options
                 show_state: true
                 show_icon: false
-
-          - type: custom:bubble-card
-            card_type: button
-            button_type: name
-            name: "Typ"
-            icon: mdi:calendar-sync
-            show_state: false
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 500px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: input_number.gartenwasser_zeitplan_editier_index
-                above: -1
-            sub_button:
               - entity: input_select.gartenwasser_zeitplan_entwurf_type
                 sub_button_type: select
                 select_attribute: options
@@ -3746,36 +3949,6 @@ views:
               ha-card {
                 --bubble-accent-color: #43a047 !important;
               }
-
-          - type: custom:bubble-card
-            card_type: button
-            button_type: name
-            name: "Aktiv"
-            icon: mdi:water
-            show_state: false
-            card_mod:
-              style: |
-                ha-card {
-                  min-width: 500px;
-                }
-            visibility:
-              - condition: numeric_state
-                entity: input_number.gartenwasser_zeitplan_editier_index
-                above: -1
-            styles: |
-              ha-card {
-                --bubble-button-icon-background-color: ${hass.states['input_boolean.gartenwasser_zeitplan_entwurf_aktiv'].state === 'on' ? '#43a047' : '#757575'} !important;
-              }
-              ${(() => {
-                const icon = card.querySelector('.bubble-main-icon-container');
-                if (!icon.dataset.toggleWired) {
-                  icon.style.cursor = 'pointer';
-                  icon.addEventListener('click', () => {
-                    hass.callService('input_boolean', 'toggle', { entity_id: 'input_boolean.gartenwasser_zeitplan_entwurf_aktiv' });
-                  });
-                  icon.dataset.toggleWired = '1';
-                }
-              })()}
 
           - type: custom:bubble-card
             card_type: button

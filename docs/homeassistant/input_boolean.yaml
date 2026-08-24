@@ -23,11 +23,10 @@ gartenwasser_entwurf_v5_auto:
   name: "Gartenwasser Entwurf V5 Auto"
 
 # Entwurfs-Helper fuer den Zeitplan-Editor (dashboard-programme.yaml, Zeitplan-Seite) -
-# gleiches Muster wie die Programm-Entwurfs-Helper oben. "aktiv" = Eintrag pausieren ohne
-# ihn zu loeschen (entry.enabled im schedule-Array), mon-sun = angehakte Wochentage bei
-# type "weekly" (entry.weekdays, siehe docs/spec/15-wochenplan.md).
-gartenwasser_zeitplan_entwurf_aktiv:
-  name: "Gartenwasser Zeitplan Entwurf Aktiv"
+# gleiches Muster wie die Programm-Entwurfs-Helper oben. mon-sun = angehakte Wochentage
+# bei type "weekly" (entry.weekdays, siehe docs/spec/15-wochenplan.md). Kein "aktiv"-Helper
+# mehr - Pausieren/Aktivieren eines Eintrags (entry.enabled) laeuft ausschliesslich ueber
+# den Icon-Toggle auf der Zeitplan-Hauptseite, nicht ueber das Formular.
 gartenwasser_zeitplan_entwurf_mon:
   name: "Gartenwasser Zeitplan Entwurf Montag"
 gartenwasser_zeitplan_entwurf_tue:
