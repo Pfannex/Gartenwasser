@@ -442,6 +442,27 @@ views:
     sections:
       - type: grid
         cards:
+          # Unsichtbarer Wächter: springt automatisch zurück auf Status, sobald das
+          # Geraet offline geht (per HA-eigenem location-changed-Navigationstrick, kein
+          # Reload) - macht ein Sperren der View-Reiter selbst ueberfluessig.
+          - type: custom:bubble-card
+            card_type: button
+            button_type: state
+            entity: sensor.gartenbewasserung_i2c_status
+            show_name: false
+            show_state: false
+            show_icon: false
+            styles: |
+              ha-card {
+                display: none !important;
+              }
+              ${(() => {
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  history.pushState(null, '', '/gartenwasser-dashboard/gartenwasser-status');
+                  window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+                }
+              })()}
+
           # --- Globale Einstellungen (Bubble Card, siehe Log.md fuer die Mockup-Iteration) ---
           - type: markdown
             content: |
@@ -1206,6 +1227,27 @@ views:
     sections:
       - type: grid
         cards:
+          # Unsichtbarer Wächter: springt automatisch zurück auf Status, sobald das
+          # Geraet offline geht (per HA-eigenem location-changed-Navigationstrick, kein
+          # Reload) - macht ein Sperren der View-Reiter selbst ueberfluessig.
+          - type: custom:bubble-card
+            card_type: button
+            button_type: state
+            entity: sensor.gartenbewasserung_i2c_status
+            show_name: false
+            show_state: false
+            show_icon: false
+            styles: |
+              ha-card {
+                display: none !important;
+              }
+              ${(() => {
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  history.pushState(null, '', '/gartenwasser-dashboard/gartenwasser-status');
+                  window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+                }
+              })()}
+
           - type: custom:bubble-card
             card_type: button
             button_type: name
@@ -2557,6 +2599,27 @@ views:
     sections:
       - type: grid
         cards:
+          # Unsichtbarer Wächter: springt automatisch zurück auf Status, sobald das
+          # Geraet offline geht (per HA-eigenem location-changed-Navigationstrick, kein
+          # Reload) - macht ein Sperren der View-Reiter selbst ueberfluessig.
+          - type: custom:bubble-card
+            card_type: button
+            button_type: state
+            entity: sensor.gartenbewasserung_i2c_status
+            show_name: false
+            show_state: false
+            show_icon: false
+            styles: |
+              ha-card {
+                display: none !important;
+              }
+              ${(() => {
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  history.pushState(null, '', '/gartenwasser-dashboard/gartenwasser-status');
+                  window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+                }
+              })()}
+
           - type: custom:bubble-card
             card_type: button
             button_type: name
@@ -4033,6 +4096,27 @@ views:
     sections:
       - type: grid
         cards:
+          # Unsichtbarer Wächter: springt automatisch zurück auf Status, sobald das
+          # Geraet offline geht (per HA-eigenem location-changed-Navigationstrick, kein
+          # Reload) - macht ein Sperren der View-Reiter selbst ueberfluessig.
+          - type: custom:bubble-card
+            card_type: button
+            button_type: state
+            entity: sensor.gartenbewasserung_i2c_status
+            show_name: false
+            show_state: false
+            show_icon: false
+            styles: |
+              ha-card {
+                display: none !important;
+              }
+              ${(() => {
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  history.pushState(null, '', '/gartenwasser-dashboard/gartenwasser-status');
+                  window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+                }
+              })()}
+
           - type: logbook
             title: Aktivitaet
             grid_options:
@@ -4073,6 +4157,27 @@ views:
     sections:
       - type: grid
         cards:
+          # Unsichtbarer Wächter: springt automatisch zurück auf Status, sobald das
+          # Geraet offline geht (per HA-eigenem location-changed-Navigationstrick, kein
+          # Reload) - macht ein Sperren der View-Reiter selbst ueberfluessig.
+          - type: custom:bubble-card
+            card_type: button
+            button_type: state
+            entity: sensor.gartenbewasserung_i2c_status
+            show_name: false
+            show_state: false
+            show_icon: false
+            styles: |
+              ha-card {
+                display: none !important;
+              }
+              ${(() => {
+                if (hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable') {
+                  history.pushState(null, '', '/gartenwasser-dashboard/gartenwasser-status');
+                  window.dispatchEvent(new CustomEvent('location-changed', { bubbles: true, composed: true }));
+                }
+              })()}
+
           - type: markdown
             content: |
               ##### Firmware
