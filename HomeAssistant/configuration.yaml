@@ -11,7 +11,7 @@ frontend:
 
 scene: !include scenes.yaml
 
-openhasp: {}
+openhasp: !include configurations/plates/openhasp.yaml
 
 lovelace:
   mode: storage
