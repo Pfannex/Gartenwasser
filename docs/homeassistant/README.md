@@ -42,43 +42,65 @@ gestylte Dashboard-Kacheln in Home Assistant.
 
 ## Dateien in diesem Ordner
 
+Seit 2026-08-24 als HA **Package** organisiert (siehe [Configuration packages](https://www.home-assistant.io/docs/configuration/packages/))
+statt als einzelne Direkt-Includes in der Haupt-`configuration.yaml` — bündelt alle
+Gartenwasser-Domains (Helper, Skripte, Automation, MQTT, Template) an einem Ort, statt
+über mehrere domain-weite Dateien verstreut zu sein, in denen sich Gartenwasser sonst
+mit fremden, unrelated Konfigurationen mischen würde.
+
 | Datei | Ziel in deiner HA-Konfiguration |
 |---|---|
-| `mqtt.yaml` | Inhalt an `configurations/mqtt.yaml` anhängen (unter den bestehenden `light:`-Block) |
-| `input_select.yaml` | Als `configurations/input_select.yaml` ablegen (neu) |
-| `template.yaml` | Als `configurations/template.yaml` ablegen (neu) |
-| `automations.yaml` | Inhalt an `configurations/automations.yaml` anhängen |
+| `input_number.yaml` | `configurations/gartenwasser/input_number.yaml` |
+| `input_boolean.yaml` | `configurations/gartenwasser/input_boolean.yaml` |
+| `input_select.yaml` | `configurations/gartenwasser/input_select.yaml` |
+| `input_text.yaml` | `configurations/gartenwasser/input_text.yaml` |
+| `input_datetime.yaml` | `configurations/gartenwasser/input_datetime.yaml` |
+| `automations.yaml` | `configurations/gartenwasser/automations.yaml` |
+| `script.yaml` | `configurations/gartenwasser/scripts.yaml` |
+| `mqtt.yaml` | `configurations/gartenwasser/mqtt.yaml` (kompletter Inhalt, kein Anhängen mehr nötig — eigene Datei statt gemeinsamer `mqtt.yaml`) |
+| `template.yaml` | `configurations/gartenwasser/template.yaml` |
 | `dashboard-programme.yaml` | Als neues Dashboard einfügen (siehe Kommentar in der Datei) |
 
 ## Einrichtungsschritte
 
-1. **`mqtt.yaml`**: den `sensor:`-Block aus `docs/homeassistant/mqtt.yaml` unten an
-   `configurations/mqtt.yaml` anhängen (bestehender `light:`-Block bleibt unverändert
-   stehen).
-2. **`input_select.yaml`** (neu): Inhalt als `configurations/input_select.yaml`
-   speichern. In der Haupt-`configuration.yaml` einen **neuen** Include ergänzen —
-   `input_select` gibt es bei dir aktuell noch nicht:
+1. Die neun Dateien oben 1:1 (Dateiname bleibt gleich, `script.yaml` wird zu
+   `scripts.yaml`) nach `configurations/gartenwasser/` kopieren.
+2. Neue Datei `configurations/packages/gartenwasser.yaml` anlegen, die alle neun
+   Domains bündelt:
    ```yaml
-   input_select: !include configurations/input_select.yaml
+   input_number: !include ../gartenwasser/input_number.yaml
+   input_boolean: !include ../gartenwasser/input_boolean.yaml
+   input_select: !include ../gartenwasser/input_select.yaml
+   input_text: !include ../gartenwasser/input_text.yaml
+   input_datetime: !include ../gartenwasser/input_datetime.yaml
+   automation: !include ../gartenwasser/automations.yaml
+   script: !include ../gartenwasser/scripts.yaml
+   mqtt: !include ../gartenwasser/mqtt.yaml
+   template: !include ../gartenwasser/template.yaml
    ```
-3. **`template.yaml`** (neu): Inhalt als `configurations/template.yaml` speichern. In der
-   Haupt-`configuration.yaml` einen **neuen** Include ergänzen — `template` gibt es bei
-   dir aktuell noch nicht:
+   Pfade sind relativ zur Package-Datei selbst (empirisch verifiziert per
+   `POST /api/config/core/check_config`, nicht relativ zum Config-Root).
+3. In der Haupt-`configuration.yaml` **eine einzige neue Zeile** im `homeassistant:`-Block
+   ergänzen (keine der neun Domains braucht mehr eine eigene Include-Zeile):
    ```yaml
-   template: !include configurations/template.yaml
+   homeassistant:
+     packages: !include_dir_named configurations/packages
    ```
-4. **`automations.yaml`**: die drei Automationen an `configurations/automations.yaml`
-   anhängen (bestehende Automationen bleiben unverändert).
+4. Vor dem Neustart validieren, ohne etwas zu riskieren: `POST /api/config/core/check_config`
+   (Bearer-Token aus `localStorage.hassTokens`) meldet `"result": "valid"` bei korrekter
+   Konfiguration, ohne die laufende Instanz anzufassen.
 5. **Home Assistant komplett neu starten** (Einstellungen → System → Neu starten, NICHT
    nur „Alle YAML-Konfigurationen neu laden“) — ein brandneuer Top-Level-Schlüssel wie
-   `template:`, der vorher noch nie in deiner `configuration.yaml` stand, wird von einem
-   reinen YAML-Reload nicht wirklich initialisiert (die Entities bleiben dauerhaft
-   "unknown"/nicht auffindbar), erst ein echter Neustart richtet die Integration ein.
-   Bereits bestehende Domains (`mqtt`/`input_select`/`automation`) reloaden dagegen ohne
+   `packages:`, der vorher noch nie in der `configuration.yaml` stand, wird von einem
+   reinen YAML-/Core-Config-Reload nachweislich NICHT aktiviert (getestet: Test-Entity
+   blieb nach `reload_core_config` unauffindbar), erst ein echter Neustart richtet die
+   Package-Einbindung ein. Bereits bestehende, im Package gebündelte Domains
+   (`input_number`/`script`/`automation`/...) reloaden sich danach einzeln wieder ohne
    Neustart zuverlässig.
-6. Prüfen: `input_select.gartenwasser_programm` sollte nach dem Neustart automatisch
-   mit den aktuellen Programmnamen befüllt sein (Automation „Gartenwasser: Programme-
-   Liste synchronisieren“ läuft beim ersten `main/programs/state`-Update).
+6. Nach dem Neustart prüfen: alle Gartenwasser-Entities (`input_number.gartenwasser_*`,
+   `sensor.gartenwasser_*`, `script.gartenwasser_*`, `automation.gartenwasser_*` usw.)
+   sollten wieder unter denselben Entity-IDs wie vorher erreichbar sein — Package-Merge
+   ändert nichts an Entity-IDs/unique_ids, nur am Speicherort der YAML-Quelle.
 7. **`dashboard-programme.yaml`**: entweder über Einstellungen → Dashboards → „+
    Dashboard hinzufügen“ → „Neues Dashboard aus YAML erstellen“ einfügen, oder als
    Datei ablegen (z. B. `dashboards/gartenwasser.yaml`) und in `configuration.yaml`
