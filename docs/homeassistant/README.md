@@ -60,7 +60,6 @@ HomeAssistant/
   configuration.yaml              # Root-Config, referenziert alles Weitere per !include
   customize.yaml
   configurations/
-    openHASP.yaml                 # Touch-Panel-Integration, aktuell leer ({})
     packages/
       gartenwasser.yaml           # buendelt die 9 Domains unten in die echten Top-Level-Keys
     gartenwasser/                 # die rohen Domain-Dateien, vom Package eingebunden
@@ -73,10 +72,23 @@ HomeAssistant/
       scripts.yaml
       mqtt.yaml
       template.yaml
+    plates/                       # openHASP-Touchpanels, ein Unterordner je Geraet
+      plate_wz/
+        device/                  # Backup des tatsaechlichen Geraete-Stands (read-only Referenz)
+          pages.jsonl
+          config.json            # Passwoerter kommen bereits maskiert vom Geraet ("********")
   dashboards/
     gartenwasser.yaml             # das Lovelace-Dashboard (YAML-Modus)
   themes/
 ```
+
+**openHASP-Integration:** rein YAML-gesteuert (kein Config-Entry, siehe
+`.storage/core.config_entries` — 0 Eintraege fuer `openhasp`), die Integration laedt nur, wenn der
+Top-Level-Schluessel `openhasp:` in `configuration.yaml` ueberhaupt vorhanden ist. Solange kein
+Geraet echte YAML-Konfiguration braucht, reicht `openhasp: {}` inline in `configuration.yaml` —
+bewusst KEINE eigene Datei dafuer, um keine leere Include-Datei mitzuschleppen. Sobald ein Plate
+eigene HA-seitige Einstellungen braucht, gehoert die Datei in dessen `configurations/plates/<name>/`
+und wird dann gezielt eingebunden.
 
 ## Einrichtungsschritte
 
