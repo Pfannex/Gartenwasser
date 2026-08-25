@@ -159,3 +159,21 @@
         {% else %}
           0
         {% endif %}
+
+    # Restzeit/Gesamtzeit als fertiger "mm:ss / mm:ss Min."-Text - fuers openHASP-Plate
+    # (configurations/plates/plate_wz/openhasp.yaml). Property-Bindings dort werten now()
+    # NICHT periodisch neu aus (anders als HA-eigene Template-Entities) - deshalb dieser
+    # Sensor als Zwischenschicht: er selbst tickt dank des time_pattern-Triggers oben
+    # sekuendlich, das Plate bindet nur noch stumpf an seinen state.
+    - name: "Gartenwasser Sequenz Restzeit Text"
+      unique_id: gartenwasser_sequenz_restzeit_text
+      state: >-
+        {% set total_sec = (states('sensor.gartenwasser_gesamtlaufzeit') | float(0)) * 60 %}
+        {% set sw = states.switch.gartenbewasserung_automatik_sequenz %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} / {{ '%02d:%02d' | format(total_sec | int // 60, total_sec | int % 60) }} Min.

@@ -65,12 +65,4 @@ objects:
 
   - obj: "p3b34"
     properties:
-      "text": >
-        {%- set total = (states('sensor.gartenwasser_gesamtlaufzeit') | float(0)) * 60 -%}
-        {%- if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') -%}
-          {%- set elapsed = (now() - states.switch.gartenbewasserung_automatik_sequenz.last_changed).total_seconds() | int -%}
-          {%- set remaining = [total - elapsed, 0] | max | int -%}
-        {%- else -%}
-          {%- set remaining = total -%}
-        {%- endif -%}
-        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} / {{ '%02d:%02d' | format(total // 60, total % 60) }} Min.
+      "text": "{{ states('sensor.gartenwasser_sequenz_restzeit_text') }}"
