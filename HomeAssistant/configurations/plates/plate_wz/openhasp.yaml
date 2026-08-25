@@ -22,25 +22,13 @@ objects:
                     topic: hasp/plate_wz/command/page
                     payload: "1"
 
-  - obj: "p3b5"
-    event:
-      "up":
-        - service: mqtt.publish
-          data:
-            topic: hasp/plate_wz/command/page
-            payload: "4"
-
-  - obj: "p3b7"
-    properties:
-      "text": "{{ states('input_select.gartenwasser_programm') }}"
-
-  - obj: "p3b6"
+  - obj: "p3b30"
     event:
       "up":
         - service: switch.toggle
           target:
             entity_id: switch.gartenbewasserung_automatik_sequenz
 
-  - obj: "p3b8"
+  - obj: "p3b31"
     properties:
-      "src": "{{ 'L:/stop_icon.png' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'L:/play_icon.png' }}"
+      "src": "{{ 'L:/stop.png' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'L:/play.png' }}"
