@@ -20,3 +20,14 @@ C:\Users\Pfanne\mqtt-spy\mqtt-spy-configuration.xml
 ## Aktuell halten
 
 Bei jeder Änderung der MQTT-Topic-Struktur (siehe `docs/requirements.md`, Abschnitt „MQTT-Topic-Struktur", die kanonische Quelle) diese Datei **und** den Live-Pfad aktualisieren. Claude macht das automatisch (siehe Memory-Eintrag „MQTT-Spy Config Sync").
+
+## Aktueller Fokus: openHASP-Plate (plate_wz) statt Gartenwasser
+
+Seit 2026-08-25 enthält die Live-Config nur noch die `hasp/plate_wz/*`-Topics (Seiten-
+Navigation, generischer Kommando-Wrapper, LWT, Status-/Kommando-Wildcards, Discovery) —
+Fokus liegt aktuell auf der Plate-Integration, nicht mehr auf Gartenwasser selbst.
+
+Die vorherigen Gartenwasser-Publication-/Subscription-Einträge (V0–V5, main/*, Diagnose,
+HA-Discovery) sind **nicht gelöscht, nur archiviert** in
+[`gartenwasser-topics-backup.xml`](gartenwasser-topics-backup.xml) — bei Wiederbedarf die
+Einträge von dort zurück in die `<ConnectionV2>` von `mqtt-spy-configuration.xml` kopieren.
