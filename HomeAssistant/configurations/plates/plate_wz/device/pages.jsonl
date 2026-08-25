@@ -34,11 +34,11 @@
 {"page":3,"id":44,"obj":"btn","x":10,"y":241,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
 {"page":3,"id":45,"obj":"btn","x":126,"y":241,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
 {"page":3,"id":60,"obj":"label","parentid":40,"x":4,"y":2,"w":102,"h":16,"text":"Hauptventil","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
-{"page":3,"id":61,"obj":"label","parentid":41,"x":4,"y":2,"w":102,"h":16,"text":"Sprenger Rasen","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
-{"page":3,"id":62,"obj":"label","parentid":42,"x":4,"y":2,"w":102,"h":16,"text":"Sprenger Seiten","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
-{"page":3,"id":63,"obj":"label","parentid":43,"x":4,"y":2,"w":102,"h":16,"text":"Kübelpflanzen","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
-{"page":3,"id":64,"obj":"label","parentid":44,"x":4,"y":2,"w":102,"h":16,"text":"Hecke","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
-{"page":3,"id":65,"obj":"label","parentid":45,"x":4,"y":2,"w":102,"h":16,"text":"Gewächshaus","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":61,"obj":"label","x":130,"y":187,"w":102,"h":16,"text":"Sprenger Rasen","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":62,"obj":"label","x":246,"y":187,"w":102,"h":16,"text":"Sprenger Seiten","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":63,"obj":"label","x":362,"y":187,"w":102,"h":16,"text":"Kübelpflanzen","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":64,"obj":"label","x":14,"y":243,"w":102,"h":16,"text":"Hecke","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":65,"obj":"label","x":130,"y":243,"w":102,"h":16,"text":"Gewächshaus","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
 {"page":3,"id":46,"obj":"obj","x":242,"y":241,"w":110,"h":50,"radius":6,"bg_opa":0,"border_width":1,"border_color":"#3a3a3a"}
 {"page":3,"id":47,"obj":"obj","x":358,"y":241,"w":110,"h":50,"radius":6,"bg_opa":0,"border_width":1,"border_color":"#3a3a3a"}
 {"page":3,"id":48,"obj":"obj","x":10,"y":297,"w":110,"h":50,"radius":6,"bg_opa":0,"border_width":1,"border_color":"#3a3a3a"}

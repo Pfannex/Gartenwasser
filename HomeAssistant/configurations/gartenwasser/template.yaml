@@ -176,4 +176,4 @@
         {% else %}
           {% set remaining = total_sec | int %}
         {% endif %}
-        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} / {{ '%02d:%02d' | format(total_sec | int // 60, total_sec | int % 60) }} Min.
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
