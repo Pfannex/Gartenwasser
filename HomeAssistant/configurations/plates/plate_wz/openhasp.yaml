@@ -46,9 +46,10 @@ objects:
 
   - obj: "p3b33"
     properties:
-      "options": "{{ (state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | join('\n') }}"
+      "options": >-
+        {{ (['Kein Programm'] + ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list)) | join('\n') }}
       "val": >
-        {%- set names = (state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list -%}
+        {%- set names = ['Kein Programm'] + ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list) -%}
         {%- set current = states('input_select.gartenwasser_programm') -%}
         {{ names.index(current) if current in names else 0 }}
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
