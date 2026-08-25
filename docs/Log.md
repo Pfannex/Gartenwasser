@@ -1106,6 +1106,11 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 
 - Nutzer hat `idle1` selbst ueber `/api/config/gui/` von 30s auf 5s reduziert (Dimmen jetzt schon nach 5s statt 30s), `idle2` bleibt bei 0 (nie ganz aus). Kein Repo-File dafuer noetig - reine Geraete-Laufzeit-Config, nicht in `pages.jsonl`/`openhasp.yaml` versioniert, hier nur dokumentiert.
 
+### openHASP-Plate: Programm-Diskrepanz beim Geraete-Neustart per echtem Reboot-Test widerlegt
+
+- Nutzer-Sorge: beim Start des Plates koennte kurzzeitig ein falsches Programm im Dropdown stehen (Diskrepanz zum echten `input_select.gartenwasser_programm`), bevor die HA-Bindings greifen.
+- **Per echtem Geraete-Neustart getestet statt angenommen**: Programm testweise auf "Rasen" gesetzt (nur Auswahl, startet nichts), `p3b33.val` bestaetigt korrekt `1`. Danach `button.plate_wz_restart` gedrueckt (echter Reboot), direkt nach Reconnect (LWT frisch auf `online`) `p3b33.val` erneut abgefragt, OHNE zwischendurch irgendeine HA-Entity anzufassen: zeigte sofort wieder korrekt `1` - **nicht** den in `pages.jsonl` statisch hinterlegten Default (`"Kein Programm"`/`val:0`). Beweist: die openHASP-Integration schreibt alle gebundenen `properties` beim Geraete-Reconnect automatisch frisch, kein Zeitfenster mit falscher Anzeige. Testauswahl danach zurueck auf "Kein Programm" gesetzt.
+
 ## Offene Punkte / nächste Schritte
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
