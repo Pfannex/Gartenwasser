@@ -22,6 +22,13 @@ objects:
                     topic: hasp/plate_wz/command/page
                     payload: "1"
 
+  - obj: "p3b29"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "bg_opa": "{{ 180 if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 255 }}"
+
   - obj: "p3b30"
     event:
       "up":
@@ -44,6 +51,10 @@ objects:
         {%- set names = (state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list -%}
         {%- set current = states('input_select.gartenwasser_programm') -%}
         {{ names.index(current) if current in names else 0 }}
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "click": "{{ not is_state('switch.gartenbewasserung_automatik_sequenz', 'on') }}"
     event:
       "changed":
         - service: input_select.select_option
@@ -58,7 +69,8 @@ objects:
         {%- set total = (states('sensor.gartenwasser_gesamtlaufzeit') | float(0)) * 60 -%}
         {%- if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') -%}
           {%- set elapsed = (now() - states.switch.gartenbewasserung_automatik_sequenz.last_changed).total_seconds() | int -%}
+          {%- set remaining = [total - elapsed, 0] | max | int -%}
         {%- else -%}
-          {%- set elapsed = 0 -%}
+          {%- set remaining = total -%}
         {%- endif -%}
-        {{ '%02d:%02d' | format(elapsed // 60, elapsed % 60) }} / {{ '%02d:%02d' | format(total // 60, total % 60) }} Min.
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} / {{ '%02d:%02d' | format(total // 60, total % 60) }} Min.
