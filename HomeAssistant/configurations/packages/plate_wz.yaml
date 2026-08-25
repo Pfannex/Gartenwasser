@@ -1,0 +1,1 @@
+automation: !include ../plates/plate_wz/automations.yaml
