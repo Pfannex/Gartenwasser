@@ -2,14 +2,14 @@
 
 //HAUPTMENÜ (SEITE 1)
 {"page":1,"id":0,"next":2,"prev":3}
-{"page":1,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_opa":255,"bg_grad_dir":0,"radius":5,"border_width":0}
+{"page":1,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"radius":5,"border_width":0}
 {"page":1,"id":2,"obj":"label","parentid":1,"x":15,"y":14,"w":450,"h":40,"text":"Hauptmenü","align":0,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
 {"page":1,"id":3,"obj":"label","x":15,"y":150,"w":450,"h":40,"text":"Seite 1 Inhalt","align":1,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
 {"page":1,"id":4,"obj":"obj","swipe":1,"x":0,"y":0,"w":480,"h":70,"bg_opa":0,"border_width":0}
 
 //BELEUCHTUNG (SEITE 2)
 {"page":2,"id":0,"next":3,"prev":1}
-{"page":2,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_opa":255,"bg_grad_dir":0,"radius":5,"border_width":0}
+{"page":2,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"radius":5,"border_width":0}
 {"page":2,"id":2,"obj":"label","parentid":1,"x":15,"y":14,"w":450,"h":40,"text":"Beleuchtung","align":0,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
 {"page":2,"id":25,"obj":"btn","x":10,"y":80,"w":225,"h":120,"toggle":true,"text":"Wohnzimmer","text_font":24,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b"}
 {"page":2,"id":26,"obj":"btn","x":245,"y":80,"w":225,"h":120,"toggle":true,"text":"Außen","text_font":24,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b"}
@@ -17,19 +17,19 @@
 
 //GARTENBEWÄSSERUNG (SEITE 3)
 {"page":3,"id":0,"next":1,"prev":2}
-{"page":3,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_opa":255,"bg_grad_dir":1,"radius":5,"border_width":0}
+{"page":3,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"radius":5,"border_width":0}
 {"page":3,"id":2,"obj":"label","parentid":1,"x":15,"y":14,"w":340,"h":40,"text":"Gartenbewässerung","align":0,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
 {"page":3,"id":3,"obj":"obj","swipe":1,"x":0,"y":0,"w":480,"h":70,"bg_opa":0,"border_width":0}
 
-{"page":3,"id":29,"obj":"obj","x":5,"y":65,"w":470,"h":130,"radius":16,"bg_color":"#4a4a4a","bg_opa":255,"border_width":0}
-{"page":3,"id":30,"obj":"btn","x":5,"y":70,"w":120,"h":120,"toggle":true,"bg_opa":0,"border_side":0,"shadow_width":0}
-{"page":3,"id":31,"obj":"img","x":5,"y":70,"src":"L:/play.png","click":false}
+{"page":3,"id":29,"obj":"obj","x":5,"y":65,"w":470,"h":110,"radius":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":30,"obj":"btn","x":0,"y":60,"w":120,"h":120,"toggle":true,"bg_opa":0,"border_side":0,"shadow_width":0}
+{"page":3,"id":31,"obj":"img","x":0,"y":60,"src":"L:/play.png","click":false}
 
 
 
 
 //GARTENWASSER - MENÜ (SEITE 4)
 {"page":4,"id":0,"next":3,"prev":3}
-{"page":4,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_opa":255,"bg_grad_dir":0,"radius":5,"border_width":0}
+{"page":4,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"radius":5,"border_width":0}
 {"page":4,"id":2,"obj":"label","parentid":1,"x":15,"y":14,"w":450,"h":40,"text":"Gartenwasser - Menü","align":0,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
 {"page":4,"id":3,"obj":"obj","swipe":1,"x":0,"y":0,"w":480,"h":70,"bg_opa":0,"border_width":0}
