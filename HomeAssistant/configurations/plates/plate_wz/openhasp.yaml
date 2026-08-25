@@ -72,9 +72,9 @@ objects:
 
   - obj: "p3b40"
     properties:
-      "bg_color": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#757575' }}"
-      "bg_color30": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#757575' }}"
-      "bg_color40": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#757575' }}"
+      "bg_color": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047' }}"
+      "bg_color30": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047' }}"
+      "bg_color40": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047' }}"
 
   - obj: "p3b41"
     properties:
