@@ -69,3 +69,64 @@ objects:
     properties:
       "text": "{{ states('sensor.gartenwasser_sequenz_restzeit_text') }}"
       "hidden": "{{ is_state('input_select.gartenwasser_programm', 'Kein Programm') }}"
+
+  - obj: "p3b40"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#757575' }}"
+      "bg_color30": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#757575' }}"
+      "bg_color40": "{{ '#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#757575' }}"
+
+  - obj: "p3b41"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenbewasserung_ventil_1
+
+  - obj: "p3b42"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenbewasserung_ventil_2
+
+  - obj: "p3b43"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenbewasserung_ventil_3
+
+  - obj: "p3b44"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenbewasserung_ventil_4
+
+  - obj: "p3b45"
+    properties:
+      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
+      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
+      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenbewasserung_ventil_5

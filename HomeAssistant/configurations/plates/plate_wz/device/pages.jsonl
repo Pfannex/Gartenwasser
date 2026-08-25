@@ -27,12 +27,18 @@
 {"page":3,"id":32,"obj":"label","x":120,"y":95,"w":200,"h":50,"text":"Start","text_font":32,"text_color":"#FFFFFF","bg_opa":0}
 {"page":3,"id":33,"obj":"dropdown","x":200,"y":95,"w":250,"h":50,"text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0,"options":"Kein Programm","val":0}
 {"page":3,"id":34,"obj":"label","x":120,"y":148,"w":330,"h":24,"text":"00:00 / 00:00 Min.","text_font":18,"text_color":"#FFFFFF","bg_opa":0}
-{"page":3,"id":40,"obj":"btn","x":10,"y":185,"w":110,"h":50,"toggle":true,"text":"Hauptventil","text_font":16,"radius":6,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b","border_width":0}
-{"page":3,"id":41,"obj":"btn","x":126,"y":185,"w":110,"h":50,"toggle":true,"text":"Sprenger Rasen","text_font":16,"radius":6,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b","border_width":0}
-{"page":3,"id":42,"obj":"btn","x":242,"y":185,"w":110,"h":50,"toggle":true,"text":"Sprenger Seiten","text_font":16,"radius":6,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b","border_width":0}
-{"page":3,"id":43,"obj":"btn","x":358,"y":185,"w":110,"h":50,"toggle":true,"text":"Kübelpflanzen","text_font":16,"radius":6,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b","border_width":0}
-{"page":3,"id":44,"obj":"btn","x":10,"y":241,"w":110,"h":50,"toggle":true,"text":"Hecke","text_font":16,"radius":6,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b","border_width":0}
-{"page":3,"id":45,"obj":"btn","x":126,"y":241,"w":110,"h":50,"toggle":true,"text":"Gewächshaus","text_font":16,"radius":6,"bg_grad_dir":1,"bg_color":"#4a4a4a","bg_color_to":"#2b2b2b","border_width":0}
+{"page":3,"id":40,"obj":"obj","x":10,"y":185,"w":110,"h":50,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":41,"obj":"btn","x":126,"y":185,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":42,"obj":"btn","x":242,"y":185,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":43,"obj":"btn","x":358,"y":185,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":44,"obj":"btn","x":10,"y":241,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":45,"obj":"btn","x":126,"y":241,"w":110,"h":50,"toggle":true,"text":"","radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","bg_grad_dir":0,"border_width":0}
+{"page":3,"id":60,"obj":"label","parentid":40,"x":4,"y":4,"w":102,"h":32,"text":"Hauptventil","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":61,"obj":"label","parentid":41,"x":4,"y":4,"w":102,"h":32,"text":"Sprenger Rasen","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":62,"obj":"label","parentid":42,"x":4,"y":4,"w":102,"h":32,"text":"Sprenger Seiten","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":63,"obj":"label","parentid":43,"x":4,"y":4,"w":102,"h":32,"text":"Kübelpflanzen","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":64,"obj":"label","parentid":44,"x":4,"y":4,"w":102,"h":32,"text":"Hecke","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
+{"page":3,"id":65,"obj":"label","parentid":45,"x":4,"y":4,"w":102,"h":32,"text":"Gewächshaus","text_font":14,"align":1,"text_color":"#FFFFFF","bg_opa":0,"click":false}
 {"page":3,"id":46,"obj":"obj","x":242,"y":241,"w":110,"h":50,"radius":6,"bg_opa":0,"border_width":1,"border_color":"#3a3a3a"}
 {"page":3,"id":47,"obj":"obj","x":358,"y":241,"w":110,"h":50,"radius":6,"bg_opa":0,"border_width":1,"border_color":"#3a3a3a"}
 {"page":3,"id":48,"obj":"obj","x":10,"y":297,"w":110,"h":50,"radius":6,"bg_opa":0,"border_width":1,"border_color":"#3a3a3a"}
