@@ -24,12 +24,18 @@ objects:
 
   - obj: "p3b29"
     properties:
-      "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
-      "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
-      "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
-      "bg_opa": "{{ 180 if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 255 }}"
+      "bg_color": >-
+        {{ '#e53935' if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('switch.gartenbewasserung_automatik_sequenz', 'on')) else '#333333' }}
+      "bg_color30": >-
+        {{ '#e53935' if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('switch.gartenbewasserung_automatik_sequenz', 'on')) else '#333333' }}
+      "bg_color40": >-
+        {{ '#e53935' if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('switch.gartenbewasserung_automatik_sequenz', 'on')) else '#333333' }}
+      "bg_opa": >-
+        {{ 180 if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('switch.gartenbewasserung_automatik_sequenz', 'on')) else 255 }}
 
   - obj: "p3b30"
+    properties:
+      "click": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "up":
         - service: switch.toggle
@@ -38,11 +44,11 @@ objects:
 
   - obj: "p3b31"
     properties:
-      "src": "{{ 'L:/stop.png' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'L:/play.png' }}"
+      "src": "{{ 'L:/wifi_off.png' if is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') else ('L:/stop.png' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'L:/play.png') }}"
 
   - obj: "p3b32"
     properties:
-      "text": "{{ 'Stop' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'Start' }}"
+      "text": "{{ 'Offline' if is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') else ('Stop' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'Start') }}"
 
   - obj: "p3b33"
     properties:
@@ -56,7 +62,8 @@ objects:
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
       "bg_opa": "{{ 270 if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 255 }}"
-      "click": "{{ not is_state('switch.gartenbewasserung_automatik_sequenz', 'on') }}"
+      "click": "{{ not is_state('switch.gartenbewasserung_automatik_sequenz', 'on') and not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
+      "hidden": "{{ is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "changed":
         - service: input_select.select_option
@@ -67,8 +74,8 @@ objects:
 
   - obj: "p3b34"
     properties:
-      "text": "{{ states('sensor.gartenwasser_sequenz_restzeit_text') }}"
-      "hidden": "{{ is_state('input_select.gartenwasser_programm', 'Kein Programm') }}"
+      "text": "{{ 'Gerät nicht erreichbar' if is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') else states('sensor.gartenwasser_sequenz_restzeit_text') }}"
+      "hidden": "{{ is_state('input_select.gartenwasser_programm', 'Kein Programm') and not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
 
   - obj: "p3b40"
     properties:
