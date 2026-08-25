@@ -74,8 +74,8 @@ views:
               }
               .bubble-sub-button-container {
                 position: absolute !important;
-                left: 230px !important;
-                top: 18px !important;
+                left: 195px !important;
+                top: 44px !important;
                 justify-content: flex-start !important;
               }
               .bubble-dropdown-arrow {
