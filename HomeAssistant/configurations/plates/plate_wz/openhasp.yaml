@@ -68,3 +68,4 @@ objects:
   - obj: "p3b34"
     properties:
       "text": "{{ states('sensor.gartenwasser_sequenz_restzeit_text') }}"
+      "hidden": "{{ is_state('input_select.gartenwasser_programm', 'Kein Programm') }}"
