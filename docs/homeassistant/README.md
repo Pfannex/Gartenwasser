@@ -82,13 +82,23 @@ HomeAssistant/
   themes/
 ```
 
-**openHASP-Integration:** rein YAML-gesteuert (kein Config-Entry, siehe
-`.storage/core.config_entries` — 0 Eintraege fuer `openhasp`), die Integration laedt nur, wenn der
-Top-Level-Schluessel `openhasp:` in `configuration.yaml` ueberhaupt vorhanden ist. Solange kein
-Geraet echte YAML-Konfiguration braucht, reicht `openhasp: {}` inline in `configuration.yaml` —
-bewusst KEINE eigene Datei dafuer, um keine leere Include-Datei mitzuschleppen. Sobald ein Plate
-eigene HA-seitige Einstellungen braucht, gehoert die Datei in dessen `configurations/plates/<name>/`
-und wird dann gezielt eingebunden.
+**openHASP-Integration:** hybrid, nicht rein YAML-gesteuert wie urspruenglich angenommen. Ein
+Plate wird per echter MQTT-Discovery automatisch als Config-Entry angelegt (`hasp/discovery/<hwid>`,
+sichtbar unter Einstellungen → Geraete & Dienste → openHASP), sobald es online ist. Der YAML-Block
+unter `openhasp: <slug>:` liefert nur die ERGAENZENDE `objects`-Konfiguration (Property-Bindungen,
+Event-Handler) zu diesem bereits per Discovery angelegten Entry - ohne den YAML-Eintrag wirft die
+Integration bei jeder MQTT-Nachricht vom Geraet einen Fehler ("No YAML configuration for `<slug>`,
+please create an entry under 'openhasp' with the slug: `<slug>`"), auch wenn das Geraet laengst
+online ist. Minimal reicht `<slug>: {objects: []}` zum Stillhalten des Fehlers.
+
+**Wichtig — Aenderungen an `openhasp: <slug>: objects:` brauchen den gezielten Entry-Reload, NICHT
+"Alle YAML-Konfigurationen neu laden":** empirisch getestet (2026-08-25, `docs/Log.md`) - ein
+Property testweise auf einen fixen Marker-Wert gesetzt, `homeassistant.reload_all` aufgerufen,
+Marker blieb wirkungslos; derselbe gezielte Reload (Einstellungen → Geraete & Dienste → openHASP →
+`<slug>` → Neu laden, bzw. `POST /api/config/config_entries/entry/<entry_id>/reload`) zog die
+Aenderung sofort. `reload_all` deckt nur eine feste Liste von Domains mit eigenem
+`<domain>.reload`-Service ab (automation/script/scene/input_*/...) - Config-Entry-Integrationen wie
+openHASP sind dort nicht dabei.
 
 ## Einrichtungsschritte
 
