@@ -33,3 +33,14 @@ objects:
   - obj: "p3b7"
     properties:
       "text": "{{ states('input_select.gartenwasser_programm') }}"
+
+  - obj: "p3b6"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenbewasserung_automatik_sequenz
+
+  - obj: "p3b8"
+    properties:
+      "src": "{{ 'L:/stop_icon.png' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'L:/play_icon.png' }}"
