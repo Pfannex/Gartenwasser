@@ -24,6 +24,8 @@
 {"page":3,"id":29,"obj":"obj","x":5,"y":65,"w":470,"h":110,"radius":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0}
 {"page":3,"id":30,"obj":"btn","x":0,"y":60,"w":120,"h":120,"toggle":true,"bg_opa":0,"border_side":0,"shadow_width":0}
 {"page":3,"id":31,"obj":"img","x":0,"y":60,"src":"L:/play.png","click":false}
+{"page":3,"id":32,"obj":"label","x":140,"y":95,"w":200,"h":50,"text":"Start","text_font":32,"text_color":"#FFFFFF","bg_opa":0}
+{"page":3,"id":33,"obj":"dropdown","x":140,"y":150,"w":200,"h":36,"options":"Kein Programm","val":0}
 
 
 

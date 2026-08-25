@@ -32,3 +32,22 @@ objects:
   - obj: "p3b31"
     properties:
       "src": "{{ 'L:/stop.png' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'L:/play.png' }}"
+
+  - obj: "p3b32"
+    properties:
+      "text": "{{ 'Stop' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 'Start' }}"
+
+  - obj: "p3b33"
+    properties:
+      "options": "{{ (state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | join('\n') }}"
+      "val": >
+        {%- set names = (state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list -%}
+        {%- set current = states('input_select.gartenwasser_programm') -%}
+        {{ names.index(current) if current in names else 0 }}
+    event:
+      "changed":
+        - service: input_select.select_option
+          data:
+            option: "{{ text }}"
+          target:
+            entity_id: input_select.gartenwasser_programm
