@@ -62,6 +62,7 @@ HomeAssistant/
   configurations/
     packages/
       gartenwasser.yaml           # buendelt die 9 Domains unten in die echten Top-Level-Keys
+      plate_wz.yaml                # buendelt die plate_wz-Domains (aktuell nur automation)
     gartenwasser/                 # die rohen Domain-Dateien, vom Package eingebunden
       input_number.yaml
       input_boolean.yaml
@@ -73,14 +74,28 @@ HomeAssistant/
       mqtt.yaml
       template.yaml
     plates/                       # openHASP-Touchpanels, ein Unterordner je Geraet
+      openhasp.yaml                # duenner Manifest: Slug -> Geraete-Unterordner
       plate_wz/
-        device/                  # Backup des tatsaechlichen Geraete-Stands (read-only Referenz)
+        openhasp.yaml               # objects: Property-Bindungen/Events fuer die Status-Seite
+        automations.yaml            # plate-spezifische Automationen (z.B. Idle-Dimmen)
+        device/                    # Backup des tatsaechlichen Geraete-Stands (read-only Referenz)
           pages.jsonl
-          config.json            # Passwoerter kommen bereits maskiert vom Geraet ("********")
+          config.json              # Passwoerter maskiert ("********"), NUR Boot-Zeit-Snapshot -
+                                    # laufende Config-Aenderungen ueber /api/config/<x>/ zeigen
+                                    # sich hier erst nach einem echten Neustart
+          play.png / stop.png       # eigene PNG-Icons fuer den Start/Stop-Button
   dashboards/
     gartenwasser.yaml             # das Lovelace-Dashboard (YAML-Modus)
   themes/
 ```
+
+**Persistente Geraete-Einstellungen (z. B. Idle-Timeouts, Backlight-Pin) NICHT per MQTT
+`config/<submodul>` setzen** - kam im Test nachweislich nicht an (per MQTT-Mitschnitt bestaetigt,
+trotz gegenteiliger Doku-Aussage). Der tatsaechlich funktionierende Weg (reverse-engineered aus dem
+Web-Editor, `static/main.js`, Funktion `submitOldConfig`): `GET /api/config/<submodul>/` liefert das
+aktuelle Objekt, `POST /api/config/<submodul>/` mit dem KOMPLETTEN (nicht nur geaenderten) Objekt als
+JSON-Body speichert es persistent. Nach einer Aenderung zeigt `GET /api/config/<submodul>/` sofort
+den neuen Stand, `config.json` (Boot-Snapshot) aber erst nach einem echten Neustart.
 
 **openHASP-Integration:** hybrid, nicht rein YAML-gesteuert wie urspruenglich angenommen. Ein
 Plate wird per echter MQTT-Discovery automatisch als Config-Entry angelegt (`hasp/discovery/<hwid>`,
