@@ -54,6 +54,7 @@ objects:
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else '#333333' }}"
+      "bg_opa": "{{ 270 if is_state('switch.gartenbewasserung_automatik_sequenz', 'on') else 255 }}"
       "click": "{{ not is_state('switch.gartenbewasserung_automatik_sequenz', 'on') }}"
     event:
       "changed":
