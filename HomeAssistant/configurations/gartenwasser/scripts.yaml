@@ -285,16 +285,19 @@ gartenwasser_plate_programm_auto_toggle:
             {% set ns.d = dict(ns.d, **{k: is_on}) %}
           {% endfor %}
           {{ ns.d }}
+        # "time" bleibt beim Deaktivieren UNVERAENDERT stehen (kein Loeschen mehr) - auto
+        # allein entscheidet, ob das Ventil laeuft, "time" ist einfach "die zuletzt
+        # eingestellte Dauer", genau wie im HA-Dashboard-Formular (dort bleibt der Wert
+        # in den Entwurfs-Helpern erhalten, solange man nicht "Speichern" drueckt). Nur
+        # beim ERSTEN Aktivieren eines Ventils ohne bisherigen Wert wird ein Default (5)
+        # ergaenzt, damit die Anzeige etwas Sinnvolles zeigt.
         new_time: >-
-          {% set ns = namespace(d={}) %}
-          {% for n in range(1, 6) %}
-            {% set k = 'V' ~ n %}
-            {% set is_on = (new_state if n == valve else (prog.get('auto', {}) or {}).get(k, false)) %}
-            {% if is_on %}
-              {% set ns.d = dict(ns.d, **{k: (prog.get('time', {}) or {}).get(k, 5)}) %}
-            {% endif %}
-          {% endfor %}
-          {{ ns.d }}
+          {%- set existing = prog.get('time', {}) or {} -%}
+          {%- if new_state -%}
+            {{ dict(existing, **{'V' ~ valve: existing.get('V' ~ valve, 5)}) }}
+          {%- else -%}
+            {{ existing }}
+          {%- endif -%}
     - variables:
         new_prog:
           name: "{{ prog.get('name', '') }}"
