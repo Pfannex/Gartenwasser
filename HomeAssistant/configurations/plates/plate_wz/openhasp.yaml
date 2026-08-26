@@ -1,5 +1,7 @@
 objects:
   - obj: "p0b3"
+    properties:
+      "hidden": "{{ states('number.plate_wz_page_number') == '4' }}"
     event:
       "up":
         - choose:
@@ -29,6 +31,14 @@ objects:
           data:
             topic: hasp/plate_wz/command/page
             payload: "4"
+
+  - obj: "p4b10"
+    event:
+      "up":
+        - service: mqtt.publish
+          data:
+            topic: hasp/plate_wz/command/page
+            payload: "3"
 
   - obj: "p3b29"
     properties:
