@@ -88,6 +88,8 @@ objects:
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
+      "bg_color02": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
+      "bg_color03": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_1', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_1_automatik', 'on') else '#757575') }}"
       "click": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "up":
@@ -100,6 +102,8 @@ objects:
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
+      "bg_color02": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
+      "bg_color03": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_2', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_2_automatik', 'on') else '#757575') }}"
       "click": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "up":
@@ -112,6 +116,8 @@ objects:
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
+      "bg_color02": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
+      "bg_color03": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_3', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_3_automatik', 'on') else '#757575') }}"
       "click": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "up":
@@ -124,6 +130,8 @@ objects:
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
+      "bg_color02": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
+      "bg_color03": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_4', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_4_automatik', 'on') else '#757575') }}"
       "click": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "up":
@@ -136,6 +144,8 @@ objects:
       "bg_color": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
       "bg_color30": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
       "bg_color40": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
+      "bg_color02": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
+      "bg_color03": "{{ '#e53935' if is_state('switch.gartenbewasserung_ventil_5', 'on') else ('#43a047' if is_state('binary_sensor.gartenbewasserung_ventil_5_automatik', 'on') else '#757575') }}"
       "click": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
     event:
       "up":
