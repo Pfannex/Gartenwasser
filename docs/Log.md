@@ -1123,6 +1123,9 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - **Zufaellig live end-to-end verifiziert statt nur simuliert**: das Gartenwasser-Geraet war beim Test tatsaechlich offline, alle sechs Bindings zeigten sofort korrekt den vollstaendigen Offline-Zustand.
 
 ## Offene Punkte / nächste Schritte
+
+- **openHASP-Plate (Merker, 2026-08-25, fuer morgen)**: "Probleme Symbol" - vom Nutzer nur kurz notiert, genaue Bedeutung noch zu klaeren (eigenes Fehler-/Problem-Icon? Ein noch bestehendes Problem mit einem der Symbole?) - beim naechsten Mal nachfragen statt zu raten.
+- **openHASP-Plate (Merker, 2026-08-25, fuer morgen)**: Hauptventil (`p3b40`) soll bei Geraet-offline ebenfalls GRAU sein, nicht gruen. Aktuelle Bindung prueft nur `is_state('binary_sensor.gartenbewasserung_hauptventil','on')` (rot) sonst gruen - bei offline ist dieser Sensor selbst `unavailable`, faellt also faelschlich auf gruen statt auf den Offline-Zustand zu reagieren. Fix: `is_state(i2c_status,'unavailable')` als zusaetzliche Grau-Bedingung ergaenzen, analog zu den anderen Ventilen/der Bubble.
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
 - **Phase 10.4 (Usermanual-Kapitel)**: Home-Assistant-Einbindungsschritte im Usermanual dokumentieren, jetzt wo alle sieben Dashboard-Seiten fertig sind - noch nicht begonnen.
 - **Moegliche Firmware-Erweiterung**: Einzel-Command-Topics fuer Programme/Zeitplan-Eintraege (statt nur komplettes Array-Replace) wuerden HA-seitige Editoren fuer diese beiden Seiten ermoeglichen - aktuell bewusst nicht umgesetzt, WebIF bleibt dafuer die Referenz.
