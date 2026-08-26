@@ -1133,6 +1133,11 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
   - Die wirkungslosen `bg_color02`/`bg_color03`-Overrides wieder entfernt (unnoetige Komplexitaet, Theme gewinnt ohnehin), `val`-Sync als sinnvolle Verbesserung beibehalten.
 - **Achtung fuer kuenftige Plates**: `color2` ist eine GERAETEWEITE Theme-Einstellung (nicht pro Seite/Objekt), wirkt sich potenziell auf alle interaktiven Elemente auf allen Seiten aus, nicht nur die Ventil-Matrix - bei einer neuen Farbwahl immer alle Seiten im Blick behalten.
 
+### openHASP-Plate: Zahnrad öffnet Settings-Seite, echtes Limit von 12 Seiten gefunden
+
+- Zahnrad-Icon (MDI-Font, Codepoint E493) oben rechts in der Kopfzeile von Seite 3 ergaenzt, oeffnet eine neue Unterseite (bisher "Gartenwasser - Menü", jetzt "Gartenbewässerung - Settings"). Eigene, kleinere Fusszeile nur mit einem "<"-Button (60x60, quadratisch) statt der globalen "<"/Home/">"-Leiste - die globale Leiste ist ein page:0-Objekt (geraeteweit), laesst sich nicht seitenspezifisch umbauen, deshalb per `hidden`-Property auf dieser Seite ausgeblendet und durch ein lokales Pendant ersetzt.
+- **Nutzer-Idee, Seite von 4 auf "31" umzubenennen** (da Unterseite von Seite 3) **live getestet und widerlegt**: `numPages:12` aus den Status-Updates war kein reiner Anzeigewert, sondern ein echtes Limit dieser Firmware - Navigation zu Seite 31 schlug fehl (Geraet blieb auf Seite 1 haengen statt zu wechseln, per gezielter Status-Abfrage bestaetigt). Umbenennung zurueckgesetzt auf Seite 4, der neue Kopfzeilentext blieb erhalten. Fuer eine hierarchische Seiten-Nummerierung (3.1, 3.2, ...) muesste man innerhalb 1-12 bleiben oder eine andere Konvention finden (z.B. Namens-Praefix statt Nummer).
+
 ## Offene Punkte / nächste Schritte
 
 - **openHASP-Plate (Merker, 2026-08-25, fuer morgen)**: "Probleme Symbol" - vom Nutzer nur kurz notiert, genaue Bedeutung noch zu klaeren (eigenes Fehler-/Problem-Icon? Ein noch bestehendes Problem mit einem der Symbole?) - beim naechsten Mal nachfragen statt zu raten.
