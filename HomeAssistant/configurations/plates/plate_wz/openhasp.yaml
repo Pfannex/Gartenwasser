@@ -142,3 +142,23 @@ objects:
         - service: switch.toggle
           target:
             entity_id: switch.gartenbewasserung_ventil_5
+
+  - obj: "p3b71"
+    properties:
+      "text": "{{ states('sensor.gartenwasser_v1_restzeit_text') }}"
+
+  - obj: "p3b72"
+    properties:
+      "text": "{{ states('sensor.gartenwasser_v2_restzeit_text') }}"
+
+  - obj: "p3b73"
+    properties:
+      "text": "{{ states('sensor.gartenwasser_v3_restzeit_text') }}"
+
+  - obj: "p3b74"
+    properties:
+      "text": "{{ states('sensor.gartenwasser_v4_restzeit_text') }}"
+
+  - obj: "p3b75"
+    properties:
+      "text": "{{ states('sensor.gartenwasser_v5_restzeit_text') }}"
