@@ -22,6 +22,14 @@ objects:
                     topic: hasp/plate_wz/command/page
                     payload: "1"
 
+  - obj: "p3b5"
+    event:
+      "up":
+        - service: mqtt.publish
+          data:
+            topic: hasp/plate_wz/command/page
+            payload: "4"
+
   - obj: "p3b29"
     properties:
       "bg_color": >-
