@@ -131,6 +131,21 @@ Aenderung sofort. `reload_all` deckt nur eine feste Liste von Domains mit eigene
 `<domain>.reload`-Service ab (automation/script/scene/input_*/...) - Config-Entry-Integrationen wie
 openHASP sind dort nicht dabei.
 
+**Reconnect nach Geraete-Reboot braucht KEINEN manuellen Entry-Reload - aber nicht wegen MQTT-retain:**
+im Quellcode der Integration (`HASwitchPlate/openHASP-custom-component`, `custom_components/openhasp/__init__.py`)
+lassen ausnahmslos ALLE `mqtt.async_publish()`-Aufrufe `retain=False` gesetzt (per Live-Mitschnitt
+2026-08-26 bestaetigt: kein einziges `command/<obj>.<property>` landet retained auf dem Broker). Der
+tatsaechliche Mechanismus ist ein anderer: die Integration abonniert `hasp/<slug>/LWT`, und sobald dort
+`online` reinkommt (Geraet frisch gebootet/reconnected), ruft ihr LWT-Handler automatisch `refresh()`
+auf, was jedes aktuell in `openhasp.yaml` gebundene Objekt neu an das Geraet pusht (per Live-Mitschnitt
+waehrend eines echten Reboots verifiziert - alle Properties kamen ungefragt zurueck). Praktische Folge:
+ein reiner Geraete-Neustart reicht, um den korrekten Zustand wiederherzustellen, ohne manuellen
+Entry-Reload hinterher. Nur wird eine Property komplett aus `openhasp.yaml` ENTFERNT (nicht nur
+geaendert), pusht `refresh()` dafuer nichts mehr - dann bleibt der alte Geraete-interne Wert stehen,
+bis ein echter Reboot die Firmware-Objekte auf ihre Datei-Defaults zuruecksetzt (siehe "Ghost State"
+weiter oben). Ein reiner `pages reload` (ohne Geraete-Reboot) loest dagegen kein LWT-Event aus - dort
+bleibt der manuelle Entry-Reload weiterhin noetig.
+
 ## Einrichtungsschritte
 
 1. Inhalt von `HomeAssistant/` in den Config-Root der eigenen HA-Instanz kopieren
