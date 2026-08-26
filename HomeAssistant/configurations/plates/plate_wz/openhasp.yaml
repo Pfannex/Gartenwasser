@@ -232,29 +232,6 @@ objects:
   - obj: "p4b46"
     properties:
       "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
-      "click": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {{ programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false }}
-      "bg_color": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
-        {{ '#333333' if auto_on else '#232323' }}
-      "bg_color30": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
-        {{ '#333333' if auto_on else '#232323' }}
-      "bg_color40": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
-        {{ '#333333' if auto_on else '#232323' }}
     event:
       "up":
         - service: script.gartenwasser_plate_programm_laufzeit_setzen
@@ -281,29 +258,6 @@ objects:
   - obj: "p4b48"
     properties:
       "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
-      "click": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {{ programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false }}
-      "bg_color": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
-        {{ '#333333' if auto_on else '#232323' }}
-      "bg_color30": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
-        {{ '#333333' if auto_on else '#232323' }}
-      "bg_color40": >-
-        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
-        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
-        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
-        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
-        {{ '#333333' if auto_on else '#232323' }}
     event:
       "up":
         - service: script.gartenwasser_plate_programm_laufzeit_setzen

@@ -328,24 +328,19 @@ gartenwasser_plate_programm_laufzeit_setzen:
         programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
         active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
         prog: "{{ programs[index] }}"
-    # Nur schreiben, wenn das Ventil in diesem Programm auf Automatik steht - sonst
-    # gaebe es einen "time"-Eintrag fuer ein auto=false-Ventil, was dem sparsen Format
-    # widerspricht (siehe Datei-Kopf-Kommentar). Die Plate blendet den +/- Stepper bei
-    # AUTO=AUS ohnehin per "click"-Property aus (openhasp.yaml, p4b46/p4b48).
-    - if:
-        - condition: template
-          value_template: "{{ (prog.get('auto', {}) or {}).get('V' ~ valve, false) }}"
-      then:
-        - variables:
-            new_prog:
-              name: "{{ prog.get('name', '') }}"
-              time: "{{ dict(prog.get('time', {}) or {}, **{'V' ~ valve: value}) }}"
-              auto: "{{ prog.get('auto', {}) }}"
-            new_programs: "{{ programs[:index] + [new_prog] + programs[index + 1:] }}"
-        - action: mqtt.publish
-          data:
-            topic: "gartenwasser/main/programs/set"
-            payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
+    # Laufzeit ist unabhaengig von AUTO editierbar (Nutzer-Entscheidung 2026-08-26) - kein
+    # Guard mehr auf den Automatik-Status. Firmware akzeptiert einen "time"-Eintrag fuer
+    # ein auto=false-Ventil klaglos, siehe gartenwasser_plate_programm_auto_toggle oben.
+    - variables:
+        new_prog:
+          name: "{{ prog.get('name', '') }}"
+          time: "{{ dict(prog.get('time', {}) or {}, **{'V' ~ valve: value}) }}"
+          auto: "{{ prog.get('auto', {}) }}"
+        new_programs: "{{ programs[:index] + [new_prog] + programs[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/programs/set"
+        payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
 
 # Fuenf Skripte fuer den Zeitplan-Editor (Zeitplan-Seite) - gleiches Grundmuster wie die
 # Programm-Skripte oben (Bearbeiten starten/Speichern/Loeschen/Neu, plus Abbrechen), auf
