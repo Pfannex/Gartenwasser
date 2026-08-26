@@ -1122,6 +1122,17 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Bei `sensor.gartenbewasserung_i2c_status == unavailable`: Bubble rot+transluzent (wie beim laufenden Programm), Tap-Flaeche gesperrt, Icon wechselt auf selbst generiertes `wifi_off.png` (gleicher Glas-Kreis-Stil wie `play.png`/`stop.png`), Label zeigt "Offline" statt Start/Stop, Programm-Dropdown wird komplett ausgeblendet, Sub-Label zeigt "Gerät nicht erreichbar" (Vorrang vor der bestehenden "Kein Programm"-Ausblend-Regel).
 - **Zufaellig live end-to-end verifiziert statt nur simuliert**: das Gartenwasser-Geraet war beim Test tatsaechlich offline, alle sechs Bindings zeigten sofort korrekt den vollstaendigen Offline-Zustand.
 
+### openHASP-Plate: Restlaufzeit je Ventil, orange Press-Farbe war die Geraete-Theme-Farbe
+
+- Restlaufzeit je Ventil unter dem Namen ergaenzt (analog zur Sequenz-Restzeit: neue trigger-basierte Sekundentakt-Sensoren `sensor.gartenwasser_v{1..5}_restzeit_text` in `template.yaml`) - auf Nutzerwunsch immer sichtbar (auch im Ruhezustand zeigt es die konfigurierte Laufzeit, nicht 00:00).
+- **Hartnaeckiger Bug**: beim manuellen Schalten eines Ventils blitzte der Button orange statt der eigentlich beabsichtigten Zustandsfarbe (rot/gruen/grau) auf. Mehrere Ansaetze auf Objekt-Ebene gescheitert:
+  - `bg_color02`/`bg_color03` (openHASP-Styling-Suffix fuer "gedrueckt"/"gedrueckt+umgeschaltet", per Firmware-Quellcode `hasp_attribute.cpp` verifiziert - `state_num = index % 10`, 2=pressed, 3=pressed+checked) korrekt gesetzt, aber wirkungslos.
+  - `val`-Property synchronisiert (interner Toggle-Zustand des Buttons an den echten Switch-Zustand gebunden) - ebenfalls wirkungslos.
+  - **Ursache gefunden per gezieltem Diagnose-Test statt weiterem Raten**: die Geraete-Theme-Konfiguration (`GET /api/config/hasp/`) hat ein `color2`-Feld (Sekundaerfarbe des aktiven Themes "Hasp Dark") - stand auf `#ff9962`, einem orangen Ton. Testweise per `POST /api/config/hasp/` auf Blau (`#0000FF`) gesetzt und neu gestartet (Theme-Werte wirken erst nach echtem Reboot, `config.json` selbst bleibt wie ueblich nur ein Boot-Snapshot) - der Press-Flash wurde tatsaechlich blau statt orange, damit zweifelsfrei bestaetigt: die THEME-Sekundaerfarbe wird fuers Checked/Pressed-Feedback verwendet und ueberschreibt lokale Objekt-Style-Overrides fuer genau diese Zustandskombination (lokale Overrides fuer andere Faelle, z.B. der kurze rote Blitz beim Ausschalten, funktionierten dagegen bereits vorher korrekt).
+  - Fix: `color2` auf unser etabliertes Rot (`#e53935`, vom Geraet leicht abweichend gerundet auf `#e63831`) gesetzt statt auf einen Kontrastton - der Press-Flash beim Einschalten passt jetzt zur spaeteren "an"-Farbe. Live vom Nutzer bestaetigt ("klappt").
+  - Die wirkungslosen `bg_color02`/`bg_color03`-Overrides wieder entfernt (unnoetige Komplexitaet, Theme gewinnt ohnehin), `val`-Sync als sinnvolle Verbesserung beibehalten.
+- **Achtung fuer kuenftige Plates**: `color2` ist eine GERAETEWEITE Theme-Einstellung (nicht pro Seite/Objekt), wirkt sich potenziell auf alle interaktiven Elemente auf allen Seiten aus, nicht nur die Ventil-Matrix - bei einer neuen Farbwahl immer alle Seiten im Blick behalten.
+
 ## Offene Punkte / nächste Schritte
 
 - **openHASP-Plate (Merker, 2026-08-25, fuer morgen)**: "Probleme Symbol" - vom Nutzer nur kurz notiert, genaue Bedeutung noch zu klaeren (eigenes Fehler-/Problem-Icon? Ein noch bestehendes Problem mit einem der Symbole?) - beim naechsten Mal nachfragen statt zu raten.

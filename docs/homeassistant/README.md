@@ -97,6 +97,22 @@ aktuelle Objekt, `POST /api/config/<submodul>/` mit dem KOMPLETTEN (nicht nur ge
 JSON-Body speichert es persistent. Nach einer Aenderung zeigt `GET /api/config/<submodul>/` sofort
 den neuen Stand, `config.json` (Boot-Snapshot) aber erst nach einem echten Neustart.
 
+**`hasp.color2` (Submodul `hasp`, `GET`/`POST /api/config/hasp/`) ist die THEME-Sekundaerfarbe und
+wird von LVGL geraeteweit fuers Pressed/Checked-Feedback interaktiver Elemente verwendet** - lokale
+Objekt-Style-Overrides (`bg_color02`/`bg_color03`, siehe Styling-Suffixe unten) koennen das fuer
+manche Zustandskombinationen NICHT ueberschreiben (per Diagnose-Test verifiziert: `color2` testweise
+auf eine Kontrastfarbe gesetzt, der Press-Flash uebernahm sie direkt, obwohl lokale Overrides gesetzt
+waren - siehe `docs/Log.md`). Fuer plate_wz aktuell auf `#e53935` (unser Rot) gesetzt, damit der
+Press-Flash beim Einschalten eines Ventils nicht kontrastiert. Wirkt sich auf ALLE Seiten des
+Geraets aus, nicht nur eine einzelne - bei einer neuen Farbwahl alle Seiten pruefen.
+
+**openHASP-Styling-Suffixe** (fuer `bg_color`/`text_color`/etc. an einzelnen Objekten): zweistelliger
+Zahlen-Suffix, 1. Ziffer = Teil (0 = Hauptteil, andere Werte fuer Sub-Widgets wie btnmatrix-Items),
+2. Ziffer = Zustand (0=Standard, 1=umgeschaltet/checked, 2=gedrueckt nicht umgeschaltet, 3=gedrueckt
+UND umgeschaltet, 4=deaktiviert nicht umgeschaltet, 5=deaktiviert umgeschaltet) - z. B. `bg_color03`
+= Hauptteil, gedrueckt+umgeschaltet. Aus der Firmware-Quelle (`src/hasp/hasp_attribute.cpp`,
+`hasp_attribute_get_part_state_new()`) verifiziert, nicht nur aus Doku/Community-Posts uebernommen.
+
 **openHASP-Integration:** hybrid, nicht rein YAML-gesteuert wie urspruenglich angenommen. Ein
 Plate wird per echter MQTT-Discovery automatisch als Config-Entry angelegt (`hasp/discovery/<hwid>`,
 sichtbar unter Einstellungen → Geraete & Dienste → openHASP), sobald es online ist. Der YAML-Block
