@@ -88,3 +88,29 @@
 {"page":4,"id":46,"obj":"btn","x":24,"y":310,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
 {"page":4,"id":47,"obj":"label","x":80,"y":322,"w":320,"h":32,"text":"8 Min","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
 {"page":4,"id":48,"obj":"btn","x":400,"y":310,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":60,"obj":"btn","x":24,"y":135,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":61,"obj":"btn","x":80,"y":135,"w":156,"h":56,"text":"Eintrag 1\nAktiv","text_font":16,"align":1,"radius":6,"bg_color":"#43a047","bg_color30":"#43a047","bg_color40":"#43a047","border_width":0}
+{"page":4,"id":62,"obj":"btn","x":400,"y":135,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":63,"obj":"btn","x":15,"y":207,"w":144,"h":44,"text":"Täglich","text_font":16,"radius":6,"bg_color":"#e53935","bg_color30":"#e53935","bg_color40":"#e53935","border_width":0}
+{"page":4,"id":64,"obj":"btn","x":167,"y":207,"w":144,"h":44,"text":"Wöchentlich","text_font":16,"radius":6,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","border_width":0}
+{"page":4,"id":65,"obj":"btn","x":319,"y":207,"w":144,"h":44,"text":"Einmalig","text_font":16,"radius":6,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","border_width":0}
+
+{"page":4,"id":66,"obj":"btn","x":24,"y":267,"w":44,"h":44,"text":"<","text_font":20,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":67,"obj":"label","x":68,"y":277,"w":344,"h":28,"text":"06:00","text_font":24,"align":1,"text_color":"#FFFFFF","bg_opa":0}
+{"page":4,"id":68,"obj":"btn","x":412,"y":267,"w":44,"h":44,"text":">","text_font":20,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":69,"obj":"btn","x":15,"y":327,"w":59,"h":44,"text":"Mo","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+{"page":4,"id":70,"obj":"btn","x":80,"y":327,"w":59,"h":44,"text":"Di","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+{"page":4,"id":71,"obj":"btn","x":145,"y":327,"w":59,"h":44,"text":"Mi","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+{"page":4,"id":72,"obj":"btn","x":210,"y":327,"w":59,"h":44,"text":"Do","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+{"page":4,"id":73,"obj":"btn","x":275,"y":327,"w":59,"h":44,"text":"Fr","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+{"page":4,"id":74,"obj":"btn","x":340,"y":327,"w":59,"h":44,"text":"Sa","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+{"page":4,"id":75,"obj":"btn","x":405,"y":327,"w":59,"h":44,"text":"So","text_font":16,"radius":6,"bg_color":"#757575","bg_color30":"#757575","bg_color40":"#757575","border_width":0,"hidden":true}
+
+{"page":4,"id":76,"obj":"btn","x":24,"y":327,"w":44,"h":44,"text":"<","text_font":20,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0,"hidden":true}
+{"page":4,"id":77,"obj":"label","x":68,"y":337,"w":344,"h":28,"text":"26.08.2026","text_font":24,"align":1,"text_color":"#FFFFFF","bg_opa":0,"hidden":true}
+{"page":4,"id":78,"obj":"btn","x":412,"y":327,"w":44,"h":44,"text":">","text_font":20,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0,"hidden":true}
+
+{"page":4,"id":79,"obj":"dropdown","x":244,"y":135,"w":156,"h":56,"text_font":14,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0,"options":"Kein Programm","val":0}

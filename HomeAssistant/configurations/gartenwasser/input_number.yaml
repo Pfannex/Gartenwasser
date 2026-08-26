@@ -87,4 +87,14 @@ gartenwasser_plate_settings_programm:
   min: 0
   max: 7
   step: 1
+
+# Pager-Zustand fuer die Zeitplan-Kategorie auf der Plate-Settings-Seite (page 4) -
+# 0-basierter Index in state_attr('sensor.gartenwasser_zeitplan','schedule'). max:15
+# passt zu kMaxScheduleEntries=16 in der Firmware (wie gartenwasser_zeitplan_editier_index).
+gartenwasser_plate_settings_zeitplan_eintrag:
+  name: "Gartenwasser Plate Settings Zeitplan Eintrag"
+  icon: mdi:calendar-clock
+  min: 0
+  max: 15
+  step: 1
   mode: box

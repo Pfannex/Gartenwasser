@@ -416,3 +416,448 @@ objects:
   - obj: "p3b75"
     properties:
       "text": "{{ states('sensor.gartenwasser_v5_restzeit_text') }}"
+
+  - obj: "p4b60"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set count = (state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count -%}
+              {%- set cur = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+              {{ ((cur - 1) % count) if count > 0 else 0 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_zeitplan_eintrag
+
+  - obj: "p4b62"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set count = (state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count -%}
+              {%- set cur = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+              {{ ((cur + 1) % count) if count > 0 else 0 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_zeitplan_eintrag
+
+  - obj: "p4b61"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "text": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set enabled = (schedule[idx].get('enabled', true) if idx < (schedule | count) else true) -%}
+        Eintrag {{ idx + 1 }}{{ '\n' }}{{ 'Aktiv' if enabled else 'Pausiert' }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set enabled = (schedule[idx].get('enabled', true) if idx < (schedule | count) else true) -%}
+        {{ '#43a047' if enabled else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set enabled = (schedule[idx].get('enabled', true) if idx < (schedule | count) else true) -%}
+        {{ '#43a047' if enabled else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set enabled = (schedule[idx].get('enabled', true) if idx < (schedule | count) else true) -%}
+        {{ '#43a047' if enabled else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_zeitplan_eintrag_toggle_aktiv
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+
+  - obj: "p4b63"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'daily' else '#333333' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'daily' else '#333333' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'daily' else '#333333' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_typ_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            type: "daily"
+
+  - obj: "p4b64"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'weekly' else '#333333' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'weekly' else '#333333' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'weekly' else '#333333' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_typ_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            type: "weekly"
+
+  - obj: "p4b65"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'once' else '#333333' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'once' else '#333333' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ '#e53935' if typ == 'once' else '#333333' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_typ_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            type: "once"
+
+  - obj: "p4b66"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_zeit_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            time: >-
+              {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+              {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+              {%- set cur = (schedule[idx].get('time', '06:00') if idx < (schedule | count) else '06:00') -%}
+              {%- set parts = cur.split(':') -%}
+              {%- set total = ((parts[0] | int(6)) * 60 + (parts[1] | int(0)) - 15) % 1440 -%}
+              {{ '%02d:%02d' | format(total // 60, total % 60) }}
+
+  - obj: "p4b68"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_zeit_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            time: >-
+              {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+              {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+              {%- set cur = (schedule[idx].get('time', '06:00') if idx < (schedule | count) else '06:00') -%}
+              {%- set parts = cur.split(':') -%}
+              {%- set total = ((parts[0] | int(6)) * 60 + (parts[1] | int(0)) + 15) % 1440 -%}
+              {{ '%02d:%02d' | format(total // 60, total % 60) }}
+
+  - obj: "p4b67"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "text": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {{ schedule[idx].get('time', '06:00') if idx < (schedule | count) else '06:00' }}
+
+  - obj: "p4b69"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'mon' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'mon' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'mon' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "mon"
+
+  - obj: "p4b70"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'tue' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'tue' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'tue' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "tue"
+
+  - obj: "p4b71"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'wed' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'wed' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'wed' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "wed"
+
+  - obj: "p4b72"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'thu' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'thu' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'thu' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "thu"
+
+  - obj: "p4b73"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'fri' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'fri' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'fri' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "fri"
+
+  - obj: "p4b74"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'sat' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'sat' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'sat' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "sat"
+
+  - obj: "p4b75"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'weekly') }}
+      "bg_color": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'sun' in wd else '#757575' }}
+      "bg_color30": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'sun' in wd else '#757575' }}
+      "bg_color40": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set wd = ((schedule[idx].get('weekdays', []) or []) if idx < (schedule | count) else []) -%}
+        {{ '#43a047' if 'sun' in wd else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_wochentag_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            day: "sun"
+
+  - obj: "p4b76"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'once') }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_datum_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            date: >-
+              {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+              {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+              {%- set cur = (schedule[idx].get('date', now().strftime('%Y-%m-%d')) if idx < (schedule | count) else now().strftime('%Y-%m-%d')) -%}
+              {%- set d = strptime(cur, '%Y-%m-%d') - timedelta(days=1) -%}
+              {{ d.strftime('%Y-%m-%d') }}
+
+  - obj: "p4b78"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'once') }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_zeitplan_datum_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            date: >-
+              {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+              {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+              {%- set cur = (schedule[idx].get('date', now().strftime('%Y-%m-%d')) if idx < (schedule | count) else now().strftime('%Y-%m-%d')) -%}
+              {%- set d = strptime(cur, '%Y-%m-%d') + timedelta(days=1) -%}
+              {{ d.strftime('%Y-%m-%d') }}
+
+  - obj: "p4b77"
+    properties:
+      "hidden": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set typ = (schedule[idx].get('type', 'daily') if idx < (schedule | count) else 'daily') -%}
+        {{ (states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan') or (typ != 'once') }}
+      "text": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set cur = (schedule[idx].get('date', now().strftime('%Y-%m-%d')) if idx < (schedule | count) else now().strftime('%Y-%m-%d')) -%}
+        {%- set d = strptime(cur, '%Y-%m-%d') -%}
+        {{ d.strftime('%d.%m.%Y') }}
+
+  - obj: "p4b79"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "options": >-
+        {{ (['Kein Programm'] + ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list)) | join('\n') }}
+      "val": >-
+        {%- set names = ['Kein Programm'] + ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | map(attribute='name') | list) -%}
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set cur = (schedule[idx].get('program', 'Kein Programm') if idx < (schedule | count) else 'Kein Programm') -%}
+        {{ names.index(cur) if cur in names else 0 }}
+    event:
+      "changed":
+        - service: script.gartenwasser_plate_zeitplan_programm_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+            program: "{{ text }}"
