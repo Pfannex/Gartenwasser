@@ -1148,6 +1148,7 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 
 ## Offene Punkte / nächste Schritte
 
+- **HA-Dashboard (Merker, 2026-08-26)**: Hauptventil-Bubble soll bei Geraet-offline ebenfalls GRAU dargestellt werden, nicht gruen/rot - analog zum bereits erledigten Fix auf der openHASP-Plate (siehe Log-Eintrag 2026-08-26 "Hauptventil soll bei Geraet-offline ebenfalls GRAU sein"), hier aber fuer die eigentliche HA-Bubble-Card-Statusseite (`configurations/gartenwasser/...`, `master`-Branch). Noch nicht umgesetzt.
 - **openHASP-Plate (Merker, 2026-08-25, fuer morgen)**: "Probleme Symbol" - vom Nutzer nur kurz notiert, genaue Bedeutung noch zu klaeren (eigenes Fehler-/Problem-Icon? Ein noch bestehendes Problem mit einem der Symbole?) - beim naechsten Mal nachfragen statt zu raten.
 - ~~**openHASP-Plate (Merker, 2026-08-25, fuer morgen)**: Hauptventil soll bei Geraet-offline ebenfalls GRAU sein, nicht gruen.~~ - **erledigt** (2026-08-26): offline-Check als hoechste Prioritaet vor rot/gruen ergaenzt, live verifiziert (Geraet war beim Fix tatsaechlich noch offline).
 - **Firmware-Backlog-Idee**: neues retained Topic `main/totalDuration` (Gesamtdauer des Programms beim Sequenzstart einfrieren) wuerde den HA-seitigen Annaeherungs-/Workaround-Sensor `sensor.gartenwasser_gesamtlaufzeit` ueberfluessig machen - siehe `docs/requirements.md`. Nutzer-Entscheidung 2026-08-21: erstmal nicht umsetzen, aktuelle HA-Loesung funktioniert bereits robust.
