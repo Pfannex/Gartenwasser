@@ -254,6 +254,96 @@ gartenwasser_programm_neu_starten:
       data:
         value: "{{ idx }}"
 
+# Zwei Skripte fuer das Programme-Panel auf der Plate-Settings-Seite (openHASP, page 4) -
+# bewusst KEIN Entwurf/Speichern wie beim HA-Dashboard-Formular oben: die Plate schreibt
+# bei jedem Tap direkt (ein Feld pro Aufruf), analog zu den Ventil-Buttons auf der
+# Status-Seite. "time" bleibt sparse (nur auto=true-Ventile), exakt wie bei
+# gartenwasser_programm_speichern - siehe Kommentar oben im Datei-Kopf.
+gartenwasser_plate_programm_auto_toggle:
+  alias: "Gartenwasser: Plate - Automatik in Programm umschalten"
+  fields:
+    index:
+      description: "0-basierter Index des Programms im programs-Array"
+      example: 0
+    valve:
+      description: "Ventilnummer 1-5"
+      example: 1
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | count) }}"
+    - variables:
+        programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
+        active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
+        prog: "{{ programs[index] }}"
+        new_state: "{{ not (prog.get('auto', {}) or {}).get('V' ~ valve, false) }}"
+    - variables:
+        new_auto: >-
+          {% set ns = namespace(d={}) %}
+          {% for n in range(1, 6) %}
+            {% set k = 'V' ~ n %}
+            {% set is_on = (new_state if n == valve else (prog.get('auto', {}) or {}).get(k, false)) %}
+            {% set ns.d = dict(ns.d, **{k: is_on}) %}
+          {% endfor %}
+          {{ ns.d }}
+        new_time: >-
+          {% set ns = namespace(d={}) %}
+          {% for n in range(1, 6) %}
+            {% set k = 'V' ~ n %}
+            {% set is_on = (new_state if n == valve else (prog.get('auto', {}) or {}).get(k, false)) %}
+            {% if is_on %}
+              {% set ns.d = dict(ns.d, **{k: (prog.get('time', {}) or {}).get(k, 5)}) %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.d }}
+    - variables:
+        new_prog:
+          name: "{{ prog.get('name', '') }}"
+          time: "{{ new_time }}"
+          auto: "{{ new_auto }}"
+        new_programs: "{{ programs[:index] + [new_prog] + programs[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/programs/set"
+        payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
+
+gartenwasser_plate_programm_laufzeit_setzen:
+  alias: "Gartenwasser: Plate - Laufzeit in Programm setzen"
+  fields:
+    index:
+      description: "0-basierter Index des Programms im programs-Array"
+      example: 0
+    valve:
+      description: "Ventilnummer 1-5"
+      example: 1
+    value:
+      description: "Neue Laufzeit in Minuten (0-180)"
+      example: 5
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | count) }}"
+    - variables:
+        programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
+        active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
+        prog: "{{ programs[index] }}"
+    # Nur schreiben, wenn das Ventil in diesem Programm auf Automatik steht - sonst
+    # gaebe es einen "time"-Eintrag fuer ein auto=false-Ventil, was dem sparsen Format
+    # widerspricht (siehe Datei-Kopf-Kommentar). Die Plate blendet den +/- Stepper bei
+    # AUTO=AUS ohnehin per "click"-Property aus (openhasp.yaml, p4b46/p4b48).
+    - if:
+        - condition: template
+          value_template: "{{ (prog.get('auto', {}) or {}).get('V' ~ valve, false) }}"
+      then:
+        - variables:
+            new_prog:
+              name: "{{ prog.get('name', '') }}"
+              time: "{{ dict(prog.get('time', {}) or {}, **{'V' ~ valve: value}) }}"
+              auto: "{{ prog.get('auto', {}) }}"
+            new_programs: "{{ programs[:index] + [new_prog] + programs[index + 1:] }}"
+        - action: mqtt.publish
+          data:
+            topic: "gartenwasser/main/programs/set"
+            payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
+
 # Fuenf Skripte fuer den Zeitplan-Editor (Zeitplan-Seite) - gleiches Grundmuster wie die
 # Programm-Skripte oben (Bearbeiten starten/Speichern/Loeschen/Neu, plus Abbrechen), auf
 # das schedule-Array statt programs-Array angewendet (main/schedule/set ersetzt ebenfalls

@@ -40,6 +40,283 @@ objects:
             topic: hasp/plate_wz/command/page
             payload: "3"
 
+  - obj: "p4b20"
+    properties:
+      "val": >-
+        {%- set opts = ['Konfiguration', 'Programme', 'Zeitplan'] -%}
+        {%- set current = states('input_select.gartenwasser_plate_settings_kategorie') -%}
+        {{ opts.index(current) if current in opts else 0 }}
+    event:
+      "changed":
+        - service: input_select.select_option
+          data:
+            option: "{{ text }}"
+          target:
+            entity_id: input_select.gartenwasser_plate_settings_kategorie
+
+  - obj: "p4b30"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set cur = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {{ 5 if cur <= 1 else cur - 1 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_ventil
+
+  - obj: "p4b33"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set cur = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {{ 1 if cur >= 5 else cur + 1 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_ventil
+
+  - obj: "p4b31"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+      "text": >-
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {{ states('text.gartenwasser_v' ~ n ~ '_alias') }}
+
+  - obj: "p4b32"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+      "text": >-
+        {{ 'Ventil ' ~ (states('input_number.gartenwasser_plate_settings_ventil') | int(1)) }}
+
+  - obj: "p4b34"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+    event:
+      "up":
+        - service: number.set_value
+          data:
+            value: >-
+              {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {%- set cur = states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') | int(0) -%}
+              {{ [0, cur - 1] | max }}
+          target:
+            entity_id: >-
+              {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              number.gartenbewasserung_ventil_{{ n }}_laufzeit
+
+  - obj: "p4b35"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+      "text": >-
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {{ states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') | int(0) }} Min
+
+  - obj: "p4b36"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Konfiguration' }}"
+    event:
+      "up":
+        - service: number.set_value
+          data:
+            value: >-
+              {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {%- set cur = states('number.gartenbewasserung_ventil_' ~ n ~ '_laufzeit') | int(0) -%}
+              {{ [180, cur + 1] | min }}
+          target:
+            entity_id: >-
+              {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              number.gartenbewasserung_ventil_{{ n }}_laufzeit
+
+  - obj: "p4b40"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set count = (state_attr('sensor.gartenwasser_programme', 'programs') or []) | count -%}
+              {%- set cur = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+              {{ ((cur - 1) % count) if count > 0 else 0 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_programm
+
+  - obj: "p4b42"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set count = (state_attr('sensor.gartenwasser_programme', 'programs') or []) | count -%}
+              {%- set cur = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+              {{ ((cur + 1) % count) if count > 0 else 0 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_programm
+
+  - obj: "p4b41"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+      "text": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {{ programs[idx].get('name', '') if idx < (programs | count) else '' }}
+
+  - obj: "p4b43"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set cur = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {{ 5 if cur <= 1 else cur - 1 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_ventil
+
+  - obj: "p4b45"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+    event:
+      "up":
+        - service: input_number.set_value
+          data:
+            value: >-
+              {%- set cur = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {{ 1 if cur >= 5 else cur + 1 }}
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_ventil
+
+  - obj: "p4b44"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+      "text": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {%- set alias = states('text.gartenwasser_v' ~ n ~ '_alias') -%}
+        V{{ n }}: {{ alias }}{{ '\n' }}Automatik {{ 'AN' if auto_on else 'AUS' }}
+      "bg_color": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#43a047' if auto_on else '#757575' }}
+      "bg_color30": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#43a047' if auto_on else '#757575' }}
+      "bg_color40": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#43a047' if auto_on else '#757575' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_programm_auto_toggle
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_programm') | int(0) }}"
+            valve: "{{ states('input_number.gartenwasser_plate_settings_ventil') | int(1) }}"
+
+  - obj: "p4b46"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+      "click": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {{ programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false }}
+      "bg_color": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#333333' if auto_on else '#232323' }}
+      "bg_color30": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#333333' if auto_on else '#232323' }}
+      "bg_color40": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#333333' if auto_on else '#232323' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_programm_laufzeit_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_programm') | int(0) }}"
+            valve: "{{ states('input_number.gartenwasser_plate_settings_ventil') | int(1) }}"
+            value: >-
+              {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+              {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+              {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {%- set cur = ((programs[idx].get('time', {}) or {}).get('V' ~ n, 5) if idx < (programs | count) else 5) -%}
+              {{ [0, cur - 1] | max }}
+
+  - obj: "p4b47"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+      "text": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set cur = ((programs[idx].get('time', {}) or {}).get('V' ~ n, 5) if idx < (programs | count) else 5) -%}
+        {{ cur }} Min
+
+  - obj: "p4b48"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Programme' }}"
+      "click": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {{ programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false }}
+      "bg_color": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#333333' if auto_on else '#232323' }}
+      "bg_color30": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#333333' if auto_on else '#232323' }}
+      "bg_color40": >-
+        {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+        {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+        {%- set auto_on = programs[idx].get('auto', {}).get('V' ~ n, false) if idx < (programs | count) else false -%}
+        {{ '#333333' if auto_on else '#232323' }}
+    event:
+      "up":
+        - service: script.gartenwasser_plate_programm_laufzeit_setzen
+          data:
+            index: "{{ states('input_number.gartenwasser_plate_settings_programm') | int(0) }}"
+            valve: "{{ states('input_number.gartenwasser_plate_settings_ventil') | int(1) }}"
+            value: >-
+              {%- set programs = state_attr('sensor.gartenwasser_programme', 'programs') or [] -%}
+              {%- set idx = states('input_number.gartenwasser_plate_settings_programm') | int(0) -%}
+              {%- set n = states('input_number.gartenwasser_plate_settings_ventil') | int(1) -%}
+              {%- set cur = ((programs[idx].get('time', {}) or {}).get('V' ~ n, 5) if idx < (programs | count) else 5) -%}
+              {{ [180, cur + 1] | min }}
+
   - obj: "p3b29"
     properties:
       "bg_color": >-

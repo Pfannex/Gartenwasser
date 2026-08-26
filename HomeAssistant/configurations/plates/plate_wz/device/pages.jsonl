@@ -65,3 +65,26 @@
 {"page":4,"id":2,"obj":"label","parentid":1,"x":15,"y":14,"w":450,"h":40,"text":"Gartenbewässerung - Settings","align":0,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
 {"page":4,"id":3,"obj":"obj","swipe":1,"x":0,"y":0,"w":480,"h":70,"bg_opa":0,"border_width":0}
 {"page":4,"id":10,"obj":"btn","x":0,"y":410,"w":60,"h":60,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"radius":5,"border_width":0}
+
+{"page":4,"id":20,"obj":"dropdown","x":15,"y":75,"w":450,"h":50,"text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0,"options":"Konfiguration\nProgramme\nZeitplan","val":0}
+
+{"page":4,"id":30,"obj":"btn","x":24,"y":150,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":31,"obj":"label","x":80,"y":150,"w":320,"h":32,"text":"Sprenger Rasen","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
+{"page":4,"id":32,"obj":"label","x":80,"y":184,"w":320,"h":22,"text":"Ventil 1","text_font":16,"align":1,"text_color":"#a9a9a9","bg_opa":0}
+{"page":4,"id":33,"obj":"btn","x":400,"y":150,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":34,"obj":"btn","x":24,"y":230,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":35,"obj":"label","x":80,"y":242,"w":320,"h":32,"text":"12 Min","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
+{"page":4,"id":36,"obj":"btn","x":400,"y":230,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":40,"obj":"btn","x":24,"y":150,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":41,"obj":"label","x":80,"y":162,"w":320,"h":32,"text":"Rasen","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
+{"page":4,"id":42,"obj":"btn","x":400,"y":150,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":43,"obj":"btn","x":24,"y":230,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":44,"obj":"btn","x":104,"y":230,"w":272,"h":56,"text":"V1: Sprenger Rasen\nAutomatik AN","text_font":16,"align":1,"radius":6,"bg_color":"#43a047","bg_color30":"#43a047","bg_color40":"#43a047","border_width":0}
+{"page":4,"id":45,"obj":"btn","x":400,"y":230,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+
+{"page":4,"id":46,"obj":"btn","x":24,"y":310,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":47,"obj":"label","x":80,"y":322,"w":320,"h":32,"text":"8 Min","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
+{"page":4,"id":48,"obj":"btn","x":400,"y":310,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}

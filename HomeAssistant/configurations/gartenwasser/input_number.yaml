@@ -63,3 +63,28 @@ gartenwasser_entwurf_v5_zeit:
   step: 1
   mode: box
   unit_of_measurement: "min"
+
+# Pager-Zustand fuer die Konfiguration-Kategorie auf der Plate-Settings-Seite (page 4) -
+# welches Ventil (1-5) gerade im Konfiguration-Panel angezeigt/bearbeitet wird. Wird auch
+# vom Programme-Panel mitbenutzt (dieselbe Ventil-Auswahl, bewusst geteilt).
+gartenwasser_plate_settings_ventil:
+  name: "Gartenwasser Plate Settings Ventil"
+  icon: mdi:valve
+  min: 1
+  max: 5
+  step: 1
+  mode: box
+
+# Pager-Zustand fuer die Programme-Kategorie auf der Plate-Settings-Seite (page 4) -
+# 0-basierter Index in state_attr('sensor.gartenwasser_programme','programs'). Bewusst
+# unabhaengig von input_number.gartenwasser_editier_index (HA-Dashboard-Formular) - die
+# Plate schreibt direkt (kein Entwurf/Speichern-Schritt, siehe scripts.yaml
+# gartenwasser_plate_programm_*), ein gemeinsamer Index wuerde beide Editier-Wege
+# gegenseitig stoeren koennen.
+gartenwasser_plate_settings_programm:
+  name: "Gartenwasser Plate Settings Programm"
+  icon: mdi:sprinkler-variant
+  min: 0
+  max: 7
+  step: 1
+  mode: box
