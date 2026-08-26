@@ -24,7 +24,7 @@ objects:
                     topic: hasp/plate_wz/command/page
                     payload: "1"
 
-  - obj: "p3b5"
+  - obj: "p3b15"
     event:
       "up":
         - service: mqtt.publish

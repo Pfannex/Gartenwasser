@@ -19,8 +19,8 @@
 {"page":3,"id":0,"next":1,"prev":2}
 {"page":3,"id":1,"obj":"obj","x":0,"y":0,"w":480,"h":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"radius":5,"border_width":0}
 {"page":3,"id":2,"obj":"label","parentid":1,"x":15,"y":14,"w":340,"h":40,"text":"Gartenbewässerung","align":0,"text_font":28,"text_color":"#FFFFFF","bg_opa":0}
-{"page":3,"id":5,"obj":"btn","x":420,"y":8,"w":52,"h":52,"text":"","text_font":40,"bg_opa":0,"border_width":0}
-{"page":3,"id":3,"obj":"obj","swipe":1,"x":0,"y":0,"w":480,"h":70,"bg_opa":0,"border_width":0}
+{"page":3,"id":15,"obj":"btn","x":420,"y":8,"w":52,"h":52,"text":"","text_font":40,"bg_opa":0,"border_width":0}
+{"page":3,"id":3,"obj":"obj","swipe":1,"x":0,"y":0,"w":410,"h":70,"bg_opa":0,"border_width":0}
 
 {"page":3,"id":29,"obj":"obj","x":5,"y":65,"w":470,"h":110,"radius":60,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_opa":255,"bg_grad_dir":0,"border_width":0}
 {"page":3,"id":30,"obj":"btn","x":0,"y":60,"w":120,"h":120,"toggle":true,"bg_opa":0,"border_side":0,"shadow_width":0}
