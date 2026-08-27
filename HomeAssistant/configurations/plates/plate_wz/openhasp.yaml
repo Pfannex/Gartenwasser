@@ -417,42 +417,46 @@ objects:
     properties:
       "text": "{{ states('sensor.gartenwasser_v5_restzeit_text') }}"
 
-  - obj: "p4b60"
-    properties:
-      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
-    event:
-      "up":
-        - service: input_number.set_value
-          data:
-            value: >-
-              {%- set count = (state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count -%}
-              {%- set cur = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
-              {{ ((cur - 1) % count) if count > 0 else 0 }}
-          target:
-            entity_id: input_number.gartenwasser_plate_settings_zeitplan_eintrag
-
-  - obj: "p4b62"
-    properties:
-      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
-    event:
-      "up":
-        - service: input_number.set_value
-          data:
-            value: >-
-              {%- set count = (state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count -%}
-              {%- set cur = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
-              {{ ((cur + 1) % count) if count > 0 else 0 }}
-          target:
-            entity_id: input_number.gartenwasser_plate_settings_zeitplan_eintrag
-
   - obj: "p4b61"
     properties:
       "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
-      "text": >-
+      "options": >-
         {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set wd = {'mon': 'Mo', 'tue': 'Di', 'wed': 'Mi', 'thu': 'Do', 'fri': 'Fr', 'sat': 'Sa', 'sun': 'So'} -%}
+        {%- set ns = namespace(lines=[]) -%}
+        {%- for e in schedule -%}
+          {%- set typ = e.get('type', 'daily') -%}
+          {%- if typ == 'weekly' -%}
+            {%- set wns = namespace(days=[]) -%}
+            {%- for d in (e.get('weekdays', []) or []) -%}
+              {%- set wns.days = wns.days + [wd.get(d, d)] -%}
+            {%- endfor -%}
+            {%- set when = (wns.days | join(', ')) ~ ', ' ~ e.get('time', '00:00') ~ ' Uhr' -%}
+          {%- elif typ == 'once' -%}
+            {%- set dp = (e.get('date', '') or '').split('-') -%}
+            {%- set when = 'Einmalig ' ~ (dp[2] ~ '.' ~ dp[1] ~ '.' ~ dp[0] if dp | count == 3 else '?') ~ ', ' ~ e.get('time', '00:00') ~ ' Uhr' -%}
+          {%- else -%}
+            {%- set when = 'Täglich, ' ~ e.get('time', '00:00') ~ ' Uhr' -%}
+          {%- endif -%}
+          {%- set suffix = '' if e.get('enabled', true) else ' (pausiert)' -%}
+          {%- set ns.lines = ns.lines + [e.get('program', 'Kein Programm') ~ ' - ' ~ when ~ suffix] -%}
+        {%- endfor -%}
+        {{ (ns.lines | join('\n')) if ns.lines else 'Keine Eintraege' }}
+      "val": >-
+        {%- set count = (state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count -%}
         {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
-        {%- set enabled = (schedule[idx].get('enabled', true) if idx < (schedule | count) else true) -%}
-        Eintrag {{ idx + 1 }}{{ '\n' }}{{ 'Aktiv' if enabled else 'Pausiert' }}
+        {{ idx if idx < count else 0 }}
+    event:
+      "changed":
+        - service: input_number.set_value
+          data:
+            value: "{{ val }}"
+          target:
+            entity_id: input_number.gartenwasser_plate_settings_zeitplan_eintrag
+
+  - obj: "p4b80"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
       "bg_color": >-
         {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
         {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
