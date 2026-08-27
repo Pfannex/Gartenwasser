@@ -5,6 +5,10 @@ Ergänzt `docs/requirements.md` (funktionale Spezifikation) und `docs/manual/use
 alles, was beim Verstehen/Navigieren der Codebasis hilft, aber weder Spezifikation noch
 Bedienungsanleitung ist.
 
+Dieses Dokument deckt den **C++-Firmware-Teil** ab (Doxygen). Für den **nicht-C-Teil** —
+Datenfluss/Abhängigkeiten zwischen Gerät, MQTT, Web-Interface, Home Assistant und dem
+openHASP-Touchpanel — siehe [`docs/architecture.md`](architecture.md).
+
 ## Code-Struktur visualisieren (Doxygen + Graphviz)
 
 Die Firmware besteht aus 10 Klassen + 3 Namespaces in `src/` (`AutomaticController`,
