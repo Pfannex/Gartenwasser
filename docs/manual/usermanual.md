@@ -38,6 +38,19 @@ Die Gartenwasser-Steuerung schaltet bis zu 5 Bewässerungsventile (`V1`–`V5`) 
 
 Alle fünf Wege greifen auf denselben Zustand zu — eine Änderung über einen Weg erscheint sofort auf den anderen (z. B. schaltet ein Touch-Tap am Display auch `V1/state` per MQTT). Nicht jeder Weg deckt jede Funktion ab — Kapitel 10 stellt eine vollständige Gegenüberstellung bereit.
 
+**Projektumfang** (Stand dieses Dokuments): Repository-Größe ohne `.git`-Verlaufsdaten und PlatformIO-Build-Cache (`.pio`) ≈ 11 MB, davon ≈ 6,3 MB automatisch generierte Doxygen-Code-Dokumentation (Kapitel 11.5). Handgeschriebener Inhalt, nach Bereich:
+
+| Bereich | Zeilen |
+|---|---:|
+| Firmware (C++, `src/`+`include/`) | ≈ 5.380 |
+| Web-Interface (HTML/CSS/JS, ohne mitgelieferte Bibliotheken) | ≈ 1.340 |
+| Home-Assistant-Konfiguration (YAML) | ≈ 7.080 |
+| openHASP-Plate (`pages.jsonl`) | ≈ 120 |
+| Dokumentation (Markdown, dieses Handbuch + `docs/`) | ≈ 4.540 |
+| **Gesamt** | **≈ 18.460** |
+
+Zusätzlich automatisch generiert (nicht Teil obiger Zahlen): die Doxygen-Ausgabe umfasst 153 Dateien mit zusammen ≈ 28.600 Zeilen HTML/XML (Kapitel 11.5) — reines Build-Artefakt, kein von Hand geschriebener Inhalt.
+
 **Programme vs. manuelle Bedienung:** Ein *Programm* legt fest, welche Ventile mit welcher Laufzeit an der nächsten Automatik-Sequenz teilnehmen (`auto`-Flag + `time` je Ventil). Ändert man `time` oder `auto` direkt (ohne ein Programm zu wählen), springt die Anzeige automatisch auf „Manueller Modus" — das verhindert, dass eine Änderung beim nächsten Automatikstart stillschweigend überschrieben wird.
 
 ---
