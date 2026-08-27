@@ -3,7 +3,7 @@
 Automatische Gartenbewässerung auf ESP32-C6-Basis mit Touch-Display, Web-Interface und MQTT/Home-Assistant-Anbindung.
 
 **Firmware-Version:** siehe `include/Version.h` bzw. Web-Interface → *Info* → *Firmware*
-**Stand dieses Dokuments:** 2026-08-19
+**Stand dieses Dokuments:** 2026-08-27
 
 ---
 
@@ -17,22 +17,26 @@ Automatische Gartenbewässerung auf ESP32-C6-Basis mit Touch-Display, Web-Interf
 6. [Bedienung: Web-Interface](#6-bedienung-web-interface)
 7. [MQTT-Schnittstelle](#7-mqtt-schnittstelle)
 8. [Home-Assistant-Integration](#8-home-assistant-integration)
-9. [Firmware-Updates](#9-firmware-updates)
-10. [Anhang: Fehlerbehebung](#10-anhang-fehlerbehebung)
+9. [Bedienung: openHASP-Touchpanel (Plate)](#9-bedienung-openhasp-touchpanel-plate)
+10. [Gesamtübersicht aller Bedienwege](#10-gesamtübersicht-aller-bedienwege)
+11. [Firmware-Updates](#11-firmware-updates)
+12. [Anhang: Fehlerbehebung](#12-anhang-fehlerbehebung)
 
 ---
 
 ## 1. Überblick
 
-Die Gartenwasser-Steuerung schaltet bis zu 5 Bewässerungsventile (`V1`–`V5`) plus ein gemeinsames Hauptventil (`V0`), das automatisch mitgeschaltet wird, sobald mindestens ein Bewässerungsventil aktiv ist. Drei gleichwertige Bedienwege stehen zur Verfügung:
+Die Gartenwasser-Steuerung schaltet bis zu 5 Bewässerungsventile (`V1`–`V5`) plus ein gemeinsames Hauptventil (`V0`), das automatisch mitgeschaltet wird, sobald mindestens ein Bewässerungsventil aktiv ist. Fünf Bedienwege stehen zur Verfügung:
 
 | Weg | Wofür geeignet |
 |---|---|
-| **Touch-Display** (Kapitel 5) | Schnelle Vor-Ort-Bedienung: Start/Stop, Ventile einzeln schalten, Programm wählen |
+| **Touch-Display am Gerät** (Kapitel 5) | Schnelle Vor-Ort-Bedienung: Start/Stop, Ventile einzeln schalten, Programm wählen |
 | **Web-Interface** (Kapitel 6) | Vollständige Konfiguration: Programme/Zeitplan anlegen, Live-Log, Firmware-Update |
 | **MQTT** (Kapitel 7) | Automatisierung, Home Assistant, eigene Skripte |
+| **Home Assistant** (Kapitel 8) | Dashboard-Bedienung, Sprachsteuerung/Automatisierungen, Diagnose |
+| **openHASP-Touchpanel** (Kapitel 9) | Separat montiertes Wand-/Tischpanel, größerer Bildschirm als das Geräte-Display |
 
-Alle drei Wege greifen auf denselben Zustand zu — eine Änderung über einen Weg erscheint sofort auf den anderen (z. B. schaltet ein Touch-Tap am Display auch `V1/state` per MQTT).
+Alle fünf Wege greifen auf denselben Zustand zu — eine Änderung über einen Weg erscheint sofort auf den anderen (z. B. schaltet ein Touch-Tap am Display auch `V1/state` per MQTT). Nicht jeder Weg deckt jede Funktion ab — Kapitel 10 stellt eine vollständige Gegenüberstellung bereit.
 
 **Programme vs. manuelle Bedienung:** Ein *Programm* legt fest, welche Ventile mit welcher Laufzeit an der nächsten Automatik-Sequenz teilnehmen (`auto`-Flag + `time` je Ventil). Ändert man `time` oder `auto` direkt (ohne ein Programm zu wählen), springt die Anzeige automatisch auf „Manueller Modus" — das verhindert, dass eine Änderung beim nächsten Automatikstart stillschweigend überschrieben wird.
 
@@ -439,28 +443,172 @@ mosquitto_sub -t gartenwasser/diagnostics/livelog
 
 ## 8. Home-Assistant-Integration
 
-> **Noch nicht umgesetzt** — MQTT-Discovery (automatische Einbindung in Home Assistant ohne manuelle `configuration.yaml`-Einträge) ist als eigene Phase geplant, aber noch nicht implementiert. Bis dahin lässt sich das Gerät über manuell angelegte [MQTT-Entities](https://www.home-assistant.io/integrations/mqtt/) einbinden — die Topics aus Kapitel 7 sind dafür direkt nutzbar.
->
-> Dieses Kapitel wird ergänzt, sobald die Discovery-Integration fertig ist.
+Home Assistant bindet das Gerät auf zwei sich ergänzenden Wegen ein: automatische **MQTT-Discovery** (26 Entities, kommen ohne jede manuelle Konfiguration, sobald das Gerät online ist) plus eine mitgelieferte, manuell einzubindende **Ergänzungskonfiguration** (`HomeAssistant/` im Repository) für alles, was Discovery allein nicht abbilden kann — Alias-Namen, Programm-/Zeitplan-Verwaltung, ein vollständiges Dashboard sowie die Anbindung des openHASP-Touchpanels (Kapitel 9). Einrichtungsschritte im Detail: `docs/homeassistant/README.md`.
+
+### 8.1 Automatisch erkannte Entities (MQTT-Discovery)
+
+Erscheinen als ein Gerät „Gartenbewässerung" unter *Einstellungen → Geräte & Dienste*, sobald das Gerät zum ersten Mal mit dem Broker verbindet — keine Handarbeit nötig. Alle 26 Entities hängen an `gartenwasser/availability` (Kapitel 7.1): geht das Gerät offline, erscheinen sie gemeinsam als „nicht verfügbar".
+
+| Entity | Domäne | Bedeutung | Bedienbar? |
+|---|---|---|---|
+| `binary_sensor.gartenbewasserung_hauptventil` | binary_sensor | Hauptventil (V0) an/aus | nur Anzeige |
+| `switch.gartenbewasserung_ventil_1` … `_5` | switch | Ventil V1–V5 an/aus | ja, direkt schaltbar |
+| `binary_sensor.gartenbewasserung_ventil_1_automatik` … `_5` | binary_sensor | Nimmt das Ventil an der Automatik teil? | nur Anzeige (Änderung nur über Programme, siehe Kapitel 1) |
+| `number.gartenbewasserung_ventil_1_laufzeit` … `_5` | number | Konfigurierte Laufzeit je Ventil (Minuten) | ja |
+| `sensor.gartenbewasserung_ventil_1_restlaufzeit` … `_5` | sensor | Rohe Restlaufzeit-Angabe der Firmware (`V{n}/time/remaining`) | nur Anzeige |
+| `switch.gartenbewasserung_automatik_sequenz` | switch | Automatik-Sequenz Start/Stop | ja |
+| `sensor.gartenbewasserung_aktives_ventil` | sensor | Aktuell aktives Ventil der Sequenz | nur Anzeige |
+| `sensor.gartenbewasserung_restzeit_sequenz` | sensor | Restzeit der Gesamtsequenz (roh, `main/remainingTotal`) | nur Anzeige |
+| `sensor.gartenbewasserung_i2c_status` | sensor | I2C-Bus/MCP23017 erreichbar? (`ok`/`error`) | nur Anzeige — **zentraler Offline-Indikator**, siehe Kapitel 8.6 |
+| `sensor.gartenbewasserung_letzter_fehler` | sensor | Letzte Fehlermeldung der Firmware | nur Anzeige |
+
+> Die rohen Restlaufzeit-Sensoren (`_restlaufzeit`/`_restzeit_sequenz`) werden von der mitgelieferten Konfiguration **nicht** direkt anzeigt — stattdessen berechnen eigene Template-Sensoren (Kapitel 8.3) die Restzeit robuster aus Schaltzeitpunkt + konfigurierter Laufzeit, unabhängig vom nicht-retained MQTT-Sekundentakt.
+
+### 8.2 Ergänzende Entities (manuell mitgeliefert, `mqtt.yaml`)
+
+Decken ab, was Discovery nicht kann: Alias-Namen (kein Discovery-Topic dafür vorgesehen), Programme/Zeitplan als strukturierte JSON-Objekte, sowie Diagnose-/Systeminfo im Klartext.
+
+| Entity | Domäne | Bedeutung |
+|---|---|---|
+| `text.gartenwasser_v0_alias` … `_v5_alias` | text | Ventil-Aliasnamen, editierbar (spiegelt `V{n}/alias`) |
+| `number.gartenwasser_v1_laufzeit` … `_v5_laufzeit` | number | Alternative Laufzeit-Entities (Alias-nahes Pendant zu 8.1) |
+| `number.gartenwasser_max_time` | number | Globale Obergrenze pro Ventil (`main/time/maxTime`) |
+| `sensor.gartenwasser_programme` | sensor | Anzahl Programme; Attribute `programs[]` (komplette Liste) + `activeProgram` |
+| `sensor.gartenwasser_zeitplan` | sensor | Attribut `schedule[]` — komplette Zeitplan-Liste |
+| `switch.gartenwasser_zeitplan_aktiv` | switch | Globaler Zeitplan-Schalter (`main/schedule/cmd`) |
+| `sensor.gartenwasser_firmware` | sensor | Firmware-Version + Build-Nummer |
+| `sensor.gartenwasser_ram`, `sensor.gartenwasser_flash` | sensor | Speicherauslastung in Prozent |
+| `sensor.gartenwasser_reset_grund` | sensor | Grund des letzten Neustarts |
+| `sensor.gartenwasser_uptime`, `sensor.gartenwasser_stack_free` | sensor | Laufzeit seit Boot, freier Stack |
+| `sensor.gartenwasser_rssi`, `sensor.gartenwasser_ip`, `sensor.gartenwasser_broker` | sensor | WLAN-Signalstärke, eigene IP, Broker-Adresse |
+| `sensor.gartenwasser_partitionen` | sensor | Partitionstabelle als Attribut (JSON-Array) |
+
+### 8.3 Berechnete Entities (Template-Sensoren)
+
+Rein HA-seitig berechnet, kein eigenes MQTT-Topic. Zweck: robustere Restzeit-Anzeige, die nicht auf den nicht-retained `.../time/remaining`-Sekundentakt angewiesen ist, sondern aus `switch`-Schaltzeitpunkt (`last_changed`) + konfigurierter Laufzeit rechnet — übersteht dadurch z. B. einen HA-Neustart mitten in einem laufenden Ventil unbeschadet.
+
+| Entity | Bedeutung |
+|---|---|
+| `sensor.gartenwasser_v1_restlaufzeit_prozent` … `_v5_...` | Restlaufzeit je Ventil in Prozent (für Fortschrittsbalken) |
+| `sensor.gartenwasser_v1_restzeit_text` … `_v5_...` | Restlaufzeit je Ventil als „mm:ss Min."-Text |
+| `sensor.gartenwasser_sequenz_restlaufzeit_prozent` | Restzeit der Gesamtsequenz in Prozent |
+| `sensor.gartenwasser_sequenz_restzeit_text` | Restzeit der Gesamtsequenz als Text |
+| `sensor.gartenwasser_gesamtlaufzeit` | Angenäherte Gesamtdauer der aktuellen Sequenz (Summe der `auto=on`-Laufzeiten — Näherung, siehe Backlog-Idee in `docs/requirements.md`) |
+
+### 8.4 Helper-Entities (Formulare, Entwürfe, Plate-Bedienzustand)
+
+Reine Hilfs-Entities ohne eigene MQTT-Anbindung — halten Zwischenzustände von Formularen bzw. den aktuellen Bedienzustand des openHASP-Panels fest. Nicht für die direkte Bedienung gedacht, werden ausschließlich von Skripten/Automationen bzw. den Dashboard-Formularen verwendet.
+
+| Zweck | Entities |
+|---|---|
+| Programm-Editor (Entwurf vor „Speichern") | `input_text.gartenwasser_entwurf_name`, `input_boolean.gartenwasser_entwurf_v1_auto`…`_v5_auto`, `input_number.gartenwasser_entwurf_v1_zeit`…`_v5_zeit`, `input_number.gartenwasser_editier_index` |
+| Zeitplan-Editor (Entwurf vor „Speichern") | `input_select.gartenwasser_zeitplan_entwurf_program`, `input_select.gartenwasser_zeitplan_entwurf_type`, `input_datetime.gartenwasser_zeitplan_entwurf_zeit`, `input_datetime.gartenwasser_zeitplan_entwurf_datum`, `input_boolean.gartenwasser_zeitplan_entwurf_mon`…`_sun`, `input_number.gartenwasser_zeitplan_editier_index` |
+| Programm-Dropdown-Sync (Status-Seite/Plate) | `input_select.gartenwasser_programm` |
+| openHASP-Plate — Settings-Seite (Kapitel 9.3) | `input_select.gartenwasser_plate_settings_kategorie`, `input_number.gartenwasser_plate_settings_ventil`, `input_number.gartenwasser_plate_settings_programm`, `input_number.gartenwasser_plate_settings_zeitplan_eintrag`, `input_boolean.gartenwasser_plate_settings_zeit_minute_modus`, `input_select.gartenwasser_plate_settings_datum_feld` |
+
+### 8.5 Automationen und Skripte
+
+| Name | Auslöser | Wirkung |
+|---|---|---|
+| „Programme-Liste synchronisieren" | `sensor.gartenwasser_programme` ändert sich | Aktualisiert die Optionsliste von `input_select.gartenwasser_programm` |
+| „Aktives Programm → Dropdown" | Aktives Programm ändert sich am Gerät | Zieht `input_select.gartenwasser_programm` nach (bidirektional, kein Rückkopplungsrisiko) |
+| „Dropdown → Programm wählen" | `input_select.gartenwasser_programm` wird in HA geändert | Publiziert den passenden Index an `main/program/cmd` |
+| „openHASP plate_wz: Backlight bei Idle dimmen" | Plate meldet Idle-Zustand | Dimmt die Hintergrundbeleuchtung des Panels |
+| `script.gartenwasser_programm_*` (neu/bearbeiten/speichern/löschen/abbrechen) | Dashboard-Buttons (Kapitel 8.6) | Programm-CRUD über die Entwurfs-Helper aus 8.4 |
+| `script.gartenwasser_zeitplan_eintrag_*` (neu/bearbeiten/speichern/löschen/abbrechen/toggle_aktiv) | Dashboard-Buttons (Kapitel 8.6) | Zeitplan-Eintrag-CRUD über die Entwurfs-Helper aus 8.4 |
+| `script.gartenwasser_plate_*` (7 Skripte: Programm-AUTO-Toggle, Laufzeit, Zeitplan-Typ/-Zeit/-Wochentag/-Datum/-Programm setzen) | Taps auf dem openHASP-Panel (Kapitel 9.3) | Direktes Schreiben einzelner Felder (kein Entwurf/Speichern-Workflow wie im Dashboard) |
+
+### 8.6 HA-Dashboard
+
+Eigenes Lovelace-Dashboard „Gartenwasser" (`HomeAssistant/dashboards/gartenwasser.yaml`, YAML-Modus), bildet fünf der sieben WebIF-Reiter nach (alle außer *Update* — ein Firmware-Update ist über das Dashboard nicht vorgesehen, dafür bleibt das WebIF zuständig, Kapitel 6.6) plus eine reine Info-Seite. Voraussetzung: mehrere HACS-Custom-Cards (Bubble Card, Mushroom, card_mod u. a. — siehe `docs/homeassistant/README.md`).
+
+**Status** — Startbildschirm mit Live-Übersicht und Schnellbedienung. Ein großer „Automatik"-Knopf startet/stoppt die Sequenz, darunter (nur im Ruhezustand wählbar) eine Programm-Dropdown-Auswahl sowie Restlaufzeit als Countdown mit Fortschrittsbalken. Kachel-Raster darunter: Hauptventil-Kachel zeigt nur den Zustand (grau bei Offline/„Kein Programm", sonst rot/grün), die fünf Ventilkacheln zeigen Alias, Zustand, bei laufendem Ventil die Restlaufzeit samt Balken — Antippen schaltet das jeweilige Ventil manuell. Eine Diagnose-Kachel zeigt Verbindungsstatus, I2C-Status sowie RAM-/Flash-Auslastung.
+
+**Konfiguration** — Ein globaler Schieberegler setzt die maximale Laufzeit pro Ventil; überschreitet die individuelle Laufzeit diesen Wert, erscheint eine Warnzeile. Für jedes Ventil ein editierbares Textfeld (Alias) und ein Laufzeit-Schieberegler, Änderungen wirken sofort. Kein Automatik-Schalter hier — das läuft ausschließlich über Programme.
+
+**Programme** — Liste aller Programme mit Name und aktiven-Ventile-Zusammenfassung, je Eintrag Aktivieren/Bearbeiten/Löschen. „Neues Programm" öffnet einen Editor (Name, je Ventil Auto-Schalter + Laufzeit-Schieberegler) über die Entwurfs-Helper aus 8.4, Speichern/Abbrechen übernimmt bzw. verwirft.
+
+**Zeitplan** — Globaler Schalter „Zeitplan aktiv" oben, darunter alle Einträge mit Programm, Zeittyp und Uhrzeit; Antippen schaltet einen Eintrag einzeln aktiv/pausiert (referenziert der Eintrag ein gelöschtes Programm, erscheint „Programm nicht gefunden!" und die Kachel wird gesperrt). Bearbeiten/Löschen je Eintrag, „Neuer Eintrag" öffnet den Editor (Programm, Typ, Uhrzeit, je nach Typ Datum oder Wochentage).
+
+**Log** — Kein Nachbau des vollständigen Geräte-Logs (das bleibt dem WebIF vorbehalten, Kapitel 6.5) — stattdessen das Standard-Home-Assistant-Logbuch der letzten 24 Stunden für Automatik-Schalter und alle fünf Ventilschalter, reine Anzeige.
+
+**Info** — Reine Anzeigeseite: Firmware (Version, Uptime, letzter Neustartgrund), Hardware (statische Eckdaten), Speicher (RAM/Flash-Auslastung, freier Stack, Partitionstabelle) und Netzwerk (IP, WLAN-Signalstärke, Broker-Adresse).
 
 ---
 
-## 9. Firmware-Updates
+## 9. Bedienung: openHASP-Touchpanel (Plate)
+
+### 9.1 Überblick
+
+Zusätzlich zum Touch-Display direkt am Gerät (Kapitel 5) lässt sich die Gartenbewässerung auch über ein **separates, per Wand-/Tischhalterung montiertes Touchpanel** bedienen — Hardware-unabhängig vom eigentlichen Steuerungs-Board, angebunden ausschließlich über MQTT + die [openHASP](https://www.openhasp.com/)-Firmware und die Home-Assistant-Integration `openhasp` (Konfiguration: `HomeAssistant/configurations/plates/plate_wz/openhasp.yaml`). Das Panel („`plate_wz`") ist ein Mehrzweck-Gerät — es hostet neben den beiden Gartenbewässerungs-Seiten auch fachfremde Seiten für andere Haussteuerungs-Funktionen (Hauptmenü, Beleuchtung), die hier nicht Teil der Dokumentation sind.
+
+Im Gegensatz zum Geräte-eigenen HMI (172×320px, Kapitel 5) hat das Panel eine deutlich größere Fläche (480×480px) und kann dadurch **mehr Funktionalität** unterbringen — inklusive eines Zeitplan-Editors, den das kleine Geräte-Display bewusst nicht anbietet (Kapitel 5.2).
+
+### 9.2 Status-Seite
+
+Nachbau der wichtigsten WebIF-Status-Funktionen: START/STOP-Button (Automatik-Sequenz), Programm-Auswahl-Dropdown, sechs Ventilkacheln (Hauptventil + V1–V5) mit Live-Restlaufzeit-Text, sowie eine Diagnosezeile (I2C-Status, RAM-/Flash-Auslastung in Prozent). Die Ventilkacheln V1–V5 sind antippbar und schalten das jeweilige Ventil direkt manuell (identische Farblogik wie das Geräte-HMI, Kapitel 5.1: grün = für Automatik vorgesehen, dunkelgrau = nicht vorgesehen, rot = läuft gerade). Das Hauptventil ist reine Anzeige (grau bei Geräte-offline oder „Kein Programm" gewählt, sonst rot/grün je nach Zustand — identische Logik wie auf dem HA-Dashboard, Kapitel 8.6).
+
+Geht das Gerät offline, zeigt die Start-Bubble ein WLAN-Aus-Symbol samt „Offline"-Text statt Start/Stop, die Programmauswahl wird gesperrt.
+
+### 9.3 Settings-Seite
+
+Über das Zahnrad-Icon auf der Status-Seite erreichbar. Drei Kategorien, per Radio-Button-Reihe oben umschaltbar (weißer Rahmen zeigt die aktive Kategorie):
+
+**Konfiguration** — Ventil-Pager (`‹`/`›` blättert durch V1–V5, zeigt Alias groß + Ventilnummer klein, **nur Anzeige, nicht editierbar**) plus ein `-`/`+`-Stepper für die zugehörige Standard-Laufzeit (0–180 min, geteilter Zustand mit der Programme-Kategorie).
+
+**Programme** — Programm-Pager (blättert durch alle vorhandenen Programme) plus ein zweiter Pager, der gleichzeitig als AUTO-Umschalter für das aktuell gewählte Ventil innerhalb dieses Programms dient (Antippen der Mitte schaltet um, grün = an), darunter ein Laufzeit-Stepper (funktioniert unabhängig vom AUTO-Zustand). **Nur bestehende Programme editierbar** — Anlegen, Umbenennen oder Löschen eines Programms ist auf dem Panel nicht möglich, dafür WebIF (6.3) oder HA-Dashboard (8.6) nutzen.
+
+**Zeitpläne** — Eintrags-Auswahl-Dropdown oben (zeigt „Programmname – wann", z. B. „extraKurz – Di, Do, Sa, 07:00 Uhr"), daneben ein Programm-Dropdown und ein AKTIV/PAUSIERT-Umschalter für den gewählten Eintrag. Darunter Modus-Auswahl (Täglich/Wöchentlich/Einmalig als drei Buttons), darunter je nach Modus eine Zeit- oder Datumseinstellung sowie bei „Wöchentlich" eine Wochentagsreihe (Mo–So, einzeln antippbar). Zeit und Datum lassen sich **feldweise** einstellen: Antippen von Stunde/Minute bzw. Tag/Monat/Jahr wählt das jeweilige Feld direkt aus (weißer Rahmen zeigt die Auswahl), die `‹`/`›`-Pfeile verändern gezielt nur dieses Feld — vermeidet, dass eine große Zeit-/Datumsverschiebung viele einzelne Taps braucht. Ein langer Druck (Long-Press) auf den Kategorie-Button „Zeitpläne" schaltet den **globalen** Zeitplan-Schalter um (unabhängig von der gerade gewählten Kategorie, bleibt als Dauerzustand grün sichtbar, solange aktiv). **Nur bestehende Einträge editierbar** — Anlegen oder endgültiges Löschen eines Zeitplan-Eintrags ist auf dem Panel nicht möglich, dafür WebIF (6.4) oder HA-Dashboard (8.6) nutzen.
+
+Auch hier: unten rechts erscheint bei Geräte-Ausfall der Hinweis „Device ist offline!" (rot).
+
+---
+
+## 10. Gesamtübersicht aller Bedienwege
+
+Vier eigenständige Oberflächen plus die zugrundeliegende MQTT-Schnittstelle stehen zur Wahl — je nach Situation ist ein anderer Weg am praktischsten (schneller Tap vor Ort vs. vollständige Konfiguration vs. Sprachsteuerung/Automatisierung über Home Assistant). Alle greifen auf denselben Gerätezustand zu.
+
+| Funktion | Geräte-HMI (5) | Geräte-WebIF (6) | HA-Dashboard (8.6) | openHASP-Plate (9) | MQTT (7) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Ventil V1–V5 manuell schalten | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Hauptventil-Status ansehen | ✅ | ✅ | ✅ (nur Anzeige) | ✅ (nur Anzeige) | ✅ |
+| Automatik Start/Stop | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Programm auswählen/aktivieren | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Programm anlegen/umbenennen/löschen | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Programm bearbeiten (Ventile/Laufzeiten) | ❌ | ✅ | ✅ | ✅ (nur bestehende) | ✅ |
+| Ventil-Alias bearbeiten | ❌ | ✅ | ✅ | ❌ (nur Anzeige) | ✅ |
+| Ventil-Laufzeit bearbeiten | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Globale Obergrenze (`maxTime`) bearbeiten | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Zeitplan-Eintrag anlegen/löschen | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Zeitplan-Eintrag bearbeiten | ❌ | ✅ | ✅ | ✅ (nur bestehende) | ✅ |
+| Zeitplan-Eintrag einzeln aktiv/pausiert | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Zeitplan global aktiv/pausiert | ❌ | ✅ | ✅ | ✅ (Long-Press) | ✅ |
+| Live-Restlaufzeit ansehen | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Diagnose (I2C/RAM/Flash/Version) | ⚠️ nur I2C-Fehler | ✅ vollständig | ✅ vollständig | ✅ vollständig | ✅ |
+| Vollständiges Live-Log mitlesen | ❌ | ✅ | ❌ (nur 24h-Logbuch) | ❌ | ✅ (`diagnostics/livelog`) |
+| Firmware-/WebIF-Update einspielen | ❌ | ✅ | ❌ | ❌ | ❌ (nur per PlatformIO, Kap. 11.2/11.3) |
+| Geräte-Offline erkennen | n/a | n/a (nur erreichbar wenn online) | ✅ | ✅ | ✅ (`availability`) |
+
+✅ = voll unterstützt · ⚠️ = eingeschränkt · ❌ = nicht verfügbar · n/a = nicht zutreffend
+
+---
+
+## 11. Firmware-Updates
 
 Drei gleichwertige Wege, ein Firmware- oder Web-Interface-Update einzuspielen:
 
-### 9.1 Über das Web-Interface (ohne Entwicklungsumgebung)
+### 11.1 Über das Web-Interface (ohne Entwicklungsumgebung)
 
 Empfohlen für alle, die keine Entwicklungsumgebung installiert haben. Web-Interface → *Update* → Datei auswählen (`firmware.bin` bzw. das Web-Dateisystem-Image) → Hochladen. Firmware und Dateisystem werden unabhängig voneinander aktualisiert. Nach erfolgreichem Upload startet das Gerät automatisch neu.
 
-### 9.2 Per Kabel (USB, PlatformIO)
+### 11.2 Per Kabel (USB, PlatformIO)
 
 ```
 pio run -e esp32-c6-devkitc-1 --target upload      # Firmware
 pio run -e esp32-c6-devkitc-1 --target uploadfs    # Web-Interface-Dateien
 ```
 
-### 9.3 Kabellos über WLAN (PlatformIO, für Entwickler)
+### 11.3 Kabellos über WLAN (PlatformIO, für Entwickler)
 
 ```
 pio run -e esp32-c6-devkitc-1-ota --target upload      # Firmware
@@ -469,13 +617,13 @@ pio run -e esp32-c6-devkitc-1-ota --target uploadfs    # Web-Interface-Dateien
 
 Voraussetzung: Gerät läuft bereits und ist im WLAN erreichbar (mDNS-Name `gartenwasser.local`).
 
-### 9.4 Version prüfen
+### 11.4 Version prüfen
 
 Nach jedem Update lässt sich die tatsächlich laufende Version im Web-Interface unter *Info* → *Firmware* ablesen (Format „V<Version> Build <Nummer>") — die Build-Nummer zählt bei jedem Firmware-Build automatisch hoch, unabhängig von der manuell vergebenen Versionsnummer.
 
 ---
 
-## 10. Anhang: Fehlerbehebung
+## 12. Anhang: Fehlerbehebung
 
 | Symptom | Mögliche Ursache | Lösung |
 |---|---|---|
