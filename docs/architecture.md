@@ -77,10 +77,6 @@ graph TB
 
     TEMPLATE --> DASH
     TEMPLATE --> PLATEBIND
-    MQTTY --> DASH
-    MQTTY --> PLATEBIND
-    DISC --> DASH
-    DISC --> PLATEBIND
     HELPERS --> DASH
     HELPERS --> PLATEBIND
     HELPERS -.->|"Speichern/Abbrechen"| SCRIPTS
@@ -96,7 +92,10 @@ graph TB
 eine Anzeige-Entity, sondern publiziert auf ein `.../set`-Topic; das Gerät validiert,
 übernimmt (oder verwirft, siehe `docs/Log.md` zu stillen Ablehnungen) und echot den neuen
 Zustand zurück auf `.../state` — von dort fließt er ganz normal wieder durch `TEMPLATE`/
-`DASH`/`PLATEBIND`. Kein Skript nimmt eine Abkürzung an der Firmware vorbei.
+`DASH`/`PLATEBIND`. Kein Skript nimmt eine Abkürzung an der Firmware vorbei. Der Übersicht
+halber nicht eingezeichnet: Dashboard und Plate lesen für einzelne Kacheln/Felder teils auch
+direkt aus `DISC`/`MQTTY` (z. B. Firmware-Version, Alias-Textfelder) statt über `TEMPLATE`/
+`HELPERS` — die Grafik zeigt die *Schichten-Rollen*, keine vollständige Kantenliste.
 
 ## 3. Datenfluss-Beispiel: Zeitplan-Eintrag am Plate bearbeiten
 
