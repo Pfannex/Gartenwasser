@@ -358,9 +358,9 @@ objects:
 
   - obj: "p3b40"
     properties:
-      "bg_color": "{{ '#757575' if is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') else ('#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047') }}"
-      "bg_color30": "{{ '#757575' if is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') else ('#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047') }}"
-      "bg_color40": "{{ '#757575' if is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') else ('#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047') }}"
+      "bg_color": "{{ '#757575' if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('input_select.gartenwasser_programm', 'Kein Programm')) else ('#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047') }}"
+      "bg_color30": "{{ '#757575' if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('input_select.gartenwasser_programm', 'Kein Programm')) else ('#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047') }}"
+      "bg_color40": "{{ '#757575' if (is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') or is_state('input_select.gartenwasser_programm', 'Kein Programm')) else ('#e53935' if is_state('binary_sensor.gartenbewasserung_hauptventil', 'on') else '#43a047') }}"
 
   - obj: "p3b41"
     properties:
