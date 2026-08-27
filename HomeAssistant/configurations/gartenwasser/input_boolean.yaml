@@ -41,3 +41,10 @@ gartenwasser_zeitplan_entwurf_sat:
   name: "Gartenwasser Zeitplan Entwurf Samstag"
 gartenwasser_zeitplan_entwurf_sun:
   name: "Gartenwasser Zeitplan Entwurf Sonntag"
+
+# Auswahl-Modus fuer den Zeit-Stepper auf der Plate-Settings-Seite (Zeitplan-Kategorie):
+# aus = Stunde ausgewaehlt, an = Minute ausgewaehlt. Tap auf Stunde- ODER Minute-Button
+# schaltet um (siehe openhasp.yaml, p4b67/p4b81) - so lassen sich grosse Zeitspruenge
+# (Stunde) und Feinjustierung (Minute) getrennt vornehmen, statt in 15-Minuten-Schritten.
+gartenwasser_plate_settings_zeit_minute_modus:
+  name: "Gartenwasser Plate Settings Zeit Minute-Modus"
