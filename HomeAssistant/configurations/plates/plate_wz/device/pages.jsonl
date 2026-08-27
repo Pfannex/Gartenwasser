@@ -71,26 +71,26 @@
 {"page":4,"id":82,"obj":"btn","x":167,"y":75,"w":144,"h":50,"text":"Programme","text_font":16,"radius":6,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0,"border_color":"#FFFFFF"}
 {"page":4,"id":83,"obj":"btn","x":319,"y":75,"w":144,"h":50,"text":"Zeitpläne","text_font":16,"radius":6,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0,"border_color":"#FFFFFF"}
 
-{"page":4,"id":30,"obj":"btn","x":15,"y":140,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":30,"obj":"btn","x":15,"y":140,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 {"page":4,"id":31,"obj":"label","x":71,"y":140,"w":338,"h":32,"text":"Sprenger Rasen","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
 {"page":4,"id":32,"obj":"label","x":71,"y":174,"w":338,"h":22,"text":"Ventil 1","text_font":16,"align":1,"text_color":"#a9a9a9","bg_opa":0}
-{"page":4,"id":33,"obj":"btn","x":409,"y":140,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":33,"obj":"btn","x":409,"y":140,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 
-{"page":4,"id":34,"obj":"btn","x":15,"y":211,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":34,"obj":"btn","x":15,"y":211,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 {"page":4,"id":35,"obj":"label","x":71,"y":223,"w":338,"h":32,"text":"12 Min","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
-{"page":4,"id":36,"obj":"btn","x":409,"y":211,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":36,"obj":"btn","x":409,"y":211,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 
-{"page":4,"id":40,"obj":"btn","x":15,"y":140,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":40,"obj":"btn","x":15,"y":140,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 {"page":4,"id":41,"obj":"label","x":71,"y":152,"w":338,"h":32,"text":"Rasen","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
-{"page":4,"id":42,"obj":"btn","x":409,"y":140,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":42,"obj":"btn","x":409,"y":140,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 
-{"page":4,"id":43,"obj":"btn","x":15,"y":211,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
-{"page":4,"id":44,"obj":"btn","x":86,"y":211,"w":308,"h":56,"text":"V1: Sprenger Rasen\nAutomatik AN","text_font":16,"align":1,"radius":6,"bg_color":"#43a047","bg_color30":"#43a047","bg_color40":"#43a047","border_width":0}
-{"page":4,"id":45,"obj":"btn","x":409,"y":211,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":43,"obj":"btn","x":15,"y":211,"w":56,"h":56,"text":"<","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
+{"page":4,"id":44,"obj":"btn","x":86,"y":211,"w":308,"h":56,"text":"V1: Sprenger Rasen\nAutomatik AN","text_font":16,"align":1,"radius":6,"bg_color":"#43a047","bg_color30":"#43a047","bg_color40":"#43a047","bg_grad_dir":0,"border_width":0}
+{"page":4,"id":45,"obj":"btn","x":409,"y":211,"w":56,"h":56,"text":">","text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 
-{"page":4,"id":46,"obj":"btn","x":15,"y":282,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":46,"obj":"btn","x":15,"y":282,"w":56,"h":56,"text":"-","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 {"page":4,"id":47,"obj":"label","x":71,"y":294,"w":338,"h":32,"text":"8 Min","text_font":28,"align":1,"text_color":"#FFFFFF","bg_opa":0}
-{"page":4,"id":48,"obj":"btn","x":409,"y":282,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"border_width":0}
+{"page":4,"id":48,"obj":"btn","x":409,"y":282,"w":56,"h":56,"text":"+","text_font":28,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","radius":6,"bg_grad_dir":0,"border_width":0}
 
 {"page":4,"id":61,"obj":"dropdown","x":15,"y":131,"w":450,"h":50,"text_font":24,"bg_color":"#333333","bg_color30":"#333333","bg_color40":"#333333","bg_grad_dir":0,"border_width":0,"options":"Keine Eintraege","val":0}
 
