@@ -1,0 +1,8 @@
+<map id="I2C::scan" name="I2C::scan">
+<area shape="rect" id="Node000001" title="Durchsucht den I2C&#45;Bus (Adressen 1&#45;126) und prueft gezielt den MCP23017." alt="" coords="125,43,203,69"/>
+<area shape="rect" id="Node000002" href="$class_i2_c.html#a06f68c1d827ffd15eea64fda461db4fc" title=" " alt="" coords="5,5,77,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,41,77,32,77,27,113,39"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="14,80,68,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="108,73,69,88,67,83,113,71"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="60,65,54,61,41,59,29,61,22,65,21,71,24,79,19,80,15,71,18,62,27,56,41,53,56,56,65,64"/>
+</map>

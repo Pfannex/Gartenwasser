@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="struct_file_system_1_1_program_input" kind="struct" language="C++" prot="public">
+    <compoundname>FileSystem::ProgramInput</compoundname>
+    <includes refid="_file_system_8h" local="no">FileSystem.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_file_system_1_1_program_input_1a62f7164ac38e82a7a4ec3c5a0261ea08" prot="public" static="no" mutable="no">
+        <type>const char *</type>
+        <definition>const char* FileSystem::ProgramInput::name</definition>
+        <argsstring></argsstring>
+        <name>name</name>
+        <qualifiedname>FileSystem::ProgramInput::name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="35" column="16" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_program_input_1a0a15ee85fe9859ca806e4d8a97932276" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t FileSystem::ProgramInput::time[6]</definition>
+        <argsstring>[6]</argsstring>
+        <name>time</name>
+        <qualifiedname>FileSystem::ProgramInput::time</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="36" column="14" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="36" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" compoundref="_file_system_8cpp" startline="540" endline="564">FileSystem::setPrograms</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_program_input_1ac66f67bdbd6c6c68e75a2b40bf385050" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool FileSystem::ProgramInput::timeSet[6]</definition>
+        <argsstring>[6]</argsstring>
+        <name>timeSet</name>
+        <qualifiedname>FileSystem::ProgramInput::timeSet</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="37" column="10" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_program_input_1ac5d405373df7dd07b6a234637ee26414" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool FileSystem::ProgramInput::autoFlag[6]</definition>
+        <argsstring>[6]</argsstring>
+        <name>autoFlag</name>
+        <qualifiedname>FileSystem::ProgramInput::autoFlag</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="38" column="10" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="38" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" compoundref="_file_system_8cpp" startline="540" endline="564">FileSystem::setPrograms</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_program_input_1a55a32e4964b9dc5741989aaaf2bcfdb0" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool FileSystem::ProgramInput::autoSet[6]</definition>
+        <argsstring>[6]</argsstring>
+        <name>autoSet</name>
+        <qualifiedname>FileSystem::ProgramInput::autoSet</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="39" column="10" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="39" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>Ein (Teil-)Eintrag zum Setzen eines Programms ueber <ref refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" kindref="member">setPrograms()</ref>. <computeroutput><ref refid="struct_file_system_1_1_program_input_1a0a15ee85fe9859ca806e4d8a97932276" kindref="member">time</ref></computeroutput>/<computeroutput><ref refid="struct_file_system_1_1_program_input_1ac5d405373df7dd07b6a234637ee26414" kindref="member">autoFlag</ref></computeroutput> sind nur gueltig, wenn das zugehoerige <computeroutput><ref refid="struct_file_system_1_1_program_input_1ac66f67bdbd6c6c68e75a2b40bf385050" kindref="member">timeSet</ref>[i]</computeroutput>/<computeroutput><ref refid="struct_file_system_1_1_program_input_1a55a32e4964b9dc5741989aaaf2bcfdb0" kindref="member">autoSet</ref>[i]</computeroutput> gesetzt ist (Index 1..5, 0 unbenutzt) - Programme sind Teilmengen wie main/config/set, siehe docs/spec/14-programme.md. </para>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/FileSystem.h" line="34" column="3" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="34" bodyend="40"/>
+    <listofallmembers>
+      <member refid="struct_file_system_1_1_program_input_1ac5d405373df7dd07b6a234637ee26414" prot="public" virt="non-virtual"><scope>FileSystem::ProgramInput</scope><name>autoFlag</name></member>
+      <member refid="struct_file_system_1_1_program_input_1a55a32e4964b9dc5741989aaaf2bcfdb0" prot="public" virt="non-virtual"><scope>FileSystem::ProgramInput</scope><name>autoSet</name></member>
+      <member refid="struct_file_system_1_1_program_input_1a62f7164ac38e82a7a4ec3c5a0261ea08" prot="public" virt="non-virtual"><scope>FileSystem::ProgramInput</scope><name>name</name></member>
+      <member refid="struct_file_system_1_1_program_input_1a0a15ee85fe9859ca806e4d8a97932276" prot="public" virt="non-virtual"><scope>FileSystem::ProgramInput</scope><name>time</name></member>
+      <member refid="struct_file_system_1_1_program_input_1ac66f67bdbd6c6c68e75a2b40bf385050" prot="public" virt="non-virtual"><scope>FileSystem::ProgramInput</scope><name>timeSet</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

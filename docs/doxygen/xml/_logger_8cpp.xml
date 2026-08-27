@@ -1,0 +1,158 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_logger_8cpp" kind="file" language="C++">
+    <compoundname>Logger.cpp</compoundname>
+    <includes refid="_logger_8h" local="yes">Logger.h</includes>
+    <includes local="no">Arduino.h</includes>
+    <includes local="no">cstdarg</includes>
+    <includes local="no">ctime</includes>
+    <incdepgraph>
+      <node id="5">
+        <label>Arduino.h</label>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/Logger.cpp</label>
+        <link refid="_logger_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>cstdarg</label>
+      </node>
+      <node id="3">
+        <label>cstddef</label>
+      </node>
+      <node id="4">
+        <label>cstdint</label>
+      </node>
+      <node id="7">
+        <label>ctime</label>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_logger_8h" kindref="compound">Logger.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;Arduino.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdarg&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;ctime&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>realTimeEnabled<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">Logger::ErrorCallback</ref><sp/>errorCallback<sp/>=<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><ref refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" kindref="member">Logger::LineCallback</ref><sp/>lineCallback<sp/>=<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*typeToString(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Logger::Type</ref><sp/>type)<sp/>{</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">switch</highlight><highlight class="normal"><sp/>(type)<sp/>{</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>:<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;ERROR&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>:<sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;INFO<sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fadc30ec20708ef7b0f641ef78b7880a15" kindref="member">Logger::Type::DEBUG</ref>:<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;DEBUG&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa9aba7127268ef2f384fdc95498c7bb1a" kindref="member">Logger::Type::PUB</ref>:<sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;PUB<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa241dd841abade20fcb27b8a9f494e1eb" kindref="member">Logger::Type::SUB</ref>:<sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;SUB<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;?????&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*sourceToString(<ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Logger::Source</ref><sp/>source)<sp/>{</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">switch</highlight><highlight class="normal"><sp/>(source)<sp/>{</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" kindref="member">Logger::Source::WIFI</ref>:<sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;WIFI<sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79aab0a7cf5deeda86b66467df64c3b6122" kindref="member">Logger::Source::MQTT</ref>:<sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;MQTT<sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afb87bf1fc88386ca21395991f90fff95" kindref="member">Logger::Source::I2C</ref>:<sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;I2C<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a87599e818aa04794bf7ff0772899d8ae" kindref="member">Logger::Source::HMI</ref>:<sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;HMI<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" kindref="member">Logger::Source::WEB</ref>:<sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;WEB<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kindref="member">Logger::Source::SYSTEM</ref>:<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;SYS<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" kindref="member">Logger::Source::VALVE</ref>:<sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;VALVE&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a5826d2990481dd71b3e258ddf8435676" kindref="member">Logger::Source::SEQ</ref>:<sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;SEQ<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kindref="member">Logger::Source::OTA</ref>:<sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;OTA<sp/><sp/>&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;?????&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41" refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" kindref="member">Logger::enableRealTime</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/>realTimeEnabled<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="43"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45" refid="class_logger_1a6fa26119de2d3513c679785f96648cb1" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a6fa26119de2d3513c679785f96648cb1" kindref="member">Logger::isRealTimeEnabled</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>realTimeEnabled;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49" refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" kindref="member">Logger::currentTimestamp</ref>(</highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*buffer,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>bufferSize)<sp/>{</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(realTimeEnabled)<sp/>{</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>time_t<sp/>now<sp/>=<sp/>time(</highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">tm<sp/>timeinfo;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/>localtime_r(&amp;now,<sp/>&amp;timeinfo);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(buffer,<sp/>bufferSize,<sp/></highlight><highlight class="stringliteral">&quot;%02d:%02d:%02d:%03lu&quot;</highlight><highlight class="normal">,<sp/>timeinfo.tm_hour,<sp/>timeinfo.tm_min,<sp/>timeinfo.tm_sec,</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>millis()<sp/>%<sp/>1000UL);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>ms<sp/>=<sp/>millis();</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>hh<sp/>=<sp/>ms<sp/>/<sp/>3600000UL;</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>mm<sp/>=<sp/>(ms<sp/>/<sp/>60000UL)<sp/>%<sp/>60UL;</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>ss<sp/>=<sp/>(ms<sp/>/<sp/>1000UL)<sp/>%<sp/>60UL;</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(buffer,<sp/>bufferSize,<sp/></highlight><highlight class="stringliteral">&quot;%02lu:%02lu:%02lu:%03lu&quot;</highlight><highlight class="normal">,<sp/>hh,<sp/>mm,<sp/>ss,<sp/>ms<sp/>%<sp/>1000UL);</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="63"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65" refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" kindref="member">Logger::setErrorCallback</ref>(<ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">ErrorCallback</ref><sp/>callback)<sp/>{</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/>errorCallback<sp/>=<sp/>callback;</highlight></codeline>
+<codeline lineno="67"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight></codeline>
+<codeline lineno="69" refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" kindref="member">Logger::setLineCallback</ref>(<ref refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" kindref="member">LineCallback</ref><sp/>callback)<sp/>{</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/>lineCallback<sp/>=<sp/>callback;</highlight></codeline>
+<codeline lineno="71"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73" refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref><sp/>type,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref><sp/>source,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*message)<sp/>{</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>timestamp[16];</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" kindref="member">currentTimestamp</ref>(timestamp,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(timestamp));</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>line[<ref refid="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" kindref="member">kMaxLineLength</ref>];</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/>snprintf(line,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(line),<sp/></highlight><highlight class="stringliteral">&quot;%s<sp/>%s<sp/>%s<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>timestamp,<sp/>sourceToString(source),<sp/>typeToString(type),<sp/>message);</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/>Serial.println(line);</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(type<sp/>==<sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Type::ERROR</ref><sp/>&amp;&amp;<sp/>errorCallback<sp/>!=<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>errorCallback(message);</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(lineCallback<sp/>!=<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/>lineCallback(line);</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="86"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88" refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref><sp/>type,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref><sp/>source,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*format,<sp/>...)<sp/>{</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Nachtrag<sp/>2026-08-18:<sp/>192-&gt;512-&gt;1024<sp/>Byte,<sp/>damit<sp/>z.B.<sp/>&quot;topic<sp/>=<sp/>payload&quot;<sp/>fuer</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>main/config/state<sp/>und<sp/>main/programs/state<sp/>(JSON-Publish,<sp/>siehe</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>MQTT::publishAndLog())<sp/>nicht<sp/>mehr<sp/>mitten<sp/>im<sp/>String<sp/>abgeschnitten<sp/>wird<sp/>-<sp/>Grund<sp/>war</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>urspruenglich<sp/>das<sp/>Pretty-Print<sp/>im<sp/>Live-Log,<sp/>das<sp/>abgeschnittenes<sp/>JSON<sp/>nicht<sp/>parsen<sp/>kann.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>1024<sp/>deckt<sp/>main/programs/state<sp/>bis<sp/>ca.<sp/>8-9<sp/>Programme<sp/>ab<sp/>(5<sp/>Programme<sp/>=<sp/>604<sp/>Byte</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Gesamtzeile);<sp/>volles<sp/>Auschoepfen<sp/>von<sp/>kMaxPrograms=32<sp/>(potenziell<sp/>mehrere<sp/>KB)<sp/>waere</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>RAM-seitig<sp/>nicht<sp/>vertretbar,<sp/>dafuer<sp/>waere<sp/>ein<sp/>Zeilenformat<sp/>grundsaetzlich<sp/>der<sp/>falsche</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Ansatz<sp/>-<sp/>bleibt<sp/>dann<sp/>sauber<sp/>abgeschnitten<sp/>(Live-Log-Fallback<sp/>auf<sp/>Rohtext).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Bewusst<sp/>kleiner<sp/>als<sp/>kMaxLineLength,<sp/>um<sp/>Platz<sp/>fuer<sp/>Zeitstempel/CLASS/TYPE-Praefix<sp/>zu<sp/>lassen.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>buffer[1024];</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/>va_list<sp/>args;</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/>va_start(args,<sp/>format);</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/>vsnprintf(buffer,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(buffer),<sp/>format,<sp/>args);</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/>va_end(args);</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">log</ref>(type,<sp/>source,<sp/>buffer);</highlight></codeline>
+<codeline lineno="104"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/Logger.cpp"/>
+  </compounddef>
+</doxygen>

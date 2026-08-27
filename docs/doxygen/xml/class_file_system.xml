@@ -1,0 +1,994 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_file_system" kind="class" language="C++" prot="public">
+    <compoundname>FileSystem</compoundname>
+    <includes refid="_file_system_8h" local="no">FileSystem.h</includes>
+    <innerclass refid="struct_file_system_1_1_program_input" prot="public">FileSystem::ProgramInput</innerclass>
+    <innerclass refid="struct_file_system_1_1_schedule_input" prot="public">FileSystem::ScheduleInput</innerclass>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756c" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>ScheduleType</name>
+        <qualifiedname>FileSystem::ScheduleType</qualifiedname>
+        <enumvalue id="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756ca791490f9f4842958f00f3791f6c01576" prot="public">
+          <name>DAILY</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756ca35f20feb221d809190e45545c933c9dc" prot="public">
+          <name>WEEKLY</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756caa32d16355630f112473d1ae254519c24" prot="public">
+          <name>ONCE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="109" column="3" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="109" bodyend="109"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="class_file_system_1a855f0de8baddbd9d43ae6618eb062603" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t FileSystem::kAliasMaxLength</definition>
+        <argsstring></argsstring>
+        <name>kAliasMaxLength</name>
+        <qualifiedname>FileSystem::kAliasMaxLength</qualifiedname>
+        <initializer>= 32</initializer>
+        <briefdescription>
+<para>Maximale Laenge (ohne Nullterminator) fuer einen Ventil-Alias bzw. Programmnamen. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="16" column="27" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="16" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" compoundref="_file_system_8cpp" startline="540" endline="564">setPrograms</referencedby>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">setSchedule</referencedby>
+        <referencedby refid="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" compoundref="_file_system_8cpp" startline="525" endline="532">setValveAlias</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="class_file_system_1a591f75c399b758af8eeff8b6b8129da7" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t FileSystem::kJsonCapacity</definition>
+        <argsstring></argsstring>
+        <name>kJsonCapacity</name>
+        <qualifiedname>FileSystem::kJsonCapacity</qualifiedname>
+        <initializer>= 768</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Puffer-/Speicherpool-Groesse fuer die config-JSON (LittleFS-Persistenz und main/config/set|state teilen sich diese Konstante). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="20" column="27" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_file_system_1aba322b937b6d1188389285270681037b" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::kMaxPrograms</definition>
+        <argsstring></argsstring>
+        <name>kMaxPrograms</name>
+        <qualifiedname>FileSystem::kMaxPrograms</qualifiedname>
+        <initializer>= 32</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Maximale Anzahl Bewaesserungsprogramme (Phase 14, mit der Touch-UI-Neugestaltung auf 32 angehoben - die Touch-UI durchblaettert sie in der &quot;Programme&quot;-Unterseite statt fixer P1-P4-Buttons, siehe docs/spec/13-touch-ui.md). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="25" column="28" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="25" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" compoundref="_file_system_8cpp" startline="540" endline="564">setPrograms</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="class_file_system_1a710f5bd7ea84c3447f8c758da02620c0" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t FileSystem::kProgramsJsonCapacity</definition>
+        <argsstring></argsstring>
+        <name>kProgramsJsonCapacity</name>
+        <qualifiedname>FileSystem::kProgramsJsonCapacity</qualifiedname>
+        <initializer>= 8192</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Puffer-/Speicherpool-Groesse fuer die programs-JSON (LittleFS-Persistenz und main/programs/set|state teilen sich diese Konstante). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="29" column="27" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_file_system_1aec5ae9336da3b83f57044be6ed75e989" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::kMaxScheduleEntries</definition>
+        <argsstring></argsstring>
+        <name>kMaxScheduleEntries</name>
+        <qualifiedname>FileSystem::kMaxScheduleEntries</qualifiedname>
+        <initializer>= 16</initializer>
+        <briefdescription>
+<para>Maximale Anzahl Zeitplan-Eintraege. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="103" column="28" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="103" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="class_file_system_1a84c06b88af528315b16a8595c66deb5a" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t FileSystem::kScheduleJsonCapacity</definition>
+        <argsstring></argsstring>
+        <name>kScheduleJsonCapacity</name>
+        <qualifiedname>FileSystem::kScheduleJsonCapacity</qualifiedname>
+        <initializer>= 4096</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Puffer-/Speicherpool-Groesse fuer die schedule-JSON (LittleFS-Persistenz und main/schedule/set|state teilen sich diese Konstante). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="107" column="27" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="107" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_file_system_1acd29068f3902ca4af016174c90258c50" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>FileSystem::FileSystem</definition>
+        <argsstring>()=delete</argsstring>
+        <name>FileSystem</name>
+        <qualifiedname>FileSystem::FileSystem</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="42" column="3"/>
+        <references refid="class_file_system_1a825d7e892794db3c1449439967cf0756" compoundref="_file_system_8cpp" startline="461" endline="477">begin</references>
+        <references refid="class_file_system_1a3e16ab221fabacf1c97b8ebdf545ef5c" compoundref="_file_system_8cpp" startline="605" endline="607">getActiveProgram</references>
+        <references refid="class_file_system_1a15bdedb8c7a15734de4c1d344ddf348d" compoundref="_file_system_8cpp" startline="494" endline="496">getMaxTime</references>
+        <references refid="class_file_system_1a39be22efda6ac47d16c325657002fb04" compoundref="_file_system_8cpp" startline="598" endline="603">getProgramAuto</references>
+        <references refid="class_file_system_1ae449fe92e81869478a35419ad8a7d6df" compoundref="_file_system_8cpp" startline="566" endline="568">getProgramCount</references>
+        <references refid="class_file_system_1a6a60e76eee4fda3af3c7900a37c3ddc2" compoundref="_file_system_8cpp" startline="620" endline="630">getProgramIndexForName</references>
+        <references refid="class_file_system_1a9262938024189ade5d5bcb84707e6a1a" compoundref="_file_system_8cpp" startline="570" endline="575">getProgramName</references>
+        <references refid="class_file_system_1a210564fff7f994e8ab5e13face669a36" compoundref="_file_system_8cpp" startline="584" endline="589">getProgramTime</references>
+        <references refid="class_file_system_1a98d60f31402eec5fff66b2805ab65536" compoundref="_file_system_8cpp" startline="518" endline="523">getValveAlias</references>
+        <references refid="class_file_system_1aa92266d9637b9f81cfc64172cb111f44" compoundref="_file_system_8cpp" startline="503" endline="508">getValveAuto</references>
+        <references refid="class_file_system_1aac5d26e454c237934d7e64f37066e597" compoundref="_file_system_8cpp" startline="479" endline="484">getValveTime</references>
+        <references refid="class_file_system_1aff80f21abf0e3075db5da8ee4e2f9ebb" compoundref="_file_system_8cpp" startline="591" endline="596">programHasAuto</references>
+        <references refid="class_file_system_1acd15109a45ee09f60376b44421513c08" compoundref="_file_system_8cpp" startline="577" endline="582">programHasTime</references>
+        <references refid="class_file_system_1a4009d3f1ad78dbda08c28fc55e1e0e30" compoundref="_file_system_8cpp" startline="614" endline="618">programsToJson</references>
+        <references refid="class_file_system_1a6d2782d2b8de7ee9a1e3226d9e51c927" compoundref="_file_system_8cpp" startline="609" endline="612">setActiveProgram</references>
+        <references refid="class_file_system_1a959cb5a246e6fc67b7f29a683f4c7fa5" compoundref="_file_system_8cpp" startline="498" endline="501">setMaxTime</references>
+        <references refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" compoundref="_file_system_8cpp" startline="540" endline="564">setPrograms</references>
+        <references refid="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" compoundref="_file_system_8cpp" startline="525" endline="532">setValveAlias</references>
+        <references refid="class_file_system_1a18666b5a5bcd179fd0ca0d3d377f29d2" compoundref="_file_system_8cpp" startline="510" endline="516">setValveAuto</references>
+        <references refid="class_file_system_1a50fd7be2ea1e5d103fc7c970bc72ce5c" compoundref="_file_system_8cpp" startline="486" endline="492">setValveTime</references>
+        <references refid="class_file_system_1a43c83ebf0d44a54be7ee20564e142cf3" compoundref="_file_system_8cpp" startline="534" endline="538">toJson</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_file_system_1a825d7e892794db3c1449439967cf0756" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>FileSystem::begin</qualifiedname>
+        <briefdescription>
+<para>Mountet LittleFS und laedt /config.json + /programs.json (falls vorhanden), sonst gelten Defaultwerte. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="45" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="461" bodyend="477"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" compoundref="_logger_8h" startline="25">Logger::SYSTEM</references>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1aac5d26e454c237934d7e64f37066e597" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t FileSystem::getValveTime</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getValveTime</name>
+        <qualifiedname>FileSystem::getValveTime</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Konfigurierte Laufzeit in Minuten fuer Ventil <computeroutput>index</computeroutput> (1..5). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="48" column="19" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="479" bodyend="484"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a50fd7be2ea1e5d103fc7c970bc72ce5c" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setValveTime</definition>
+        <argsstring>(uint8_t index, uint16_t minutes)</argsstring>
+        <name>setValveTime</name>
+        <qualifiedname>FileSystem::setValveTime</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>uint16_t</type>
+          <declname>minutes</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="49" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="486" bodyend="492"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a15bdedb8c7a15734de4c1d344ddf348d" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t FileSystem::getMaxTime</definition>
+        <argsstring>()</argsstring>
+        <name>getMaxTime</name>
+        <qualifiedname>FileSystem::getMaxTime</qualifiedname>
+        <briefdescription>
+<para>Globale Obergrenze in Minuten (main/time/maxTime, effektive Laufzeit = min(time, maxTime)). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="52" column="19" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="494" bodyend="496"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a959cb5a246e6fc67b7f29a683f4c7fa5" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setMaxTime</definition>
+        <argsstring>(uint16_t minutes)</argsstring>
+        <name>setMaxTime</name>
+        <qualifiedname>FileSystem::setMaxTime</qualifiedname>
+        <param>
+          <type>uint16_t</type>
+          <declname>minutes</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="53" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="498" bodyend="501"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1aa92266d9637b9f81cfc64172cb111f44" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool FileSystem::getValveAuto</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getValveAuto</name>
+        <qualifiedname>FileSystem::getValveAuto</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Automatik-Flag fuer Ventil <computeroutput>index</computeroutput> (1..5): Teilnahme an der Automatik-Sequenz (Phase 7). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="56" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="503" bodyend="508"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" compoundref="_valve_controller_8cpp" startline="57" endline="59">ValveController::getAuto</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a18666b5a5bcd179fd0ca0d3d377f29d2" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setValveAuto</definition>
+        <argsstring>(uint8_t index, bool on)</argsstring>
+        <name>setValveAuto</name>
+        <qualifiedname>FileSystem::setValveAuto</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="57" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="510" bodyend="516"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" compoundref="_valve_controller_8cpp" startline="61" endline="64">ValveController::setAuto</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a98d60f31402eec5fff66b2805ab65536" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const char *</type>
+        <definition>const char * FileSystem::getValveAlias</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getValveAlias</name>
+        <qualifiedname>FileSystem::getValveAlias</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Klartextname (Alias) fuer Ventil <computeroutput>index</computeroutput> (0..5, inkl. V0/Hauptventil). Leerer String, falls nicht gesetzt. <computeroutput>alias</computeroutput> wird auf kAliasMaxLength Zeichen gekuerzt uebernommen (Aufrufer validiert vorher). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="62" column="21" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="518" bodyend="523"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" compoundref="_valve_controller_8cpp" startline="66" endline="68">ValveController::getAlias</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setValveAlias</definition>
+        <argsstring>(uint8_t index, const char *alias)</argsstring>
+        <name>setValveAlias</name>
+        <qualifiedname>FileSystem::setValveAlias</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>alias</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="63" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="525" bodyend="532"/>
+        <references refid="class_file_system_1a855f0de8baddbd9d43ae6618eb062603" compoundref="_file_system_8h" startline="16">kAliasMaxLength</references>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" compoundref="_valve_controller_8cpp" startline="70" endline="73">ValveController::setAlias</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a43c83ebf0d44a54be7ee20564e142cf3" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t FileSystem::toJson</definition>
+        <argsstring>(char *buffer, size_t bufferSize)</argsstring>
+        <name>toJson</name>
+        <qualifiedname>FileSystem::toJson</qualifiedname>
+        <param>
+          <type>char *</type>
+          <declname>buffer</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>bufferSize</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Serialisiert die aktuelle Gesamt-Konfiguration (time/auto/alias/maxTime) als JSON nach <computeroutput>buffer</computeroutput> (dieselbe Struktur wie /config.json). Liefert die Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="68" column="17" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="534" bodyend="538"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setPrograms</definition>
+        <argsstring>(const ProgramInput *entries, uint8_t count)</argsstring>
+        <name>setPrograms</name>
+        <qualifiedname>FileSystem::setPrograms</qualifiedname>
+        <param>
+          <type>const <ref refid="struct_file_system_1_1_program_input" kindref="compound">ProgramInput</ref> *</type>
+          <declname>entries</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>count</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Ersetzt das komplette Programme-Array (main/programs/set, Key &quot;programs&quot;) und speichert sofort. Mehr als kMaxPrograms Eintraege werden ignoriert + geloggt. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="72" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="540" bodyend="564"/>
+        <references refid="struct_file_system_1_1_program_input_1ac5d405373df7dd07b6a234637ee26414" compoundref="_file_system_8h" startline="38">FileSystem::ProgramInput::autoFlag</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_file_system_1a855f0de8baddbd9d43ae6618eb062603" compoundref="_file_system_8h" startline="16">kAliasMaxLength</references>
+        <references refid="class_file_system_1aba322b937b6d1188389285270681037b" compoundref="_file_system_8h" startline="25">kMaxPrograms</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" compoundref="_logger_8h" startline="25">Logger::SYSTEM</references>
+        <references refid="struct_file_system_1_1_program_input_1a0a15ee85fe9859ca806e4d8a97932276" compoundref="_file_system_8h" startline="36">FileSystem::ProgramInput::time</references>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1ae449fe92e81869478a35419ad8a7d6df" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getProgramCount</definition>
+        <argsstring>()</argsstring>
+        <name>getProgramCount</name>
+        <qualifiedname>FileSystem::getProgramCount</qualifiedname>
+        <briefdescription>
+<para>Anzahl aktuell gespeicherter Programme. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="75" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="566" bodyend="568"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a9262938024189ade5d5bcb84707e6a1a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const char *</type>
+        <definition>const char * FileSystem::getProgramName</definition>
+        <argsstring>(uint8_t programIndex)</argsstring>
+        <name>getProgramName</name>
+        <qualifiedname>FileSystem::getProgramName</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <briefdescription>
+<para>Programmname, 1-basierter Index (1..<ref refid="class_file_system_1ae449fe92e81869478a35419ad8a7d6df" kindref="member">getProgramCount()</ref>). Leerer String bei ungueltigem Index. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="78" column="21" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="570" bodyend="575"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1acd15109a45ee09f60376b44421513c08" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool FileSystem::programHasTime</definition>
+        <argsstring>(uint8_t programIndex, uint8_t valveIndex)</argsstring>
+        <name>programHasTime</name>
+        <qualifiedname>FileSystem::programHasTime</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>valveIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Ob Programm <computeroutput>programIndex</computeroutput> (1-basiert) einen Laufzeit-/Automatik-Wert fuer Ventil <computeroutput>valveIndex</computeroutput> (1..5) enthaelt, bzw. dessen Wert. Ungueltige Indizes liefern false/0. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="82" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="577" bodyend="582"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="class_file_system_1a210564fff7f994e8ab5e13face669a36" compoundref="_file_system_8cpp" startline="584" endline="589">getProgramTime</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a210564fff7f994e8ab5e13face669a36" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t FileSystem::getProgramTime</definition>
+        <argsstring>(uint8_t programIndex, uint8_t valveIndex)</argsstring>
+        <name>getProgramTime</name>
+        <qualifiedname>FileSystem::getProgramTime</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>valveIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="83" column="19" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="584" bodyend="589"/>
+        <references refid="class_file_system_1acd15109a45ee09f60376b44421513c08" compoundref="_file_system_8cpp" startline="577" endline="582">programHasTime</references>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1aff80f21abf0e3075db5da8ee4e2f9ebb" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool FileSystem::programHasAuto</definition>
+        <argsstring>(uint8_t programIndex, uint8_t valveIndex)</argsstring>
+        <name>programHasAuto</name>
+        <qualifiedname>FileSystem::programHasAuto</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>valveIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="84" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="591" bodyend="596"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+        <referencedby refid="class_file_system_1a39be22efda6ac47d16c325657002fb04" compoundref="_file_system_8cpp" startline="598" endline="603">getProgramAuto</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a39be22efda6ac47d16c325657002fb04" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool FileSystem::getProgramAuto</definition>
+        <argsstring>(uint8_t programIndex, uint8_t valveIndex)</argsstring>
+        <name>getProgramAuto</name>
+        <qualifiedname>FileSystem::getProgramAuto</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>valveIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="85" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="598" bodyend="603"/>
+        <references refid="class_file_system_1aff80f21abf0e3075db5da8ee4e2f9ebb" compoundref="_file_system_8cpp" startline="591" endline="596">programHasAuto</references>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a3e16ab221fabacf1c97b8ebdf545ef5c" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getActiveProgram</definition>
+        <argsstring>()</argsstring>
+        <name>getActiveProgram</name>
+        <qualifiedname>FileSystem::getActiveProgram</qualifiedname>
+        <briefdescription>
+<para>Aktuell gewaehltes Programm, 1-basiert (0 = keins). Persistiert in /programs.json. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="88" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="605" bodyend="607"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a6d2782d2b8de7ee9a1e3226d9e51c927" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setActiveProgram</definition>
+        <argsstring>(uint8_t programIndex)</argsstring>
+        <name>setActiveProgram</name>
+        <qualifiedname>FileSystem::setActiveProgram</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="89" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="609" bodyend="612"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a4009d3f1ad78dbda08c28fc55e1e0e30" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t FileSystem::programsToJson</definition>
+        <argsstring>(char *buffer, size_t bufferSize)</argsstring>
+        <name>programsToJson</name>
+        <qualifiedname>FileSystem::programsToJson</qualifiedname>
+        <param>
+          <type>char *</type>
+          <declname>buffer</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>bufferSize</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Serialisiert programs+activeProgram als JSON (main/programs/state-Struktur). Liefert die Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="93" column="17" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="614" bodyend="618"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a6a60e76eee4fda3af3c7900a37c3ddc2" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getProgramIndexForName</definition>
+        <argsstring>(const char *name)</argsstring>
+        <name>getProgramIndexForName</name>
+        <qualifiedname>FileSystem::getProgramIndexForName</qualifiedname>
+        <param>
+          <type>const char *</type>
+          <declname>name</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Programm-Index (1-basiert), dessen Name exakt <computeroutput>name</computeroutput> entspricht (Case-sensitiv) - fuer die Programm-Referenz im Zeitplan (Phase 15, siehe docs/spec/15-wochenplan.md). 0, wenn kein Programm diesen Namen hat. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="98" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="620" bodyend="630"/>
+        <referencedby refid="class_file_system_1acd29068f3902ca4af016174c90258c50">FileSystem</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a889429cfca465871ed1935d4537381b9" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setSchedule</definition>
+        <argsstring>(const ScheduleInput *entries, uint8_t count)</argsstring>
+        <name>setSchedule</name>
+        <qualifiedname>FileSystem::setSchedule</qualifiedname>
+        <param>
+          <type>const <ref refid="struct_file_system_1_1_schedule_input" kindref="compound">ScheduleInput</ref> *</type>
+          <declname>entries</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>count</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Ersetzt das komplette Zeitplan-Array (main/schedule/set, Key &quot;schedule&quot;) und speichert sofort. Mehr als kMaxScheduleEntries Eintraege werden ignoriert + geloggt. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="128" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="632" bodyend="653"/>
+        <references refid="struct_file_system_1_1_schedule_input_1ae745cc192f5a29c76c55df1b91690bf9" compoundref="_file_system_8h" startline="123">FileSystem::ScheduleInput::day</references>
+        <references refid="struct_file_system_1_1_schedule_input_1a8489285908260ddc9f16fc42b62682ca" compoundref="_file_system_8h" startline="116">FileSystem::ScheduleInput::enabled</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="struct_file_system_1_1_schedule_input_1a38098db907c26a2c5925cc9bfe9d306e" compoundref="_file_system_8h" startline="118">FileSystem::ScheduleInput::hour</references>
+        <references refid="class_file_system_1a855f0de8baddbd9d43ae6618eb062603" compoundref="_file_system_8h" startline="16">kAliasMaxLength</references>
+        <references refid="class_file_system_1aec5ae9336da3b83f57044be6ed75e989" compoundref="_file_system_8h" startline="103">kMaxScheduleEntries</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="struct_file_system_1_1_schedule_input_1acc2fd36121c5bf619a3eb794e35297bd" compoundref="_file_system_8h" startline="119">FileSystem::ScheduleInput::minute</references>
+        <references refid="struct_file_system_1_1_schedule_input_1aceb676cdce7f77480a183dea15ee1e22" compoundref="_file_system_8h" startline="122">FileSystem::ScheduleInput::month</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" compoundref="_logger_8h" startline="25">Logger::SYSTEM</references>
+        <references refid="struct_file_system_1_1_schedule_input_1a01aa568cd25de66c33869b4ee4e0a166" compoundref="_file_system_8h" startline="117">FileSystem::ScheduleInput::type</references>
+        <references refid="struct_file_system_1_1_schedule_input_1adf1de82adde52bb254b9be3af6ad84c9" compoundref="_file_system_8h" startline="120">FileSystem::ScheduleInput::weekdaysMask</references>
+        <references refid="struct_file_system_1_1_schedule_input_1a0ac3fb2003f54af770403c601f3175ae" compoundref="_file_system_8h" startline="121">FileSystem::ScheduleInput::year</references>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a143d0e5a0c81a6ee01bc579ec38c9352" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getScheduleCount</definition>
+        <argsstring>()</argsstring>
+        <name>getScheduleCount</name>
+        <qualifiedname>FileSystem::getScheduleCount</qualifiedname>
+        <briefdescription>
+<para>Anzahl aktuell gespeicherter Zeitplan-Eintraege. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="131" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="655" bodyend="657"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a8e10442d12f3ff4f12711db83123c34c" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool FileSystem::getScheduleEnabled</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleEnabled</name>
+        <qualifiedname>FileSystem::getScheduleEnabled</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Zeitplan-Eintrag-Felder, 0-basierter Index (0..<ref refid="class_file_system_1a143d0e5a0c81a6ee01bc579ec38c9352" kindref="member">getScheduleCount()</ref>-1). Kein von aussen ansprechbarer Identifikator noetig (main/schedule/set ersetzt immer die komplette Liste als Block, siehe docs/spec/15-wochenplan.md). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="136" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="659" bodyend="664"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a535de8e712999c2d28a58144bc08fa5a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756c" kindref="member">ScheduleType</ref></type>
+        <definition>FileSystem::ScheduleType FileSystem::getScheduleType</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleType</name>
+        <qualifiedname>FileSystem::getScheduleType</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="137" column="23" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="666" bodyend="671"/>
+        <references refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756ca791490f9f4842958f00f3791f6c01576" compoundref="_file_system_8h" startline="109">DAILY</references>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a37ffa1249dfa653816ff8abf20d80d48" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getScheduleHour</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleHour</name>
+        <qualifiedname>FileSystem::getScheduleHour</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="138" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="673" bodyend="678"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1ac5416ad1371a79eda0ff4c42aa93e43e" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getScheduleMinute</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleMinute</name>
+        <qualifiedname>FileSystem::getScheduleMinute</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="139" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="680" bodyend="685"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a2a274d7b4a480d8c578648acbc9b7849" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getScheduleWeekdaysMask</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleWeekdaysMask</name>
+        <qualifiedname>FileSystem::getScheduleWeekdaysMask</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="140" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="687" bodyend="692"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a3dee143f3664afbdc756b0829e358188" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t FileSystem::getScheduleYear</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleYear</name>
+        <qualifiedname>FileSystem::getScheduleYear</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="141" column="19" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="694" bodyend="699"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1af8fdcf5b7478d11e7b57ba8df93a9aff" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getScheduleMonth</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleMonth</name>
+        <qualifiedname>FileSystem::getScheduleMonth</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="142" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="701" bodyend="706"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a51b1ad5847650677b1dcd8786b6f0f07" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::getScheduleDay</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleDay</name>
+        <qualifiedname>FileSystem::getScheduleDay</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="143" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="708" bodyend="713"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1aa2eebe14b577f75a5204b2a52b84092a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const char *</type>
+        <definition>const char * FileSystem::getScheduleProgram</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getScheduleProgram</name>
+        <qualifiedname>FileSystem::getScheduleProgram</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="144" column="21" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="715" bodyend="720"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1ae76d7d257916a0576af55536581d5ca7" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool FileSystem::getScheduleGlobalEnabled</definition>
+        <argsstring>()</argsstring>
+        <name>getScheduleGlobalEnabled</name>
+        <qualifiedname>FileSystem::getScheduleGlobalEnabled</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Globaler Ein/Aus-Schalter fuer den kompletten Zeitplan (main/schedule/cmd). Bei false loest kein Eintrag aus, die Konfiguration bleibt aber erhalten. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="148" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="722" bodyend="724"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a218772918e746e0cbdbc334f501fe605" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FileSystem::setScheduleGlobalEnabled</definition>
+        <argsstring>(bool enabled)</argsstring>
+        <name>setScheduleGlobalEnabled</name>
+        <qualifiedname>FileSystem::setScheduleGlobalEnabled</qualifiedname>
+        <param>
+          <type>bool</type>
+          <declname>enabled</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="149" column="15" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="726" bodyend="729"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1ad41c860b8067e2340208085c3d2e04bb" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t FileSystem::scheduleToJson</definition>
+        <argsstring>(char *buffer, size_t bufferSize)</argsstring>
+        <name>scheduleToJson</name>
+        <qualifiedname>FileSystem::scheduleToJson</qualifiedname>
+        <param>
+          <type>char *</type>
+          <declname>buffer</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>bufferSize</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Serialisiert schedule+enabled als JSON (main/schedule/state-Struktur). Liefert die Anzahl geschriebener Bytes (wie serializeJson()), oder 0 bei Fehler. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="153" column="17" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="731" bodyend="735"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a11ab0a00b3592bff6c648fe4c7c71b6f" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t FileSystem::usedBytes</definition>
+        <argsstring>()</argsstring>
+        <name>usedBytes</name>
+        <qualifiedname>FileSystem::usedBytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Belegter/gesamter Speicherplatz der &quot;config&quot;-Partition (LittleFS, siehe partitions.csv) - fuer die Partitionstabelle auf der Info-Seite. Die &quot;webfs&quot;-Partition wird direkt ueber das globale LittleFS-Objekt in <ref refid="_web_i_f_8cpp" kindref="compound">WebIF.cpp</ref> abgefragt, dafuer ist kein eigener Getter noetig. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="160" column="17" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="737" bodyend="739"/>
+      </memberdef>
+      <memberdef kind="function" id="class_file_system_1a2f09930b0a90fbca6300692c1cc70d8b" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t FileSystem::totalBytes</definition>
+        <argsstring>()</argsstring>
+        <name>totalBytes</name>
+        <qualifiedname>FileSystem::totalBytes</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="161" column="17" bodyfile="D:/Gartenwasser/src/FileSystem.cpp" bodystart="741" bodyend="743"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/FileSystem.h" line="13" column="1" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="13" bodyend="162"/>
+    <listofallmembers>
+      <member refid="class_file_system_1a825d7e892794db3c1449439967cf0756" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>begin</name></member>
+      <member refid="class_file_system_1acd29068f3902ca4af016174c90258c50" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>FileSystem</name></member>
+      <member refid="class_file_system_1a3e16ab221fabacf1c97b8ebdf545ef5c" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getActiveProgram</name></member>
+      <member refid="class_file_system_1a15bdedb8c7a15734de4c1d344ddf348d" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getMaxTime</name></member>
+      <member refid="class_file_system_1a39be22efda6ac47d16c325657002fb04" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getProgramAuto</name></member>
+      <member refid="class_file_system_1ae449fe92e81869478a35419ad8a7d6df" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getProgramCount</name></member>
+      <member refid="class_file_system_1a6a60e76eee4fda3af3c7900a37c3ddc2" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getProgramIndexForName</name></member>
+      <member refid="class_file_system_1a9262938024189ade5d5bcb84707e6a1a" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getProgramName</name></member>
+      <member refid="class_file_system_1a210564fff7f994e8ab5e13face669a36" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getProgramTime</name></member>
+      <member refid="class_file_system_1a143d0e5a0c81a6ee01bc579ec38c9352" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleCount</name></member>
+      <member refid="class_file_system_1a51b1ad5847650677b1dcd8786b6f0f07" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleDay</name></member>
+      <member refid="class_file_system_1a8e10442d12f3ff4f12711db83123c34c" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleEnabled</name></member>
+      <member refid="class_file_system_1ae76d7d257916a0576af55536581d5ca7" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleGlobalEnabled</name></member>
+      <member refid="class_file_system_1a37ffa1249dfa653816ff8abf20d80d48" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleHour</name></member>
+      <member refid="class_file_system_1ac5416ad1371a79eda0ff4c42aa93e43e" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleMinute</name></member>
+      <member refid="class_file_system_1af8fdcf5b7478d11e7b57ba8df93a9aff" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleMonth</name></member>
+      <member refid="class_file_system_1aa2eebe14b577f75a5204b2a52b84092a" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleProgram</name></member>
+      <member refid="class_file_system_1a535de8e712999c2d28a58144bc08fa5a" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleType</name></member>
+      <member refid="class_file_system_1a2a274d7b4a480d8c578648acbc9b7849" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleWeekdaysMask</name></member>
+      <member refid="class_file_system_1a3dee143f3664afbdc756b0829e358188" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getScheduleYear</name></member>
+      <member refid="class_file_system_1a98d60f31402eec5fff66b2805ab65536" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getValveAlias</name></member>
+      <member refid="class_file_system_1aa92266d9637b9f81cfc64172cb111f44" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getValveAuto</name></member>
+      <member refid="class_file_system_1aac5d26e454c237934d7e64f37066e597" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>getValveTime</name></member>
+      <member refid="class_file_system_1a855f0de8baddbd9d43ae6618eb062603" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>kAliasMaxLength</name></member>
+      <member refid="class_file_system_1a591f75c399b758af8eeff8b6b8129da7" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>kJsonCapacity</name></member>
+      <member refid="class_file_system_1aba322b937b6d1188389285270681037b" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>kMaxPrograms</name></member>
+      <member refid="class_file_system_1aec5ae9336da3b83f57044be6ed75e989" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>kMaxScheduleEntries</name></member>
+      <member refid="class_file_system_1a710f5bd7ea84c3447f8c758da02620c0" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>kProgramsJsonCapacity</name></member>
+      <member refid="class_file_system_1a84c06b88af528315b16a8595c66deb5a" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>kScheduleJsonCapacity</name></member>
+      <member refid="class_file_system_1aff80f21abf0e3075db5da8ee4e2f9ebb" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>programHasAuto</name></member>
+      <member refid="class_file_system_1acd15109a45ee09f60376b44421513c08" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>programHasTime</name></member>
+      <member refid="class_file_system_1a4009d3f1ad78dbda08c28fc55e1e0e30" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>programsToJson</name></member>
+      <member refid="class_file_system_1ad41c860b8067e2340208085c3d2e04bb" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>scheduleToJson</name></member>
+      <member refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756c" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>ScheduleType</name></member>
+      <member refid="class_file_system_1a6d2782d2b8de7ee9a1e3226d9e51c927" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setActiveProgram</name></member>
+      <member refid="class_file_system_1a959cb5a246e6fc67b7f29a683f4c7fa5" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setMaxTime</name></member>
+      <member refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setPrograms</name></member>
+      <member refid="class_file_system_1a889429cfca465871ed1935d4537381b9" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setSchedule</name></member>
+      <member refid="class_file_system_1a218772918e746e0cbdbc334f501fe605" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setScheduleGlobalEnabled</name></member>
+      <member refid="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setValveAlias</name></member>
+      <member refid="class_file_system_1a18666b5a5bcd179fd0ca0d3d377f29d2" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setValveAuto</name></member>
+      <member refid="class_file_system_1a50fd7be2ea1e5d103fc7c970bc72ce5c" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>setValveTime</name></member>
+      <member refid="class_file_system_1a43c83ebf0d44a54be7ee20564e142cf3" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>toJson</name></member>
+      <member refid="class_file_system_1a2f09930b0a90fbca6300692c1cc70d8b" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>totalBytes</name></member>
+      <member refid="class_file_system_1a11ab0a00b3592bff6c648fe4c7c71b6f" prot="public" virt="non-virtual"><scope>FileSystem</scope><name>usedBytes</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

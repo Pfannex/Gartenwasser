@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_build_number_8h" kind="file" language="C++">
+    <compoundname>BuildNumber.h</compoundname>
+    <includedby refid="_ha_discovery_8cpp" local="yes">D:/Gartenwasser/src/HaDiscovery.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <invincdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/include/BuildNumber.h</label>
+        <link refid="_build_number_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>D:/Gartenwasser/src/HaDiscovery.cpp</label>
+        <link refid="_ha_discovery_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="_build_number_8h_1adab90aacdf61685356e47d5233d41520" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>const char *</type>
+        <definition>const char* kBuildNumber</definition>
+        <argsstring></argsstring>
+        <name>kBuildNumber</name>
+        <initializer>= &quot;00054&quot;</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/include/BuildNumber.h" line="5" column="22" bodyfile="D:/Gartenwasser/include/BuildNumber.h" bodystart="5" bodyend="-1"/>
+        <referencedby refid="namespace_ha_discovery_1ad5847f8d0ebfaf1aa6579ddbc7ae0baf" compoundref="_ha_discovery_8cpp" startline="94" endline="137">HaDiscovery::publishAll</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>Automatisch<sp/>generiert<sp/>von<sp/>tools/increment_build_number.py<sp/>bei<sp/>jedem<sp/>Build<sp/>-<sp/>nicht<sp/>manuell<sp/>bearbeiten.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Persistenter<sp/>Zaehler<sp/>liegt<sp/>in<sp/>build_number.txt<sp/>(versioniert),<sp/>diese<sp/>Datei<sp/>ist<sp/>reines<sp/>Build-Artefakt.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight></codeline>
+<codeline lineno="5" refid="_build_number_8h_1adab90aacdf61685356e47d5233d41520" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*<ref refid="_build_number_8h_1adab90aacdf61685356e47d5233d41520" kindref="member">kBuildNumber</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;00054&quot;</highlight><highlight class="normal">;</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/include/BuildNumber.h"/>
+  </compounddef>
+</doxygen>

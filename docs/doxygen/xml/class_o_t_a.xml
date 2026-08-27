@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_o_t_a" kind="class" language="C++" prot="public">
+    <compoundname>OTA</compoundname>
+    <includes refid="_o_t_a_8h" local="no">OTA.h</includes>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>OTA::OTA</definition>
+        <argsstring>()=delete</argsstring>
+        <name>OTA</name>
+        <qualifiedname>OTA::OTA</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/OTA.h" line="13" column="3"/>
+        <references refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" compoundref="_o_t_a_8cpp" startline="24" endline="41">begin</references>
+        <references refid="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" compoundref="_o_t_a_8cpp" startline="43" endline="45">loop</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void OTA::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>OTA::begin</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Registriert Callbacks und startet den ArduinoOTA-Dienst (inkl. mDNS-Ankuendigung als &quot;gartenwasser.local&quot;). Setzt eine bestehende WLAN-Verbindung voraus. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/OTA.h" line="17" column="15" bodyfile="D:/Gartenwasser/src/OTA.cpp" bodystart="24" bodyend="41"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" compoundref="_logger_8h" startline="25">Logger::OTA</references>
+        <referencedby refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8">OTA</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void OTA::loop</definition>
+        <argsstring>()</argsstring>
+        <name>loop</name>
+        <qualifiedname>OTA::loop</qualifiedname>
+        <briefdescription>
+<para>Muss regelmaessig aus main.cpp::loop() aufgerufen werden. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/OTA.h" line="20" column="15" bodyfile="D:/Gartenwasser/src/OTA.cpp" bodystart="43" bodyend="45"/>
+        <referencedby refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" compoundref="main_8cpp" startline="87" endline="93">loop</referencedby>
+        <referencedby refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8">OTA</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/OTA.h" line="11" column="1" bodyfile="D:/Gartenwasser/src/OTA.h" bodystart="11" bodyend="21"/>
+    <listofallmembers>
+      <member refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" prot="public" virt="non-virtual"><scope>OTA</scope><name>begin</name></member>
+      <member refid="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" prot="public" virt="non-virtual"><scope>OTA</scope><name>loop</name></member>
+      <member refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8" prot="public" virt="non-virtual"><scope>OTA</scope><name>OTA</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

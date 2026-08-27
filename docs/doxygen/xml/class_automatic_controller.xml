@@ -1,0 +1,199 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_automatic_controller" kind="class" language="C++" prot="public">
+    <compoundname>AutomaticController</compoundname>
+    <includes refid="_automatic_controller_8h" local="no">AutomaticController.h</includes>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>AutomaticController::AutomaticController</definition>
+        <argsstring>()=delete</argsstring>
+        <name>AutomaticController</name>
+        <qualifiedname>AutomaticController::AutomaticController</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="14" column="3"/>
+        <references refid="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" compoundref="_automatic_controller_8cpp" startline="57" endline="69">advance</references>
+        <references refid="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" compoundref="_automatic_controller_8cpp" startline="16" endline="20">begin</references>
+        <references refid="class_automatic_controller_1acc1c05abe64763cd951aa0b4efd0a187" compoundref="_automatic_controller_8cpp" startline="50" endline="55">getActiveValve</references>
+        <references refid="class_automatic_controller_1ac89fb27486eed31944c75c38371cd1c2" compoundref="_automatic_controller_8cpp" startline="71" endline="76">getPendingCount</references>
+        <references refid="class_automatic_controller_1aceaa72e4e8fb0b5d99391ca27fb59d48" compoundref="_automatic_controller_8cpp" startline="78" endline="84">getPendingValve</references>
+        <references refid="class_automatic_controller_1a4d0306a6711c4ed529668baad4b7502a" compoundref="_automatic_controller_8cpp" startline="46" endline="48">isRunning</references>
+        <references refid="class_automatic_controller_1a542b3e61b6bd726c6d6a2c5e49ee7e15" compoundref="_automatic_controller_8cpp" startline="22" endline="35">start</references>
+        <references refid="class_automatic_controller_1afb960a9422a05137dc953ddcce52ddfc" compoundref="_automatic_controller_8cpp" startline="37" endline="44">stop</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void AutomaticController::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>AutomaticController::begin</qualifiedname>
+        <briefdescription>
+<para>Setzt den Zustand zurueck (keine Sequenz aktiv). Fuer den Boot-Grundzustand. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="17" column="15" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="16" bodyend="20"/>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1a542b3e61b6bd726c6d6a2c5e49ee7e15" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool AutomaticController::start</definition>
+        <argsstring>(const uint8_t *valves, uint8_t count)</argsstring>
+        <name>start</name>
+        <qualifiedname>AutomaticController::start</qualifiedname>
+        <param>
+          <type>const uint8_t *</type>
+          <declname>valves</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>count</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Startet die Sequenz mit den uebergebenen Ventil-Indizes (1..5) in der gegebenen Reihenfolge. Liefert false (und aendert nichts) bei <computeroutput>count == 0</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="21" column="15" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="22" bodyend="35"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a5826d2990481dd71b3e258ddf8435676" compoundref="_logger_8h" startline="25">Logger::SEQ</references>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1afb960a9422a05137dc953ddcce52ddfc" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void AutomaticController::stop</definition>
+        <argsstring>()</argsstring>
+        <name>stop</name>
+        <qualifiedname>AutomaticController::stop</qualifiedname>
+        <briefdescription>
+<para>Bricht eine laufende Sequenz ab (nur Zustand, schaltet keine Ventile). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="24" column="15" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="37" bodyend="44"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a5826d2990481dd71b3e258ddf8435676" compoundref="_logger_8h" startline="25">Logger::SEQ</references>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1a4d0306a6711c4ed529668baad4b7502a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool AutomaticController::isRunning</definition>
+        <argsstring>()</argsstring>
+        <name>isRunning</name>
+        <qualifiedname>AutomaticController::isRunning</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="26" column="15" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="46" bodyend="48"/>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1acc1c05abe64763cd951aa0b4efd0a187" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t AutomaticController::getActiveValve</definition>
+        <argsstring>()</argsstring>
+        <name>getActiveValve</name>
+        <qualifiedname>AutomaticController::getActiveValve</qualifiedname>
+        <briefdescription>
+<para>Aktuell aktives Ventil (1..5), oder 0 wenn keine Sequenz laeuft. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="29" column="18" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="50" bodyend="55"/>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t AutomaticController::advance</definition>
+        <argsstring>()</argsstring>
+        <name>advance</name>
+        <qualifiedname>AutomaticController::advance</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Rueckt zum naechsten Ventil in der Warteschlange vor. Liefert das neue aktive Ventil (1..5), oder 0, wenn die Sequenz damit beendet ist. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="33" column="18" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="57" bodyend="69"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a5826d2990481dd71b3e258ddf8435676" compoundref="_logger_8h" startline="25">Logger::SEQ</references>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1ac89fb27486eed31944c75c38371cd1c2" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t AutomaticController::getPendingCount</definition>
+        <argsstring>()</argsstring>
+        <name>getPendingCount</name>
+        <qualifiedname>AutomaticController::getPendingCount</qualifiedname>
+        <briefdescription>
+<para>Anzahl noch ausstehender Ventile (ohne das aktuell aktive), fuer main/remainingTotal. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="36" column="18" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="71" bodyend="76"/>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_automatic_controller_1aceaa72e4e8fb0b5d99391ca27fb59d48" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t AutomaticController::getPendingValve</definition>
+        <argsstring>(uint8_t offset)</argsstring>
+        <name>getPendingValve</name>
+        <qualifiedname>AutomaticController::getPendingValve</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>offset</declname>
+        </param>
+        <briefdescription>
+<para>Ventil-Index des <computeroutput>offset</computeroutput>-ten ausstehenden Ventils (0 = naechstes nach dem aktiven). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/AutomaticController.h" line="39" column="18" bodyfile="D:/Gartenwasser/src/AutomaticController.cpp" bodystart="78" bodyend="84"/>
+        <referencedby refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22">AutomaticController</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/AutomaticController.h" line="12" column="1" bodyfile="D:/Gartenwasser/src/AutomaticController.h" bodystart="12" bodyend="40"/>
+    <listofallmembers>
+      <member refid="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>advance</name></member>
+      <member refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>AutomaticController</name></member>
+      <member refid="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>begin</name></member>
+      <member refid="class_automatic_controller_1acc1c05abe64763cd951aa0b4efd0a187" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>getActiveValve</name></member>
+      <member refid="class_automatic_controller_1ac89fb27486eed31944c75c38371cd1c2" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>getPendingCount</name></member>
+      <member refid="class_automatic_controller_1aceaa72e4e8fb0b5d99391ca27fb59d48" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>getPendingValve</name></member>
+      <member refid="class_automatic_controller_1a4d0306a6711c4ed529668baad4b7502a" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>isRunning</name></member>
+      <member refid="class_automatic_controller_1a542b3e61b6bd726c6d6a2c5e49ee7e15" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>start</name></member>
+      <member refid="class_automatic_controller_1afb960a9422a05137dc953ddcce52ddfc" prot="public" virt="non-virtual"><scope>AutomaticController</scope><name>stop</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

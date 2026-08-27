@@ -1,0 +1,12 @@
+<map id="MQTT::loop" name="MQTT::loop">
+<area shape="rect" id="Node000001" title="Muss regelmaessig aus loop() aufgerufen werden (PubSubClient&#45;Loop, Reconnect bei Verbindungsverlust)." alt="" coords="5,56,95,83"/>
+<area shape="rect" id="Node000002" href="$namespace_wi_fi_controller.html#a30a5a5bd9817f793f11d9a8681c7e1c4" title="Liefert true, wenn aktuell eine WLAN&#45;Verbindung besteht." alt="" coords="143,5,328,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,55,172,35,168,38,96,60"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="376,81,461,108"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,70,361,88,360,93,95,75"/>
+<area shape="rect" id="Node000005" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="191,107,280,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="95,79,178,102,174,105,95,84"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="509,81,683,108"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="462,92,496,95,491,95,462,97"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="280,111,358,103,363,102,281,117"/>
+</map>

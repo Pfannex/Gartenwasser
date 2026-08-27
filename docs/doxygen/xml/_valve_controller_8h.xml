@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_valve_controller_8h" kind="file" language="C++">
+    <compoundname>ValveController.h</compoundname>
+    <includes local="no">cstdint</includes>
+    <includedby refid="_h_m_i_8cpp" local="yes">D:/Gartenwasser/src/HMI.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="_valve_controller_8cpp" local="yes">D:/Gartenwasser/src/ValveController.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/src/ValveController.h</label>
+        <link refid="_valve_controller_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/HMI.cpp</label>
+        <link refid="_h_m_i_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/ValveController.cpp</label>
+        <link refid="_valve_controller_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/ValveController.h</label>
+        <link refid="_valve_controller_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_valve_controller" prot="public">ValveController</innerclass>
+    <briefdescription>
+<para>Kapselt V0-V5 als MCP23017-Ausgaenge (Port B), unabhaengig von <ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10" refid="class_valve_controller" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84" kindref="member">ValveController</ref><sp/>{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="12" refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" kindref="member">kValveCount</ref><sp/>=<sp/>6;<sp/><sp/></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14" refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84" kindref="member">ValveController</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" kindref="member">setValve</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>on);</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" kindref="member">getValve</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" kindref="member">anyIrrigationValveActive</ref>();</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" kindref="member">getAuto</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" kindref="member">setAuto</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>on);</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*<ref refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" kindref="member">getAlias</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" kindref="member">setAlias</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*alias);</highlight></codeline>
+<codeline lineno="37"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/ValveController.h"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_i2_c_8h" kind="file" language="C++">
+    <compoundname>I2C.h</compoundname>
+    <includes local="no">cstdint</includes>
+    <includedby refid="_diagnostics_8cpp" local="yes">D:/Gartenwasser/src/Diagnostics.cpp</includedby>
+    <includedby refid="_i2_c_8cpp" local="yes">D:/Gartenwasser/src/I2C.cpp</includedby>
+    <includedby refid="_valve_controller_8cpp" local="yes">D:/Gartenwasser/src/ValveController.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/src/I2C.h</label>
+        <link refid="_i2_c_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/Diagnostics.cpp</label>
+        <link refid="_diagnostics_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/I2C.cpp</label>
+        <link refid="_i2_c_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/I2C.h</label>
+        <link refid="_i2_c_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/ValveController.cpp</label>
+        <link refid="_valve_controller_8cpp"/>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_i2_c" prot="public">I2C</innerclass>
+    <briefdescription>
+<para>I2C-Bus-Funktionen (Scan, Register-Zugriff, MCP23017-Grundsetup). </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="note"><para>Wire muss vor Aufruf dieser Funktionen bereits initialisiert sein (aktuell durch <ref refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" kindref="member">HMI::begin()</ref>, da Touch und MCP23017 sich den Bus teilen). </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13" refid="class_i2_c" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc" kindref="member">I2C</ref><sp/>{</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="15" refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" kindref="member">kMcp23017Addr</ref><sp/>=<sp/>0x20;<sp/><sp/></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17" refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc" kindref="member">I2C</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" kindref="member">scan</ref>();</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" kindref="member">writeRegister</ref>(uint8_t<sp/>addr,<sp/>uint8_t<sp/>reg,<sp/>uint8_t<sp/>value);</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" kindref="member">mcp23017Setup</ref>();</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" kindref="member">isMcp23017Reachable</ref>();</highlight></codeline>
+<codeline lineno="30"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/I2C.h"/>
+  </compounddef>
+</doxygen>

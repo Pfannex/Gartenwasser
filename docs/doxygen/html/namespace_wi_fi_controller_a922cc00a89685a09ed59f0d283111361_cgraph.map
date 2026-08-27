@@ -1,0 +1,14 @@
+<map id="WiFiController::connectAndSyncTimeBlocking" name="WiFiController::connectAndSyncTimeBlocking">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,48,187,91"/>
+<area shape="rect" id="Node000002" href="$namespace_wi_fi_controller.html#a1dfc0b0c84c0df5a9a80b59460b29a67" title="Startet die WLAN&#45;Verbindung (Zugangsdaten aus secrets.h). Nicht blockierend." alt="" coords="244,5,388,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,46,243,35,238,37,188,51"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="582,31,668,57"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="187,62,567,44,567,49,187,68"/>
+<area shape="rect" id="Node000006" href="$class_logger.html#a29d0f74ae8136a5f87849a9c3aba87f1" title="Schaltet den Zeitstempel von boot&#45;relativer Zeit auf Echtzeit um (nach erfolgreicher NTP&#45;Synchronisie..." alt="" coords="235,107,397,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="187,88,243,102,238,103,187,93"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="445,5,534,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,16,432,18,427,19,388,21"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="535,24,570,33,564,33,535,30"/>
+<area shape="rect" id="Node000005" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="716,31,889,57"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="668,41,703,44,697,44,668,47"/>
+</map>

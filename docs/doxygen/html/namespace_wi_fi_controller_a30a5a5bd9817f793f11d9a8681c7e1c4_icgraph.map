@@ -1,0 +1,11 @@
+<map id="WiFiController::isConnected" name="WiFiController::isConnected">
+<area shape="rect" id="Node000001" title="Liefert true, wenn aktuell eine WLAN&#45;Verbindung besteht." alt="" coords="287,31,472,57"/>
+<area shape="rect" id="Node000002" href="$namespace_m_q_t_t.html#a10bbbea49d36b483ac33babc40e6ff4a" title="Muss regelmaessig aus loop() aufgerufen werden (PubSubClient&#45;Loop, Reconnect bei Verbindungsverlust)." alt="" coords="126,5,215,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="269,31,216,27,216,21,274,31"/>
+<area shape="rect" id="Node000004" href="$namespace_wi_fi_controller.html#a61f4b17e8199349d61b889ad18ecb82c" title="Muss regelmaessig aus loop() aufgerufen werden (Reconnect bei Verbindungsverlust)." alt="" coords="102,56,239,83"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="274,57,239,64,239,58,269,57"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,31,54,57"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,32,55,43,54,37,112,27"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="54,16,47,12,32,9,18,11,10,16,8,22,12,30,7,31,3,22,6,12,16,6,32,4,49,7,59,15"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="85,55,54,51,54,45,89,53"/>
+</map>

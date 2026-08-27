@@ -1,0 +1,255 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_valve_controller" kind="class" language="C++" prot="public">
+    <compoundname>ValveController</compoundname>
+    <includes refid="_valve_controller_8h" local="no">ValveController.h</includes>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t ValveController::kValveCount</definition>
+        <argsstring></argsstring>
+        <name>kValveCount</name>
+        <qualifiedname>ValveController::kValveCount</qualifiedname>
+        <initializer>= 6</initializer>
+        <briefdescription>
+<para>V0 (Hauptventil) .. V5. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="12" column="28" bodyfile="D:/Gartenwasser/src/ValveController.h" bodystart="12" bodyend="-1"/>
+        <referencedby refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" compoundref="_valve_controller_8cpp" startline="41" endline="46">getValve</referencedby>
+        <referencedby refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" compoundref="_valve_controller_8cpp" startline="25" endline="39">setValve</referencedby>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>ValveController::ValveController</definition>
+        <argsstring>()=delete</argsstring>
+        <name>ValveController</name>
+        <qualifiedname>ValveController::ValveController</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="14" column="3"/>
+        <references refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" compoundref="_valve_controller_8cpp" startline="48" endline="55">anyIrrigationValveActive</references>
+        <references refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" compoundref="_valve_controller_8cpp" startline="20" endline="23">begin</references>
+        <references refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" compoundref="_valve_controller_8cpp" startline="66" endline="68">getAlias</references>
+        <references refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" compoundref="_valve_controller_8cpp" startline="57" endline="59">getAuto</references>
+        <references refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" compoundref="_valve_controller_8cpp" startline="41" endline="46">getValve</references>
+        <references refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" compoundref="_valve_controller_8cpp" startline="70" endline="73">setAlias</references>
+        <references refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" compoundref="_valve_controller_8cpp" startline="61" endline="64">setAuto</references>
+        <references refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" compoundref="_valve_controller_8cpp" startline="25" endline="39">setValve</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveController::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>ValveController::begin</qualifiedname>
+        <briefdescription>
+<para>Setzt alle Ventile auf AUS (sicherer Boot-Grundzustand). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="17" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="20" bodyend="23"/>
+        <references refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" compoundref="_i2_c_8h" startline="15">I2C::kMcp23017Addr</references>
+        <references refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" compoundref="_i2_c_8cpp" startline="12" endline="17">I2C::writeRegister</references>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveController::setValve</definition>
+        <argsstring>(uint8_t index, bool on)</argsstring>
+        <name>setValve</name>
+        <qualifiedname>ValveController::setValve</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+        </param>
+        <briefdescription>
+<para>Schaltet Ventil <computeroutput>index</computeroutput> (0=V0 .. 5=V5) ein/aus. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="20" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="25" bodyend="39"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" compoundref="_i2_c_8h" startline="15">I2C::kMcp23017Addr</references>
+        <references refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" compoundref="_valve_controller_8h" startline="12">kValveCount</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" compoundref="_logger_8h" startline="25">Logger::VALVE</references>
+        <references refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" compoundref="_i2_c_8cpp" startline="12" endline="17">I2C::writeRegister</references>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool ValveController::getValve</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getValve</name>
+        <qualifiedname>ValveController::getValve</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Liefert den zuletzt gesetzten Schaltzustand von Ventil <computeroutput>index</computeroutput>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="23" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="41" bodyend="46"/>
+        <references refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" compoundref="_valve_controller_8h" startline="12">kValveCount</references>
+        <referencedby refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" compoundref="_valve_controller_8cpp" startline="48" endline="55">anyIrrigationValveActive</referencedby>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool ValveController::anyIrrigationValveActive</definition>
+        <argsstring>()</argsstring>
+        <name>anyIrrigationValveActive</name>
+        <qualifiedname>ValveController::anyIrrigationValveActive</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Liefert true, wenn mindestens eines der Bewaesserungsventile V1-V5 eingeschaltet ist (fuer die V0-Kopplung: V0 bleibt an, solange irgendein Ventil aktiv ist). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="27" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="48" bodyend="55"/>
+        <references refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" compoundref="_valve_controller_8cpp" startline="41" endline="46">getValve</references>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool ValveController::getAuto</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getAuto</name>
+        <qualifiedname>ValveController::getAuto</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Automatik-Flag von Ventil <computeroutput>index</computeroutput> (1..5): Teilnahme an der Automatik-Sequenz (Phase 7). Persistiert via <ref refid="class_file_system" kindref="compound">FileSystem</ref>, hat vorerst noch keine Funktion. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="31" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="57" bodyend="59"/>
+        <references refid="class_file_system_1aa92266d9637b9f81cfc64172cb111f44" compoundref="_file_system_8cpp" startline="503" endline="508">FileSystem::getValveAuto</references>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveController::setAuto</definition>
+        <argsstring>(uint8_t index, bool on)</argsstring>
+        <name>setAuto</name>
+        <qualifiedname>ValveController::setAuto</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="32" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="61" bodyend="64"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_file_system_1a18666b5a5bcd179fd0ca0d3d377f29d2" compoundref="_file_system_8cpp" startline="510" endline="516">FileSystem::setValveAuto</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" compoundref="_logger_8h" startline="25">Logger::VALVE</references>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const char *</type>
+        <definition>const char * ValveController::getAlias</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getAlias</name>
+        <qualifiedname>ValveController::getAlias</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Klartextname (Alias) von Ventil <computeroutput>index</computeroutput> (0=V0 .. 5=V5). Persistiert via <ref refid="class_file_system" kindref="compound">FileSystem</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="35" column="21" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="66" bodyend="68"/>
+        <references refid="class_file_system_1a98d60f31402eec5fff66b2805ab65536" compoundref="_file_system_8cpp" startline="518" endline="523">FileSystem::getValveAlias</references>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveController::setAlias</definition>
+        <argsstring>(uint8_t index, const char *alias)</argsstring>
+        <name>setAlias</name>
+        <qualifiedname>ValveController::setAlias</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>alias</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveController.h" line="36" column="15" bodyfile="D:/Gartenwasser/src/ValveController.cpp" bodystart="70" bodyend="73"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" compoundref="_file_system_8cpp" startline="525" endline="532">FileSystem::setValveAlias</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" compoundref="_logger_8h" startline="25">Logger::VALVE</references>
+        <referencedby refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84">ValveController</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/ValveController.h" line="10" column="1" bodyfile="D:/Gartenwasser/src/ValveController.h" bodystart="10" bodyend="37"/>
+    <listofallmembers>
+      <member refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" prot="public" virt="non-virtual"><scope>ValveController</scope><name>anyIrrigationValveActive</name></member>
+      <member refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" prot="public" virt="non-virtual"><scope>ValveController</scope><name>begin</name></member>
+      <member refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" prot="public" virt="non-virtual"><scope>ValveController</scope><name>getAlias</name></member>
+      <member refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" prot="public" virt="non-virtual"><scope>ValveController</scope><name>getAuto</name></member>
+      <member refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" prot="public" virt="non-virtual"><scope>ValveController</scope><name>getValve</name></member>
+      <member refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" prot="public" virt="non-virtual"><scope>ValveController</scope><name>kValveCount</name></member>
+      <member refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" prot="public" virt="non-virtual"><scope>ValveController</scope><name>setAlias</name></member>
+      <member refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" prot="public" virt="non-virtual"><scope>ValveController</scope><name>setAuto</name></member>
+      <member refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" prot="public" virt="non-virtual"><scope>ValveController</scope><name>setValve</name></member>
+      <member refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84" prot="public" virt="non-virtual"><scope>ValveController</scope><name>ValveController</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

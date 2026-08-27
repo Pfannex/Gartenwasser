@@ -1,0 +1,6 @@
+<map id="MQTT::begin" name="MQTT::begin">
+<area shape="rect" id="Node000001" title="Konfiguriert den MQTT&#45;Client (Broker/Port aus secrets.h). Nicht blockierend." alt="" coords="107,29,203,56"/>
+<area shape="rect" id="Node000002" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,29,59,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,43,59,45,59,40,93,42"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="51,15,45,10,32,8,20,10,13,14,12,20,15,28,10,29,6,20,9,11,18,5,32,3,47,5,56,14"/>
+</map>

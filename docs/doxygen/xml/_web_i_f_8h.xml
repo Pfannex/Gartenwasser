@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_web_i_f_8h" kind="file" language="C++">
+    <compoundname>WebIF.h</compoundname>
+    <includedby refid="_web_i_f_8cpp" local="yes">D:/Gartenwasser/src/WebIF.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/WebIF.cpp</label>
+        <link refid="_web_i_f_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/WebIF.h</label>
+        <link refid="_web_i_f_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_web_i_f" prot="public">WebIF</innerclass>
+    <briefdescription>
+<para>Async-Webserver (ESPAsyncWebServer), liefert das Web-Interface als statische Dateien aus LittleFS aus (Phase 16). Fuer Live-Daten spricht der Browser direkt per MQTT-over-WebSocket mit dem Broker, siehe docs/spec/16-webif-fundament.md (Architekturentscheidung B). Ausnahme (Phase 21, <ref refid="class_o_t_a" kindref="compound">OTA</ref>): zwei echte HTTP-POST- Upload-Endpunkte fuer Firmware/Dateisystem - MQTT-Payloads sind bei uns auf wenige KB gedeckelt, fuer mehrere-MB-Binaries bewusst kein Ersatz fuer echten HTTP-Upload. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14" refid="class_web_i_f" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_web_i_f_1a848343b2664e0b994d40d83e2be5207e" kindref="member">WebIF</ref><sp/>{</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="16" refid="class_web_i_f_1a848343b2664e0b994d40d83e2be5207e" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_web_i_f_1a848343b2664e0b994d40d83e2be5207e" kindref="member">WebIF</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" kindref="member">loop</ref>();</highlight></codeline>
+<codeline lineno="26"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/WebIF.h"/>
+  </compounddef>
+</doxygen>

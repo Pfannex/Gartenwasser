@@ -1,0 +1,39 @@
+<map id="ValveController::ValveController" name="ValveController::ValveController">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,185,211,212"/>
+<area shape="rect" id="Node000002" href="$class_valve_controller.html#a58ef29b30fe77616d8f7ecf79740c271" title=" " alt="" coords="259,43,447,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,183,182,141,257,95,273,90,268,93,260,100,185,145,128,187"/>
+<area shape="rect" id="Node000003" href="$class_valve_controller.html#a24d85dc9fba796e994bb87be844d50c0" title="Liefert den zuletzt gesetzten Schaltzustand von Ventil index." alt="" coords="498,21,666,48"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="114,183,134,149,165,105,207,62,231,43,258,28,289,16,323,9,390,3,456,6,515,17,510,18,455,12,390,8,323,14,291,22,260,33,234,47,210,66,169,109,138,152,119,186"/>
+<area shape="rect" id="Node000004" href="$class_valve_controller.html#a47dc7d3e249aa83c873c00e02409a557" title="Setzt alle Ventile auf AUS (sicherer Boot&#45;Grundzustand)." alt="" coords="279,109,427,136"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="147,182,258,145,286,139,282,142,259,150,150,187"/>
+<area shape="rect" id="Node000006" href="$class_valve_controller.html#a8b366c8ba200d074e7081d458951ac18" title="Klartextname (Alias) von Ventil index (0=V0 .. 5=V5). Persistiert via FileSystem." alt="" coords="271,312,435,339"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="126,210,184,253,221,277,260,297,277,306,272,306,258,302,218,281,181,257,125,215"/>
+<area shape="rect" id="Node000008" href="$class_valve_controller.html#a99a1751fdaf99851446b43ef38cd74a4" title=" " alt="" coords="272,363,434,389"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="120,210,175,277,215,315,260,348,272,357,267,356,257,353,211,319,171,280,118,215"/>
+<area shape="rect" id="Node000010" href="$class_valve_controller.html#ac228ec706f3a726ac60624f5cb861036" title=" " alt="" coords="271,211,435,237"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="211,207,258,213,253,215,212,212"/>
+<area shape="rect" id="Node000015" href="$class_valve_controller.html#aa4c7774203cd4387c7e26763aa2a5ef1" title=" " alt="" coords="272,261,434,288"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="148,210,259,247,287,256,281,257,258,252,148,215"/>
+<area shape="rect" id="Node000017" href="$class_valve_controller.html#aec0668cc044f40f0dc56918973ce849f" title="Schaltet Ventil index (0=V0 .. 5=V5) ein/aus." alt="" coords="269,160,436,187"/>
+<area shape="poly" id="edge18_Node000001_Node000017" title=" " alt="" coords="210,185,256,182,251,185,212,190"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="446,49,485,46,481,48,448,54"/>
+<area shape="rect" id="Node000005" href="$class_i2_c.html#a839b151d693709d7767aeed03dcbc206" title="Schreibt ein Register&#45;Byte per I2C an ein Geraet." alt="" coords="518,109,646,136"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="427,120,505,122,500,123,428,125"/>
+<area shape="rect" id="Node000007" href="$class_file_system.html#a98d60f31402eec5fff66b2805ab65536" title=" " alt="" coords="495,312,669,339"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="435,323,482,325,477,325,436,328"/>
+<area shape="rect" id="Node000009" href="$class_file_system.html#aa92266d9637b9f81cfc64172cb111f44" title="Automatik&#45;Flag fuer Ventil index (1..5): Teilnahme an der Automatik&#45;Sequenz (Phase 7)." alt="" coords="496,363,668,389"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="434,373,483,376,478,376,434,379"/>
+<area shape="rect" id="Node000011" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="538,211,627,237"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="435,221,524,223,519,224,436,227"/>
+<area shape="rect" id="Node000014" href="$class_file_system.html#a71d71d5d2586ccfd1982ee5efbb2db2c" title=" " alt="" coords="495,160,669,187"/>
+<area shape="poly" id="edge14_Node000010_Node000014" title=" " alt="" coords="416,207,506,190,501,191,417,212"/>
+<area shape="rect" id="Node000012" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="717,211,803,237"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="627,221,704,224,699,224,628,227"/>
+<area shape="rect" id="Node000013" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="851,211,1024,237"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="803,221,838,224,832,224,803,227"/>
+<area shape="poly" id="edge16_Node000015_Node000011" title=" " alt="" coords="416,258,525,236,520,238,417,263"/>
+<area shape="rect" id="Node000016" href="$class_file_system.html#a18666b5a5bcd179fd0ca0d3d377f29d2" title=" " alt="" coords="496,261,668,288"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="434,272,483,274,478,275,434,277"/>
+<area shape="poly" id="edge20_Node000017_Node000005" title=" " alt="" coords="416,157,506,139,501,141,418,162"/>
+<area shape="poly" id="edge19_Node000017_Node000011" title=" " alt="" coords="417,185,525,210,520,211,417,190"/>
+</map>

@@ -1,0 +1,57 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="10,325,63,352"/>
+<area shape="poly" id="edge33_Node000001_Node000001" title=" " alt="" coords="8,326,3,317,6,307,18,301,37,299,57,301,68,309,63,311,55,306,37,304,20,306,10,311,8,316,13,324"/>
+<area shape="rect" id="Node000002" href="$class_automatic_controller.html#acf073935540c377ea1578b6d455dcc9c" title="Setzt den Zustand zurueck (keine Sequenz aktiv). Fuer den Boot&#45;Grundzustand." alt="" coords="134,5,270,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="35,325,36,276,44,205,54,166,67,128,85,91,109,58,122,49,119,54,113,62,90,94,72,130,59,168,50,206,41,276,40,325"/>
+<area shape="rect" id="Node000003" href="$class_diagnostics.html#a3004aeac1d2170fe78a9f8043eefbeae" title="Initialisiert den Zustand und registriert den Logger::ErrorCallback." alt="" coords="137,72,267,99"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="36,325,40,285,51,229,73,169,89,141,109,115,127,104,124,108,113,119,93,144,78,171,56,230,45,286,41,325"/>
+<area shape="rect" id="Node000005" href="$class_file_system.html#a825d7e892794db3c1449439967cf0756" title="Mountet LittleFS und laedt /config.json + /programs.json (falls vorhanden), sonst gelten Defaultwerte..." alt="" coords="587,148,714,175"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="36,325,42,291,54,248,76,203,91,183,110,167,146,151,195,141,254,136,320,134,455,139,574,151,570,154,455,145,320,140,255,141,196,146,147,156,113,172,95,187,80,206,59,250,47,293,42,325"/>
+<area shape="rect" id="Node000008" href="$class_h_m_i.html#a5573f1a5bf16defa7aeced2652de696a" title="Initialisiert Display, Touch (inkl. Wire.begin() fuer den I2C&#45;Bus) und LVGL." alt="" coords="608,223,693,249"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="39,324,47,298,60,266,81,234,110,210,173,182,239,167,308,162,377,165,442,174,503,186,601,216,596,218,502,191,441,179,376,170,308,167,240,172,174,187,113,214,85,238,65,269,52,300,44,325"/>
+<area shape="rect" id="Node000009" href="$namespace_m_q_t_t.html#a5355e8fc50ad2622c124c55b8dd64e9f" title="Konfiguriert den MQTT&#45;Client (Broker/Port aus secrets.h). Nicht blockierend." alt="" coords="154,224,250,251"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="47,324,74,295,110,267,141,253,138,258,113,272,78,299,51,326"/>
+<area shape="rect" id="Node000011" href="$class_o_t_a.html#a6111f598c2cd2f0ca78731603906764e" title=" " alt="" coords="380,373,466,400"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="62,338,164,347,293,361,367,374,362,377,292,367,164,352,65,343"/>
+<area shape="rect" id="Node000012" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="606,449,695,476"/>
+<area shape="poly" id="edge27_Node000001_Node000012" title=" " alt="" coords="39,350,46,387,57,432,79,478,94,498,113,514,136,527,157,533,177,535,196,532,239,522,292,513,454,494,593,473,588,475,455,500,293,519,240,527,197,538,177,540,156,538,134,532,110,518,90,501,74,481,52,434,41,388,39,355"/>
+<area shape="rect" id="Node000013" href="$class_valve_controller.html#a47dc7d3e249aa83c873c00e02409a557" title="Setzt alle Ventile auf AUS (sicherer Boot&#45;Grundzustand)." alt="" coords="128,376,276,403"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="63,344,144,369,139,373,65,349"/>
+<area shape="rect" id="Node000015" href="$class_valve_timer.html#ad9565a0920e8eb4549b0c519a9d1c8dc" title=" " alt="" coords="139,427,265,453"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="47,350,76,382,113,412,127,420,122,423,110,417,72,386,48,355"/>
+<area shape="rect" id="Node000016" href="$class_web_i_f.html#a856f6407dce93cb23257d2bf3ff92097" title=" " alt="" coords="374,677,472,704"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="39,350,50,413,64,497,86,579,99,611,113,631,140,652,169,668,201,680,234,688,300,695,361,697,356,698,300,701,233,693,200,685,167,673,137,656,109,635,94,613,81,581,59,498,45,414,39,355"/>
+<area shape="rect" id="Node000018" href="$namespace_wi_fi_controller.html#a922cc00a89685a09ed59f0d283111361" title=" " alt="" coords="111,579,293,621"/>
+<area shape="poly" id="edge22_Node000001_Node000018" title=" " alt="" coords="39,350,46,392,57,446,79,505,94,533,113,558,124,569,119,570,109,562,90,536,74,508,52,448,41,393,39,355"/>
+<area shape="rect" id="Node000021" href="$class_i2_c.html#ad8e211c40ab2d53bf5db54cf9fb269c4" title="Konfiguriert den MCP23017 (Port B, alle Pins Ausgang, LOW)." alt="" coords="130,477,274,504"/>
+<area shape="poly" id="edge28_Node000001_Node000021" title=" " alt="" coords="42,350,68,406,87,437,113,463,120,469,115,471,110,467,83,440,63,409,42,355"/>
+<area shape="rect" id="Node000022" href="$class_i2_c.html#ad3ebfa3204880e4fa60beeba997f357a" title="Durchsucht den I2C&#45;Bus (Adressen 1&#45;126) und prueft gezielt den MCP23017." alt="" coords="384,323,462,349"/>
+<area shape="poly" id="edge30_Node000001_Node000022" title=" " alt="" coords="62,328,111,317,180,313,250,314,370,326,366,329,250,319,181,318,112,323,66,332"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8e88dd6ab1fba23da493b2d2214f04a8" title=" " alt="" coords="341,72,506,99"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="266,83,327,84,323,87,268,88"/>
+<area shape="rect" id="Node000006" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="795,373,881,400"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="691,173,722,188,749,209,778,245,802,286,831,360,826,358,797,288,774,248,745,213,719,192,692,178"/>
+<area shape="rect" id="Node000007" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="929,373,1102,400"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="881,384,915,386,910,387,882,389"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="669,247,811,363,805,364,668,253"/>
+<area shape="rect" id="Node000010" href="$class_logger.html#adf4c4245af48ffa9fff97a3dda1a4192" title=" " alt="" coords="343,224,504,251"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="250,235,329,236,325,239,252,240"/>
+<area shape="poly" id="edge12_Node000011_Node000006" title=" " alt="" coords="466,384,782,385,777,388,467,389"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="467,397,507,409,599,443,594,444,505,415,467,402"/>
+<area shape="poly" id="edge14_Node000012_Node000006" title=" " alt="" coords="685,446,791,405,786,407,687,451"/>
+<area shape="rect" id="Node000014" href="$class_i2_c.html#a839b151d693709d7767aeed03dcbc206" title="Schreibt ein Register&#45;Byte per I2C an ein Geraet." alt="" coords="360,424,487,451"/>
+<area shape="poly" id="edge16_Node000013_Node000014" title=" " alt="" coords="266,401,347,419,342,422,267,406"/>
+<area shape="poly" id="edge19_Node000016_Node000006" title=" " alt="" coords="473,698,534,705,606,705,643,700,680,691,714,677,746,657,771,631,791,602,806,569,817,535,830,468,835,418,838,413,835,469,822,536,811,571,795,604,775,635,749,661,717,681,682,696,644,705,606,710,533,711,473,703"/>
+<area shape="poly" id="edge20_Node000016_Node000012" title=" " alt="" coords="438,675,504,613,624,489,629,486,508,617,441,679"/>
+<area shape="rect" id="Node000017" href="$namespace_wi_fi_controller.html#a2622d7c47ada0e6e985e84813934e3bd" title=" " alt="" coords="554,728,747,771"/>
+<area shape="poly" id="edge21_Node000016_Node000017" title=" " alt="" coords="473,701,553,724,548,723,472,706"/>
+<area shape="poly" id="edge26_Node000018_Node000006" title=" " alt="" coords="292,615,396,623,451,621,505,612,579,591,634,566,684,533,746,486,785,448,816,414,820,411,789,452,749,490,687,537,636,571,581,596,507,617,452,626,396,629,293,620"/>
+<area shape="rect" id="Node000019" href="$namespace_wi_fi_controller.html#a1dfc0b0c84c0df5a9a80b59460b29a67" title="Startet die WLAN&#45;Verbindung (Zugangsdaten aus secrets.h). Nicht blockierend." alt="" coords="352,525,495,552"/>
+<area shape="poly" id="edge23_Node000018_Node000019" title=" " alt="" coords="281,576,360,556,355,558,283,580"/>
+<area shape="rect" id="Node000020" href="$class_logger.html#a29d0f74ae8136a5f87849a9c3aba87f1" title="Schaltet den Zeitstempel von boot&#45;relativer Zeit auf Echtzeit um (nach erfolgreicher NTP&#45;Synchronisie..." alt="" coords="342,576,504,603"/>
+<area shape="poly" id="edge25_Node000018_Node000020" title=" " alt="" coords="292,593,329,593,324,595,294,598"/>
+<area shape="poly" id="edge24_Node000019_Node000012" title=" " alt="" coords="465,522,596,480,591,483,467,527"/>
+<area shape="poly" id="edge29_Node000021_Node000014" title=" " alt="" coords="259,474,352,453,348,457,261,479"/>
+<area shape="poly" id="edge31_Node000022_Node000006" title=" " alt="" coords="462,336,590,346,748,365,783,373,777,374,747,371,589,352,464,341"/>
+<area shape="poly" id="edge32_Node000022_Node000012" title=" " alt="" coords="462,343,507,359,571,398,624,439,619,439,568,402,505,364,463,348"/>
+</map>

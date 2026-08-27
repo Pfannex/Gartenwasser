@@ -1,0 +1,5 @@
+<map id="Diagnostics::begin" name="Diagnostics::begin">
+<area shape="rect" id="Node000001" title="Initialisiert den Zustand und registriert den Logger::ErrorCallback." alt="" coords="5,5,135,32"/>
+<area shape="rect" id="Node000002" href="$class_logger.html#a8e88dd6ab1fba23da493b2d2214f04a8" title=" " alt="" coords="183,5,348,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,16,170,18,164,19,135,21"/>
+</map>

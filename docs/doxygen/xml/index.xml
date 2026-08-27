@@ -1,0 +1,276 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.18.0" xml:lang="en-US">
+  <compound refid="class_automatic_controller" kind="class"><name>AutomaticController</name>
+    <member refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22" kind="function"><name>AutomaticController</name></member>
+    <member refid="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" kind="function"><name>begin</name></member>
+    <member refid="class_automatic_controller_1a542b3e61b6bd726c6d6a2c5e49ee7e15" kind="function"><name>start</name></member>
+    <member refid="class_automatic_controller_1afb960a9422a05137dc953ddcce52ddfc" kind="function"><name>stop</name></member>
+    <member refid="class_automatic_controller_1a4d0306a6711c4ed529668baad4b7502a" kind="function"><name>isRunning</name></member>
+    <member refid="class_automatic_controller_1acc1c05abe64763cd951aa0b4efd0a187" kind="function"><name>getActiveValve</name></member>
+    <member refid="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" kind="function"><name>advance</name></member>
+    <member refid="class_automatic_controller_1ac89fb27486eed31944c75c38371cd1c2" kind="function"><name>getPendingCount</name></member>
+    <member refid="class_automatic_controller_1aceaa72e4e8fb0b5d99391ca27fb59d48" kind="function"><name>getPendingValve</name></member>
+  </compound>
+  <compound refid="class_diagnostics" kind="class"><name>Diagnostics</name>
+    <member refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39" kind="function"><name>Diagnostics</name></member>
+    <member refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" kind="function"><name>begin</name></member>
+    <member refid="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" kind="function"><name>checkI2cStatus</name></member>
+    <member refid="class_diagnostics_1a87b924c728b1e8bb335c361095a60754" kind="function"><name>isI2cOk</name></member>
+    <member refid="class_diagnostics_1abafa16aed5a46e3b9e0f9c39109a4519" kind="function"><name>consumeNewError</name></member>
+    <member refid="class_diagnostics_1a5377b98576fee15844a969a53ab947e2" kind="function"><name>getLastError</name></member>
+  </compound>
+  <compound refid="class_file_system" kind="class"><name>FileSystem</name>
+    <member refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756c" kind="enum"><name>ScheduleType</name></member>
+    <member refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756ca791490f9f4842958f00f3791f6c01576" kind="enumvalue"><name>DAILY</name></member>
+    <member refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756ca35f20feb221d809190e45545c933c9dc" kind="enumvalue"><name>WEEKLY</name></member>
+    <member refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756caa32d16355630f112473d1ae254519c24" kind="enumvalue"><name>ONCE</name></member>
+    <member refid="class_file_system_1a855f0de8baddbd9d43ae6618eb062603" kind="variable"><name>kAliasMaxLength</name></member>
+    <member refid="class_file_system_1a591f75c399b758af8eeff8b6b8129da7" kind="variable"><name>kJsonCapacity</name></member>
+    <member refid="class_file_system_1aba322b937b6d1188389285270681037b" kind="variable"><name>kMaxPrograms</name></member>
+    <member refid="class_file_system_1a710f5bd7ea84c3447f8c758da02620c0" kind="variable"><name>kProgramsJsonCapacity</name></member>
+    <member refid="class_file_system_1aec5ae9336da3b83f57044be6ed75e989" kind="variable"><name>kMaxScheduleEntries</name></member>
+    <member refid="class_file_system_1a84c06b88af528315b16a8595c66deb5a" kind="variable"><name>kScheduleJsonCapacity</name></member>
+    <member refid="class_file_system_1acd29068f3902ca4af016174c90258c50" kind="function"><name>FileSystem</name></member>
+    <member refid="class_file_system_1a825d7e892794db3c1449439967cf0756" kind="function"><name>begin</name></member>
+    <member refid="class_file_system_1aac5d26e454c237934d7e64f37066e597" kind="function"><name>getValveTime</name></member>
+    <member refid="class_file_system_1a50fd7be2ea1e5d103fc7c970bc72ce5c" kind="function"><name>setValveTime</name></member>
+    <member refid="class_file_system_1a15bdedb8c7a15734de4c1d344ddf348d" kind="function"><name>getMaxTime</name></member>
+    <member refid="class_file_system_1a959cb5a246e6fc67b7f29a683f4c7fa5" kind="function"><name>setMaxTime</name></member>
+    <member refid="class_file_system_1aa92266d9637b9f81cfc64172cb111f44" kind="function"><name>getValveAuto</name></member>
+    <member refid="class_file_system_1a18666b5a5bcd179fd0ca0d3d377f29d2" kind="function"><name>setValveAuto</name></member>
+    <member refid="class_file_system_1a98d60f31402eec5fff66b2805ab65536" kind="function"><name>getValveAlias</name></member>
+    <member refid="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" kind="function"><name>setValveAlias</name></member>
+    <member refid="class_file_system_1a43c83ebf0d44a54be7ee20564e142cf3" kind="function"><name>toJson</name></member>
+    <member refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" kind="function"><name>setPrograms</name></member>
+    <member refid="class_file_system_1ae449fe92e81869478a35419ad8a7d6df" kind="function"><name>getProgramCount</name></member>
+    <member refid="class_file_system_1a9262938024189ade5d5bcb84707e6a1a" kind="function"><name>getProgramName</name></member>
+    <member refid="class_file_system_1acd15109a45ee09f60376b44421513c08" kind="function"><name>programHasTime</name></member>
+    <member refid="class_file_system_1a210564fff7f994e8ab5e13face669a36" kind="function"><name>getProgramTime</name></member>
+    <member refid="class_file_system_1aff80f21abf0e3075db5da8ee4e2f9ebb" kind="function"><name>programHasAuto</name></member>
+    <member refid="class_file_system_1a39be22efda6ac47d16c325657002fb04" kind="function"><name>getProgramAuto</name></member>
+    <member refid="class_file_system_1a3e16ab221fabacf1c97b8ebdf545ef5c" kind="function"><name>getActiveProgram</name></member>
+    <member refid="class_file_system_1a6d2782d2b8de7ee9a1e3226d9e51c927" kind="function"><name>setActiveProgram</name></member>
+    <member refid="class_file_system_1a4009d3f1ad78dbda08c28fc55e1e0e30" kind="function"><name>programsToJson</name></member>
+    <member refid="class_file_system_1a6a60e76eee4fda3af3c7900a37c3ddc2" kind="function"><name>getProgramIndexForName</name></member>
+    <member refid="class_file_system_1a889429cfca465871ed1935d4537381b9" kind="function"><name>setSchedule</name></member>
+    <member refid="class_file_system_1a143d0e5a0c81a6ee01bc579ec38c9352" kind="function"><name>getScheduleCount</name></member>
+    <member refid="class_file_system_1a8e10442d12f3ff4f12711db83123c34c" kind="function"><name>getScheduleEnabled</name></member>
+    <member refid="class_file_system_1a535de8e712999c2d28a58144bc08fa5a" kind="function"><name>getScheduleType</name></member>
+    <member refid="class_file_system_1a37ffa1249dfa653816ff8abf20d80d48" kind="function"><name>getScheduleHour</name></member>
+    <member refid="class_file_system_1ac5416ad1371a79eda0ff4c42aa93e43e" kind="function"><name>getScheduleMinute</name></member>
+    <member refid="class_file_system_1a2a274d7b4a480d8c578648acbc9b7849" kind="function"><name>getScheduleWeekdaysMask</name></member>
+    <member refid="class_file_system_1a3dee143f3664afbdc756b0829e358188" kind="function"><name>getScheduleYear</name></member>
+    <member refid="class_file_system_1af8fdcf5b7478d11e7b57ba8df93a9aff" kind="function"><name>getScheduleMonth</name></member>
+    <member refid="class_file_system_1a51b1ad5847650677b1dcd8786b6f0f07" kind="function"><name>getScheduleDay</name></member>
+    <member refid="class_file_system_1aa2eebe14b577f75a5204b2a52b84092a" kind="function"><name>getScheduleProgram</name></member>
+    <member refid="class_file_system_1ae76d7d257916a0576af55536581d5ca7" kind="function"><name>getScheduleGlobalEnabled</name></member>
+    <member refid="class_file_system_1a218772918e746e0cbdbc334f501fe605" kind="function"><name>setScheduleGlobalEnabled</name></member>
+    <member refid="class_file_system_1ad41c860b8067e2340208085c3d2e04bb" kind="function"><name>scheduleToJson</name></member>
+    <member refid="class_file_system_1a11ab0a00b3592bff6c648fe4c7c71b6f" kind="function"><name>usedBytes</name></member>
+    <member refid="class_file_system_1a2f09930b0a90fbca6300692c1cc70d8b" kind="function"><name>totalBytes</name></member>
+  </compound>
+  <compound refid="class_h_m_i" kind="class"><name>HMI</name>
+    <member refid="class_h_m_i_1a70accb733e35e9a48ca783523cb4151e" kind="function"><name>HMI</name></member>
+    <member refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" kind="function"><name>begin</name></member>
+    <member refid="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" kind="function"><name>loop</name></member>
+  </compound>
+  <compound refid="class_i2_c" kind="class"><name>I2C</name>
+    <member refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" kind="variable"><name>kMcp23017Addr</name></member>
+    <member refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc" kind="function"><name>I2C</name></member>
+    <member refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" kind="function"><name>scan</name></member>
+    <member refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" kind="function"><name>writeRegister</name></member>
+    <member refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" kind="function"><name>mcp23017Setup</name></member>
+    <member refid="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" kind="function"><name>isMcp23017Reachable</name></member>
+  </compound>
+  <compound refid="class_logger" kind="class"><name>Logger</name>
+    <member refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kind="enum"><name>Type</name></member>
+    <member refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kind="enumvalue"><name>ERROR</name></member>
+    <member refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kind="enumvalue"><name>INFO</name></member>
+    <member refid="class_logger_1acc066f65d27368f795ed38ce6968737fadc30ec20708ef7b0f641ef78b7880a15" kind="enumvalue"><name>DEBUG</name></member>
+    <member refid="class_logger_1acc066f65d27368f795ed38ce6968737fa9aba7127268ef2f384fdc95498c7bb1a" kind="enumvalue"><name>PUB</name></member>
+    <member refid="class_logger_1acc066f65d27368f795ed38ce6968737fa241dd841abade20fcb27b8a9f494e1eb" kind="enumvalue"><name>SUB</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kind="enum"><name>Source</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" kind="enumvalue"><name>WIFI</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79aab0a7cf5deeda86b66467df64c3b6122" kind="enumvalue"><name>MQTT</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afb87bf1fc88386ca21395991f90fff95" kind="enumvalue"><name>I2C</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a87599e818aa04794bf7ff0772899d8ae" kind="enumvalue"><name>HMI</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" kind="enumvalue"><name>WEB</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kind="enumvalue"><name>SYSTEM</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" kind="enumvalue"><name>VALVE</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a5826d2990481dd71b3e258ddf8435676" kind="enumvalue"><name>SEQ</name></member>
+    <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kind="enumvalue"><name>OTA</name></member>
+    <member refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kind="typedef"><name>ErrorCallback</name></member>
+    <member refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" kind="typedef"><name>LineCallback</name></member>
+    <member refid="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" kind="variable"><name>kMaxLineLength</name></member>
+    <member refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439" kind="function"><name>Logger</name></member>
+    <member refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kind="function"><name>log</name></member>
+    <member refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kind="function"><name>logf</name></member>
+    <member refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" kind="function"><name>enableRealTime</name></member>
+    <member refid="class_logger_1a6fa26119de2d3513c679785f96648cb1" kind="function"><name>isRealTimeEnabled</name></member>
+    <member refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" kind="function"><name>currentTimestamp</name></member>
+    <member refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" kind="function"><name>setErrorCallback</name></member>
+    <member refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" kind="function"><name>setLineCallback</name></member>
+  </compound>
+  <compound refid="class_o_t_a" kind="class"><name>OTA</name>
+    <member refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8" kind="function"><name>OTA</name></member>
+    <member refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" kind="function"><name>begin</name></member>
+    <member refid="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" kind="function"><name>loop</name></member>
+  </compound>
+  <compound refid="struct_file_system_1_1_program_input" kind="struct"><name>FileSystem::ProgramInput</name>
+    <member refid="struct_file_system_1_1_program_input_1a62f7164ac38e82a7a4ec3c5a0261ea08" kind="variable"><name>name</name></member>
+    <member refid="struct_file_system_1_1_program_input_1a0a15ee85fe9859ca806e4d8a97932276" kind="variable"><name>time</name></member>
+    <member refid="struct_file_system_1_1_program_input_1ac66f67bdbd6c6c68e75a2b40bf385050" kind="variable"><name>timeSet</name></member>
+    <member refid="struct_file_system_1_1_program_input_1ac5d405373df7dd07b6a234637ee26414" kind="variable"><name>autoFlag</name></member>
+    <member refid="struct_file_system_1_1_program_input_1a55a32e4964b9dc5741989aaaf2bcfdb0" kind="variable"><name>autoSet</name></member>
+  </compound>
+  <compound refid="struct_file_system_1_1_schedule_input" kind="struct"><name>FileSystem::ScheduleInput</name>
+    <member refid="struct_file_system_1_1_schedule_input_1ac10b506477490d790357d638a6551843" kind="variable"><name>program</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1a8489285908260ddc9f16fc42b62682ca" kind="variable"><name>enabled</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1a01aa568cd25de66c33869b4ee4e0a166" kind="variable"><name>type</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1a38098db907c26a2c5925cc9bfe9d306e" kind="variable"><name>hour</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1acc2fd36121c5bf619a3eb794e35297bd" kind="variable"><name>minute</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1adf1de82adde52bb254b9be3af6ad84c9" kind="variable"><name>weekdaysMask</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1a0ac3fb2003f54af770403c601f3175ae" kind="variable"><name>year</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1aceb676cdce7f77480a183dea15ee1e22" kind="variable"><name>month</name></member>
+    <member refid="struct_file_system_1_1_schedule_input_1ae745cc192f5a29c76c55df1b91690bf9" kind="variable"><name>day</name></member>
+  </compound>
+  <compound refid="class_valve_controller" kind="class"><name>ValveController</name>
+    <member refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" kind="variable"><name>kValveCount</name></member>
+    <member refid="class_valve_controller_1acc4bee34fe33fcd51ddd1cbc6dd53e84" kind="function"><name>ValveController</name></member>
+    <member refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" kind="function"><name>begin</name></member>
+    <member refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" kind="function"><name>setValve</name></member>
+    <member refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" kind="function"><name>getValve</name></member>
+    <member refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" kind="function"><name>anyIrrigationValveActive</name></member>
+    <member refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" kind="function"><name>getAuto</name></member>
+    <member refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" kind="function"><name>setAuto</name></member>
+    <member refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" kind="function"><name>getAlias</name></member>
+    <member refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" kind="function"><name>setAlias</name></member>
+  </compound>
+  <compound refid="class_valve_timer" kind="class"><name>ValveTimer</name>
+    <member refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717" kind="function"><name>ValveTimer</name></member>
+    <member refid="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" kind="function"><name>begin</name></member>
+    <member refid="class_valve_timer_1ac3ef15b64ff7a0105a2fae787a334dfd" kind="function"><name>start</name></member>
+    <member refid="class_valve_timer_1af4c4bc856014e8d385e5358b47e267cb" kind="function"><name>reset</name></member>
+    <member refid="class_valve_timer_1a9eb466b6cf7ad81a1806f81c9a435f70" kind="function"><name>clear</name></member>
+    <member refid="class_valve_timer_1a73e0b2a3059beb9cc5abe25c0985e2d3" kind="function"><name>tick</name></member>
+    <member refid="class_valve_timer_1a952377769bd144ff3500bf62225a687a" kind="function"><name>getRemainingSeconds</name></member>
+  </compound>
+  <compound refid="class_web_i_f" kind="class"><name>WebIF</name>
+    <member refid="class_web_i_f_1a848343b2664e0b994d40d83e2be5207e" kind="function"><name>WebIF</name></member>
+    <member refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" kind="function"><name>begin</name></member>
+    <member refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" kind="function"><name>loop</name></member>
+  </compound>
+  <compound refid="namespace_0d000103336254355263122005070242031224133307312115" kind="namespace"><name>@000103336254355263122005070242031224133307312115</name>
+  </compound>
+  <compound refid="namespace_0d000137370265001160075372216067040037000375214027" kind="namespace"><name>@000137370265001160075372216067040037000375214027</name>
+  </compound>
+  <compound refid="namespace_0d027065155362074123145077127040207037025373131017" kind="namespace"><name>@027065155362074123145077127040207037025373131017</name>
+  </compound>
+  <compound refid="namespace_0d036351113220304220023270014117141164003226135200" kind="namespace"><name>@036351113220304220023270014117141164003226135200</name>
+  </compound>
+  <compound refid="namespace_0d113345232152270201117125344035373327253161150177" kind="namespace"><name>@113345232152270201117125344035373327253161150177</name>
+  </compound>
+  <compound refid="namespace_0d117157336333367163170140347175062064144254100272" kind="namespace"><name>@117157336333367163170140347175062064144254100272</name>
+  </compound>
+  <compound refid="namespace_0d203321347300016015213246244101116224337244331223" kind="namespace"><name>@203321347300016015213246244101116224337244331223</name>
+  </compound>
+  <compound refid="namespace_0d230164300051067112113155334064046323376321067260" kind="namespace"><name>@230164300051067112113155334064046323376321067260</name>
+  </compound>
+  <compound refid="namespace_0d247014110166133134133141321322344172255140231010" kind="namespace"><name>@247014110166133134133141321322344172255140231010</name>
+  </compound>
+  <compound refid="namespace_0d254110227106323020117371126256167116161264042245" kind="namespace"><name>@254110227106323020117371126256167116161264042245</name>
+  </compound>
+  <compound refid="namespace_0d265100127340330131137155325141341000241104222251" kind="namespace"><name>@265100127340330131137155325141341000241104222251</name>
+  </compound>
+  <compound refid="namespace_0d302355007321152242041204127106250202014000013310" kind="namespace"><name>@302355007321152242041204127106250202014000013310</name>
+  </compound>
+  <compound refid="namespace_0d356113150350163060007270027110075332334176104367" kind="namespace"><name>@356113150350163060007270027110075332334176104367</name>
+  </compound>
+  <compound refid="namespace_ha_discovery" kind="namespace"><name>HaDiscovery</name>
+    <member refid="namespace_ha_discovery_1ad5847f8d0ebfaf1aa6579ddbc7ae0baf" kind="function"><name>publishAll</name></member>
+  </compound>
+  <compound refid="namespace_m_q_t_t" kind="namespace"><name>MQTT</name>
+    <member refid="namespace_m_q_t_t_1a5355e8fc50ad2622c124c55b8dd64e9f" kind="function"><name>begin</name></member>
+    <member refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" kind="function"><name>loop</name></member>
+    <member refid="namespace_m_q_t_t_1a57a5231fd3205682c56de70e57dd9d62" kind="function"><name>isConnected</name></member>
+    <member refid="namespace_m_q_t_t_1a2f8781f29adb44d3e5ecf3564d700681" kind="function"><name>publish</name></member>
+    <member refid="namespace_m_q_t_t_1a1a39a4c9bfacb52780f0e8cef145e9a1" kind="function"><name>requestMainCmd</name></member>
+    <member refid="namespace_m_q_t_t_1a58fe301c5dff0689982ecd64e2d844ab" kind="function"><name>requestProgramSelect</name></member>
+    <member refid="namespace_m_q_t_t_1a2a4c808868b4a18a8708b16d66b1fe2f" kind="function"><name>requestValveCmd</name></member>
+  </compound>
+  <compound refid="namespace_wi_fi_controller" kind="namespace"><name>WiFiController</name>
+    <member refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" kind="typedef"><name>ReconnectCallback</name></member>
+    <member refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" kind="function"><name>begin</name></member>
+    <member refid="namespace_wi_fi_controller_1a2622d7c47ada0e6e985e84813934e3bd" kind="function"><name>setReconnectCallback</name></member>
+    <member refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kind="function"><name>loop</name></member>
+    <member refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" kind="function"><name>isConnected</name></member>
+    <member refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" kind="function"><name>connectAndSyncTimeBlocking</name></member>
+  </compound>
+  <compound refid="_build_number_8h" kind="file"><name>BuildNumber.h</name>
+    <member refid="_build_number_8h_1adab90aacdf61685356e47d5233d41520" kind="variable"><name>kBuildNumber</name></member>
+  </compound>
+  <compound refid="_version_8h" kind="file"><name>Version.h</name>
+    <member refid="_version_8h_1acd9c40d01ece8e1c9ea2a655ed8352e7" kind="variable"><name>kFirmwareVersion</name></member>
+  </compound>
+  <compound refid="_automatic_controller_8cpp" kind="file"><name>AutomaticController.cpp</name>
+  </compound>
+  <compound refid="_automatic_controller_8h" kind="file"><name>AutomaticController.h</name>
+  </compound>
+  <compound refid="_diagnostics_8cpp" kind="file"><name>Diagnostics.cpp</name>
+  </compound>
+  <compound refid="_diagnostics_8h" kind="file"><name>Diagnostics.h</name>
+  </compound>
+  <compound refid="_file_system_8cpp" kind="file"><name>FileSystem.cpp</name>
+  </compound>
+  <compound refid="_file_system_8h" kind="file"><name>FileSystem.h</name>
+  </compound>
+  <compound refid="_ha_discovery_8cpp" kind="file"><name>HaDiscovery.cpp</name>
+  </compound>
+  <compound refid="_ha_discovery_8h" kind="file"><name>HaDiscovery.h</name>
+  </compound>
+  <compound refid="_h_m_i_8cpp" kind="file"><name>HMI.cpp</name>
+  </compound>
+  <compound refid="_h_m_i_8h" kind="file"><name>HMI.h</name>
+  </compound>
+  <compound refid="_i2_c_8cpp" kind="file"><name>I2C.cpp</name>
+  </compound>
+  <compound refid="_i2_c_8h" kind="file"><name>I2C.h</name>
+  </compound>
+  <compound refid="_logger_8cpp" kind="file"><name>Logger.cpp</name>
+  </compound>
+  <compound refid="_logger_8h" kind="file"><name>Logger.h</name>
+  </compound>
+  <compound refid="main_8cpp" kind="file"><name>main.cpp</name>
+    <member refid="main_8cpp_1a68d09aef1f00cc87b4c3b2177f66db8f" kind="function"><name>SET_LOOP_TASK_STACK_SIZE</name></member>
+    <member refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" kind="function"><name>setup</name></member>
+    <member refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" kind="function"><name>loop</name></member>
+  </compound>
+  <compound refid="_m_q_t_t_8cpp" kind="file"><name>MQTT.cpp</name>
+  </compound>
+  <compound refid="_m_q_t_t_8h" kind="file"><name>MQTT.h</name>
+  </compound>
+  <compound refid="_o_t_a_8cpp" kind="file"><name>OTA.cpp</name>
+  </compound>
+  <compound refid="_o_t_a_8h" kind="file"><name>OTA.h</name>
+  </compound>
+  <compound refid="_valve_controller_8cpp" kind="file"><name>ValveController.cpp</name>
+  </compound>
+  <compound refid="_valve_controller_8h" kind="file"><name>ValveController.h</name>
+  </compound>
+  <compound refid="_valve_timer_8cpp" kind="file"><name>ValveTimer.cpp</name>
+  </compound>
+  <compound refid="_valve_timer_8h" kind="file"><name>ValveTimer.h</name>
+  </compound>
+  <compound refid="_web_i_f_8cpp" kind="file"><name>WebIF.cpp</name>
+  </compound>
+  <compound refid="_web_i_f_8h" kind="file"><name>WebIF.h</name>
+  </compound>
+  <compound refid="_wi_fi_controller_8cpp" kind="file"><name>WiFiController.cpp</name>
+  </compound>
+  <compound refid="_wi_fi_controller_8h" kind="file"><name>WiFiController.h</name>
+  </compound>
+  <compound refid="dir_d44c64559bbebec7f509842c48db8b23" kind="dir"><name>D:/Gartenwasser/include</name>
+  </compound>
+  <compound refid="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir"><name>D:/Gartenwasser/src</name>
+  </compound>
+</doxygenindex>

@@ -1,0 +1,7 @@
+<map id="D:/Gartenwasser/src/WebIF.h" name="D:/Gartenwasser/src/WebIF.h">
+<area shape="rect" id="Node000001" title="Async&#45;Webserver (ESPAsyncWebServer), liefert das Web&#45;Interface als statische Dateien aus LittleFS aus..." alt="" coords="88,5,230,48"/>
+<area shape="rect" id="Node000002" href="$_web_i_f_8cpp.html" title=" " alt="" coords="5,96,148,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,58,97,98,94,94,127,61"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html" title="Projekt &quot;Gartenwasser&quot; &#45; Einstiegspunkt (Setup/Loop&#45;Orchestrierung)." alt="" coords="172,96,314,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,57,226,96,221,96,188,62"/>
+</map>

@@ -1,0 +1,305 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="main_8cpp" kind="file" language="C++">
+    <compoundname>main.cpp</compoundname>
+    <includes local="no">Arduino.h</includes>
+    <includes refid="_file_system_8h" local="yes">FileSystem.h</includes>
+    <includes refid="_diagnostics_8h" local="yes">Diagnostics.h</includes>
+    <includes refid="_h_m_i_8h" local="yes">HMI.h</includes>
+    <includes refid="_i2_c_8h" local="yes">I2C.h</includes>
+    <includes refid="_m_q_t_t_8h" local="yes">MQTT.h</includes>
+    <includes refid="_automatic_controller_8h" local="yes">AutomaticController.h</includes>
+    <includes refid="_valve_controller_8h" local="yes">ValveController.h</includes>
+    <includes refid="_valve_timer_8h" local="yes">ValveTimer.h</includes>
+    <includes refid="_o_t_a_8h" local="yes">OTA.h</includes>
+    <includes refid="_web_i_f_8h" local="yes">WebIF.h</includes>
+    <includes refid="_wi_fi_controller_8h" local="yes">WiFiController.h</includes>
+    <includes refid="_logger_8h" local="yes">Logger.h</includes>
+    <includes refid="_version_8h" local="yes">Version.h</includes>
+    <includes refid="_build_number_8h" local="yes">BuildNumber.h</includes>
+    <incdepgraph>
+      <node id="2">
+        <label>Arduino.h</label>
+      </node>
+      <node id="18">
+        <label>BuildNumber.h</label>
+        <link refid="_build_number_8h"/>
+      </node>
+      <node id="17">
+        <label>Version.h</label>
+        <link refid="_version_8h"/>
+      </node>
+      <node id="10">
+        <label>AutomaticController.h</label>
+        <link refid="_automatic_controller_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>Diagnostics.h</label>
+        <link refid="_diagnostics_8h"/>
+      </node>
+      <node id="3">
+        <label>FileSystem.h</label>
+        <link refid="_file_system_8h"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>HMI.h</label>
+        <link refid="_h_m_i_8h"/>
+      </node>
+      <node id="8">
+        <label>I2C.h</label>
+        <link refid="_i2_c_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="16">
+        <label>Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>MQTT.h</label>
+        <link refid="_m_q_t_t_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>OTA.h</label>
+        <link refid="_o_t_a_8h"/>
+      </node>
+      <node id="11">
+        <label>ValveController.h</label>
+        <link refid="_valve_controller_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="12">
+        <label>ValveTimer.h</label>
+        <link refid="_valve_timer_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="14">
+        <label>WebIF.h</label>
+        <link refid="_web_i_f_8h"/>
+      </node>
+      <node id="15">
+        <label>WiFiController.h</label>
+        <link refid="_wi_fi_controller_8h"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>cstddef</label>
+      </node>
+      <node id="5">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="main_8cpp_1a68d09aef1f00cc87b4c3b2177f66db8f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SET_LOOP_TASK_STACK_SIZE</definition>
+        <argsstring>(64 *1024)</argsstring>
+        <name>SET_LOOP_TASK_STACK_SIZE</name>
+        <param>
+          <type>64 *</type>
+          <declname>1024</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/main.cpp" line="38" column="1" declfile="D:/Gartenwasser/src/main.cpp" declline="38" declcolumn="1"/>
+        <references refid="main_8cpp_1a68d09aef1f00cc87b4c3b2177f66db8f">SET_LOOP_TASK_STACK_SIZE</references>
+        <referencedby refid="main_8cpp_1a68d09aef1f00cc87b4c3b2177f66db8f">SET_LOOP_TASK_STACK_SIZE</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void setup</definition>
+        <argsstring>()</argsstring>
+        <name>setup</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/main.cpp" line="40" column="6" bodyfile="D:/Gartenwasser/src/main.cpp" bodystart="40" bodyend="85"/>
+        <references refid="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" compoundref="_automatic_controller_8cpp" startline="16" endline="20">AutomaticController::begin</references>
+        <references refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" compoundref="_diagnostics_8cpp" startline="23" endline="28">Diagnostics::begin</references>
+        <references refid="class_file_system_1a825d7e892794db3c1449439967cf0756" compoundref="_file_system_8cpp" startline="461" endline="477">FileSystem::begin</references>
+        <references refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" compoundref="_h_m_i_8cpp" startline="671" endline="707">HMI::begin</references>
+        <references refid="namespace_m_q_t_t_1a5355e8fc50ad2622c124c55b8dd64e9f" compoundref="_m_q_t_t_8cpp" startline="1480" endline="1487">MQTT::begin</references>
+        <references refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" compoundref="_o_t_a_8cpp" startline="24" endline="41">OTA::begin</references>
+        <references refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" compoundref="_valve_controller_8cpp" startline="20" endline="23">ValveController::begin</references>
+        <references refid="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" compoundref="_valve_timer_8cpp" startline="20" endline="24">ValveTimer::begin</references>
+        <references refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" compoundref="_web_i_f_8cpp" startline="102" endline="153">WebIF::begin</references>
+        <references refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" compoundref="_wi_fi_controller_8cpp" startline="109" endline="121">WiFiController::connectAndSyncTimeBlocking</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="_build_number_8h_1adab90aacdf61685356e47d5233d41520" compoundref="_build_number_8h" startline="5">kBuildNumber</references>
+        <references refid="_version_8h_1acd9c40d01ece8e1c9ea2a655ed8352e7" compoundref="_version_8h" startline="11">kFirmwareVersion</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" compoundref="_i2_c_8cpp" startline="46" endline="49">I2C::mcp23017Setup</references>
+        <references refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" compoundref="_i2_c_8cpp" startline="19" endline="44">I2C::scan</references>
+        <references refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" compoundref="_logger_8h" startline="25">Logger::SYSTEM</references>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void loop</definition>
+        <argsstring>()</argsstring>
+        <name>loop</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/main.cpp" line="87" column="6" bodyfile="D:/Gartenwasser/src/main.cpp" bodystart="87" bodyend="93"/>
+        <references refid="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" compoundref="_h_m_i_8cpp" startline="709" endline="720">HMI::loop</references>
+        <references refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" compoundref="main_8cpp" startline="87" endline="93">loop</references>
+        <references refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" compoundref="_m_q_t_t_8cpp" startline="1491" endline="1529">MQTT::loop</references>
+        <references refid="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" compoundref="_o_t_a_8cpp" startline="43" endline="45">OTA::loop</references>
+        <references refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" compoundref="_web_i_f_8cpp" startline="155" endline="161">WebIF::loop</references>
+        <references refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" compoundref="_wi_fi_controller_8cpp" startline="75" endline="103">WiFiController::loop</references>
+        <referencedby refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" compoundref="main_8cpp" startline="87" endline="93">loop</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Projekt &quot;Gartenwasser&quot; - Einstiegspunkt (Setup/Loop-Orchestrierung). </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Die eigentliche Logik steckt in eigenen Klassen (src/), <ref refid="main_8cpp" kindref="compound">main.cpp</ref> bleibt ein schlanker Orchestrator: <ref refid="namespace_wi_fi_controller" kindref="compound">WiFiController</ref> (WLAN/NTP), <ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref> (MQTT-Verbindung und komplette Ventil-/Automatik-/Config-Anbindung), <ref refid="class_h_m_i" kindref="compound">HMI</ref> (Display/ Touch/LVGL), <ref refid="class_i2_c" kindref="compound">I2C</ref> (I2C-Bus, MCP23017), <ref refid="class_valve_controller" kindref="compound">ValveController</ref> (Ventil-Ein- gänge/Alias), <ref refid="class_valve_timer" kindref="compound">ValveTimer</ref> (Restlaufzeit), <ref refid="class_automatic_controller" kindref="compound">AutomaticController</ref> (Automatik-Ablauf), <ref refid="class_file_system" kindref="compound">FileSystem</ref> (Persistenz), <ref refid="class_diagnostics" kindref="compound">Diagnostics</ref> (i2cStatus/lastError), <ref refid="class_logger" kindref="compound">Logger</ref>. </para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;Arduino.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_file_system_8h" kindref="compound">FileSystem.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_diagnostics_8h" kindref="compound">Diagnostics.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_h_m_i_8h" kindref="compound">HMI.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_i2_c_8h" kindref="compound">I2C.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_m_q_t_t_8h" kindref="compound">MQTT.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_automatic_controller_8h" kindref="compound">AutomaticController.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_valve_controller_8h" kindref="compound">ValveController.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_valve_timer_8h" kindref="compound">ValveTimer.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_o_t_a_8h" kindref="compound">OTA.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_web_i_f_8h" kindref="compound">WebIF.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_wi_fi_controller_8h" kindref="compound">WiFiController.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_logger_8h" kindref="compound">Logger.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_version_8h" kindref="compound">Version.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_build_number_8h" kindref="compound">BuildNumber.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Default-Stack<sp/>der<sp/>Arduino-loopTask<sp/>(8192<sp/>Byte)<sp/>reicht<sp/>nicht<sp/>mehr:<sp/>main/programs/set</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="comment">//<sp/>(Phase<sp/>14)<sp/>verarbeitet<sp/>mehrere<sp/>StaticJsonDocument&lt;N&gt;/Puffer<sp/>gleichzeitig<sp/>auf<sp/>dem</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Stack<sp/>(handleMqttMessage<sp/>-&gt;<sp/>handleProgramsSet),<sp/>das<sp/>fuehrte<sp/>zu<sp/>einem<sp/>&quot;Stack<sp/>protection</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="comment">//<sp/>fault&quot;<sp/>(Guru<sp/>Meditation<sp/>Error).<sp/>RAM-Headroom<sp/>ist<sp/>reichlich<sp/>vorhanden<sp/>(siehe<sp/>Log.md,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Speicher-Check<sp/>Phase<sp/>12),<sp/>daher<sp/>grosszuegig<sp/>bemessen<sp/>statt<sp/>die<sp/>JSON-Puffer<sp/>zu<sp/>verkleinern.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Die<sp/>Touch-UI-Neugestaltung<sp/>hat<sp/>kMaxPrograms<sp/>8-&gt;32<sp/>angehoben,<sp/>kProgramsJsonCapacity<sp/>damit</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="comment">//<sp/>auf<sp/>8192<sp/>(jetzt<sp/>groesster<sp/>Payload,<sp/>vorher<sp/>schedule.json<sp/>mit<sp/>4096)<sp/>-<sp/>nochmal<sp/>verdoppelt</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="comment">//<sp/>statt<sp/>die<sp/>knapp<sp/>bemessenen<sp/>32<sp/>KB<sp/>zu<sp/>riskieren.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38" refid="main_8cpp_1a68d09aef1f00cc87b4c3b2177f66db8f" refkind="member"><highlight class="normal"><ref refid="main_8cpp_1a68d09aef1f00cc87b4c3b2177f66db8f" kindref="member">SET_LOOP_TASK_STACK_SIZE</ref>(64<sp/>*<sp/>1024);</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="40" refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" kindref="member">setup</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/>Serial.begin(115200);</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/>delay(500);</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Boot-Trenner,<sp/>damit<sp/>im<sp/>Serial-Monitor<sp/>klar<sp/>erkennbar<sp/>ist,<sp/>wo<sp/>ein<sp/>Neustart<sp/>beginnt.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/>Serial.println();</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/>Serial.println(</highlight><highlight class="stringliteral">&quot;------------------------------------------------------------&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>So<sp/>frueh<sp/>wie<sp/>moeglich,<sp/>damit<sp/>auch<sp/>fruehe<sp/>Boot-Fehler<sp/>(LittleFS,<sp/>WLAN,<sp/>...)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>in<sp/>diagnostics/lastError<sp/>landen<sp/>(siehe<sp/>Logger::setErrorCallback()).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><ref refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" kindref="member">Diagnostics::begin</ref>();</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Persistente<sp/>Konfiguration<sp/>laden<sp/>(time,<sp/>auto,<sp/>alias,<sp/>maxTime)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><ref refid="class_file_system_1a825d7e892794db3c1449439967cf0756" kindref="member">FileSystem::begin</ref>();</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>WLAN<sp/>verbinden,<sp/>danach<sp/>NTP<sp/>synchronisieren<sp/>(beides<sp/>blockierend<sp/>beim<sp/>Boot,<sp/>siehe<sp/>WiFiController).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><ref refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" kindref="member">WiFiController::connectAndSyncTimeBlocking</ref>();</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>PlatformIO/VSCode-OTA<sp/>(Phase<sp/>21,<sp/>zweiter<sp/>Teil):<sp/>`pio<sp/>run<sp/>-e<sp/>...-ota<sp/>--target<sp/>upload`/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>`uploadfs`<sp/>uebers<sp/>WLAN<sp/>statt<sp/>Kabel,<sp/>fuer<sp/>den<sp/>eigenen<sp/>Dev-Workflow<sp/>-<sp/>unabhaengig<sp/>vom</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>WebIF-Browser-Upload<sp/>unten<sp/>(der<sp/>ist<sp/>fuer<sp/>Nutzer<sp/>ohne<sp/>Entwicklungsumgebung<sp/>gedacht).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><ref refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" kindref="member">OTA::begin</ref>();</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>MQTT-Client<sp/>konfigurieren<sp/>(nicht<sp/>blockierend,<sp/>siehe<sp/>MQTT::loop())</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><ref refid="namespace_m_q_t_t_1a5355e8fc50ad2622c124c55b8dd64e9f" kindref="member">MQTT::begin</ref>();</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Web-Interface<sp/>(Phase<sp/>16):<sp/>async,<sp/>braucht<sp/>aber<sp/>trotzdem<sp/>einen<sp/>loop()-Aufruf<sp/>(siehe<sp/>unten)<sp/>-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>fuer<sp/>den<sp/>verzoegerten<sp/>Neustart<sp/>nach<sp/>einem<sp/>OTA-Update<sp/>(Phase<sp/>21).<sp/>Setzt<sp/>gemountetes</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>LittleFS<sp/>voraus<sp/>(siehe<sp/>FileSystem::begin()<sp/>oben)<sp/>und<sp/>WLAN<sp/>(siehe<sp/>WiFiController<sp/>oben).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><ref refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" kindref="member">WebIF::begin</ref>();</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Display/Touch/LVGL<sp/>initialisieren<sp/>(startet<sp/>dabei<sp/>auch<sp/>den<sp/>I2C-Bus)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><ref refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" kindref="member">HMI::begin</ref>();</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>I2C-Bus<sp/>scannen<sp/>und<sp/>MCP23017<sp/>vorbereiten</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><ref refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" kindref="member">I2C::scan</ref>();</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><ref refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" kindref="member">I2C::mcp23017Setup</ref>();</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Ventile<sp/>V0-V5<sp/>auf<sp/>sicheren<sp/>Grundzustand<sp/>(AUS)<sp/>setzen</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><ref refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" kindref="member">ValveController::begin</ref>();</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><ref refid="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" kindref="member">ValveTimer::begin</ref>();</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><ref refid="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" kindref="member">AutomaticController::begin</ref>();</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kindref="member">Logger::Source::SYSTEM</ref>,<sp/></highlight><highlight class="stringliteral">&quot;Setup<sp/>abgeschlossen.<sp/>Firmware<sp/>%s<sp/>Build<sp/>%s&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="_version_8h_1acd9c40d01ece8e1c9ea2a655ed8352e7" kindref="member">kFirmwareVersion</ref>,<sp/><ref refid="_build_number_8h_1adab90aacdf61685356e47d5233d41520" kindref="member">kBuildNumber</ref>);</highlight></codeline>
+<codeline lineno="85"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87" refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" kindref="member">loop</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><ref refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kindref="member">WiFiController::loop</ref>();</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><ref refid="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" kindref="member">OTA::loop</ref>();</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><ref refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" kindref="member">MQTT::loop</ref>();</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><ref refid="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" kindref="member">HMI::loop</ref>();</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><ref refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" kindref="member">WebIF::loop</ref>();</highlight></codeline>
+<codeline lineno="93"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/main.cpp"/>
+  </compounddef>
+</doxygen>

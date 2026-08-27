@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="namespace_wi_fi_controller" kind="namespace" language="C++">
+    <compoundname>WiFiController</compoundname>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" prot="public" static="no">
+        <type>void(*)()</type>
+        <definition>using WiFiController::ReconnectCallback = void (*)()</definition>
+        <argsstring></argsstring>
+        <name>ReconnectCallback</name>
+        <qualifiedname>WiFiController::ReconnectCallback</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/WiFiController.h" line="10" column="1" bodyfile="D:/Gartenwasser/src/WiFiController.h" bodystart="10" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void WiFiController::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>WiFiController::begin</qualifiedname>
+        <briefdescription>
+<para>Startet die WLAN-Verbindung (Zugangsdaten aus secrets.h). Nicht blockierend. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/WiFiController.h" line="13" column="6" bodyfile="D:/Gartenwasser/src/WiFiController.cpp" bodystart="62" bodyend="73" declfile="D:/Gartenwasser/src/WiFiController.h" declline="13" declcolumn="6"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" compoundref="_logger_8h" startline="25">Logger::WIFI</references>
+        <referencedby refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" compoundref="_wi_fi_controller_8cpp" startline="109" endline="121">connectAndSyncTimeBlocking</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="namespace_wi_fi_controller_1a2622d7c47ada0e6e985e84813934e3bd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void WiFiController::setReconnectCallback</definition>
+        <argsstring>(ReconnectCallback callback)</argsstring>
+        <name>setReconnectCallback</name>
+        <qualifiedname>WiFiController::setReconnectCallback</qualifiedname>
+        <param>
+          <type><ref refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" kindref="member">ReconnectCallback</ref></type>
+          <declname>callback</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Registriert einen Callback, der aus <ref refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kindref="member">loop()</ref> heraus bei jedem (Wieder-)Verbindungsaufbau aufgerufen wird. Der allererste Boot-Verbindungsaufbau passiert blockierend in <ref refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" kindref="member">connectAndSyncTimeBlocking()</ref>, also VOR jeder Callback-Registrierung - der Callback feuert in der Praxis daher nur bei echten Reconnects nach einem WLAN-Abbruch, nicht beim Boot. Fuer Module wie <ref refid="class_web_i_f" kindref="compound">WebIF</ref>, die nach einem WLAN-Reconnect selbst wieder aktiv werden muessen (siehe <ref refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" kindref="member">WebIF::begin()</ref>), ohne dass <ref refid="namespace_wi_fi_controller" kindref="compound">WiFiController</ref> <ref refid="class_web_i_f" kindref="compound">WebIF</ref> kennen muss (gleiches Muster wie <ref refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" kindref="member">Logger::setErrorCallback()</ref>). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/WiFiController.h" line="22" column="6" bodyfile="D:/Gartenwasser/src/WiFiController.cpp" bodystart="60" bodyend="60" declfile="D:/Gartenwasser/src/WiFiController.h" declline="22" declcolumn="6"/>
+        <referencedby refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" compoundref="_web_i_f_8cpp" startline="102" endline="153">WebIF::begin</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void WiFiController::loop</definition>
+        <argsstring>()</argsstring>
+        <name>loop</name>
+        <qualifiedname>WiFiController::loop</qualifiedname>
+        <briefdescription>
+<para>Muss regelmaessig aus <ref refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kindref="member">loop()</ref> aufgerufen werden (Reconnect bei Verbindungsverlust). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/WiFiController.h" line="25" column="6" bodyfile="D:/Gartenwasser/src/WiFiController.cpp" bodystart="75" bodyend="103" declfile="D:/Gartenwasser/src/WiFiController.h" declline="25" declcolumn="6"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" compoundref="_wi_fi_controller_8cpp" startline="105" endline="107">isConnected</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" compoundref="_logger_8h" startline="25">Logger::WIFI</references>
+        <referencedby refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" compoundref="main_8cpp" startline="87" endline="93">loop</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool WiFiController::isConnected</definition>
+        <argsstring>()</argsstring>
+        <name>isConnected</name>
+        <qualifiedname>WiFiController::isConnected</qualifiedname>
+        <briefdescription>
+<para>Liefert true, wenn aktuell eine WLAN-Verbindung besteht. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/WiFiController.h" line="28" column="6" bodyfile="D:/Gartenwasser/src/WiFiController.cpp" bodystart="105" bodyend="107" declfile="D:/Gartenwasser/src/WiFiController.h" declline="28" declcolumn="6"/>
+        <referencedby refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" compoundref="_m_q_t_t_8cpp" startline="1491" endline="1529">MQTT::loop</referencedby>
+        <referencedby refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" compoundref="_wi_fi_controller_8cpp" startline="75" endline="103">loop</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void WiFiController::connectAndSyncTimeBlocking</definition>
+        <argsstring>()</argsstring>
+        <name>connectAndSyncTimeBlocking</name>
+        <qualifiedname>WiFiController::connectAndSyncTimeBlocking</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Blockiert beim Boot: baut die WLAN-Verbindung auf und synchronisiert danach die Systemzeit per NTP (je mit Timeout). Schaltet den <ref refid="class_logger" kindref="compound">Logger</ref> bei Erfolg auf Echtzeit um (siehe <ref refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" kindref="member">Logger::enableRealTime()</ref>). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/WiFiController.h" line="33" column="6" bodyfile="D:/Gartenwasser/src/WiFiController.cpp" bodystart="109" bodyend="121" declfile="D:/Gartenwasser/src/WiFiController.h" declline="33" declcolumn="6"/>
+        <references refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" compoundref="_wi_fi_controller_8cpp" startline="62" endline="73">begin</references>
+        <references refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" compoundref="_logger_8cpp" startline="41" endline="43">Logger::enableRealTime</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" compoundref="_logger_8h" startline="25">Logger::SYSTEM</references>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/WiFiController.h" line="8" column="1"/>
+  </compounddef>
+</doxygen>

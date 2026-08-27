@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_wi_fi_controller_8cpp" kind="file" language="C++">
+    <compoundname>WiFiController.cpp</compoundname>
+    <includes refid="_wi_fi_controller_8h" local="yes">WiFiController.h</includes>
+    <includes local="no">Arduino.h</includes>
+    <includes local="no">WiFi.h</includes>
+    <includes local="no">time.h</includes>
+    <includes refid="_logger_8h" local="yes">Logger.h</includes>
+    <includes local="yes">secrets.h</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>Arduino.h</label>
+      </node>
+      <node id="6">
+        <label>Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/WiFiController.cpp</label>
+        <link refid="_wi_fi_controller_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>WiFiController.h</label>
+        <link refid="_wi_fi_controller_8h"/>
+      </node>
+      <node id="4">
+        <label>WiFi.h</label>
+      </node>
+      <node id="7">
+        <label>cstddef</label>
+      </node>
+      <node id="8">
+        <label>cstdint</label>
+      </node>
+      <node id="9">
+        <label>secrets.h</label>
+      </node>
+      <node id="5">
+        <label>time.h</label>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_wi_fi_controller_8h" kindref="compound">WiFiController.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;Arduino.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;WiFi.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;time.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_logger_8h" kindref="compound">Logger.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;secrets.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Nur<sp/>eingreifen,<sp/>wenn<sp/>ueber<sp/>diese<sp/>Zeit<sp/>hinweg<sp/>kein<sp/>Verbindungsaufbau</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="comment">//<sp/>zustande<sp/>kam.<sp/>Kurz<sp/>genug<sp/>fuer<sp/>zuegige<sp/>Wiederholung,<sp/>lang<sp/>genug,<sp/>um<sp/>den<sp/>vom</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="comment">//<sp/>ESP-IDF<sp/>WiFi-Treiber<sp/>laufenden<sp/>Verbindungsversuch<sp/>nicht<sp/>zu<sp/>unterbrechen</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="comment">//<sp/>(ein<sp/>zu<sp/>frueher<sp/>erneuter<sp/>WiFi.begin()<sp/>fuehrt<sp/>sonst<sp/>zu</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="comment">//<sp/>&quot;wifi:sta<sp/>is<sp/>connecting,<sp/>return<sp/>error&quot;).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>kReconnectIntervalMs<sp/>=<sp/>15000;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Timeouts<sp/>fuer<sp/>den<sp/>blockierenden<sp/>Boot-Ablauf<sp/>(connectAndSyncTimeBlocking()).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>kWifiConnectTimeoutMs<sp/>=<sp/>20000;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>kNtpSyncTimeoutMs<sp/>=<sp/>10000;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*kTimezone<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;CET-1CEST,M3.5.0,M10.5.0/3&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*kNtpServer1<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;pool.ntp.org&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*kNtpServer2<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;de.pool.ntp.org&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Alles<sp/>darunter<sp/>gilt<sp/>als<sp/>&quot;noch<sp/>nicht<sp/>synchronisiert&quot;<sp/>(Systemuhr<sp/>startet<sp/>1970).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>time_t<sp/>kMinValidEpoch<sp/>=<sp/>1700000000;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>lastAttemptMs<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>wasConnected<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><ref refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" kindref="member">WiFiController::ReconnectCallback</ref><sp/>reconnectCallback<sp/>=<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Blockiert,<sp/>bis<sp/>WLAN<sp/>verbunden<sp/>ist<sp/>oder<sp/>das<sp/>Timeout<sp/>erreicht<sp/>wird.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>waitForConnection(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>timeoutMs)<sp/>{</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>start<sp/>=<sp/>millis();</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(!<ref refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" kindref="member">WiFiController::isConnected</ref>())<sp/>{</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(millis()<sp/>-<sp/>start<sp/>&gt;=<sp/>timeoutMs)<sp/>{</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kindref="member">WiFiController::loop</ref>();</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>delay(100);</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="43"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Blockiert,<sp/>bis<sp/>die<sp/>Systemzeit<sp/>per<sp/>NTP<sp/>synchronisiert<sp/>ist<sp/>oder<sp/>das<sp/>Timeout<sp/>erreicht<sp/>wird.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>waitForNtpSync(</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>timeoutMs)<sp/>{</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/>configTzTime(kTimezone,<sp/>kNtpServer1,<sp/>kNtpServer2);</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>start<sp/>=<sp/>millis();</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(time(</highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">)<sp/>&lt;<sp/>kMinValidEpoch)<sp/>{</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(millis()<sp/>-<sp/>start<sp/>&gt;=<sp/>timeoutMs)<sp/>{</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/>delay(100);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"></highlight></codeline>
+<codeline lineno="60" refid="namespace_wi_fi_controller_1a2622d7c47ada0e6e985e84813934e3bd" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a2622d7c47ada0e6e985e84813934e3bd" kindref="member">WiFiController::setReconnectCallback</ref>(<ref refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" kindref="member">ReconnectCallback</ref><sp/>callback)<sp/>{<sp/>reconnectCallback<sp/>=<sp/>callback;<sp/>}</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="62" refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" kindref="member">WiFiController::begin</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/>WiFi.mode(WIFI_STA);</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Muss<sp/>vor<sp/>WiFi.begin()<sp/>gesetzt<sp/>werden,<sp/>um<sp/>zu<sp/>greifen<sp/>-<sp/>macht<sp/>das<sp/>Geraet<sp/>im<sp/>Router/DHCP</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>erkennbar<sp/>und<sp/>ist<sp/>der<sp/>mDNS-Name,<sp/>unter<sp/>dem<sp/>OTA::begin()<sp/>(Phase<sp/>21,<sp/>PlatformIO-OTA)<sp/>das</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Geraet<sp/>als<sp/>&quot;gartenwasser.local&quot;<sp/>bewirbt.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/>WiFi.setHostname(</highlight><highlight class="stringliteral">&quot;gartenwasser&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/>WiFi.persistent(</highlight><highlight class="keyword">false</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/>WiFi.setAutoReconnect(</highlight><highlight class="keyword">true</highlight><highlight class="normal">);<sp/><sp/></highlight><highlight class="comment">//<sp/>ESP-IDF<sp/>haengt<sp/>sich<sp/>nach<sp/>Verbindungsverlust<sp/>selbst<sp/>wieder<sp/>ein</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/>WiFi.begin(WIFI_SSID,<sp/>WIFI_PASSWORD);</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/>lastAttemptMs<sp/>=<sp/>millis();</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" kindref="member">Logger::Source::WIFI</ref>,<sp/></highlight><highlight class="stringliteral">&quot;Verbinde<sp/>mit<sp/>&apos;%s&apos;<sp/>...&quot;</highlight><highlight class="normal">,<sp/>WIFI_SSID);</highlight></codeline>
+<codeline lineno="73"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75" refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kindref="member">WiFiController::loop</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>connected<sp/>=<sp/><ref refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" kindref="member">isConnected</ref>();</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(connected<sp/>&amp;&amp;<sp/>!wasConnected)<sp/>{</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" kindref="member">Logger::Source::WIFI</ref>,<sp/></highlight><highlight class="stringliteral">&quot;Verbunden.<sp/>IP:<sp/>%s&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>WiFi.localIP().toString().c_str());</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(reconnectCallback<sp/>!=<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>reconnectCallback();</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!connected<sp/>&amp;&amp;<sp/>wasConnected)<sp/>{</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" kindref="member">Logger::Source::WIFI</ref>,<sp/></highlight><highlight class="stringliteral">&quot;WLAN<sp/>Verbindung<sp/>verloren.&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/>wasConnected<sp/>=<sp/>connected;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!connected)<sp/>{</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>now<sp/>=<sp/>millis();</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(now<sp/>-<sp/>lastAttemptMs<sp/>&gt;=<sp/>kReconnectIntervalMs)<sp/>{</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>lastAttemptMs<sp/>=<sp/>now;</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>wl_status_t<sp/>status<sp/>=<sp/>WiFi.status();</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Nur<sp/>bei<sp/>eindeutig<sp/>abgeschlossenem<sp/>Fehlversuch<sp/>neu<sp/>starten<sp/>-<sp/>nicht,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>waehrend<sp/>der<sp/>Treiber<sp/>noch<sp/>verbindet<sp/>(WL_IDLE_STATUS).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(status<sp/>==<sp/>WL_CONNECT_FAILED<sp/>||<sp/>status<sp/>==<sp/>WL_NO_SSID_AVAIL<sp/>||<sp/>status<sp/>==<sp/>WL_DISCONNECTED)<sp/>{</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" kindref="member">Logger::Source::WIFI</ref>,<sp/></highlight><highlight class="stringliteral">&quot;Reconnect-Versuch<sp/>...&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>WiFi.disconnect();</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>WiFi.begin(WIFI_SSID,<sp/>WIFI_PASSWORD);</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="103"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105" refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" kindref="member">WiFiController::isConnected</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>WiFi.status()<sp/>==<sp/>WL_CONNECTED;</highlight></codeline>
+<codeline lineno="107"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109" refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" kindref="member">WiFiController::connectAndSyncTimeBlocking</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><ref refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(waitForConnection(kWifiConnectTimeoutMs))<sp/>{</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(waitForNtpSync(kNtpSyncTimeoutMs))<sp/>{</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" kindref="member">Logger::enableRealTime</ref>();</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kindref="member">Logger::Source::SYSTEM</ref>,<sp/></highlight><highlight class="stringliteral">&quot;NTP-Synchronisierung<sp/>erfolgreich.&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kindref="member">Logger::Source::SYSTEM</ref>,<sp/></highlight><highlight class="stringliteral">&quot;NTP-Synchronisierung<sp/>fehlgeschlagen<sp/>(Timeout).&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kindref="member">Logger::Source::SYSTEM</ref>,<sp/></highlight><highlight class="stringliteral">&quot;WLAN-Verbindung<sp/>fehlgeschlagen<sp/>(Timeout).&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="121"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/WiFiController.cpp"/>
+  </compounddef>
+</doxygen>

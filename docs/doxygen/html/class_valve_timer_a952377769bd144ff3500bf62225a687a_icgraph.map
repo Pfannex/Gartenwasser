@@ -1,0 +1,5 @@
+<map id="ValveTimer::getRemainingSeconds" name="ValveTimer::getRemainingSeconds">
+<area shape="rect" id="Node000001" title="Liefert die aktuelle Restlaufzeit in Sekunden fuer Ventil index." alt="" coords="213,5,387,48"/>
+<area shape="rect" id="Node000002" href="$class_valve_timer.html#ab5248ea88f03e43450cbb6da8a5cd717" title=" " alt="" coords="5,13,165,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,27,165,29,165,24,200,26"/>
+</map>

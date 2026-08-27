@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_m_q_t_t_8h" kind="file" language="C++">
+    <compoundname>MQTT.h</compoundname>
+    <includes local="no">cstdint</includes>
+    <includedby refid="_h_m_i_8cpp" local="yes">D:/Gartenwasser/src/HMI.cpp</includedby>
+    <includedby refid="_ha_discovery_8cpp" local="yes">D:/Gartenwasser/src/HaDiscovery.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/src/MQTT.h</label>
+        <link refid="_m_q_t_t_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/HMI.cpp</label>
+        <link refid="_h_m_i_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/HaDiscovery.cpp</label>
+        <link refid="_ha_discovery_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/MQTT.h</label>
+        <link refid="_m_q_t_t_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_m_q_t_t">MQTT</innernamespace>
+    <briefdescription>
+<para>MQTT-Verbindungsaufbau (PubSubClient), LWT/availability, nicht-blockierendes Reconnect-Handling. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10" refid="namespace_m_q_t_t" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref><sp/>{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a5355e8fc50ad2622c124c55b8dd64e9f" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" kindref="member">loop</ref>();</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a57a5231fd3205682c56de70e57dd9d62" kindref="member">isConnected</ref>();</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a2f8781f29adb44d3e5ecf3564d700681" kindref="member">publish</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*topic,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*payload,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>retained);</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a1a39a4c9bfacb52780f0e8cef145e9a1" kindref="member">requestMainCmd</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>on);</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a58fe301c5dff0689982ecd64e2d844ab" kindref="member">requestProgramSelect</ref>(uint8_t<sp/>programIndex);</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_m_q_t_t_1a2a4c808868b4a18a8708b16d66b1fe2f" kindref="member">requestValveCmd</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>on);</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>MQTT</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/MQTT.h"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,6 @@
+<map id="WiFiController::connectAndSyncTimeBlocking" name="WiFiController::connectAndSyncTimeBlocking">
+<area shape="rect" id="Node000001" title=" " alt="" coords="111,21,293,64"/>
+<area shape="rect" id="Node000002" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="10,29,63,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,44,64,45,64,40,98,42"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="63,15,55,10,37,8,20,10,10,15,8,20,13,28,8,30,3,21,6,11,18,5,37,3,57,5,68,13"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="ValveTimer::ValveTimer" name="ValveTimer::ValveTimer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,144,165,171"/>
+<area shape="rect" id="Node000002" href="$class_valve_timer.html#ad9565a0920e8eb4549b0c519a9d1c8dc" title=" " alt="" coords="237,5,362,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,142,143,93,175,66,211,42,226,36,222,40,214,46,179,70,147,97,100,145"/>
+<area shape="rect" id="Node000003" href="$class_valve_timer.html#a9eb466b6cf7ad81a1806f81c9a435f70" title=" " alt="" coords="239,56,361,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="109,141,156,117,212,92,234,86,229,89,214,97,159,122,113,146"/>
+<area shape="rect" id="Node000004" href="$class_valve_timer.html#a952377769bd144ff3500bf62225a687a" title="Liefert die aktuelle Restlaufzeit in Sekunden fuer Ventil index." alt="" coords="213,107,387,149"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,144,200,141,195,143,166,149"/>
+<area shape="rect" id="Node000005" href="$class_valve_timer.html#af4c4bc856014e8d385e5358b47e267cb" title=" " alt="" coords="238,173,362,200"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="164,166,225,175,220,177,165,171"/>
+<area shape="rect" id="Node000006" href="$class_valve_timer.html#ac3ef15b64ff7a0105a2fae787a334dfd" title="Startet den Countdown fuer Ventil index (1..5) mit min(time, maxTime) aus FileSystem." alt="" coords="240,224,360,251"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="116,169,214,210,236,219,230,219,212,214,115,174"/>
+<area shape="rect" id="Node000007" href="$class_valve_timer.html#a73e0b2a3059beb9cc5abe25c0985e2d3" title=" " alt="" coords="242,275,358,301"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="100,168,148,214,180,239,214,260,230,270,225,269,211,265,177,243,145,218,98,174"/>
+<area shape="rect" id="Node000008" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="435,275,524,301"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="358,285,423,288,417,288,358,291"/>
+<area shape="rect" id="Node000009" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="572,275,658,301"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="525,285,559,288,554,288,525,291"/>
+<area shape="rect" id="Node000010" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="706,275,879,301"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="658,285,693,288,687,288,658,291"/>
+</map>

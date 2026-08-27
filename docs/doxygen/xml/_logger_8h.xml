@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_logger_8h" kind="file" language="C++">
+    <compoundname>Logger.h</compoundname>
+    <includes local="no">cstddef</includes>
+    <includes local="no">cstdint</includes>
+    <includedby refid="_automatic_controller_8cpp" local="yes">D:/Gartenwasser/src/AutomaticController.cpp</includedby>
+    <includedby refid="_diagnostics_8cpp" local="yes">D:/Gartenwasser/src/Diagnostics.cpp</includedby>
+    <includedby refid="_file_system_8cpp" local="yes">D:/Gartenwasser/src/FileSystem.cpp</includedby>
+    <includedby refid="_h_m_i_8cpp" local="yes">D:/Gartenwasser/src/HMI.cpp</includedby>
+    <includedby refid="_i2_c_8cpp" local="yes">D:/Gartenwasser/src/I2C.cpp</includedby>
+    <includedby refid="_logger_8cpp" local="yes">D:/Gartenwasser/src/Logger.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="_o_t_a_8cpp" local="yes">D:/Gartenwasser/src/OTA.cpp</includedby>
+    <includedby refid="_valve_controller_8cpp" local="yes">D:/Gartenwasser/src/ValveController.cpp</includedby>
+    <includedby refid="_valve_timer_8cpp" local="yes">D:/Gartenwasser/src/ValveTimer.cpp</includedby>
+    <includedby refid="_web_i_f_8cpp" local="yes">D:/Gartenwasser/src/WebIF.cpp</includedby>
+    <includedby refid="_wi_fi_controller_8cpp" local="yes">D:/Gartenwasser/src/WiFiController.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/src/Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstddef</label>
+      </node>
+      <node id="3">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/AutomaticController.cpp</label>
+        <link refid="_automatic_controller_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/Diagnostics.cpp</label>
+        <link refid="_diagnostics_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/FileSystem.cpp</label>
+        <link refid="_file_system_8cpp"/>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/HMI.cpp</label>
+        <link refid="_h_m_i_8cpp"/>
+      </node>
+      <node id="6">
+        <label>D:/Gartenwasser/src/I2C.cpp</label>
+        <link refid="_i2_c_8cpp"/>
+      </node>
+      <node id="7">
+        <label>D:/Gartenwasser/src/Logger.cpp</label>
+        <link refid="_logger_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+      </node>
+      <node id="8">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="9">
+        <label>D:/Gartenwasser/src/OTA.cpp</label>
+        <link refid="_o_t_a_8cpp"/>
+      </node>
+      <node id="10">
+        <label>D:/Gartenwasser/src/ValveController.cpp</label>
+        <link refid="_valve_controller_8cpp"/>
+      </node>
+      <node id="11">
+        <label>D:/Gartenwasser/src/ValveTimer.cpp</label>
+        <link refid="_valve_timer_8cpp"/>
+      </node>
+      <node id="12">
+        <label>D:/Gartenwasser/src/WebIF.cpp</label>
+        <link refid="_web_i_f_8cpp"/>
+      </node>
+      <node id="13">
+        <label>D:/Gartenwasser/src/WiFiController.cpp</label>
+        <link refid="_wi_fi_controller_8cpp"/>
+      </node>
+      <node id="14">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_logger" prot="public">Logger</innerclass>
+    <briefdescription>
+<para>Einheitliches Log-Format fuer alle Subsysteme. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Zeilenformat: hh:mm:ss:mmm CLASS TYPE logtext hh:mm:ss:mmm ist boot-relative Laufzeit (millis()-basiert), bis enableRealTime() nach erfolgreicher NTP-Synchronisierung auf Echtzeit umschaltet. </para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstddef&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15" refid="class_logger" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439" kindref="member">Logger</ref><sp/>{</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="17" refid="class_logger_1acc066f65d27368f795ed38ce6968737fadc30ec20708ef7b0f641ef78b7880a15" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref><sp/>:<sp/>uint8_t<sp/>{<sp/>ERROR,<sp/>INFO,<sp/>DEBUG,<sp/>PUB,<sp/>SUB<sp/>};</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>VALVE<sp/>(2026-08-18<sp/>ergaenzt):<sp/>tatsaechliche<sp/>Ventilschaltungen<sp/>(ValveController/ValveTimer)<sp/>-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>vorher<sp/>faelschlich<sp/>unter<sp/>I2C<sp/>mitgelaufen,<sp/>das<sp/>jetzt<sp/>ausschliesslich<sp/>Bus-Gesundheit<sp/>meint</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>(Scan,<sp/>MCP23017-Erreichbarkeit).<sp/>SEQ:<sp/>Automatik-Sequenz-Lebenszyklus<sp/>(AutomaticController),<sp/>vorher</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>komplett<sp/>ungeloggt.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>OTA<sp/>(2026-08-18<sp/>ergaenzt,<sp/>Phase<sp/>21):<sp/>Firmware-/Dateisystem-Updates,<sp/>unabhaengig<sp/>vom</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Uebertragungsweg<sp/>(WebIF-Upload,<sp/>spaeter<sp/>ArduinoOTA)<sp/>-<sp/>damit<sp/>beide<sp/>Wege<sp/>im<sp/>Log<sp/>gleich</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>erkennbar<sp/>sind,<sp/>nicht<sp/>als<sp/>WEB<sp/>bzw.<sp/>eine<sp/>dritte<sp/>Quelle.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25" refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a87599e818aa04794bf7ff0772899d8ae" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref><sp/>:<sp/>uint8_t<sp/>{<sp/>WIFI,<sp/><ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref>,<sp/><ref refid="class_i2_c" kindref="compound">I2C</ref>,<sp/><ref refid="class_h_m_i" kindref="compound">HMI</ref>,<sp/>WEB,<sp/>SYSTEM,<sp/>VALVE,<sp/>SEQ,<sp/><ref refid="class_o_t_a" kindref="compound">OTA</ref><sp/>};</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27" refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">ErrorCallback</ref><sp/>=<sp/>void<sp/>(*)(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*message);</highlight></codeline>
+<codeline lineno="28" refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" kindref="member">LineCallback</ref><sp/>=<sp/>void<sp/>(*)(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*line);</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Maximale<sp/>Laenge<sp/>einer<sp/>formatierten<sp/>Log-Zeile<sp/>(inkl.<sp/>Zeitstempel/CLASS/TYPE-Praefix,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>exkl.<sp/>Nullterminator)<sp/>-<sp/>oeffentlich,<sp/>damit<sp/>MQTT<sp/>seinen<sp/>Live-Log-Ringpuffer</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>(ein<sp/>`char[kMaxLineLength]`<sp/>pro<sp/>Zeile)<sp/>garantiert<sp/>genauso<sp/>gross<sp/>dimensioniert<sp/>wie<sp/>das,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>was<sp/>hier<sp/>tatsaechlich<sp/>hineinpasst<sp/>(Nachtrag<sp/>2026-08-18:<sp/>vorher<sp/>zwei<sp/>unabhaengige<sp/>&quot;224&quot;-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Literale<sp/>in<sp/>Logger.cpp/MQTT.cpp,<sp/>nur<sp/>zufaellig<sp/>gleich<sp/>-<sp/>siehe<sp/>Log.md).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>560-&gt;1088<sp/>(2026-08-18,<sp/>zweite<sp/>Runde):<sp/>main/programs/state<sp/>(604<sp/>Byte<sp/>bei<sp/>5<sp/>Programmen)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>wurde<sp/>mit<sp/>560<sp/>noch<sp/>abgeschnitten,<sp/>Live-Log-Pretty-Print<sp/>schlug<sp/>dafuer<sp/>fehl<sp/>-<sp/>auf</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Nutzerentscheidung<sp/>hin<sp/>angehoben<sp/>(deckt<sp/>ca.<sp/>8-9<sp/>Programme,<sp/>volles<sp/>Auschoepfen<sp/>von</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>kMaxPrograms=32<sp/>waere<sp/>RAM-seitig<sp/>nicht<sp/>vertretbar,<sp/>siehe<sp/>Log.md).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39" refid="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/><ref refid="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" kindref="member">kMaxLineLength</ref><sp/>=<sp/>1088;</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41" refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439" kindref="member">Logger</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref><sp/>type,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref><sp/>source,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*message);</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref><sp/>type,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref><sp/>source,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*format,<sp/>...);</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" kindref="member">enableRealTime</ref>();</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a6fa26119de2d3513c679785f96648cb1" kindref="member">isRealTimeEnabled</ref>();</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" kindref="member">currentTimestamp</ref>(</highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*buffer,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>bufferSize);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" kindref="member">setErrorCallback</ref>(<ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">ErrorCallback</ref><sp/>callback);</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" kindref="member">setLineCallback</ref>(<ref refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" kindref="member">LineCallback</ref><sp/>callback);</highlight></codeline>
+<codeline lineno="70"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/Logger.h"/>
+  </compounddef>
+</doxygen>

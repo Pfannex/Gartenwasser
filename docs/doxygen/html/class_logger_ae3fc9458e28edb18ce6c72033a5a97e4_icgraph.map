@@ -1,0 +1,63 @@
+<map id="Logger::logf" name="Logger::logf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="584,486,674,512"/>
+<area shape="rect" id="Node000002" href="$class_automatic_controller.html#a39dd8447801b36ba977aaf7e33a68056" title=" " alt="" coords="383,511,520,554"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="567,511,521,522,519,517,572,509"/>
+<area shape="rect" id="Node000004" href="$class_o_t_a.html#a6111f598c2cd2f0ca78731603906764e" title=" " alt="" coords="408,191,495,218"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="624,470,617,420,603,355,576,289,558,259,535,232,516,219,496,212,494,207,518,214,538,228,562,255,581,287,608,354,623,419,629,472"/>
+<area shape="rect" id="Node000006" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="12,218,66,244"/>
+<area shape="poly" id="edge29_Node000001_Node000006" title=" " alt="" coords="606,522,575,549,537,568,415,605,361,617,310,621,261,616,213,601,163,575,112,534,96,512,82,479,61,395,46,307,42,248,42,242,52,307,66,393,87,478,100,510,116,531,166,570,215,596,262,611,310,616,360,611,414,600,535,563,572,545,602,525"/>
+<area shape="rect" id="Node000007" href="$class_web_i_f.html#a856f6407dce93cb23257d2bf3ff92097" title=" " alt="" coords="402,50,501,76"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="626,469,623,401,611,308,599,258,583,207,562,158,534,114,513,94,490,80,489,74,516,90,538,111,566,156,588,205,604,256,616,307,628,401,631,471"/>
+<area shape="rect" id="Node000009" href="$namespace_wi_fi_controller.html#a1dfc0b0c84c0df5a9a80b59460b29a67" title="Startet die WLAN&#45;Verbindung (Zugangsdaten aus secrets.h). Nicht blockierend." alt="" coords="380,124,523,151"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="624,469,619,411,605,335,594,294,578,254,559,216,534,181,517,165,498,154,497,149,520,161,538,177,563,213,583,252,599,293,610,334,624,411,629,471"/>
+<area shape="rect" id="Node000011" href="$class_logger.html#aefffc02e0c6c0ab09ec1f77fe35f6439" title=" " alt="" coords="398,343,505,370"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="611,472,580,427,559,404,535,384,506,370,505,365,538,380,562,400,584,424,616,472"/>
+<area shape="rect" id="Node000012" href="$namespace_m_q_t_t.html#a10bbbea49d36b483ac33babc40e6ff4a" title="Muss regelmaessig aus loop() aufgerufen werden (PubSubClient&#45;Loop, Reconnect bei Verbindungsverlust)." alt="" coords="407,292,496,319"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="617,470,606,440,588,402,565,365,535,333,516,322,497,315,496,310,519,317,538,329,569,362,593,400,610,437,622,472"/>
+<area shape="rect" id="Node000014" href="$namespace_wi_fi_controller.html#a61f4b17e8199349d61b889ad18ecb82c" title="Muss regelmaessig aus loop() aufgerufen werden (Reconnect bei Verbindungsverlust)." alt="" coords="383,394,520,420"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="598,476,569,455,535,435,509,424,508,418,537,430,572,451,604,476"/>
+<area shape="rect" id="Node000015" href="$class_i2_c.html#ad3ebfa3204880e4fa60beeba997f357a" title="Durchsucht den I2C&#45;Bus (Adressen 1&#45;126) und prueft gezielt den MCP23017." alt="" coords="412,242,491,268"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="621,470,612,429,596,378,570,327,554,303,535,282,514,270,492,262,491,257,516,265,538,278,558,300,575,324,601,376,617,428,626,471"/>
+<area shape="rect" id="Node000017" href="$class_valve_controller.html#ac228ec706f3a726ac60624f5cb861036" title=" " alt="" coords="369,628,534,655"/>
+<area shape="poly" id="edge22_Node000001_Node000017" title=" " alt="" coords="613,524,582,570,561,592,538,612,503,630,501,625,535,608,557,589,578,567,609,527"/>
+<area shape="rect" id="Node000019" href="$class_valve_controller.html#aa4c7774203cd4387c7e26763aa2a5ef1" title=" " alt="" coords="370,679,533,706"/>
+<area shape="poly" id="edge24_Node000001_Node000019" title=" " alt="" coords="621,525,610,561,593,599,569,637,538,669,519,681,516,676,535,665,565,633,588,596,606,559,618,529"/>
+<area shape="rect" id="Node000020" href="$class_file_system.html#a20fd5da0dac5fc1e2594f313c0158851" title=" " alt="" coords="367,831,536,858"/>
+<area shape="poly" id="edge26_Node000001_Node000020" title=" " alt="" coords="630,526,627,589,615,667,603,708,587,749,565,787,538,821,522,833,520,828,534,817,561,784,582,747,598,707,609,666,622,588,627,530"/>
+<area shape="rect" id="Node000022" href="$class_file_system.html#a889429cfca465871ed1935d4537381b9" title=" " alt="" coords="368,730,535,756"/>
+<area shape="poly" id="edge28_Node000001_Node000022" title=" " alt="" coords="625,525,617,570,601,622,575,674,558,698,538,720,520,732,518,727,535,716,554,695,570,672,596,620,612,569,622,530"/>
+<area shape="rect" id="Node000023" href="$class_valve_controller.html#aec0668cc044f40f0dc56918973ce849f" title="Schaltet Ventil index (0=V0 .. 5=V5) ein/aus." alt="" coords="368,780,535,807"/>
+<area shape="poly" id="edge30_Node000001_Node000023" title=" " alt="" coords="628,525,623,579,608,644,581,712,562,743,538,770,521,782,519,778,535,766,558,740,576,709,603,643,617,578,625,530"/>
+<area shape="rect" id="Node000024" href="$class_automatic_controller.html#a542b3e61b6bd726c6d6a2c5e49ee7e15" title=" " alt="" coords="383,444,520,487"/>
+<area shape="poly" id="edge32_Node000001_Node000024" title=" " alt="" coords="567,489,521,481,520,476,572,487"/>
+<area shape="rect" id="Node000025" href="$class_valve_timer.html#a73e0b2a3059beb9cc5abe25c0985e2d3" title=" " alt="" coords="394,882,509,908"/>
+<area shape="poly" id="edge34_Node000001_Node000025" title=" " alt="" coords="626,526,616,608,597,710,571,807,556,845,538,872,511,889,509,884,534,868,551,843,566,805,592,709,610,607,623,530"/>
+<area shape="rect" id="Node000003" href="$class_automatic_controller.html#a8b21c0d87ae53811c98a06d7083bda22" title=" " alt="" coords="144,478,288,520"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="366,522,290,512,288,507,370,519"/>
+<area shape="rect" id="Node000005" href="$class_o_t_a.html#a8d768d482aa9d476e83618d50c8fcab8" title=" " alt="" coords="176,167,257,194"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="391,200,259,187,256,182,395,197"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="392,210,67,232,65,227,395,206"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="69,205,60,199,39,196,20,198,11,203,9,209,14,217,9,219,3,210,6,200,19,193,39,191,62,194,74,203"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="404,45,343,25,267,10,227,8,187,12,150,22,115,40,95,58,79,80,57,130,47,180,43,217,38,217,41,179,52,129,74,77,91,54,112,36,148,17,186,6,227,3,267,5,344,20,408,42"/>
+<area shape="rect" id="Node000008" href="$class_web_i_f.html#a848343b2664e0b994d40d83e2be5207e" title=" " alt="" coords="164,50,269,76"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="385,65,271,65,268,61,389,61"/>
+<area shape="rect" id="Node000010" href="$namespace_wi_fi_controller.html#a922cc00a89685a09ed59f0d283111361" title=" " alt="" coords="126,100,307,143"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="363,133,309,130,306,126,367,130"/>
+<area shape="poly" id="edge12_Node000010_Node000006" title=" " alt="" coords="120,152,115,157,79,188,53,218,48,216,75,184,112,153,123,148"/>
+<area shape="rect" id="Node000013" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="194,394,239,420"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="390,323,368,334,320,360,241,399,238,395,318,355,366,329,394,320"/>
+<area shape="poly" id="edge16_Node000013_Node000013" title=" " alt="" coords="247,385,246,381,241,377,216,372,196,375,187,380,186,387,196,397,190,398,181,388,182,377,195,370,216,367,244,372,251,378,252,386"/>
+<area shape="poly" id="edge18_Node000014_Node000013" title=" " alt="" coords="366,409,240,410,238,405,370,405"/>
+<area shape="poly" id="edge21_Node000015_Node000006" title=" " alt="" coords="395,260,268,263,190,260,113,252,68,242,65,237,114,247,191,254,268,257,399,256"/>
+<area shape="rect" id="Node000016" href="$class_i2_c.html#a06f68c1d827ffd15eea64fda461db4fc" title=" " alt="" coords="181,319,252,346"/>
+<area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="395,272,368,283,320,303,254,324,251,320,318,298,366,278,399,269"/>
+<area shape="rect" id="Node000018" href="$class_valve_controller.html#acc4bee34fe33fcd51ddd1cbc6dd53e84" title=" " alt="" coords="114,679,319,706"/>
+<area shape="poly" id="edge23_Node000017_Node000018" title=" " alt="" coords="369,660,283,681,281,676,373,658"/>
+<area shape="poly" id="edge25_Node000019_Node000018" title=" " alt="" coords="353,693,320,695,319,690,358,692"/>
+<area shape="rect" id="Node000021" href="$class_file_system.html#acd29068f3902ca4af016174c90258c50" title=" " alt="" coords="136,831,297,858"/>
+<area shape="poly" id="edge27_Node000020_Node000021" title=" " alt="" coords="349,845,298,847,297,842,354,844"/>
+<area shape="poly" id="edge31_Node000023_Node000018" title=" " alt="" coords="382,775,366,771,297,739,241,709,241,703,299,734,368,766,388,775"/>
+<area shape="poly" id="edge33_Node000024_Node000003" title=" " alt="" coords="366,479,290,491,288,487,370,476"/>
+<area shape="rect" id="Node000026" href="$class_valve_timer.html#ab5248ea88f03e43450cbb6da8a5cd717" title=" " alt="" coords="137,882,296,908"/>
+<area shape="poly" id="edge35_Node000025_Node000026" title=" " alt="" coords="375,895,296,898,296,892,381,895"/>
+</map>

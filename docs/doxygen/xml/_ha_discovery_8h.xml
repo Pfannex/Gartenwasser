@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_ha_discovery_8h" kind="file" language="C++">
+    <compoundname>HaDiscovery.h</compoundname>
+    <includedby refid="_ha_discovery_8cpp" local="yes">D:/Gartenwasser/src/HaDiscovery.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/HaDiscovery.cpp</label>
+        <link refid="_ha_discovery_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/HaDiscovery.h</label>
+        <link refid="_ha_discovery_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_ha_discovery">HaDiscovery</innernamespace>
+    <briefdescription>
+<para>Home-Assistant-MQTT-Discovery (Phase 10). Baut fuer jede Entity aus der Mapping-Tabelle in docs/requirements.md eine Discovery-Config (JSON) und publiziert sie retained unter homeassistant/&lt;component&gt;/gartenwasser/&lt;object_id&gt;/config, siehe docs/spec/10-ha-discovery.md. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="namespace_ha_discovery" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespace_ha_discovery" kindref="compound">HaDiscovery</ref><sp/>{</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_ha_discovery_1ad5847f8d0ebfaf1aa6579ddbc7ae0baf" kindref="member">publishAll</ref>();</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>HaDiscovery</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/HaDiscovery.h"/>
+  </compounddef>
+</doxygen>

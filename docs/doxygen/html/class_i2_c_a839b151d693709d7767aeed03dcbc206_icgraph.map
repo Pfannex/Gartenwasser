@@ -1,0 +1,19 @@
+<map id="I2C::writeRegister" name="I2C::writeRegister">
+<area shape="rect" id="Node000001" title="Schreibt ein Register&#45;Byte per I2C an ein Geraet." alt="" coords="474,81,601,108"/>
+<area shape="rect" id="Node000002" href="$class_valve_controller.html#a47dc7d3e249aa83c873c00e02409a557" title="Setzt alle Ventile auf AUS (sicherer Boot&#45;Grundzustand)." alt="" coords="268,56,416,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="456,85,417,82,417,76,461,84"/>
+<area shape="rect" id="Node000005" href="$class_i2_c.html#a06f68c1d827ffd15eea64fda461db4fc" title=" " alt="" coords="72,155,144,181"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="502,115,465,135,427,148,349,163,270,170,144,172,144,167,270,165,348,158,425,143,463,130,497,116"/>
+<area shape="rect" id="Node000006" href="$class_i2_c.html#ad8e211c40ab2d53bf5db54cf9fb269c4" title="Konfiguriert den MCP23017 (Port B, alle Pins Ausgang, LOW)." alt="" coords="270,107,414,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="456,105,415,113,415,108,462,104"/>
+<area shape="rect" id="Node000007" href="$class_valve_controller.html#aec0668cc044f40f0dc56918973ce849f" title="Schaltet Ventil index (0=V0 .. 5=V5) ein/aus." alt="" coords="259,5,426,32"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="493,74,425,46,393,35,393,30,427,42,498,74"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="81,97,135,124"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="251,87,136,109,134,103,255,83"/>
+<area shape="rect" id="Node000004" href="$class_valve_controller.html#acc4bee34fe33fcd51ddd1cbc6dd53e84" title=" " alt="" coords="5,9,211,36"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="255,54,179,39,179,34,260,51"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="146,93,149,87,145,82,132,78,108,76,80,79,68,84,68,91,83,102,78,103,64,94,63,82,79,74,108,71,133,73,148,78,155,87,150,97"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="253,118,135,114,135,109,257,115"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="262,137,145,163,144,158,257,137"/>
+<area shape="poly" id="edge10_Node000007_Node000004" title=" " alt="" coords="240,21,212,23,210,18,245,19"/>
+</map>

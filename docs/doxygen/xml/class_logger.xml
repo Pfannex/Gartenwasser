@@ -1,0 +1,411 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_logger" kind="class" language="C++" prot="public">
+    <compoundname>Logger</compoundname>
+    <includes refid="_logger_8h" local="no">Logger.h</includes>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="class_logger_1acc066f65d27368f795ed38ce6968737f" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Type</name>
+        <qualifiedname>Logger::Type</qualifiedname>
+        <enumvalue id="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" prot="public">
+          <name>ERROR</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" prot="public">
+          <name>INFO</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1acc066f65d27368f795ed38ce6968737fadc30ec20708ef7b0f641ef78b7880a15" prot="public">
+          <name>DEBUG</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1acc066f65d27368f795ed38ce6968737fa9aba7127268ef2f384fdc95498c7bb1a" prot="public">
+          <name>PUB</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1acc066f65d27368f795ed38ce6968737fa241dd841abade20fcb27b8a9f494e1eb" prot="public">
+          <name>SUB</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="17" column="3" bodyfile="D:/Gartenwasser/src/Logger.h" bodystart="17" bodyend="17"/>
+      </memberdef>
+      <memberdef kind="enum" id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Source</name>
+        <qualifiedname>Logger::Source</qualifiedname>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a2f0b4d2c0c3d64bbb2cd525dbba8b0d0" prot="public">
+          <name>WIFI</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79aab0a7cf5deeda86b66467df64c3b6122" prot="public">
+          <name>MQTT</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afb87bf1fc88386ca21395991f90fff95" prot="public">
+          <name>I2C</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a87599e818aa04794bf7ff0772899d8ae" prot="public">
+          <name>HMI</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" prot="public">
+          <name>WEB</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" prot="public">
+          <name>SYSTEM</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" prot="public">
+          <name>VALVE</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a5826d2990481dd71b3e258ddf8435676" prot="public">
+          <name>SEQ</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" prot="public">
+          <name>OTA</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="25" column="3" bodyfile="D:/Gartenwasser/src/Logger.h" bodystart="25" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" prot="public" static="no">
+        <type>void(*)(const char *message)</type>
+        <definition>using Logger::ErrorCallback = void (*)(const char *message)</definition>
+        <argsstring></argsstring>
+        <name>ErrorCallback</name>
+        <qualifiedname>Logger::ErrorCallback</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="27" column="3" bodyfile="D:/Gartenwasser/src/Logger.h" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_logger_1a7d3c86334251b4590415529975e7d1f4" prot="public" static="no">
+        <type>void(*)(const char *line)</type>
+        <definition>using Logger::LineCallback = void (*)(const char *line)</definition>
+        <argsstring></argsstring>
+        <name>LineCallback</name>
+        <qualifiedname>Logger::LineCallback</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="28" column="3" bodyfile="D:/Gartenwasser/src/Logger.h" bodystart="28" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>size_t</type>
+        <definition>size_t Logger::kMaxLineLength</definition>
+        <argsstring></argsstring>
+        <name>kMaxLineLength</name>
+        <qualifiedname>Logger::kMaxLineLength</qualifiedname>
+        <initializer>= 1088</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="39" column="27" bodyfile="D:/Gartenwasser/src/Logger.h" bodystart="39" bodyend="-1"/>
+        <referencedby refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">log</referencedby>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Logger::Logger</definition>
+        <argsstring>()=delete</argsstring>
+        <name>Logger</name>
+        <qualifiedname>Logger::Logger</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="41" column="3"/>
+        <references refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" compoundref="_logger_8cpp" startline="49" endline="63">currentTimestamp</references>
+        <references refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" compoundref="_logger_8cpp" startline="41" endline="43">enableRealTime</references>
+        <references refid="class_logger_1a6fa26119de2d3513c679785f96648cb1" compoundref="_logger_8cpp" startline="45" endline="47">isRealTimeEnabled</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">log</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">logf</references>
+        <references refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" compoundref="_logger_8cpp" startline="65" endline="67">setErrorCallback</references>
+        <references refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" compoundref="_logger_8cpp" startline="69" endline="71">setLineCallback</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_logger_1a21705d43d3167e0687454df79dedb6d3" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Logger::log</definition>
+        <argsstring>(Type type, Source source, const char *message)</argsstring>
+        <name>log</name>
+        <qualifiedname>Logger::log</qualifiedname>
+        <param>
+          <type><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref></type>
+          <declname>type</declname>
+        </param>
+        <param>
+          <type><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref></type>
+          <declname>source</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>message</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="43" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="73" bodyend="86"/>
+        <references refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" compoundref="_logger_8cpp" startline="49" endline="63">currentTimestamp</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">ERROR</references>
+        <references refid="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" compoundref="_logger_8h" startline="39">kMaxLineLength</references>
+        <referencedby refid="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" compoundref="_automatic_controller_8cpp" startline="57" endline="69">AutomaticController::advance</referencedby>
+        <referencedby refid="class_file_system_1a825d7e892794db3c1449439967cf0756" compoundref="_file_system_8cpp" startline="461" endline="477">FileSystem::begin</referencedby>
+        <referencedby refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" compoundref="_h_m_i_8cpp" startline="671" endline="707">HMI::begin</referencedby>
+        <referencedby refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" compoundref="_o_t_a_8cpp" startline="24" endline="41">OTA::begin</referencedby>
+        <referencedby refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" compoundref="_web_i_f_8cpp" startline="102" endline="153">WebIF::begin</referencedby>
+        <referencedby refid="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" compoundref="_diagnostics_8cpp" startline="30" endline="42">Diagnostics::checkI2cStatus</referencedby>
+        <referencedby refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" compoundref="_wi_fi_controller_8cpp" startline="109" endline="121">WiFiController::connectAndSyncTimeBlocking</referencedby>
+        <referencedby refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">logf</referencedby>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+        <referencedby refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" compoundref="_m_q_t_t_8cpp" startline="1491" endline="1529">MQTT::loop</referencedby>
+        <referencedby refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" compoundref="_web_i_f_8cpp" startline="155" endline="161">WebIF::loop</referencedby>
+        <referencedby refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" compoundref="_wi_fi_controller_8cpp" startline="75" endline="103">WiFiController::loop</referencedby>
+        <referencedby refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" compoundref="_i2_c_8cpp" startline="19" endline="44">I2C::scan</referencedby>
+        <referencedby refid="class_automatic_controller_1afb960a9422a05137dc953ddcce52ddfc" compoundref="_automatic_controller_8cpp" startline="37" endline="44">AutomaticController::stop</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Logger::logf</definition>
+        <argsstring>(Type type, Source source, const char *format,...)</argsstring>
+        <name>logf</name>
+        <qualifiedname>Logger::logf</qualifiedname>
+        <param>
+          <type><ref refid="class_logger_1acc066f65d27368f795ed38ce6968737f" kindref="member">Type</ref></type>
+          <declname>type</declname>
+        </param>
+        <param>
+          <type><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" kindref="member">Source</ref></type>
+          <declname>source</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>format</declname>
+        </param>
+        <param>
+          <type>...</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="44" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="88" bodyend="104"/>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">log</references>
+        <referencedby refid="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" compoundref="_automatic_controller_8cpp" startline="57" endline="69">AutomaticController::advance</referencedby>
+        <referencedby refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" compoundref="_o_t_a_8cpp" startline="24" endline="41">OTA::begin</referencedby>
+        <referencedby refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" compoundref="_web_i_f_8cpp" startline="102" endline="153">WebIF::begin</referencedby>
+        <referencedby refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" compoundref="_wi_fi_controller_8cpp" startline="62" endline="73">WiFiController::begin</referencedby>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+        <referencedby refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" compoundref="_m_q_t_t_8cpp" startline="1491" endline="1529">MQTT::loop</referencedby>
+        <referencedby refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" compoundref="_wi_fi_controller_8cpp" startline="75" endline="103">WiFiController::loop</referencedby>
+        <referencedby refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" compoundref="_i2_c_8cpp" startline="19" endline="44">I2C::scan</referencedby>
+        <referencedby refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" compoundref="_valve_controller_8cpp" startline="70" endline="73">ValveController::setAlias</referencedby>
+        <referencedby refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" compoundref="_valve_controller_8cpp" startline="61" endline="64">ValveController::setAuto</referencedby>
+        <referencedby refid="class_file_system_1a20fd5da0dac5fc1e2594f313c0158851" compoundref="_file_system_8cpp" startline="540" endline="564">FileSystem::setPrograms</referencedby>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+        <referencedby refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" compoundref="_valve_controller_8cpp" startline="25" endline="39">ValveController::setValve</referencedby>
+        <referencedby refid="class_automatic_controller_1a542b3e61b6bd726c6d6a2c5e49ee7e15" compoundref="_automatic_controller_8cpp" startline="22" endline="35">AutomaticController::start</referencedby>
+        <referencedby refid="class_valve_timer_1a73e0b2a3059beb9cc5abe25c0985e2d3" compoundref="_valve_timer_8cpp" startline="47" endline="59">ValveTimer::tick</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Logger::enableRealTime</definition>
+        <argsstring>()</argsstring>
+        <name>enableRealTime</name>
+        <qualifiedname>Logger::enableRealTime</qualifiedname>
+        <briefdescription>
+<para>Schaltet den Zeitstempel von boot-relativer Zeit auf Echtzeit um (nach erfolgreicher NTP-Synchronisierung). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="47" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="41" bodyend="43"/>
+        <referencedby refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" compoundref="_wi_fi_controller_8cpp" startline="109" endline="121">WiFiController::connectAndSyncTimeBlocking</referencedby>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_logger_1a6fa26119de2d3513c679785f96648cb1" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool Logger::isRealTimeEnabled</definition>
+        <argsstring>()</argsstring>
+        <name>isRealTimeEnabled</name>
+        <qualifiedname>Logger::isRealTimeEnabled</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Liefert true, wenn die Systemzeit per NTP synchronisiert ist (siehe <ref refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" kindref="member">enableRealTime()</ref>). Fuer Code, der echtes Datum/Uhrzeit braucht (z.B. Scheduler, Phase 15) statt nur eines Log-Zeitstempels, der auch boot-relativ sinnvoll ist. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="52" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="45" bodyend="47"/>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Logger::currentTimestamp</definition>
+        <argsstring>(char *buffer, size_t bufferSize)</argsstring>
+        <name>currentTimestamp</name>
+        <qualifiedname>Logger::currentTimestamp</qualifiedname>
+        <param>
+          <type>char *</type>
+          <declname>buffer</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>bufferSize</declname>
+        </param>
+        <briefdescription>
+<para>Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach <computeroutput>buffer</computeroutput>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="55" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="49" bodyend="63"/>
+        <referencedby refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">log</referencedby>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Logger::setErrorCallback</definition>
+        <argsstring>(ErrorCallback callback)</argsstring>
+        <name>setErrorCallback</name>
+        <qualifiedname>Logger::setErrorCallback</qualifiedname>
+        <param>
+          <type><ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">ErrorCallback</ref></type>
+          <declname>callback</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Registriert einen Callback, der bei jedem ERROR-Log-Eintrag mit der reinen (unformatierten) Meldung aufgerufen wird - Grundlage fuer diagnostics/lastError (<ref refid="class_diagnostics" kindref="compound">Diagnostics</ref>), ohne dass <ref refid="class_logger" kindref="compound">Logger</ref> die Diagnostics-Klasse kennen muss. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="60" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="65" bodyend="67"/>
+        <referencedby refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" compoundref="_diagnostics_8cpp" startline="23" endline="28">Diagnostics::begin</referencedby>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Logger::setLineCallback</definition>
+        <argsstring>(LineCallback callback)</argsstring>
+        <name>setLineCallback</name>
+        <qualifiedname>Logger::setLineCallback</qualifiedname>
+        <param>
+          <type><ref refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" kindref="member">LineCallback</ref></type>
+          <declname>callback</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Registriert einen Callback, der bei JEDER Log-Zeile (inkl. PUB/SUB) mit der komplett formatierten Zeile (wie auf Serial) aufgerufen wird - Grundlage fuer diagnostics/livelog (<ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref>), ohne dass <ref refid="class_logger" kindref="compound">Logger</ref> <ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref> kennen muss. Keine Rueckkopplungsgefahr durch das Weiterleiten selbst, solange der Callback dafuer rohes MQTT-Publish statt einer geloggten Publish-Funktion nutzt (2026-08-18 klargestellt, siehe <ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref>:: onLoggerLine()). Zu haeufige Einzeltopics (z.B. sekuendliche Restlaufzeit-Ticks) filtert bei Bedarf gezielt der Aufrufer selbst. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Logger.h" line="69" column="15" bodyfile="D:/Gartenwasser/src/Logger.cpp" bodystart="69" bodyend="71"/>
+        <referencedby refid="namespace_m_q_t_t_1a5355e8fc50ad2622c124c55b8dd64e9f" compoundref="_m_q_t_t_8cpp" startline="1480" endline="1487">MQTT::begin</referencedby>
+        <referencedby refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439">Logger</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/Logger.h" line="15" column="1" bodyfile="D:/Gartenwasser/src/Logger.h" bodystart="15" bodyend="70"/>
+    <listofallmembers>
+      <member refid="class_logger_1a8c85a0b2b35eb9f57ca874807a04b911" prot="public" virt="non-virtual"><scope>Logger</scope><name>currentTimestamp</name></member>
+      <member refid="class_logger_1a29d0f74ae8136a5f87849a9c3aba87f1" prot="public" virt="non-virtual"><scope>Logger</scope><name>enableRealTime</name></member>
+      <member refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" prot="public" virt="non-virtual"><scope>Logger</scope><name>ErrorCallback</name></member>
+      <member refid="class_logger_1a6fa26119de2d3513c679785f96648cb1" prot="public" virt="non-virtual"><scope>Logger</scope><name>isRealTimeEnabled</name></member>
+      <member refid="class_logger_1ad54a7f0bff88bbe63081385487a3b6c6" prot="public" virt="non-virtual"><scope>Logger</scope><name>kMaxLineLength</name></member>
+      <member refid="class_logger_1a7d3c86334251b4590415529975e7d1f4" prot="public" virt="non-virtual"><scope>Logger</scope><name>LineCallback</name></member>
+      <member refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" prot="public" virt="non-virtual"><scope>Logger</scope><name>log</name></member>
+      <member refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" prot="public" virt="non-virtual"><scope>Logger</scope><name>logf</name></member>
+      <member refid="class_logger_1aefffc02e0c6c0ab09ec1f77fe35f6439" prot="public" virt="non-virtual"><scope>Logger</scope><name>Logger</name></member>
+      <member refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" prot="public" virt="non-virtual"><scope>Logger</scope><name>setErrorCallback</name></member>
+      <member refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" prot="public" virt="non-virtual"><scope>Logger</scope><name>setLineCallback</name></member>
+      <member refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79" prot="public" virt="non-virtual"><scope>Logger</scope><name>Source</name></member>
+      <member refid="class_logger_1acc066f65d27368f795ed38ce6968737f" prot="public" virt="non-virtual"><scope>Logger</scope><name>Type</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

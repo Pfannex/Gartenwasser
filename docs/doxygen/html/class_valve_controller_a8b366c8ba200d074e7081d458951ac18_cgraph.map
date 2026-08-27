@@ -1,0 +1,5 @@
+<map id="ValveController::getAlias" name="ValveController::getAlias">
+<area shape="rect" id="Node000001" title="Klartextname (Alias) von Ventil index (0=V0 .. 5=V5). Persistiert via FileSystem." alt="" coords="5,5,170,32"/>
+<area shape="rect" id="Node000002" href="$class_file_system.html#a98d60f31402eec5fff66b2805ab65536" title=" " alt="" coords="218,5,392,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,16,205,19,199,19,170,21"/>
+</map>

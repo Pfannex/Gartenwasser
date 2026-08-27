@@ -1,0 +1,10 @@
+<map id="AutomaticController::advance" name="AutomaticController::advance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,142,48"/>
+<area shape="rect" id="Node000002" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="327,13,412,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,24,313,24,311,29,142,29"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="190,39,279,65"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="142,35,177,42,172,43,142,40"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="460,13,634,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="413,24,447,27,442,27,413,29"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="279,41,309,38,314,37,280,46"/>
+</map>

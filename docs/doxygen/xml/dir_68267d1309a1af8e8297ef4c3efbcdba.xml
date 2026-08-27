@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir">
+    <compoundname>D:/Gartenwasser/src</compoundname>
+    <innerfile refid="_automatic_controller_8cpp">AutomaticController.cpp</innerfile>
+    <innerfile refid="_automatic_controller_8h">AutomaticController.h</innerfile>
+    <innerfile refid="_diagnostics_8cpp">Diagnostics.cpp</innerfile>
+    <innerfile refid="_diagnostics_8h">Diagnostics.h</innerfile>
+    <innerfile refid="_file_system_8cpp">FileSystem.cpp</innerfile>
+    <innerfile refid="_file_system_8h">FileSystem.h</innerfile>
+    <innerfile refid="_ha_discovery_8cpp">HaDiscovery.cpp</innerfile>
+    <innerfile refid="_ha_discovery_8h">HaDiscovery.h</innerfile>
+    <innerfile refid="_h_m_i_8cpp">HMI.cpp</innerfile>
+    <innerfile refid="_h_m_i_8h">HMI.h</innerfile>
+    <innerfile refid="_i2_c_8cpp">I2C.cpp</innerfile>
+    <innerfile refid="_i2_c_8h">I2C.h</innerfile>
+    <innerfile refid="_logger_8cpp">Logger.cpp</innerfile>
+    <innerfile refid="_logger_8h">Logger.h</innerfile>
+    <innerfile refid="main_8cpp">main.cpp</innerfile>
+    <innerfile refid="_m_q_t_t_8cpp">MQTT.cpp</innerfile>
+    <innerfile refid="_m_q_t_t_8h">MQTT.h</innerfile>
+    <innerfile refid="_o_t_a_8cpp">OTA.cpp</innerfile>
+    <innerfile refid="_o_t_a_8h">OTA.h</innerfile>
+    <innerfile refid="_valve_controller_8cpp">ValveController.cpp</innerfile>
+    <innerfile refid="_valve_controller_8h">ValveController.h</innerfile>
+    <innerfile refid="_valve_timer_8cpp">ValveTimer.cpp</innerfile>
+    <innerfile refid="_valve_timer_8h">ValveTimer.h</innerfile>
+    <innerfile refid="_web_i_f_8cpp">WebIF.cpp</innerfile>
+    <innerfile refid="_web_i_f_8h">WebIF.h</innerfile>
+    <innerfile refid="_wi_fi_controller_8cpp">WiFiController.cpp</innerfile>
+    <innerfile refid="_wi_fi_controller_8h">WiFiController.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/"/>
+  </compounddef>
+</doxygen>

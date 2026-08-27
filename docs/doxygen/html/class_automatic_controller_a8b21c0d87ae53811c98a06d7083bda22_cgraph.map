@@ -1,0 +1,28 @@
+<map id="AutomaticController::AutomaticController" name="AutomaticController::AutomaticController">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,239,150,281"/>
+<area shape="rect" id="Node000002" href="$class_automatic_controller.html#a39dd8447801b36ba977aaf7e33a68056" title=" " alt="" coords="198,5,334,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,237,101,200,125,152,157,103,196,58,202,55,199,59,200,62,161,106,129,155,105,202,89,239"/>
+<area shape="rect" id="Node000006" href="$class_automatic_controller.html#acf073935540c377ea1578b6d455dcc9c" title="Setzt den Zustand zurueck (keine Sequenz aktiv). Fuer den Boot&#45;Grundzustand." alt="" coords="198,72,334,115"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="92,237,135,182,164,152,196,125,204,121,201,125,199,129,168,156,140,186,96,240"/>
+<area shape="rect" id="Node000007" href="$class_automatic_controller.html#acc1c05abe64763cd951aa0b4efd0a187" title="Aktuell aktives Ventil (1..5), oder 0 wenn keine Sequenz laeuft." alt="" coords="198,139,334,181"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="115,236,196,191,208,187,204,191,199,196,118,240"/>
+<area shape="rect" id="Node000008" href="$class_automatic_controller.html#ac89fb27486eed31944c75c38371cd1c2" title="Anzahl noch ausstehender Ventile (ohne das aktuell aktive), fuer main/remainingTotal." alt="" coords="198,205,334,248"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="149,245,185,240,180,243,151,250"/>
+<area shape="rect" id="Node000009" href="$class_automatic_controller.html#aceaa72e4e8fb0b5d99391ca27fb59d48" title="Ventil&#45;Index des offset&#45;ten ausstehenden Ventils (0 = naechstes nach dem aktiven)." alt="" coords="198,272,334,315"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="149,270,185,277,180,280,151,275"/>
+<area shape="rect" id="Node000010" href="$class_automatic_controller.html#a4d0306a6711c4ed529668baad4b7502a" title=" " alt="" coords="198,339,334,381"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="117,279,199,324,209,331,204,331,196,329,116,284"/>
+<area shape="rect" id="Node000011" href="$class_automatic_controller.html#a542b3e61b6bd726c6d6a2c5e49ee7e15" title=" " alt="" coords="198,405,334,448"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="95,279,140,334,168,364,199,391,205,397,200,396,196,395,164,368,135,338,93,284"/>
+<area shape="rect" id="Node000012" href="$class_automatic_controller.html#afb960a9422a05137dc953ddcce52ddfc" title="Bricht eine laufende Sequenz ab (nur Zustand, schaltet keine Ventile)." alt="" coords="382,376,518,419"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="85,279,100,321,122,371,155,420,175,441,199,458,224,468,251,472,278,472,306,467,358,448,402,428,407,426,361,453,307,472,279,477,250,478,223,473,196,462,172,445,151,423,117,374,95,323,84,284"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="566,239,652,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="313,46,335,58,474,149,581,229,576,230,471,154,333,62,314,51"/>
+<area shape="rect" id="Node000005" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="406,239,495,265"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="318,46,336,58,381,127,437,225,431,225,376,130,332,62,319,51"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="700,239,873,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="652,249,687,252,681,252,653,255"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="495,249,553,251,548,253,496,255"/>
+<area shape="poly" id="edge12_Node000011_Node000005" title=" " alt="" coords="316,402,332,391,362,364,389,333,430,280,435,277,393,336,366,367,336,395,318,407"/>
+<area shape="poly" id="edge14_Node000012_Node000003" title=" " alt="" coords="473,373,579,277,584,275,476,378"/>
+</map>

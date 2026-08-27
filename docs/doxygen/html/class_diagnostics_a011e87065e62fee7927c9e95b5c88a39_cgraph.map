@@ -1,0 +1,21 @@
+<map id="Diagnostics::Diagnostics" name="Diagnostics::Diagnostics">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,107,173,133"/>
+<area shape="rect" id="Node000002" href="$class_diagnostics.html#a3004aeac1d2170fe78a9f8043eefbeae" title="Initialisiert den Zustand und registriert den Logger::ErrorCallback." alt="" coords="259,5,388,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,104,158,73,220,42,246,34,242,37,222,46,160,77,112,108"/>
+<area shape="rect" id="Node000004" href="$class_diagnostics.html#a61eb935f65df2ea332ac669ea6bed498" title=" " alt="" coords="229,56,418,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,104,246,85,242,88,155,109"/>
+<area shape="rect" id="Node000008" href="$class_diagnostics.html#abafa16aed5a46e3b9e0f9c39109a4519" title=" " alt="" coords="221,107,427,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="172,117,208,119,203,121,173,123"/>
+<area shape="rect" id="Node000009" href="$class_diagnostics.html#a5377b98576fee15844a969a53ab947e2" title="Zuletzt aufgetretene Fehlermeldung inkl. Zeitstempel, leer wenn noch keine." alt="" coords="239,157,408,184"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="154,131,246,152,241,155,154,137"/>
+<area shape="rect" id="Node000010" href="$class_diagnostics.html#a87b924c728b1e8bb335c361095a60754" title="true = i2cStatus &quot;ok&quot;, false = &quot;error&quot;." alt="" coords="252,208,396,235"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="111,131,160,163,222,194,243,203,237,203,220,198,158,167,110,137"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a8e88dd6ab1fba23da493b2d2214f04a8" title=" " alt="" coords="484,5,649,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="388,16,470,18,465,19,389,21"/>
+<area shape="rect" id="Node000005" href="$class_i2_c.html#a4af540f66794fd0f04855e6cf79238f3" title="Prueft, ob der MCP23017 aktuell auf dem I2C&#45;Bus antwortet." alt="" coords="475,56,657,83"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="418,67,462,69,457,70,419,72"/>
+<area shape="rect" id="Node000006" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="524,107,609,133"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="391,81,511,108,506,109,391,86"/>
+<area shape="rect" id="Node000007" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="705,107,879,133"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="609,117,692,120,687,120,610,123"/>
+</map>

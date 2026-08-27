@@ -1,0 +1,9 @@
+<map id="WiFiController::begin" name="WiFiController::begin">
+<area shape="rect" id="Node000001" title="Startet die WLAN&#45;Verbindung (Zugangsdaten aus secrets.h). Nicht blockierend." alt="" coords="5,5,149,32"/>
+<area shape="rect" id="Node000002" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="197,5,286,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,16,184,19,178,19,149,21"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="334,5,419,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="286,16,321,19,316,19,287,21"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="467,5,641,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="420,16,454,19,449,19,420,21"/>
+</map>

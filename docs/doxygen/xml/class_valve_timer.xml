@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_valve_timer" kind="class" language="C++" prot="public">
+    <compoundname>ValveTimer</compoundname>
+    <includes refid="_valve_timer_8h" local="no">ValveTimer.h</includes>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>ValveTimer::ValveTimer</definition>
+        <argsstring>()=delete</argsstring>
+        <name>ValveTimer</name>
+        <qualifiedname>ValveTimer::ValveTimer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="17" column="3"/>
+        <references refid="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" compoundref="_valve_timer_8cpp" startline="20" endline="24">begin</references>
+        <references refid="class_valve_timer_1a9eb466b6cf7ad81a1806f81c9a435f70" compoundref="_valve_timer_8cpp" startline="40" endline="45">clear</references>
+        <references refid="class_valve_timer_1a952377769bd144ff3500bf62225a687a" compoundref="_valve_timer_8cpp" startline="61" endline="66">getRemainingSeconds</references>
+        <references refid="class_valve_timer_1af4c4bc856014e8d385e5358b47e267cb" compoundref="_valve_timer_8cpp" startline="33" endline="38">reset</references>
+        <references refid="class_valve_timer_1ac3ef15b64ff7a0105a2fae787a334dfd" compoundref="_valve_timer_8cpp" startline="26" endline="31">start</references>
+        <references refid="class_valve_timer_1a73e0b2a3059beb9cc5abe25c0985e2d3" compoundref="_valve_timer_8cpp" startline="47" endline="59">tick</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveTimer::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>ValveTimer::begin</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Armiert alle Ventile mit ihrer konfigurierten effektiven Laufzeit (kein Ventil laeuft nach Boot, siehe <ref refid="class_valve_controller" kindref="compound">ValveController</ref>). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="21" column="15" bodyfile="D:/Gartenwasser/src/ValveTimer.cpp" bodystart="20" bodyend="24"/>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+        <referencedby refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717">ValveTimer</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_timer_1ac3ef15b64ff7a0105a2fae787a334dfd" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveTimer::start</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>start</name>
+        <qualifiedname>ValveTimer::start</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Startet den Countdown fuer Ventil <computeroutput>index</computeroutput> (1..5) mit min(time, maxTime) aus <ref refid="class_file_system" kindref="compound">FileSystem</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="24" column="15" bodyfile="D:/Gartenwasser/src/ValveTimer.cpp" bodystart="26" bodyend="31"/>
+        <referencedby refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717">ValveTimer</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_timer_1af4c4bc856014e8d385e5358b47e267cb" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveTimer::reset</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>reset</name>
+        <qualifiedname>ValveTimer::reset</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Setzt Ventil <computeroutput>index</computeroutput> auf die konfigurierte effektive Laufzeit zurueck (armiert) - nach Ausschalten ausserhalb einer laufenden Automatik-Sequenz, oder wenn sich <computeroutput>time</computeroutput>/<computeroutput>maxTime</computeroutput> waehrend des Leerlaufs aendert. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="29" column="15" bodyfile="D:/Gartenwasser/src/ValveTimer.cpp" bodystart="33" bodyend="38"/>
+        <referencedby refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717">ValveTimer</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_timer_1a9eb466b6cf7ad81a1806f81c9a435f70" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void ValveTimer::clear</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>clear</name>
+        <qualifiedname>ValveTimer::clear</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Setzt die Restlaufzeit von Ventil <computeroutput>index</computeroutput> auf 0 - fuer ein Ventil, das innerhalb einer noch laufenden Automatik-Sequenz bereits durchgelaufen ist (nicht &quot;armiert&quot;, sonst sieht es so aus, als waere es noch an der Reihe). Siehe <ref refid="class_valve_timer_1af4c4bc856014e8d385e5358b47e267cb" kindref="member">reset()</ref> fuer den Gegenfall (Sequenz komplett beendet -&gt; alle Ventile wieder auf Zeit). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="35" column="15" bodyfile="D:/Gartenwasser/src/ValveTimer.cpp" bodystart="40" bodyend="45"/>
+        <referencedby refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717">ValveTimer</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_timer_1a73e0b2a3059beb9cc5abe25c0985e2d3" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint8_t</type>
+        <definition>uint8_t ValveTimer::tick</definition>
+        <argsstring>(uint8_t activeMask)</argsstring>
+        <name>tick</name>
+        <qualifiedname>ValveTimer::tick</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>activeMask</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Zaehlt die Restlaufzeit aller Ventile herunter, deren Bit in <computeroutput>activeMask</computeroutput> gesetzt ist (Bit <computeroutput>index</computeroutput> = Ventil <computeroutput>index</computeroutput> ist eingeschaltet). Muss sekuendlich aufgerufen werden. Liefert eine Bitmaske der Ventile, deren Countdown in diesem Aufruf 0 erreicht hat. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="41" column="18" bodyfile="D:/Gartenwasser/src/ValveTimer.cpp" bodystart="47" bodyend="59"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" compoundref="_logger_8h" startline="25">Logger::VALVE</references>
+        <referencedby refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717">ValveTimer</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_valve_timer_1a952377769bd144ff3500bf62225a687a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>uint16_t</type>
+        <definition>uint16_t ValveTimer::getRemainingSeconds</definition>
+        <argsstring>(uint8_t index)</argsstring>
+        <name>getRemainingSeconds</name>
+        <qualifiedname>ValveTimer::getRemainingSeconds</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <briefdescription>
+<para>Liefert die aktuelle Restlaufzeit in Sekunden fuer Ventil <computeroutput>index</computeroutput>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/ValveTimer.h" line="44" column="19" bodyfile="D:/Gartenwasser/src/ValveTimer.cpp" bodystart="61" bodyend="66"/>
+        <referencedby refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717">ValveTimer</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/ValveTimer.h" line="15" column="1" bodyfile="D:/Gartenwasser/src/ValveTimer.h" bodystart="15" bodyend="45"/>
+    <listofallmembers>
+      <member refid="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>begin</name></member>
+      <member refid="class_valve_timer_1a9eb466b6cf7ad81a1806f81c9a435f70" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>clear</name></member>
+      <member refid="class_valve_timer_1a952377769bd144ff3500bf62225a687a" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>getRemainingSeconds</name></member>
+      <member refid="class_valve_timer_1af4c4bc856014e8d385e5358b47e267cb" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>reset</name></member>
+      <member refid="class_valve_timer_1ac3ef15b64ff7a0105a2fae787a334dfd" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>start</name></member>
+      <member refid="class_valve_timer_1a73e0b2a3059beb9cc5abe25c0985e2d3" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>tick</name></member>
+      <member refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717" prot="public" virt="non-virtual"><scope>ValveTimer</scope><name>ValveTimer</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

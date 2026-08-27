@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_valve_controller_8cpp" kind="file" language="C++">
+    <compoundname>ValveController.cpp</compoundname>
+    <includes refid="_valve_controller_8h" local="yes">ValveController.h</includes>
+    <includes refid="_file_system_8h" local="yes">FileSystem.h</includes>
+    <includes refid="_i2_c_8h" local="yes">I2C.h</includes>
+    <includes refid="_logger_8h" local="yes">Logger.h</includes>
+    <incdepgraph>
+      <node id="4">
+        <label>FileSystem.h</label>
+        <link refid="_file_system_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>I2C.h</label>
+        <link refid="_i2_c_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="7">
+        <label>Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/ValveController.cpp</label>
+        <link refid="_valve_controller_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>ValveController.h</label>
+        <link refid="_valve_controller_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>cstddef</label>
+      </node>
+      <node id="3">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_valve_controller_8h" kindref="compound">ValveController.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_file_system_8h" kindref="compound">FileSystem.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_i2_c_8h" kindref="compound">I2C.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_logger_8h" kindref="compound">Logger.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/>kGpioB<sp/>=<sp/>0x13;<sp/><sp/></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Pin-Zuordnung<sp/>Port<sp/>B<sp/>je<sp/>Ventil<sp/>(V0..V5),<sp/>siehe<sp/>docs/requirements.md.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/>kValvePins[<ref refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" kindref="member">ValveController::kValveCount</ref>]<sp/>=<sp/>{7,<sp/>2,<sp/>3,<sp/>4,<sp/>5,<sp/>6};</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Schattenregister<sp/>des<sp/>zuletzt<sp/>geschriebenen<sp/>Port-B-Zustands<sp/>(GPIOB<sp/>ist<sp/>fuer</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="comment">//<sp/>unsere<sp/>Zwecke<sp/>write-only:<sp/>wir<sp/>sind<sp/>die<sp/>einzige<sp/>Quelle,<sp/>die<sp/>die<sp/>Pins<sp/>treibt).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal">uint8_t<sp/>portBState<sp/>=<sp/>0x00;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20" refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" kindref="member">ValveController::begin</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/>portBState<sp/>=<sp/>0x00;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><ref refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" kindref="member">I2C::writeRegister</ref>(<ref refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" kindref="member">I2C::kMcp23017Addr</ref>,<sp/>kGpioB,<sp/>portBState);</highlight></codeline>
+<codeline lineno="23"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25" refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" kindref="member">ValveController::setValve</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>on)<sp/>{</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(index<sp/>&gt;=<sp/><ref refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" kindref="member">kValveCount</ref>)<sp/>{</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" kindref="member">Logger::Source::VALVE</ref>,<sp/></highlight><highlight class="stringliteral">&quot;ValveController:<sp/>ungueltiger<sp/>Index<sp/>%u&quot;</highlight><highlight class="normal">,<sp/>index);</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/>bit<sp/>=<sp/>kValvePins[index];</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(on)<sp/>{</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/>portBState<sp/>|=<sp/>(1<sp/>&lt;&lt;<sp/>bit);</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>portBState<sp/>&amp;=<sp/>~(1<sp/>&lt;&lt;<sp/>bit);</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><ref refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" kindref="member">I2C::writeRegister</ref>(<ref refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" kindref="member">I2C::kMcp23017Addr</ref>,<sp/>kGpioB,<sp/>portBState);</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" kindref="member">Logger::Source::VALVE</ref>,<sp/></highlight><highlight class="stringliteral">&quot;V%u<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>index,<sp/>on<sp/>?<sp/></highlight><highlight class="stringliteral">&quot;ON&quot;</highlight><highlight class="normal"><sp/>:<sp/></highlight><highlight class="stringliteral">&quot;OFF&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="39"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41" refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" kindref="member">ValveController::getValve</ref>(uint8_t<sp/>index)<sp/>{</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(index<sp/>&gt;=<sp/><ref refid="class_valve_controller_1af09604ec3f2c61e6db3ceb03794661d7" kindref="member">kValveCount</ref>)<sp/>{</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(portBState<sp/>&amp;<sp/>(1<sp/>&lt;&lt;<sp/>kValvePins[index]))<sp/>!=<sp/>0;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48" refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a58ef29b30fe77616d8f7ecf79740c271" kindref="member">ValveController::anyIrrigationValveActive</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(uint8_t<sp/>i<sp/>=<sp/>1;<sp/>i<sp/>&lt;=<sp/>5;<sp/>i++)<sp/>{</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<ref refid="class_valve_controller_1a24d85dc9fba796e994bb87be844d50c0" kindref="member">getValve</ref>(i))<sp/>{</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57" refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1a99a1751fdaf99851446b43ef38cd74a4" kindref="member">ValveController::getAuto</ref>(uint8_t<sp/>index)<sp/>{</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_file_system_1aa92266d9637b9f81cfc64172cb111f44" kindref="member">FileSystem::getValveAuto</ref>(index);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61" refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1aa4c7774203cd4387c7e26763aa2a5ef1" kindref="member">ValveController::setAuto</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>on)<sp/>{</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><ref refid="class_file_system_1a18666b5a5bcd179fd0ca0d3d377f29d2" kindref="member">FileSystem::setValveAuto</ref>(index,<sp/>on);</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" kindref="member">Logger::Source::VALVE</ref>,<sp/></highlight><highlight class="stringliteral">&quot;V%u<sp/>Automatik<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>index,<sp/>on<sp/>?<sp/></highlight><highlight class="stringliteral">&quot;EIN&quot;</highlight><highlight class="normal"><sp/>:<sp/></highlight><highlight class="stringliteral">&quot;AUS&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="64"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66" refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*<ref refid="class_valve_controller_1a8b366c8ba200d074e7081d458951ac18" kindref="member">ValveController::getAlias</ref>(uint8_t<sp/>index)<sp/>{</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_file_system_1a98d60f31402eec5fff66b2805ab65536" kindref="member">FileSystem::getValveAlias</ref>(index);</highlight></codeline>
+<codeline lineno="68"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="70" refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_controller_1ac228ec706f3a726ac60624f5cb861036" kindref="member">ValveController::setAlias</ref>(uint8_t<sp/>index,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*alias)<sp/>{</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><ref refid="class_file_system_1a71d71d5d2586ccfd1982ee5efbb2db2c" kindref="member">FileSystem::setValveAlias</ref>(index,<sp/>alias);</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79adecfd8c6f168b47eb885f232a82eefd4" kindref="member">Logger::Source::VALVE</ref>,<sp/></highlight><highlight class="stringliteral">&quot;V%u<sp/>Alias<sp/>&apos;%s&apos;<sp/>gesetzt&quot;</highlight><highlight class="normal">,<sp/>index,<sp/>alias);</highlight></codeline>
+<codeline lineno="73"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/ValveController.cpp"/>
+  </compounddef>
+</doxygen>

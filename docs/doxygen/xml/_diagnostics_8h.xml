@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_diagnostics_8h" kind="file" language="C++">
+    <compoundname>Diagnostics.h</compoundname>
+    <includedby refid="_diagnostics_8cpp" local="yes">D:/Gartenwasser/src/Diagnostics.cpp</includedby>
+    <includedby refid="_h_m_i_8cpp" local="yes">D:/Gartenwasser/src/HMI.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/Diagnostics.cpp</label>
+        <link refid="_diagnostics_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/Diagnostics.h</label>
+        <link refid="_diagnostics_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/HMI.cpp</label>
+        <link refid="_h_m_i_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_diagnostics" prot="public">Diagnostics</innerclass>
+    <briefdescription>
+<para>I2C-Bus-Status und letzte Fehlermeldung, fuer diagnostics/i2cStatus und diagnostics/lastError. Registriert sich als <ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">Logger::ErrorCallback</ref>, damit jeder ERROR-Log-Eintrag (I2C-Ausfall, ungueltige MQTT-Payloads, WLAN-Verlust, ...) automatisch in lastError landet. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="class_diagnostics" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39" kindref="member">Diagnostics</ref><sp/>{</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="13" refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39" kindref="member">Diagnostics</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" kindref="member">checkI2cStatus</ref>();</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_diagnostics_1a87b924c728b1e8bb335c361095a60754" kindref="member">isI2cOk</ref>();</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_diagnostics_1abafa16aed5a46e3b9e0f9c39109a4519" kindref="member">consumeNewError</ref>();</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*<ref refid="class_diagnostics_1a5377b98576fee15844a969a53ab947e2" kindref="member">getLastError</ref>();</highlight></codeline>
+<codeline lineno="31"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/Diagnostics.h"/>
+  </compounddef>
+</doxygen>

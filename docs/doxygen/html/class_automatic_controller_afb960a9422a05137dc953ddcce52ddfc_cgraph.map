@@ -1,0 +1,7 @@
+<map id="AutomaticController::stop" name="AutomaticController::stop">
+<area shape="rect" id="Node000001" title="Bricht eine laufende Sequenz ab (nur Zustand, schaltet keine Ventile)." alt="" coords="5,5,142,48"/>
+<area shape="rect" id="Node000002" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="190,13,275,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,24,177,26,171,27,142,29"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="323,13,496,40"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="275,24,310,27,305,27,276,29"/>
+</map>

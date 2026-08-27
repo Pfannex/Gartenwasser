@@ -1,0 +1,44 @@
+<map id="D:/Gartenwasser/src/main.cpp" name="D:/Gartenwasser/src/main.cpp">
+<area shape="rect" id="Node000001" title="Projekt &quot;Gartenwasser&quot; &#45; Einstiegspunkt (Setup/Loop&#45;Orchestrierung)." alt="" coords="787,5,929,48"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,96,82,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="784,32,490,52,296,71,98,98,97,93,296,66,489,47,789,30"/>
+<area shape="rect" id="Node000003" href="$_file_system_8h.html" title="Persistenz der Einstellwerte (config.json: Ventil&#45;Laufzeiten/Automatik/Alias/maxTime; programs...." alt="" coords="201,96,299,123"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="784,36,579,62,315,98,314,93,579,56,789,35"/>
+<area shape="rect" id="Node000006" href="$_diagnostics_8h.html" title="I2C&#45;Bus&#45;Status und letzte Fehlermeldung, fuer diagnostics/i2cStatus und diagnostics/lastError...." alt="" coords="932,96,1033,123"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="891,46,953,88,948,87,889,51"/>
+<area shape="rect" id="Node000007" href="$_h_m_i_8h.html" title="Display (ST7789/SPI), Touch (AXS5106L/I2C) und LVGL. @hardware ESP32&#45;C6, ST7789&#45;Display (SPI),..." alt="" coords="1058,96,1115,123"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="917,46,1045,93,1040,93,917,51"/>
+<area shape="rect" id="Node000008" href="$_i2_c_8h.html" title="I2C&#45;Bus&#45;Funktionen (Scan, Register&#45;Zugriff, MCP23017&#45;Grundsetup)." alt="" coords="324,96,377,123"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="784,35,611,59,503,76,393,98,392,93,502,71,610,54,789,34"/>
+<area shape="rect" id="Node000009" href="$_m_q_t_t_8h.html" title="MQTT&#45;Verbindungsaufbau (PubSubClient), LWT/availability, nicht&#45;blockierendes Reconnect&#45;Handling." alt="" coords="401,96,470,123"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="784,40,651,65,485,98,484,93,650,60,789,39"/>
+<area shape="rect" id="Node000010" href="$_automatic_controller_8h.html" title="Reine Ablaufsteuerung fuer die Automatik&#45;Sequenz (Warteschlange + Cursor). Kennt keine Ventile/MQTT &#45;..." alt="" coords="494,96,641,123"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="789,47,628,94,627,89,784,48"/>
+<area shape="rect" id="Node000011" href="$_valve_controller_8h.html" title="Kapselt V0&#45;V5 als MCP23017&#45;Ausgaenge (Port B), unabhaengig von MQTT." alt="" coords="665,96,785,123"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="826,48,760,90,758,85,821,49"/>
+<area shape="rect" id="Node000012" href="$_valve_timer_8h.html" title="Countdown der Restlaufzeit je Ventil (V1&#45;V5), Werte aus FileSystem." alt="" coords="810,96,907,123"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="860,47,860,82,856,78,856,51"/>
+<area shape="rect" id="Node000013" href="$_o_t_a_8h.html" title="PlatformIO/VSCode&#45;OTA (Phase 21, zweiter Teil) &#45; ArduinoOTA&#45;Bibliothek, ermoeglicht pio run &#45;&#45;target ..." alt="" coords="1138,96,1197,123"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="930,43,1126,95,1121,95,930,48"/>
+<area shape="rect" id="Node000014" href="$_web_i_f_8h.html" title="Async&#45;Webserver (ESPAsyncWebServer), liefert das Web&#45;Interface als statische Dateien aus LittleFS aus..." alt="" coords="1221,96,1290,123"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="930,38,1209,95,1203,96,930,43"/>
+<area shape="rect" id="Node000015" href="$_wi_fi_controller_8h.html" title="WLAN&#45;Verbindungsaufbau und nicht&#45;blockierendes Reconnect&#45;Handling." alt="" coords="1314,96,1429,123"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="930,36,1301,95,1296,96,930,41"/>
+<area shape="rect" id="Node000016" href="$_logger_8h.html" title="Einheitliches Log&#45;Format fuer alle Subsysteme." alt="" coords="105,96,176,123"/>
+<area shape="poly" id="edge20_Node000001_Node000016" title=" " alt="" coords="784,33,528,55,363,73,192,98,191,93,362,68,528,50,789,31"/>
+<area shape="rect" id="Node000017" href="$_version_8h.html" title="Firmware&#45;Version &#45; einzige Stelle, die vor jedem Release/OTA&#45;Test manuell angepasst wird...." alt="" coords="1454,96,1529,123"/>
+<area shape="poly" id="edge23_Node000001_Node000017" title=" " alt="" coords="930,31,1153,53,1294,71,1441,96,1436,96,1293,76,1152,58,930,36"/>
+<area shape="rect" id="Node000018" href="$_build_number_8h.html" title=" " alt="" coords="1554,96,1661,123"/>
+<area shape="poly" id="edge24_Node000001_Node000018" title=" " alt="" coords="930,31,1193,53,1541,96,1536,96,1193,59,930,36"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="163,171,228,197"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="243,122,216,160,213,156,238,124"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="405,171,466,197"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="283,121,393,165,388,166,282,126"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="366,121,412,161,407,160,364,126"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="437,121,438,157,433,153,434,125"/>
+<area shape="poly" id="edge12_Node000010_Node000005" title=" " alt="" coords="547,123,472,166,471,161,542,124"/>
+<area shape="poly" id="edge14_Node000011_Node000005" title=" " alt="" coords="677,123,482,174,481,169,672,123"/>
+<area shape="poly" id="edge16_Node000012_Node000005" title=" " alt="" coords="812,120,797,125,481,178,480,173,796,120,807,121"/>
+<area shape="poly" id="edge21_Node000016_Node000004" title=" " alt="" coords="152,121,179,158,174,158,149,126"/>
+<area shape="poly" id="edge22_Node000016_Node000005" title=" " alt="" coords="177,117,189,120,392,170,388,173,188,125,177,122"/>
+</map>

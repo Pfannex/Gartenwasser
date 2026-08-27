@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_valve_timer_8h" kind="file" language="C++">
+    <compoundname>ValveTimer.h</compoundname>
+    <includes local="no">cstdint</includes>
+    <includedby refid="_h_m_i_8cpp" local="yes">D:/Gartenwasser/src/HMI.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="_valve_timer_8cpp" local="yes">D:/Gartenwasser/src/ValveTimer.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/src/ValveTimer.h</label>
+        <link refid="_valve_timer_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/HMI.cpp</label>
+        <link refid="_h_m_i_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/ValveTimer.cpp</label>
+        <link refid="_valve_timer_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/ValveTimer.h</label>
+        <link refid="_valve_timer_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_valve_timer" prot="public">ValveTimer</innerclass>
+    <briefdescription>
+<para>Countdown der Restlaufzeit je Ventil (V1-V5), Werte aus <ref refid="class_file_system" kindref="compound">FileSystem</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Ein Ventil, das nicht laeuft, zeigt als Restlaufzeit seine konfigurierte effektive Laufzeit (min(time, maxTime)) - so ist auf einen Blick erkennbar, welche Ventile noch nicht gelaufen sind bzw. wieder &quot;armiert&quot; sind. Nur waehrend das Ventil tatsaechlich eingeschaltet ist, zaehlt tick() herunter. </para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15" refid="class_valve_timer" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717" kindref="member">ValveTimer</ref><sp/>{</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="17" refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_valve_timer_1ab5248ea88f03e43450cbb6da8a5cd717" kindref="member">ValveTimer</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_timer_1ad9565a0920e8eb4549b0c519a9d1c8dc" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_timer_1ac3ef15b64ff7a0105a2fae787a334dfd" kindref="member">start</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_timer_1af4c4bc856014e8d385e5358b47e267cb" kindref="member">reset</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_valve_timer_1a9eb466b6cf7ad81a1806f81c9a435f70" kindref="member">clear</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_valve_timer_1a73e0b2a3059beb9cc5abe25c0985e2d3" kindref="member">tick</ref>(uint8_t<sp/>activeMask);</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>uint16_t<sp/><ref refid="class_valve_timer_1a952377769bd144ff3500bf62225a687a" kindref="member">getRemainingSeconds</ref>(uint8_t<sp/>index);</highlight></codeline>
+<codeline lineno="45"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/ValveTimer.h"/>
+  </compounddef>
+</doxygen>

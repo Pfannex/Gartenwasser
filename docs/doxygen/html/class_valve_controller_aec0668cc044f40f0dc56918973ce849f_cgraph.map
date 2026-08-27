@@ -1,0 +1,11 @@
+<map id="ValveController::setValve" name="ValveController::setValve">
+<area shape="rect" id="Node000001" title="Schaltet Ventil index (0=V0 .. 5=V5) ein/aus." alt="" coords="5,31,173,57"/>
+<area shape="rect" id="Node000002" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="240,5,329,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,30,227,26,222,27,174,36"/>
+<area shape="rect" id="Node000005" href="$class_i2_c.html#a839b151d693709d7767aeed03dcbc206" title="Schreibt ein Register&#45;Byte per I2C an ein Geraet." alt="" coords="221,56,348,83"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="173,52,208,59,202,59,173,58"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="396,5,481,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="329,16,383,18,378,19,330,21"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="529,5,703,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="482,16,516,18,511,19,482,21"/>
+</map>

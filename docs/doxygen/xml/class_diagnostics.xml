@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_diagnostics" kind="class" language="C++" prot="public">
+    <compoundname>Diagnostics</compoundname>
+    <includes refid="_diagnostics_8h" local="no">Diagnostics.h</includes>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Diagnostics::Diagnostics</definition>
+        <argsstring>()=delete</argsstring>
+        <name>Diagnostics</name>
+        <qualifiedname>Diagnostics::Diagnostics</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Diagnostics.h" line="13" column="3"/>
+        <references refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" compoundref="_diagnostics_8cpp" startline="23" endline="28">begin</references>
+        <references refid="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" compoundref="_diagnostics_8cpp" startline="30" endline="42">checkI2cStatus</references>
+        <references refid="class_diagnostics_1abafa16aed5a46e3b9e0f9c39109a4519" compoundref="_diagnostics_8cpp" startline="48" endline="54">consumeNewError</references>
+        <references refid="class_diagnostics_1a5377b98576fee15844a969a53ab947e2" compoundref="_diagnostics_8cpp" startline="56" endline="58">getLastError</references>
+        <references refid="class_diagnostics_1a87b924c728b1e8bb335c361095a60754" compoundref="_diagnostics_8cpp" startline="44" endline="46">isI2cOk</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Diagnostics::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>Diagnostics::begin</qualifiedname>
+        <briefdescription>
+<para>Initialisiert den Zustand und registriert den <ref refid="class_logger_1a85369d28dac2dc64b7bc4e73386e7acf" kindref="member">Logger::ErrorCallback</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Diagnostics.h" line="16" column="15" bodyfile="D:/Gartenwasser/src/Diagnostics.cpp" bodystart="23" bodyend="28"/>
+        <references refid="class_logger_1a8e88dd6ab1fba23da493b2d2214f04a8" compoundref="_logger_8cpp" startline="65" endline="67">Logger::setErrorCallback</references>
+        <referencedby refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39">Diagnostics</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool Diagnostics::checkI2cStatus</definition>
+        <argsstring>()</argsstring>
+        <name>checkI2cStatus</name>
+        <qualifiedname>Diagnostics::checkI2cStatus</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Prueft den I2C-Bus (MCP23017) und aktualisiert den internen Status. Liefert true, wenn sich der Status seit dem letzten Aufruf geaendert hat. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Diagnostics.h" line="20" column="15" bodyfile="D:/Gartenwasser/src/Diagnostics.cpp" bodystart="30" bodyend="42"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afb87bf1fc88386ca21395991f90fff95" compoundref="_logger_8h" startline="25">Logger::I2C</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" compoundref="_i2_c_8cpp" startline="51" endline="54">I2C::isMcp23017Reachable</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <referencedby refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39">Diagnostics</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_diagnostics_1a87b924c728b1e8bb335c361095a60754" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool Diagnostics::isI2cOk</definition>
+        <argsstring>()</argsstring>
+        <name>isI2cOk</name>
+        <qualifiedname>Diagnostics::isI2cOk</qualifiedname>
+        <briefdescription>
+<para>true = i2cStatus &quot;ok&quot;, false = &quot;error&quot;. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Diagnostics.h" line="23" column="15" bodyfile="D:/Gartenwasser/src/Diagnostics.cpp" bodystart="44" bodyend="46"/>
+        <referencedby refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39">Diagnostics</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_diagnostics_1abafa16aed5a46e3b9e0f9c39109a4519" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool Diagnostics::consumeNewError</definition>
+        <argsstring>()</argsstring>
+        <name>consumeNewError</name>
+        <qualifiedname>Diagnostics::consumeNewError</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Liefert true (und setzt intern zurueck), wenn seit dem letzten Abruf ein neuer Fehler aufgetreten ist - fuer die Publish-Seite in <ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Diagnostics.h" line="27" column="15" bodyfile="D:/Gartenwasser/src/Diagnostics.cpp" bodystart="48" bodyend="54"/>
+        <referencedby refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39">Diagnostics</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_diagnostics_1a5377b98576fee15844a969a53ab947e2" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>const char *</type>
+        <definition>const char * Diagnostics::getLastError</definition>
+        <argsstring>()</argsstring>
+        <name>getLastError</name>
+        <qualifiedname>Diagnostics::getLastError</qualifiedname>
+        <briefdescription>
+<para>Zuletzt aufgetretene Fehlermeldung inkl. Zeitstempel, leer wenn noch keine. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/Diagnostics.h" line="30" column="21" bodyfile="D:/Gartenwasser/src/Diagnostics.cpp" bodystart="56" bodyend="58"/>
+        <referencedby refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39">Diagnostics</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/Diagnostics.h" line="11" column="1" bodyfile="D:/Gartenwasser/src/Diagnostics.h" bodystart="11" bodyend="31"/>
+    <listofallmembers>
+      <member refid="class_diagnostics_1a3004aeac1d2170fe78a9f8043eefbeae" prot="public" virt="non-virtual"><scope>Diagnostics</scope><name>begin</name></member>
+      <member refid="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" prot="public" virt="non-virtual"><scope>Diagnostics</scope><name>checkI2cStatus</name></member>
+      <member refid="class_diagnostics_1abafa16aed5a46e3b9e0f9c39109a4519" prot="public" virt="non-virtual"><scope>Diagnostics</scope><name>consumeNewError</name></member>
+      <member refid="class_diagnostics_1a011e87065e62fee7927c9e95b5c88a39" prot="public" virt="non-virtual"><scope>Diagnostics</scope><name>Diagnostics</name></member>
+      <member refid="class_diagnostics_1a5377b98576fee15844a969a53ab947e2" prot="public" virt="non-virtual"><scope>Diagnostics</scope><name>getLastError</name></member>
+      <member refid="class_diagnostics_1a87b924c728b1e8bb335c361095a60754" prot="public" virt="non-virtual"><scope>Diagnostics</scope><name>isI2cOk</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

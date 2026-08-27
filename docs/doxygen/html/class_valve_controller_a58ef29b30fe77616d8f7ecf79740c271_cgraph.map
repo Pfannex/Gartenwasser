@@ -1,0 +1,5 @@
+<map id="ValveController::anyIrrigationValveActive" name="ValveController::anyIrrigationValveActive">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,194,48"/>
+<area shape="rect" id="Node000002" href="$class_valve_controller.html#a24d85dc9fba796e994bb87be844d50c0" title="Liefert den zuletzt gesetzten Schaltzustand von Ventil index." alt="" coords="242,13,409,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,24,229,26,223,27,194,29"/>
+</map>

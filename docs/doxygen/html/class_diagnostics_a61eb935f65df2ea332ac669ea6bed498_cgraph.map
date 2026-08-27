@@ -1,0 +1,9 @@
+<map id="Diagnostics::checkI2cStatus" name="Diagnostics::checkI2cStatus">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,195,57"/>
+<area shape="rect" id="Node000002" href="$class_i2_c.html#a4af540f66794fd0f04855e6cf79238f3" title="Prueft, ob der MCP23017 aktuell auf dem I2C&#45;Bus antwortet." alt="" coords="243,5,425,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,31,230,30,224,31,195,36"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="291,56,376,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,52,278,63,273,63,195,57"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="473,56,646,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="377,67,460,69,455,69,377,72"/>
+</map>

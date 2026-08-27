@@ -1,0 +1,201 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_ha_discovery_8cpp" kind="file" language="C++">
+    <compoundname>HaDiscovery.cpp</compoundname>
+    <includes refid="_ha_discovery_8h" local="yes">HaDiscovery.h</includes>
+    <includes local="no">ArduinoJson.h</includes>
+    <includes local="no">cstdio</includes>
+    <includes refid="_m_q_t_t_8h" local="yes">MQTT.h</includes>
+    <includes refid="_version_8h" local="yes">Version.h</includes>
+    <includes refid="_build_number_8h" local="yes">BuildNumber.h</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>ArduinoJson.h</label>
+      </node>
+      <node id="8">
+        <label>BuildNumber.h</label>
+        <link refid="_build_number_8h"/>
+      </node>
+      <node id="7">
+        <label>Version.h</label>
+        <link refid="_version_8h"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/HaDiscovery.cpp</label>
+        <link refid="_ha_discovery_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>HaDiscovery.h</label>
+        <link refid="_ha_discovery_8h"/>
+      </node>
+      <node id="5">
+        <label>MQTT.h</label>
+        <link refid="_m_q_t_t_8h"/>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>cstdint</label>
+      </node>
+      <node id="4">
+        <label>cstdio</label>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_ha_discovery_8h" kindref="compound">HaDiscovery.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;ArduinoJson.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdio&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_m_q_t_t_8h" kindref="compound">MQTT.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_version_8h" kindref="compound">Version.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_build_number_8h" kindref="compound">BuildNumber.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*kAvailabilityTopic<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/availability&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Grosszuegige<sp/>statische<sp/>Obergrenze<sp/>fuer<sp/>den<sp/>&quot;number&quot;-Slider<sp/>(V{n}_time)<sp/>-<sp/>unabhaengig<sp/>vom</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="comment">//<sp/>aktuellen<sp/>main/time/maxTime<sp/>(das<sp/>ist<sp/>ein<sp/>Laufzeit-Wert,<sp/>kein<sp/>Compile-Zeit-Limit;<sp/>die</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="comment">//<sp/>tatsaechlich<sp/>wirksame<sp/>Grenze<sp/>bleibt<sp/>ohnehin<sp/>min(time,<sp/>maxTime)<sp/>auf<sp/>der<sp/>Firmware-Seite).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint16_t<sp/>kTimeSliderMaxMinutes<sp/>=<sp/>180;</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>kDiscoveryDocCapacity<sp/>=<sp/>512;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Gemeinsames<sp/>device-Objekt<sp/>(gruppiert<sp/>alle<sp/>Entities<sp/>auf<sp/>einer<sp/>Geraeteseite<sp/>in<sp/>Home</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Assistant)<sp/>+<sp/>origin-Objekt<sp/>(Firmware-Herkunft,<sp/>seit<sp/>einiger<sp/>Zeit<sp/>von<sp/>Home<sp/>Assistant</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="comment">//<sp/>empfohlen).<sp/>Wird<sp/>in<sp/>jede<sp/>einzelne<sp/>Discovery-Config<sp/>eingebettet,<sp/>damit<sp/>die<sp/>Zuordnung</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="comment">//<sp/>unabhaengig<sp/>von<sp/>der<sp/>Publish-Reihenfolge<sp/>der<sp/>26<sp/>Entities<sp/>funktioniert.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>addDeviceAndOrigin(StaticJsonDocument&lt;kDiscoveryDocCapacity&gt;<sp/>&amp;doc,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*versionStr)<sp/>{</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/>JsonObject<sp/>dev<sp/>=<sp/>doc.createNestedObject(</highlight><highlight class="stringliteral">&quot;device&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/>JsonArray<sp/>ids<sp/>=<sp/>dev.createNestedArray(</highlight><highlight class="stringliteral">&quot;identifiers&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/>ids.add(</highlight><highlight class="stringliteral">&quot;gartenwasser&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>&quot;ae&quot;<sp/>mit<sp/>Hex-Escape<sp/>statt<sp/>woertlichem<sp/>Umlaut<sp/>im<sp/>Quelltext<sp/>(\xc3\xa4<sp/>=<sp/>&quot;ae&quot;<sp/>in<sp/>UTF-8)<sp/>-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>ein<sp/>woertlicher<sp/>Umlaut<sp/>fuehrte<sp/>beim<sp/>Kompilieren<sp/>fuer<sp/>den<sp/>ESP32-C6-Toolchain<sp/>zu<sp/>einem</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>kaputten<sp/>Byte<sp/>in<sp/>der<sp/>publizierten<sp/>Discovery-Config<sp/>(ein<sp/>U+FFFD-Ersatzzeichen<sp/>statt<sp/>&quot;ae&quot;),</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>vermutlich<sp/>eine<sp/>Quelltext-Encoding-Fehlannahme<sp/>des<sp/>Compilers.<sp/>Mit<sp/>expliziten<sp/>Hex-Escapes</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>ist<sp/>die<sp/>tatsaechliche<sp/>Byte-Sequenz<sp/>unabhaengig<sp/>davon<sp/>eindeutig.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/>dev[</highlight><highlight class="stringliteral">&quot;name&quot;</highlight><highlight class="normal">]<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;Gartenbew\xc3\xa4sserung&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/>dev[</highlight><highlight class="stringliteral">&quot;manufacturer&quot;</highlight><highlight class="normal">]<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;Pf@nne&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/>dev[</highlight><highlight class="stringliteral">&quot;sw_version&quot;</highlight><highlight class="normal">]<sp/>=<sp/>versionStr;</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/>JsonObject<sp/>origin<sp/>=<sp/>doc.createNestedObject(</highlight><highlight class="stringliteral">&quot;origin&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/>origin[</highlight><highlight class="stringliteral">&quot;name&quot;</highlight><highlight class="normal">]<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;Gartenwasser<sp/>Firmware&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/>origin[</highlight><highlight class="stringliteral">&quot;sw_version&quot;</highlight><highlight class="normal">]<sp/>=<sp/>versionStr;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Ergaenzt<sp/>Name/unique_id/availability/device/origin<sp/>und<sp/>publiziert<sp/>retained<sp/>unter</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="comment">//<sp/>homeassistant/&lt;component&gt;/gartenwasser/&lt;objectId&gt;/config.<sp/>object_id<sp/>=<sp/>unique_id<sp/>(ohne</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight><highlight class="comment">//<sp/>&quot;gartenwasser_&quot;-Praefix<sp/>bei<sp/>unique_id<sp/>waere<sp/>ein<sp/>Kollisionsrisiko<sp/>mit<sp/>fremden<sp/>Integrationen</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight><highlight class="comment">//<sp/>auf<sp/>demselben<sp/>Broker)<sp/>-<sp/>siehe<sp/>HA-Empfehlung<sp/>&quot;object_id<sp/>auf<sp/>unique_id<sp/>setzen&quot;.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>finishAndPublish(StaticJsonDocument&lt;kDiscoveryDocCapacity&gt;<sp/>&amp;doc,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*component,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*objectId,</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*name,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*versionStr)<sp/>{</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>uniqueId[40];</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/>snprintf(uniqueId,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(uniqueId),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser_%s&quot;</highlight><highlight class="normal">,<sp/>objectId);</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;name&quot;</highlight><highlight class="normal">]<sp/>=<sp/>name;</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;unique_id&quot;</highlight><highlight class="normal">]<sp/>=<sp/>uniqueId;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;availability_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>kAvailabilityTopic;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/>addDeviceAndOrigin(doc,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>topic[96];</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/>snprintf(topic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(topic),<sp/></highlight><highlight class="stringliteral">&quot;homeassistant/%s/gartenwasser/%s/config&quot;</highlight><highlight class="normal">,<sp/>component,<sp/>objectId);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>payload[kDiscoveryDocCapacity];</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/>serializeJson(doc,<sp/>payload,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(payload));</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><ref refid="namespace_m_q_t_t_1a2f8781f29adb44d3e5ecf3564d700681" kindref="member">MQTT::publish</ref>(topic,<sp/>payload,<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>publishBinarySensor(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*objectId,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*name,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*stateTopic,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*versionStr)<sp/>{</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/>StaticJsonDocument&lt;kDiscoveryDocCapacity&gt;<sp/>doc;</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;state_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>stateTopic;</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/>finishAndPublish(doc,<sp/></highlight><highlight class="stringliteral">&quot;binary_sensor&quot;</highlight><highlight class="normal">,<sp/>objectId,<sp/>name,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="65"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>publishSwitch(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*objectId,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*name,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*cmdTopic,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*stateTopic,</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*versionStr)<sp/>{</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/>StaticJsonDocument&lt;kDiscoveryDocCapacity&gt;<sp/>doc;</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;command_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>cmdTopic;</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;state_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>stateTopic;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/>finishAndPublish(doc,<sp/></highlight><highlight class="stringliteral">&quot;switch&quot;</highlight><highlight class="normal">,<sp/>objectId,<sp/>name,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="73"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>publishSensor(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*objectId,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*name,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*stateTopic,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*versionStr)<sp/>{</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/>StaticJsonDocument&lt;kDiscoveryDocCapacity&gt;<sp/>doc;</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;state_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>stateTopic;</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/>finishAndPublish(doc,<sp/></highlight><highlight class="stringliteral">&quot;sensor&quot;</highlight><highlight class="normal">,<sp/>objectId,<sp/>name,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="79"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>publishNumber(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*objectId,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*name,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*cmdTopic,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*stateTopic,</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*versionStr)<sp/>{</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/>StaticJsonDocument&lt;kDiscoveryDocCapacity&gt;<sp/>doc;</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;command_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>cmdTopic;</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;state_topic&quot;</highlight><highlight class="normal">]<sp/>=<sp/>stateTopic;</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;min&quot;</highlight><highlight class="normal">]<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;max&quot;</highlight><highlight class="normal">]<sp/>=<sp/>kTimeSliderMaxMinutes;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/>doc[</highlight><highlight class="stringliteral">&quot;unit_of_measurement&quot;</highlight><highlight class="normal">]<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;min&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/>finishAndPublish(doc,<sp/></highlight><highlight class="stringliteral">&quot;number&quot;</highlight><highlight class="normal">,<sp/>objectId,<sp/>name,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="90"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94" refid="namespace_ha_discovery_1ad5847f8d0ebfaf1aa6579ddbc7ae0baf" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_ha_discovery_1ad5847f8d0ebfaf1aa6579ddbc7ae0baf" kindref="member">HaDiscovery::publishAll</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>versionStr[32];</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/>snprintf(versionStr,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(versionStr),<sp/></highlight><highlight class="stringliteral">&quot;%s<sp/>Build<sp/>%s&quot;</highlight><highlight class="normal">,<sp/><ref refid="_version_8h_1acd9c40d01ece8e1c9ea2a655ed8352e7" kindref="member">kFirmwareVersion</ref>,<sp/><ref refid="_build_number_8h_1adab90aacdf61685356e47d5233d41520" kindref="member">kBuildNumber</ref>);</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/>publishBinarySensor(</highlight><highlight class="stringliteral">&quot;V0_state&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Hauptventil&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V0/state&quot;</highlight><highlight class="normal">,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>objectId[24];</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>name[32];</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>stateTopic[40];</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>cmdTopic[40];</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(uint8_t<sp/>i<sp/>=<sp/>1;<sp/>i<sp/>&lt;=<sp/>5;<sp/>i++)<sp/>{</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(objectId,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(objectId),<sp/></highlight><highlight class="stringliteral">&quot;V%u_cmd&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(name,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(name),<sp/></highlight><highlight class="stringliteral">&quot;Ventil<sp/>%u&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(stateTopic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(stateTopic),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V%u/state&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(cmdTopic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cmdTopic),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V%u/cmd&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/>publishSwitch(objectId,<sp/>name,<sp/>cmdTopic,<sp/>stateTopic,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(objectId,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(objectId),<sp/></highlight><highlight class="stringliteral">&quot;V%u_auto&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(name,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(name),<sp/></highlight><highlight class="stringliteral">&quot;Ventil<sp/>%u<sp/>Automatik&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(stateTopic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(stateTopic),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V%u/auto/state&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Bewusst<sp/>binary_sensor<sp/>statt<sp/>switch:<sp/>&quot;auto&quot;<sp/>laesst<sp/>sich<sp/>seit<sp/>der<sp/>MANUELL-Regel<sp/>nur<sp/>noch</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>sinnvoll<sp/>ueber<sp/>Programme<sp/>aendern,<sp/>direktes<sp/>Setzen<sp/>waehlt<sp/>implizit<sp/>das<sp/>aktive<sp/>Programm</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>ab.<sp/>Ein<sp/>schaltbarer<sp/>HA-switch<sp/>waere<sp/>hier<sp/>ueberraschend<sp/>(siehe<sp/>docs/Log.md,<sp/>Phase-10-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Vorueberlegung)<sp/>-<sp/>Aendern<sp/>bleibt<sp/>exklusiv<sp/>ueber<sp/>Touch/WebIF/main/program/cmd.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/>publishBinarySensor(objectId,<sp/>name,<sp/>stateTopic,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(objectId,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(objectId),<sp/></highlight><highlight class="stringliteral">&quot;V%u_time&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(name,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(name),<sp/></highlight><highlight class="stringliteral">&quot;Ventil<sp/>%u<sp/>Laufzeit&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(stateTopic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(stateTopic),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V%u/time/state&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(cmdTopic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cmdTopic),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V%u/time/set&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/>publishNumber(objectId,<sp/>name,<sp/>cmdTopic,<sp/>stateTopic,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(objectId,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(objectId),<sp/></highlight><highlight class="stringliteral">&quot;V%u_remaining&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(name,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(name),<sp/></highlight><highlight class="stringliteral">&quot;Ventil<sp/>%u<sp/>Restlaufzeit&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/>snprintf(stateTopic,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(stateTopic),<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/V%u/time/remaining&quot;</highlight><highlight class="normal">,<sp/>i);</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/>publishSensor(objectId,<sp/>name,<sp/>stateTopic,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"></highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/>publishSwitch(</highlight><highlight class="stringliteral">&quot;main_cmd&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Automatik-Sequenz&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/main/cmd&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/main/state&quot;</highlight><highlight class="normal">,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/>publishSensor(</highlight><highlight class="stringliteral">&quot;main_activeValve&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Aktives<sp/>Ventil&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/main/activeValve&quot;</highlight><highlight class="normal">,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/>publishSensor(</highlight><highlight class="stringliteral">&quot;main_remainingTotal&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Restzeit<sp/>Sequenz&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/main/remainingTotal&quot;</highlight><highlight class="normal">,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/>publishSensor(</highlight><highlight class="stringliteral">&quot;diag_i2cStatus&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;I2C-Status&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/diagnostics/i2cStatus&quot;</highlight><highlight class="normal">,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/>publishSensor(</highlight><highlight class="stringliteral">&quot;diag_lastError&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Letzter<sp/>Fehler&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;gartenwasser/diagnostics/lastError&quot;</highlight><highlight class="normal">,<sp/>versionStr);</highlight></codeline>
+<codeline lineno="137"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/HaDiscovery.cpp"/>
+  </compounddef>
+</doxygen>

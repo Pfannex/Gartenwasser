@@ -1,0 +1,12 @@
+<map id="Logger::setErrorCallback" name="Logger::setErrorCallback">
+<area shape="rect" id="Node000001" title=" " alt="" coords="398,68,563,95"/>
+<area shape="rect" id="Node000002" href="$class_diagnostics.html#a3004aeac1d2170fe78a9f8043eefbeae" title="Initialisiert den Zustand und registriert den Logger::ErrorCallback." alt="" coords="221,43,350,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="380,69,350,67,350,62,385,69"/>
+<area shape="rect" id="Node000005" href="$class_logger.html#aefffc02e0c6c0ab09ec1f77fe35f6439" title=" " alt="" coords="232,93,339,120"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="385,94,340,102,339,97,380,94"/>
+<area shape="rect" id="Node000003" href="$class_diagnostics.html#a011e87065e62fee7927c9e95b5c88a39" title=" " alt="" coords="5,5,173,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="203,41,163,35,163,30,208,40"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="62,80,116,107"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="203,72,117,91,115,86,208,70"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="123,70,122,67,116,63,89,59,67,61,57,66,55,72,65,82,59,83,50,74,52,63,66,56,89,53,118,58,126,64,128,72"/>
+</map>

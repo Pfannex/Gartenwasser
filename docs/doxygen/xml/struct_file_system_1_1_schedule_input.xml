@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="struct_file_system_1_1_schedule_input" kind="struct" language="C++" prot="public">
+    <compoundname>FileSystem::ScheduleInput</compoundname>
+    <includes refid="_file_system_8h" local="no">FileSystem.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1ac10b506477490d790357d638a6551843" prot="public" static="no" mutable="no">
+        <type>const char *</type>
+        <definition>const char* FileSystem::ScheduleInput::program</definition>
+        <argsstring></argsstring>
+        <name>program</name>
+        <qualifiedname>FileSystem::ScheduleInput::program</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="115" column="16" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1a8489285908260ddc9f16fc42b62682ca" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool FileSystem::ScheduleInput::enabled</definition>
+        <argsstring></argsstring>
+        <name>enabled</name>
+        <qualifiedname>FileSystem::ScheduleInput::enabled</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="116" column="10" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="116" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1a01aa568cd25de66c33869b4ee4e0a166" prot="public" static="no" mutable="no">
+        <type><ref refid="class_file_system_1ab13aa71d96ae6bbcff0fb014fd7f756c" kindref="member">ScheduleType</ref></type>
+        <definition>ScheduleType FileSystem::ScheduleInput::type</definition>
+        <argsstring></argsstring>
+        <name>type</name>
+        <qualifiedname>FileSystem::ScheduleInput::type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="117" column="18" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="117" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1a38098db907c26a2c5925cc9bfe9d306e" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::ScheduleInput::hour</definition>
+        <argsstring></argsstring>
+        <name>hour</name>
+        <qualifiedname>FileSystem::ScheduleInput::hour</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="118" column="13" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="118" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1acc2fd36121c5bf619a3eb794e35297bd" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::ScheduleInput::minute</definition>
+        <argsstring></argsstring>
+        <name>minute</name>
+        <qualifiedname>FileSystem::ScheduleInput::minute</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="119" column="13" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="119" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1adf1de82adde52bb254b9be3af6ad84c9" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::ScheduleInput::weekdaysMask</definition>
+        <argsstring></argsstring>
+        <name>weekdaysMask</name>
+        <qualifiedname>FileSystem::ScheduleInput::weekdaysMask</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="120" column="13" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="120" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1a0ac3fb2003f54af770403c601f3175ae" prot="public" static="no" mutable="no">
+        <type>uint16_t</type>
+        <definition>uint16_t FileSystem::ScheduleInput::year</definition>
+        <argsstring></argsstring>
+        <name>year</name>
+        <qualifiedname>FileSystem::ScheduleInput::year</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="121" column="14" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="121" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1aceb676cdce7f77480a183dea15ee1e22" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::ScheduleInput::month</definition>
+        <argsstring></argsstring>
+        <name>month</name>
+        <qualifiedname>FileSystem::ScheduleInput::month</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="122" column="13" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="122" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+      <memberdef kind="variable" id="struct_file_system_1_1_schedule_input_1ae745cc192f5a29c76c55df1b91690bf9" prot="public" static="no" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t FileSystem::ScheduleInput::day</definition>
+        <argsstring></argsstring>
+        <name>day</name>
+        <qualifiedname>FileSystem::ScheduleInput::day</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/FileSystem.h" line="123" column="13" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="123" bodyend="-1"/>
+        <referencedby refid="class_file_system_1a889429cfca465871ed1935d4537381b9" compoundref="_file_system_8cpp" startline="632" endline="653">FileSystem::setSchedule</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>Ein Zeitplan-Eintrag zum Setzen ueber <ref refid="class_file_system_1a889429cfca465871ed1935d4537381b9" kindref="member">setSchedule()</ref>. <computeroutput><ref refid="struct_file_system_1_1_schedule_input_1adf1de82adde52bb254b9be3af6ad84c9" kindref="member">weekdaysMask</ref></computeroutput> (Bit 0=Montag.. 6=Sonntag) ist nur bei type=WEEKLY relevant, <computeroutput><ref refid="struct_file_system_1_1_schedule_input_1a0ac3fb2003f54af770403c601f3175ae" kindref="member">year</ref></computeroutput>/<computeroutput><ref refid="struct_file_system_1_1_schedule_input_1aceb676cdce7f77480a183dea15ee1e22" kindref="member">month</ref></computeroutput>/<computeroutput><ref refid="struct_file_system_1_1_schedule_input_1ae745cc192f5a29c76c55df1b91690bf9" kindref="member">day</ref></computeroutput> nur bei type=ONCE - siehe docs/spec/15-wochenplan.md. </para>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/FileSystem.h" line="114" column="3" bodyfile="D:/Gartenwasser/src/FileSystem.h" bodystart="114" bodyend="124"/>
+    <listofallmembers>
+      <member refid="struct_file_system_1_1_schedule_input_1ae745cc192f5a29c76c55df1b91690bf9" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>day</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1a8489285908260ddc9f16fc42b62682ca" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>enabled</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1a38098db907c26a2c5925cc9bfe9d306e" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>hour</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1acc2fd36121c5bf619a3eb794e35297bd" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>minute</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1aceb676cdce7f77480a183dea15ee1e22" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>month</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1ac10b506477490d790357d638a6551843" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>program</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1a01aa568cd25de66c33869b4ee4e0a166" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>type</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1adf1de82adde52bb254b9be3af6ad84c9" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>weekdaysMask</name></member>
+      <member refid="struct_file_system_1_1_schedule_input_1a0ac3fb2003f54af770403c601f3175ae" prot="public" virt="non-virtual"><scope>FileSystem::ScheduleInput</scope><name>year</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

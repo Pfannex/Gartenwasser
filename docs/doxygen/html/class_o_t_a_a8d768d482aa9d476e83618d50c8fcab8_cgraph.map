@@ -1,0 +1,14 @@
+<map id="OTA::OTA" name="OTA::OTA">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,87,57"/>
+<area shape="rect" id="Node000002" href="$class_o_t_a.html#a6111f598c2cd2f0ca78731603906764e" title=" " alt="" coords="135,5,221,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,34,122,29,117,31,88,39"/>
+<area shape="rect" id="Node000006" href="$class_o_t_a.html#a667ab581ad7244c7f4b0342ecf55d4d5" title="Muss regelmaessig aus main.cpp::loop() aufgerufen werden." alt="" coords="138,56,218,83"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="87,49,126,58,121,60,87,54"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="406,5,492,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,16,393,17,389,20,221,21"/>
+<area shape="rect" id="Node000005" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="269,31,358,57"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="221,24,256,33,251,33,221,29"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="540,5,713,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="492,16,527,18,521,19,492,21"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="358,33,388,30,394,29,359,38"/>
+</map>

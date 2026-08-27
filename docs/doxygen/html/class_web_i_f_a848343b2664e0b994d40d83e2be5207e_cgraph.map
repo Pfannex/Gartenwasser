@@ -1,0 +1,17 @@
+<map id="WebIF::WebIF" name="WebIF::WebIF">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,89,111,116"/>
+<area shape="rect" id="Node000002" href="$class_web_i_f.html#a856f6407dce93cb23257d2bf3ff92097" title=" " alt="" coords="159,60,257,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,90,146,85,141,87,112,95"/>
+<area shape="rect" id="Node000007" href="$class_web_i_f.html#ad2e0d9894319d781b482cbcb2d10fca2" title=" " alt="" coords="162,115,254,141"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="111,109,149,117,144,118,111,114"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="546,31,632,57"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="226,57,261,35,304,16,358,5,401,3,499,16,536,26,531,26,498,21,401,9,359,10,306,21,263,39,228,62"/>
+<area shape="rect" id="Node000005" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="357,31,446,57"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="257,63,344,52,339,54,258,69"/>
+<area shape="rect" id="Node000006" href="$namespace_wi_fi_controller.html#a2622d7c47ada0e6e985e84813934e3bd" title=" " alt="" coords="305,81,498,124"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="257,78,292,85,287,86,257,83"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="680,31,853,57"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="632,41,667,44,661,44,632,47"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="447,41,533,44,528,44,447,47"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="254,138,306,148,368,153,434,150,466,144,497,134,519,121,539,105,569,72,573,69,542,109,522,126,499,138,468,149,435,156,368,159,305,153,254,143"/>
+</map>

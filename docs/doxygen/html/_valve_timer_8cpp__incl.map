@@ -1,0 +1,16 @@
+<map id="D:/Gartenwasser/src/ValveTimer.cpp" name="D:/Gartenwasser/src/ValveTimer.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="91,5,233,48"/>
+<area shape="rect" id="Node000002" href="$_valve_timer_8h.html" title="Countdown der Restlaufzeit je Ventil (V1&#45;V5), Werte aus FileSystem." alt="" coords="5,96,103,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,51,85,88,81,84,136,46"/>
+<area shape="rect" id="Node000004" href="$_file_system_8h.html" title="Persistenz der Einstellwerte (config.json: Ventil&#45;Laufzeiten/Automatik/Alias/maxTime; programs...." alt="" coords="222,96,320,123"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="191,46,245,86,240,87,190,51"/>
+<area shape="rect" id="Node000006" href="$_logger_8h.html" title="Einheitliches Log&#45;Format fuer alle Subsysteme." alt="" coords="126,96,198,123"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="163,46,164,81,160,79,161,51"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="132,171,192,197"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,121,133,160,128,163,72,126"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="255,122,195,164,192,160,250,124"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="227,171,292,197"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="271,121,266,157,262,154,267,125"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="164,121,164,156,160,154,160,125"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="180,121,233,161,228,162,178,126"/>
+</map>

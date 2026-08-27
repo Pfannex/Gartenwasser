@@ -1,0 +1,8 @@
+<map id="ValveController::getValve" name="ValveController::getValve">
+<area shape="rect" id="Node000001" title="Liefert den zuletzt gesetzten Schaltzustand von Ventil index." alt="" coords="495,43,662,69"/>
+<area shape="rect" id="Node000002" href="$class_valve_controller.html#a58ef29b30fe77616d8f7ecf79740c271" title=" " alt="" coords="259,5,447,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="477,43,447,42,448,36,483,43"/>
+<area shape="rect" id="Node000003" href="$class_valve_controller.html#acc4bee34fe33fcd51ddd1cbc6dd53e84" title=" " alt="" coords="5,43,211,69"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="477,59,447,63,259,63,211,62,211,56,259,57,447,57,482,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="241,40,211,46,211,41,246,39"/>
+</map>

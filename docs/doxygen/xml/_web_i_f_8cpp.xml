@@ -1,0 +1,229 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_web_i_f_8cpp" kind="file" language="C++">
+    <compoundname>WebIF.cpp</compoundname>
+    <includes refid="_web_i_f_8h" local="yes">WebIF.h</includes>
+    <includes local="no">ESPAsyncWebServer.h</includes>
+    <includes local="no">LittleFS.h</includes>
+    <includes local="no">Update.h</includes>
+    <includes refid="_logger_8h" local="yes">Logger.h</includes>
+    <includes refid="_wi_fi_controller_8h" local="yes">WiFiController.h</includes>
+    <incdepgraph>
+      <node id="6">
+        <label>Logger.h</label>
+        <link refid="_logger_8h"/>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/WebIF.cpp</label>
+        <link refid="_web_i_f_8cpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>WebIF.h</label>
+        <link refid="_web_i_f_8h"/>
+      </node>
+      <node id="9">
+        <label>WiFiController.h</label>
+        <link refid="_wi_fi_controller_8h"/>
+      </node>
+      <node id="3">
+        <label>ESPAsyncWebServer.h</label>
+      </node>
+      <node id="4">
+        <label>LittleFS.h</label>
+      </node>
+      <node id="5">
+        <label>Update.h</label>
+      </node>
+      <node id="7">
+        <label>cstddef</label>
+      </node>
+      <node id="8">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_web_i_f_8h" kindref="compound">WebIF.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;ESPAsyncWebServer.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;LittleFS.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;Update.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_logger_8h" kindref="compound">Logger.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_wi_fi_controller_8h" kindref="compound">WiFiController.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint16_t<sp/>kHttpPort<sp/>=<sp/>80;</highlight></codeline>
+<codeline lineno="13"><highlight class="normal">AsyncWebServer<sp/>server(kHttpPort);</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Verzoegerter<sp/>Neustart<sp/>nach<sp/>OTA-Erfolg<sp/>(siehe<sp/>WebIF::loop())<sp/>statt<sp/>ESP.restart()<sp/>direkt<sp/>im</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Upload-Callback<sp/>-<sp/>sonst<sp/>besteht<sp/>das<sp/>Risiko,<sp/>dass<sp/>die<sp/>HTTP-Erfolgsantwort<sp/>den<sp/>Browser<sp/>nicht</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="comment">//<sp/>mehr<sp/>erreicht,<sp/>weil<sp/>die<sp/>Verbindung<sp/>durch<sp/>den<sp/>Neustart<sp/>schon<sp/>weg<sp/>ist,<sp/>bevor<sp/>AsyncTCP<sp/>sie</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="comment">//<sp/>tatsaechlich<sp/>rausgeschickt<sp/>hat.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>restartRequested<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>restartRequestedAtMs<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">long</highlight><highlight class="normal"><sp/>kRestartDelayMs<sp/>=<sp/>500;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Zwischen<sp/>index==0<sp/>(Update.begin())<sp/>und<sp/>final==true<sp/>(Update.end())<sp/>kann<sp/>kein<sp/>Fehler<sp/>ueber</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="comment">//<sp/>den<sp/>Rueckgabewert<sp/>von<sp/>onUpload()<sp/>gemeldet<sp/>werden<sp/>(Callback<sp/>hat<sp/>keinen<sp/>Rueckgabewert)<sp/>-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="comment">//<sp/>daher<sp/>als<sp/>Flag<sp/>gemerkt<sp/>und<sp/>vom<sp/>zugehoerigen<sp/>Request-Handler<sp/>ausgewertet.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>otaFailed<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Gemeinsame<sp/>Kernlogik<sp/>fuer<sp/>beide<sp/>Upload-Ziele<sp/>(U_FLASH=Firmware/app-Partition,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="comment">//<sp/>U_SPIFFS=Dateisystem/&quot;webfs&quot;-Partition,<sp/>siehe<sp/>partitions.csv<sp/>-<sp/>Update<sp/>sucht<sp/>bei<sp/>U_SPIFFS</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="comment">//<sp/>automatisch<sp/>die<sp/>Partition<sp/>mit<sp/>SubType<sp/>&quot;spiffs&quot;,<sp/>die<sp/>&quot;config&quot;-Partition<sp/>hat<sp/>einen<sp/>anderen</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="comment">//<sp/>SubType<sp/>und<sp/>wird<sp/>dadurch<sp/>nie<sp/>getroffen,<sp/>bleibt<sp/>also<sp/>von<sp/>OTA-Updates<sp/>unberuehrt).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>handleOtaChunk(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>command,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*label,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>index,<sp/>uint8_t<sp/>*data,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>len,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">final</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(index<sp/>==<sp/>0)<sp/>{</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>otaFailed<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kindref="member">Logger::Source::OTA</ref>,<sp/></highlight><highlight class="stringliteral">&quot;%s-Upload<sp/>gestartet.&quot;</highlight><highlight class="normal">,<sp/>label);</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Dateisystem-Ziel<sp/>(&quot;webfs&quot;)<sp/>ist<sp/>waehrend<sp/>des<sp/>laufenden<sp/>Betriebs<sp/>gemountet<sp/>(siehe</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>FileSystem::begin()/WebIF::begin())<sp/>-<sp/>vor<sp/>dem<sp/>rohen<sp/>Ueberschreiben<sp/>der<sp/>Partition</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>aushaengen,<sp/>sonst<sp/>droht<sp/>ein<sp/>inkonsistenter<sp/>Zustand.<sp/>Neu<sp/>gemountet<sp/>wird<sp/>erst<sp/>wieder</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>nach<sp/>dem<sp/>Neustart,<sp/>ein<sp/>sofortiges<sp/>Remount<sp/>ist<sp/>hier<sp/>nicht<sp/>noetig.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(command<sp/>==<sp/>U_SPIFFS)<sp/>{</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>LittleFS.end();</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!Update.begin(UPDATE_SIZE_UNKNOWN,<sp/>command))<sp/>{</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kindref="member">Logger::Source::OTA</ref>,<sp/></highlight><highlight class="stringliteral">&quot;%s:<sp/>Update.begin()<sp/>fehlgeschlagen:<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>label,</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Update.errorString());</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>otaFailed<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(otaFailed)<sp/>{</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(len<sp/>&gt;<sp/>0<sp/>&amp;&amp;<sp/>Update.write(data,<sp/>len)<sp/>!=<sp/>len)<sp/>{</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kindref="member">Logger::Source::OTA</ref>,<sp/></highlight><highlight class="stringliteral">&quot;%s:<sp/>Update.write()<sp/>fehlgeschlagen:<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>label,</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Update.errorString());</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>otaFailed<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keyword">final</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(Update.end(</highlight><highlight class="keyword">true</highlight><highlight class="normal">))<sp/>{</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kindref="member">Logger::Source::OTA</ref>,<sp/></highlight><highlight class="stringliteral">&quot;%s-Upload<sp/>abgeschlossen<sp/>(%u<sp/>Byte).<sp/>MD5=%s&quot;</highlight><highlight class="normal">,<sp/>label,</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static_cast&lt;</highlight><highlight class="keywordtype">unsigned</highlight><highlight class="keyword">&gt;</highlight><highlight class="normal">(index<sp/>+<sp/>len),<sp/>Update.md5String().c_str());</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a1087bec7ef12911010976d203f36fd7f" kindref="member">Logger::Source::OTA</ref>,<sp/></highlight><highlight class="stringliteral">&quot;%s:<sp/>Update.end()<sp/>fehlgeschlagen:<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>label,</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Update.errorString());</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>otaFailed<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="69"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"></highlight><highlight class="comment">//<sp/>ESPAsyncWebServer::begin()<sp/>wird<sp/>nur<sp/>einmal<sp/>im<sp/>Setup<sp/>aufgerufen<sp/>(siehe<sp/>WebIF::begin())<sp/>-<sp/>nach</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight><highlight class="comment">//<sp/>einem<sp/>WLAN-Verbindungsabbruch+Wiederverbindung<sp/>(neues<sp/>Netzwerkinterface/neue<sp/>DHCP-Lease</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight><highlight class="comment">//<sp/>intern)<sp/>kann<sp/>der<sp/>zugrundeliegende<sp/>TCP-Listen-Socket<sp/>ungueltig<sp/>werden,<sp/>ohne<sp/>dass<sp/>der<sp/>Server</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight><highlight class="comment">//<sp/>das<sp/>selbst<sp/>bemerkt:<sp/>er<sp/>&quot;denkt&quot;<sp/>er<sp/>lauscht<sp/>noch,<sp/>nimmt<sp/>aber<sp/>keine<sp/>neuen<sp/>Verbindungen<sp/>mehr<sp/>an</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight><highlight class="comment">//<sp/>(bekanntes<sp/>ESPAsyncWebServer/LWIP-Verhalten).<sp/>MQTT<sp/>ist<sp/>davon<sp/>nicht<sp/>betroffen,<sp/>weil</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"></highlight><highlight class="comment">//<sp/>MqttManager::loop()<sp/>bei<sp/>Verbindungsverlust<sp/>aktiv<sp/>einen<sp/>komplett<sp/>neuen<sp/>Socket<sp/>aufbaut<sp/>-<sp/>WebIF</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight><highlight class="comment">//<sp/>hatte<sp/>bislang<sp/>kein<sp/>Aequivalent<sp/>dazu.<sp/>Fix:<sp/>bei<sp/>jedem<sp/>von<sp/>WiFiController<sp/>gemeldeten<sp/>Reconnect</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight><highlight class="comment">//<sp/>(siehe<sp/>WiFiController::setReconnectCallback()<sp/>in<sp/>WebIF::begin()<sp/>unten)<sp/>den<sp/>Server<sp/>explizit</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight><highlight class="comment">//<sp/>neu<sp/>binden.<sp/>server.end()/begin()<sp/>loescht<sp/>dabei<sp/>NICHT<sp/>die<sp/>per<sp/>server.on(...)<sp/>registrierten</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Routen<sp/>(die<sp/>bleiben<sp/>im<sp/>AsyncWebServer-Objekt<sp/>bestehen)<sp/>-<sp/>nur<sp/>der<sp/>Listen-Socket<sp/>wird<sp/>neu</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight><highlight class="comment">//<sp/>aufgebaut.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>rebindServer()<sp/>{</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/>server.end();</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/>server.begin();</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" kindref="member">Logger::Source::WEB</ref>,<sp/></highlight><highlight class="stringliteral">&quot;WebIF:<sp/>Server<sp/>nach<sp/>WLAN-Reconnect<sp/>neu<sp/>gebunden.&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="86"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>handleOtaResult(AsyncWebServerRequest<sp/>*request)<sp/>{</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>ok<sp/>=<sp/>!otaFailed;</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/>AsyncWebServerResponse<sp/>*response<sp/>=</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>request-&gt;beginResponse(ok<sp/>?<sp/>200<sp/>:<sp/>500,<sp/></highlight><highlight class="stringliteral">&quot;application/json&quot;</highlight><highlight class="normal">,<sp/>ok<sp/>?<sp/></highlight><highlight class="stringliteral">&quot;{\&quot;success\&quot;:true}&quot;</highlight><highlight class="normal"><sp/>:<sp/></highlight><highlight class="stringliteral">&quot;{\&quot;success\&quot;:false}&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/>response-&gt;addHeader(</highlight><highlight class="stringliteral">&quot;Connection&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;close&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/>request-&gt;send(response);</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(ok)<sp/>{</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/>restartRequested<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/>restartRequestedAtMs<sp/>=<sp/>millis();</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="98"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="102" refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_web_i_f_1a856f6407dce93cb23257d2bf3ff92097" kindref="member">WebIF::begin</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Eigene<sp/>Partition<sp/>&quot;webfs&quot;<sp/>(siehe<sp/>partitions.csv),<sp/>getrennt<sp/>von<sp/>FileSystems<sp/>&quot;config&quot;-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Partition<sp/>-<sp/>genau<sp/>die<sp/>Partition,<sp/>die<sp/>`pio<sp/>run<sp/>--target<sp/>uploadfs`<sp/>bespielt.<sp/>formatOnFail</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>bewusst<sp/>false:<sp/>auf<sp/>Hardware<sp/>verifiziert,<sp/>dass<sp/>ein<sp/>gueltiges<sp/>uploadfs-Image<sp/>mit</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>formatOnFail=true<sp/>faelschlich<sp/>als<sp/>ungueltig<sp/>erkannt<sp/>und<sp/>automatisch<sp/>neu<sp/>formatiert</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>wurde<sp/>(siehe<sp/>docs/spec/16-webif-fundament.md).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!LittleFS.begin(</highlight><highlight class="keyword">false</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;/littlefs&quot;</highlight><highlight class="normal">,<sp/>10,<sp/></highlight><highlight class="stringliteral">&quot;webfs&quot;</highlight><highlight class="normal">))<sp/>{</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" kindref="member">Logger::Type::ERROR</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" kindref="member">Logger::Source::WEB</ref>,<sp/></highlight><highlight class="stringliteral">&quot;WebIF:<sp/>LittleFS-Mount<sp/>(webfs)<sp/>fehlgeschlagen.&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Nachtrag<sp/>(2026-08-19):<sp/>&quot;no-store&quot;<sp/>ergaenzend<sp/>zu<sp/>&quot;no-cache&quot;<sp/>entfernt<sp/>-<sp/>RAM<sp/>lief<sp/>bei<sp/>zwei</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>gleichzeitigen<sp/>Clients<sp/>(PC<sp/>+<sp/>Handy)<sp/>innerhalb<sp/>weniger<sp/>Minuten<sp/>auf<sp/>97%<sp/>(240/247<sp/>KB),<sp/>weil</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>&quot;no-store&quot;<sp/>den<sp/>Browser<sp/>anweist,<sp/>die<sp/>Antwort<sp/>gar<sp/>nicht<sp/>erst<sp/>lokal<sp/>zu<sp/>behalten<sp/>-<sp/>jede<sp/>Anfrage</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>von<sp/>jedem<sp/>Geraet<sp/>lud<sp/>dadurch<sp/>ALLE<sp/>Dateien<sp/>komplett<sp/>neu,<sp/>inkl.<sp/>mqtt.min.js<sp/>(369<sp/>KB)<sp/>und</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>alpine.min.js<sp/>(47<sp/>KB).<sp/>&quot;no-cache&quot;<sp/>allein<sp/>zwingt<sp/>den<sp/>Browser<sp/>weiterhin,<sp/>bei<sp/>JEDER<sp/>Anfrage</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>beim<sp/>Server<sp/>nachzufragen<sp/>(loest<sp/>also<sp/>weiterhin<sp/>das<sp/>urspruengliche<sp/>Problem,<sp/>wegen<sp/>dem</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>no-cache<sp/>ueberhaupt<sp/>eingefuehrt<sp/>wurde<sp/>-<sp/>ein<sp/>Browser-Cache-Missverstaendnis<sp/>auf<sp/>dem<sp/>Handy,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>2026-08-17),<sp/>erlaubt<sp/>ihm<sp/>aber,<sp/>die<sp/>Antwort<sp/>lokal<sp/>zu<sp/>behalten<sp/>und<sp/>per<sp/>If-None-Match</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>bedingt<sp/>anzufragen<sp/>-<sp/>ESPAsyncWebServer<sp/>beantwortet<sp/>das<sp/>dann<sp/>automatisch<sp/>mit<sp/>einem</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>winzigen<sp/>&quot;304<sp/>Not<sp/>Modified&quot;<sp/>statt<sp/>die<sp/>komplette<sp/>Datei<sp/>erneut<sp/>zu<sp/>uebertragen<sp/>(ETag-Logik</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>ist<sp/>in<sp/>der<sp/>Library<sp/>bereits<sp/>eingebaut,<sp/>siehe<sp/>AsyncStaticWebHandler).<sp/>Immer<sp/>noch<sp/>sofort</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>aktuell<sp/>nach<sp/>jedem<sp/>Deploy,<sp/>aber<sp/>ohne<sp/>die<sp/>wiederholte<sp/>Vollzustellung<sp/>grosser<sp/>Dateien.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/>server.serveStatic(</highlight><highlight class="stringliteral">&quot;/&quot;</highlight><highlight class="normal">,<sp/>LittleFS,<sp/></highlight><highlight class="stringliteral">&quot;/&quot;</highlight><highlight class="normal">).setDefaultFile(</highlight><highlight class="stringliteral">&quot;index.html&quot;</highlight><highlight class="normal">).setCacheControl(</highlight><highlight class="stringliteral">&quot;no-cache&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>DEBUG<sp/>statt<sp/>INFO/ERROR:<sp/>faellt<sp/>beim<sp/>Browsen<sp/>routinemaessig<sp/>auch<sp/>fuer<sp/>harmlose<sp/>Anfragen</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>wie<sp/>/favicon.ico<sp/>an,<sp/>ist<sp/>aber<sp/>fuers<sp/>Aufspueren<sp/>kaputter/veralteter<sp/>Links<sp/>im<sp/>Web-Interface</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>nuetzlich<sp/>(Nachtrag<sp/>2026-08-18,<sp/>Logging-Brainstorming).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/>server.onNotFound([](AsyncWebServerRequest<sp/>*request)<sp/>{</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" kindref="member">Logger::logf</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fadc30ec20708ef7b0f641ef78b7880a15" kindref="member">Logger::Type::DEBUG</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" kindref="member">Logger::Source::WEB</ref>,<sp/></highlight><highlight class="stringliteral">&quot;404:<sp/>%s&quot;</highlight><highlight class="normal">,<sp/>request-&gt;url().c_str());</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/>request-&gt;send(404,<sp/></highlight><highlight class="stringliteral">&quot;text/plain&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/>});</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>OTA-Upload<sp/>(Phase<sp/>21):<sp/>zwei<sp/>getrennte<sp/>Ziele<sp/>statt<sp/>eines<sp/>gebuendelten<sp/>Archivs<sp/>(Nutzer-</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Entscheidung)<sp/>-<sp/>PlatformIO<sp/>erzeugt<sp/>Firmware<sp/>und<sp/>Dateisystem<sp/>ohnehin<sp/>als<sp/>zwei<sp/>separate</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Dateien,<sp/>und<sp/>beide<sp/>lassen<sp/>sich<sp/>damit<sp/>unabhaengig<sp/>voneinander<sp/>aktualisieren<sp/>(genau<sp/>wie</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>wir<sp/>es<sp/>waehrend<sp/>der<sp/>Entwicklung<sp/>staendig<sp/>per<sp/>`pio<sp/>run<sp/>-t<sp/>upload`/`-t<sp/>uploadfs`<sp/>einzeln<sp/>tun).</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/>server.on(</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;/api/ota/firmware&quot;</highlight><highlight class="normal">,<sp/>HTTP_POST,<sp/>handleOtaResult,</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>[](AsyncWebServerRequest<sp/>*,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>String<sp/>&amp;,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>index,<sp/>uint8_t<sp/>*data,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>len,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">final</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>handleOtaChunk(U_FLASH,<sp/></highlight><highlight class="stringliteral">&quot;Firmware&quot;</highlight><highlight class="normal">,<sp/>index,<sp/>data,<sp/>len,<sp/></highlight><highlight class="keyword">final</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/>server.on(</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;/api/ota/filesystem&quot;</highlight><highlight class="normal">,<sp/>HTTP_POST,<sp/>handleOtaResult,</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>[](AsyncWebServerRequest<sp/>*,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>String<sp/>&amp;,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>index,<sp/>uint8_t<sp/>*data,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>len,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">final</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>handleOtaChunk(U_SPIFFS,<sp/></highlight><highlight class="stringliteral">&quot;Dateisystem&quot;</highlight><highlight class="normal">,<sp/>index,<sp/>data,<sp/>len,<sp/></highlight><highlight class="keyword">final</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"></highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/>server.begin();</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79abc1f55f482a2df2bede07c661806c4eb" kindref="member">Logger::Source::WEB</ref>,<sp/></highlight><highlight class="stringliteral">&quot;WebIF:<sp/>Webserver<sp/>gestartet<sp/>(Port<sp/>80).&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"></highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><ref refid="namespace_wi_fi_controller_1a2622d7c47ada0e6e985e84813934e3bd" kindref="member">WiFiController::setReconnectCallback</ref>(rebindServer);</highlight></codeline>
+<codeline lineno="153"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"></highlight></codeline>
+<codeline lineno="155" refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_web_i_f_1ad2e0d9894319d781b482cbcb2d10fca2" kindref="member">WebIF::loop</ref>()<sp/>{</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(restartRequested<sp/>&amp;&amp;<sp/>millis()<sp/>-<sp/>restartRequestedAtMs<sp/>&gt;=<sp/>kRestartDelayMs)<sp/>{</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/>restartRequested<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" kindref="member">Logger::log</ref>(<ref refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" kindref="member">Logger::Type::INFO</ref>,<sp/><ref refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afa177138f94a7ea01f549b1aa7893d03" kindref="member">Logger::Source::SYSTEM</ref>,<sp/></highlight><highlight class="stringliteral">&quot;Neustart<sp/>nach<sp/>OTA-Update<sp/>...&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/>ESP.restart();</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="161"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/WebIF.cpp"/>
+  </compounddef>
+</doxygen>

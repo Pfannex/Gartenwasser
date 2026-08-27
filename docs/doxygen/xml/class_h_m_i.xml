@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_h_m_i" kind="class" language="C++" prot="public">
+    <compoundname>HMI</compoundname>
+    <includes refid="_h_m_i_8h" local="no">HMI.h</includes>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_h_m_i_1a70accb733e35e9a48ca783523cb4151e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>HMI::HMI</definition>
+        <argsstring>()=delete</argsstring>
+        <name>HMI</name>
+        <qualifiedname>HMI::HMI</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/HMI.h" line="11" column="3"/>
+        <references refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" compoundref="_h_m_i_8cpp" startline="671" endline="707">begin</references>
+        <references refid="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" compoundref="_h_m_i_8cpp" startline="709" endline="720">loop</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void HMI::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>HMI::begin</qualifiedname>
+        <briefdescription>
+<para>Initialisiert Display, Touch (inkl. Wire.begin() fuer den I2C-Bus) und LVGL. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/HMI.h" line="14" column="15" bodyfile="D:/Gartenwasser/src/HMI.cpp" bodystart="671" bodyend="707"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79a87599e818aa04794bf7ff0772899d8ae" compoundref="_logger_8h" startline="25">Logger::HMI</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <referencedby refid="class_h_m_i_1a70accb733e35e9a48ca783523cb4151e">HMI</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void HMI::loop</definition>
+        <argsstring>()</argsstring>
+        <name>loop</name>
+        <qualifiedname>HMI::loop</qualifiedname>
+        <briefdescription>
+<para>Muss regelmaessig aus <ref refid="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" kindref="member">loop()</ref> aufgerufen werden (LVGL-Verarbeitung). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/HMI.h" line="17" column="15" bodyfile="D:/Gartenwasser/src/HMI.cpp" bodystart="709" bodyend="720"/>
+        <referencedby refid="class_h_m_i_1a70accb733e35e9a48ca783523cb4151e">HMI</referencedby>
+        <referencedby refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" compoundref="main_8cpp" startline="87" endline="93">loop</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/HMI.h" line="9" column="1" bodyfile="D:/Gartenwasser/src/HMI.h" bodystart="9" bodyend="18"/>
+    <listofallmembers>
+      <member refid="class_h_m_i_1a5573f1a5bf16defa7aeced2652de696a" prot="public" virt="non-virtual"><scope>HMI</scope><name>begin</name></member>
+      <member refid="class_h_m_i_1a70accb733e35e9a48ca783523cb4151e" prot="public" virt="non-virtual"><scope>HMI</scope><name>HMI</name></member>
+      <member refid="class_h_m_i_1a588f861e54cfe39db23c9b67406d86f2" prot="public" virt="non-virtual"><scope>HMI</scope><name>loop</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

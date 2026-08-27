@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_o_t_a_8h" kind="file" language="C++">
+    <compoundname>OTA.h</compoundname>
+    <includedby refid="_o_t_a_8cpp" local="yes">D:/Gartenwasser/src/OTA.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/OTA.cpp</label>
+        <link refid="_o_t_a_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/OTA.h</label>
+        <link refid="_o_t_a_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_o_t_a" prot="public">OTA</innerclass>
+    <briefdescription>
+<para>PlatformIO/VSCode-OTA (Phase 21, zweiter Teil) - <computeroutput>ArduinoOTA</computeroutput>-Bibliothek, ermoeglicht <computeroutput>pio run --target upload</computeroutput>/<computeroutput>uploadfs</computeroutput> uebers WLAN statt Kabel (eigener Dev-Workflow). Unabhaengig vom WebIF-Browser-Upload (siehe <ref refid="_web_i_f_8h" kindref="compound">WebIF.h</ref>), der fuer Nutzer ohne Entwicklungsumgebung gedacht ist. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11" refid="class_o_t_a" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8" kindref="member">OTA</ref><sp/>{</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="13" refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_o_t_a_1a8d768d482aa9d476e83618d50c8fcab8" kindref="member">OTA</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_o_t_a_1a6111f598c2cd2f0ca78731603906764e" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_o_t_a_1a667ab581ad7244c7f4b0342ecf55d4d5" kindref="member">loop</ref>();</highlight></codeline>
+<codeline lineno="21"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/OTA.h"/>
+  </compounddef>
+</doxygen>

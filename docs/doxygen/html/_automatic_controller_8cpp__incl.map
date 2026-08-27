@@ -1,0 +1,12 @@
+<map id="D:/Gartenwasser/src/AutomaticController.cpp" name="D:/Gartenwasser/src/AutomaticController.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="63,5,228,48"/>
+<area shape="rect" id="Node000002" href="$_automatic_controller_8h.html" title="Reine Ablaufsteuerung fuer die Automatik&#45;Sequenz (Warteschlange + Cursor). Kennt keine Ventile/MQTT &#45;..." alt="" coords="5,96,153,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,51,101,86,97,82,130,47"/>
+<area shape="rect" id="Node000004" href="$_logger_8h.html" title="Einheitliches Log&#45;Format fuer alle Subsysteme." alt="" coords="177,96,248,123"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,46,195,84,190,84,162,51"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="73,171,133,197"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,121,97,156,91,155,82,125"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="196,123,136,164,133,160,191,124"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="180,171,244,197"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="214,121,215,156,210,154,210,125"/>
+</map>

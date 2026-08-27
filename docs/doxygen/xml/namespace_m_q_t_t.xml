@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="namespace_m_q_t_t" kind="namespace" language="C++">
+    <compoundname>MQTT</compoundname>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="namespace_m_q_t_t_1a5355e8fc50ad2622c124c55b8dd64e9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MQTT::begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <qualifiedname>MQTT::begin</qualifiedname>
+        <briefdescription>
+<para>Konfiguriert den MQTT-Client (Broker/Port aus secrets.h). Nicht blockierend. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="13" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1480" bodyend="1487" declfile="D:/Gartenwasser/src/MQTT.h" declline="13" declcolumn="6"/>
+        <references refid="class_logger_1adf4c4245af48ffa9fff97a3dda1a4192" compoundref="_logger_8cpp" startline="69" endline="71">Logger::setLineCallback</references>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MQTT::loop</definition>
+        <argsstring>()</argsstring>
+        <name>loop</name>
+        <qualifiedname>MQTT::loop</qualifiedname>
+        <briefdescription>
+<para>Muss regelmaessig aus <ref refid="namespace_m_q_t_t_1a10bbbea49d36b483ac33babc40e6ff4a" kindref="member">loop()</ref> aufgerufen werden (PubSubClient-Loop, Reconnect bei Verbindungsverlust). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="16" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1491" bodyend="1529" declfile="D:/Gartenwasser/src/MQTT.h" declline="16" declcolumn="6"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" compoundref="_wi_fi_controller_8cpp" startline="105" endline="107">WiFiController::isConnected</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79aab0a7cf5deeda86b66467df64c3b6122" compoundref="_logger_8h" startline="25">Logger::MQTT</references>
+        <referencedby refid="main_8cpp_1afe461d27b9c48d5921c00d521181f12f" compoundref="main_8cpp" startline="87" endline="93">loop</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="namespace_m_q_t_t_1a57a5231fd3205682c56de70e57dd9d62" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool MQTT::isConnected</definition>
+        <argsstring>()</argsstring>
+        <name>isConnected</name>
+        <qualifiedname>MQTT::isConnected</qualifiedname>
+        <briefdescription>
+<para>Liefert true, wenn aktuell eine MQTT-Verbindung besteht. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="19" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1531" bodyend="1533" declfile="D:/Gartenwasser/src/MQTT.h" declline="19" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="namespace_m_q_t_t_1a2f8781f29adb44d3e5ecf3564d700681" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MQTT::publish</definition>
+        <argsstring>(const char *topic, const char *payload, bool retained)</argsstring>
+        <name>publish</name>
+        <qualifiedname>MQTT::publish</qualifiedname>
+        <param>
+          <type>const char *</type>
+          <declname>topic</declname>
+        </param>
+        <param>
+          <type>const char *</type>
+          <declname>payload</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>retained</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Oeffentlicher Zugriff auf die zentrale Publish-Stelle (siehe <ref refid="_m_q_t_t_8cpp" kindref="compound">MQTT.cpp</ref>, publishAndLog()) - fuer Module wie <ref refid="namespace_ha_discovery" kindref="compound">HaDiscovery</ref>, die eigene Topics publizieren, aber keinen direkten Zugriff auf den privaten PubSubClient dieser Datei haben sollen. topic ist der volle Topic-String (inkl. &quot;gartenwasser/&quot;- bzw. &quot;homeassistant/&quot;-Praefix), landet wie jeder andere Publish auch im Live-Log. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="26" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1489" bodyend="1489" declfile="D:/Gartenwasser/src/MQTT.h" declline="26" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="namespace_m_q_t_t_1a1a39a4c9bfacb52780f0e8cef145e9a1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MQTT::requestMainCmd</definition>
+        <argsstring>(bool on)</argsstring>
+        <name>requestMainCmd</name>
+        <qualifiedname>MQTT::requestMainCmd</qualifiedname>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Startet/stoppt die Automatik-Sequenz genau wie ein main/cmd MQTT-Befehl (inkl. aller Publishes) - fuer lokale Ausloeser wie das Touch-UI, keine Sonderlogik gegenueber dem MQTT-Pfad. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="31" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1535" bodyend="1541" declfile="D:/Gartenwasser/src/MQTT.h" declline="31" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="namespace_m_q_t_t_1a58fe301c5dff0689982ecd64e2d844ab" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MQTT::requestProgramSelect</definition>
+        <argsstring>(uint8_t programIndex)</argsstring>
+        <name>requestProgramSelect</name>
+        <qualifiedname>MQTT::requestProgramSelect</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>programIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Wendet Programm <computeroutput>programIndex</computeroutput> (1-basiert, 0 = keins/abwaehlen) an - identisch zu main/program/cmd, aber ohne MQTT-Umweg. Fuer die Touch-UI-Programme-Unterseite (Touch-UI-Neugestaltung, siehe docs/spec/13-touch-ui.md), die per &lt;/&gt;-Buttons durch alle Programme blaettert. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="37" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1543" bodyend="1545" declfile="D:/Gartenwasser/src/MQTT.h" declline="37" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="namespace_m_q_t_t_1a2a4c808868b4a18a8708b16d66b1fe2f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MQTT::requestValveCmd</definition>
+        <argsstring>(uint8_t index, bool on)</argsstring>
+        <name>requestValveCmd</name>
+        <qualifiedname>MQTT::requestValveCmd</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>index</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Schaltet Ventil <computeroutput>index</computeroutput> (1..5) direkt (identisch V{n}/cmd MQTT-Befehl), ohne MQTT-Umweg - fuer die Touch-UI-Ventilmatrix (Touch-UI-Neugestaltung, siehe docs/spec/13-touch-ui.md). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/MQTT.h" line="42" column="6" bodyfile="D:/Gartenwasser/src/MQTT.cpp" bodystart="1547" bodyend="1549" declfile="D:/Gartenwasser/src/MQTT.h" declline="42" declcolumn="6"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/MQTT.h" line="10" column="1"/>
+  </compounddef>
+</doxygen>

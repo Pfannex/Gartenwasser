@@ -1,0 +1,59 @@
+<map id="D:/Gartenwasser/src/MQTT.cpp" name="D:/Gartenwasser/src/MQTT.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1261,5,1404,48"/>
+<area shape="rect" id="Node000002" href="$_m_q_t_t_8h.html" title="MQTT&#45;Verbindungsaufbau (PubSubClient), LWT/availability, nicht&#45;blockierendes Reconnect&#45;Handling." alt="" coords="442,96,510,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1258,30,1126,38,945,49,738,69,526,98,525,93,738,64,945,44,1126,33,1263,30"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="752,96,856,123"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1263,37,872,98,872,93,1258,38"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="881,96,957,123"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1263,40,973,98,972,93,1258,41"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="982,96,1059,123"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1263,46,1074,97,1073,92,1258,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="1083,96,1195,123"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1285,48,1184,92,1183,87,1280,49"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="1219,96,1278,123"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1313,48,1274,87,1271,83,1308,50"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1303,96,1362,123"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="1334,47,1334,82,1330,78,1331,51"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="1386,96,1446,123"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="1355,46,1395,86,1390,84,1353,51"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="1471,96,1524,123"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1375,46,1461,89,1455,88,1374,51"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1548,96,1655,123"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="1402,46,1547,91,1542,91,1401,51"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="1679,96,1786,123"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="1404,40,1667,94,1661,94,1404,45"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="1810,96,1913,123"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="1404,35,1797,95,1792,96,1404,40"/>
+<area shape="rect" id="Node000015" href="$_file_system_8h.html" title="Persistenz der Einstellwerte (config.json: Ventil&#45;Laufzeiten/Automatik/Alias/maxTime; programs...." alt="" coords="630,96,728,123"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="1258,35,1035,60,744,98,744,93,1034,55,1263,34"/>
+<area shape="rect" id="Node000017" href="$_diagnostics_8h.html" title="I2C&#45;Bus&#45;Status und letzte Fehlermeldung, fuer diagnostics/i2cStatus und diagnostics/lastError...." alt="" coords="1938,96,2039,123"/>
+<area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="1404,32,1631,55,1925,96,1920,96,1631,60,1404,37"/>
+<area shape="rect" id="Node000018" href="$_logger_8h.html" title="Einheitliches Log&#45;Format fuer alle Subsysteme." alt="" coords="534,96,605,123"/>
+<area shape="poly" id="edge18_Node000001_Node000018" title=" " alt="" coords="1258,32,984,53,805,72,621,98,620,93,804,67,984,48,1264,31"/>
+<area shape="rect" id="Node000019" href="$_automatic_controller_8h.html" title="Reine Ablaufsteuerung fuer die Automatik&#45;Sequenz (Warteschlange + Cursor). Kennt keine Ventile/MQTT &#45;..." alt="" coords="5,96,153,123"/>
+<area shape="poly" id="edge21_Node000001_Node000019" title=" " alt="" coords="1258,31,805,52,492,72,168,98,168,93,491,66,805,47,1263,30"/>
+<area shape="rect" id="Node000020" href="$_valve_controller_8h.html" title="Kapselt V0&#45;V5 als MCP23017&#45;Ausgaenge (Port B), unabhaengig von MQTT." alt="" coords="176,96,296,123"/>
+<area shape="poly" id="edge23_Node000001_Node000020" title=" " alt="" coords="1258,31,861,52,591,71,313,98,312,93,591,66,861,47,1263,30"/>
+<area shape="rect" id="Node000021" href="$_valve_timer_8h.html" title="Countdown der Restlaufzeit je Ventil (V1&#45;V5), Werte aus FileSystem." alt="" coords="321,96,418,123"/>
+<area shape="poly" id="edge25_Node000001_Node000021" title=" " alt="" coords="1258,31,909,52,675,71,434,98,433,93,674,66,909,47,1263,30"/>
+<area shape="rect" id="Node000022" href="$_version_8h.html" title="Firmware&#45;Version &#45; einzige Stelle, die vor jedem Release/OTA&#45;Test manuell angepasst wird...." alt="" coords="2063,96,2138,123"/>
+<area shape="poly" id="edge27_Node000001_Node000022" title=" " alt="" coords="1404,29,1682,48,1863,67,2050,96,2045,96,1862,72,1682,54,1404,34"/>
+<area shape="rect" id="Node000023" href="$_build_number_8h.html" title=" " alt="" coords="2163,96,2270,123"/>
+<area shape="poly" id="edge28_Node000001_Node000023" title=" " alt="" coords="1404,29,1722,50,1931,69,2150,96,2144,96,1931,74,1721,56,1404,34"/>
+<area shape="rect" id="Node000024" href="$_wi_fi_controller_8h.html" title="WLAN&#45;Verbindungsaufbau und nicht&#45;blockierendes Reconnect&#45;Handling." alt="" coords="2295,96,2410,123"/>
+<area shape="poly" id="edge29_Node000001_Node000024" title=" " alt="" coords="1404,28,1775,48,2023,67,2282,96,2277,96,2023,73,1774,54,1404,33"/>
+<area shape="rect" id="Node000025" href="$_ha_discovery_8h.html" title="Home&#45;Assistant&#45;MQTT&#45;Discovery (Phase 10). Baut fuer jede Entity aus der Mapping&#45;Tabelle in docs/requi..." alt="" coords="2435,96,2542,123"/>
+<area shape="poly" id="edge30_Node000001_Node000025" title=" " alt="" coords="1404,27,1580,33,1830,44,2120,64,2422,96,2416,96,2120,69,1829,50,1580,38,1404,32"/>
+<area shape="rect" id="Node000026" title=" " alt="" coords="2567,96,2642,123"/>
+<area shape="poly" id="edge31_Node000001_Node000026" title=" " alt="" coords="1404,25,1600,27,1882,35,2212,56,2383,72,2554,96,2549,96,2382,78,2211,61,1882,41,1600,32,1404,30"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="393,171,453,197"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,122,443,160,440,156,465,124"/>
+<area shape="poly" id="edge16_Node000015_Node000003" title=" " alt="" coords="637,123,469,173,467,167,632,123"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="592,171,656,197"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="672,122,644,160,642,156,667,124"/>
+<area shape="poly" id="edge20_Node000018_Node000003" title=" " alt="" coords="547,123,463,166,461,161,542,124"/>
+<area shape="poly" id="edge19_Node000018_Node000016" title=" " alt="" coords="580,121,608,159,603,157,578,126"/>
+<area shape="poly" id="edge22_Node000019_Node000003" title=" " alt="" coords="140,121,379,171,376,175,139,126"/>
+<area shape="poly" id="edge24_Node000020_Node000003" title=" " alt="" coords="269,121,381,165,376,166,268,126"/>
+<area shape="poly" id="edge26_Node000021_Node000003" title=" " alt="" coords="380,121,407,159,402,157,378,126"/>
+</map>

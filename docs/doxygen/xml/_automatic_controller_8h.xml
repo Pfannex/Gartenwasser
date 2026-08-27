@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_automatic_controller_8h" kind="file" language="C++">
+    <compoundname>AutomaticController.h</compoundname>
+    <includes local="no">cstdint</includes>
+    <includedby refid="_automatic_controller_8cpp" local="yes">D:/Gartenwasser/src/AutomaticController.cpp</includedby>
+    <includedby refid="_h_m_i_8cpp" local="yes">D:/Gartenwasser/src/HMI.cpp</includedby>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>D:/Gartenwasser/src/AutomaticController.h</label>
+        <link refid="_automatic_controller_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstdint</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/AutomaticController.cpp</label>
+        <link refid="_automatic_controller_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/AutomaticController.h</label>
+        <link refid="_automatic_controller_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/HMI.cpp</label>
+        <link refid="_h_m_i_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_automatic_controller" prot="public">AutomaticController</innerclass>
+    <briefdescription>
+<para>Reine Ablaufsteuerung fuer die Automatik-Sequenz (Warteschlange + Cursor). Kennt keine Ventile/MQTT - das Ein-/Ausschalten und Publizieren macht der Aufrufer (<ref refid="namespace_m_q_t_t" kindref="compound">MQTT</ref>), analog zu <ref refid="class_valve_timer" kindref="compound">ValveTimer</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12" refid="class_automatic_controller" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22" kindref="member">AutomaticController</ref><sp/>{</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="14" refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_automatic_controller_1a8b21c0d87ae53811c98a06d7083bda22" kindref="member">AutomaticController</ref>()<sp/>=<sp/></highlight><highlight class="keyword">delete</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_automatic_controller_1acf073935540c377ea1578b6d455dcc9c" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_automatic_controller_1a542b3e61b6bd726c6d6a2c5e49ee7e15" kindref="member">start</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>uint8_t<sp/>*valves,<sp/>uint8_t<sp/>count);</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_automatic_controller_1afb960a9422a05137dc953ddcce52ddfc" kindref="member">stop</ref>();</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_automatic_controller_1a4d0306a6711c4ed529668baad4b7502a" kindref="member">isRunning</ref>();</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_automatic_controller_1acc1c05abe64763cd951aa0b4efd0a187" kindref="member">getActiveValve</ref>();</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_automatic_controller_1a39dd8447801b36ba977aaf7e33a68056" kindref="member">advance</ref>();</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_automatic_controller_1ac89fb27486eed31944c75c38371cd1c2" kindref="member">getPendingCount</ref>();</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="class_automatic_controller_1aceaa72e4e8fb0b5d99391ca27fb59d48" kindref="member">getPendingValve</ref>(uint8_t<sp/>offset);</highlight></codeline>
+<codeline lineno="40"><highlight class="normal">};</highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/AutomaticController.h"/>
+  </compounddef>
+</doxygen>

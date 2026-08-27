@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="class_i2_c" kind="class" language="C++" prot="public">
+    <compoundname>I2C</compoundname>
+    <includes refid="_i2_c_8h" local="no">I2C.h</includes>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" prot="public" static="yes" constexpr="yes" mutable="no">
+        <type>uint8_t</type>
+        <definition>uint8_t I2C::kMcp23017Addr</definition>
+        <argsstring></argsstring>
+        <name>kMcp23017Addr</name>
+        <qualifiedname>I2C::kMcp23017Addr</qualifiedname>
+        <initializer>= 0x20</initializer>
+        <briefdescription>
+<para>I2C-Adresse bei A0-A2 = GND. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/I2C.h" line="15" column="28" bodyfile="D:/Gartenwasser/src/I2C.h" bodystart="15" bodyend="-1"/>
+        <referencedby refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" compoundref="_valve_controller_8cpp" startline="20" endline="23">ValveController::begin</referencedby>
+        <referencedby refid="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" compoundref="_i2_c_8cpp" startline="51" endline="54">isMcp23017Reachable</referencedby>
+        <referencedby refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" compoundref="_i2_c_8cpp" startline="46" endline="49">mcp23017Setup</referencedby>
+        <referencedby refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" compoundref="_i2_c_8cpp" startline="19" endline="44">scan</referencedby>
+        <referencedby refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" compoundref="_valve_controller_8cpp" startline="25" endline="39">ValveController::setValve</referencedby>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>I2C::I2C</definition>
+        <argsstring>()=delete</argsstring>
+        <name>I2C</name>
+        <qualifiedname>I2C::I2C</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/I2C.h" line="17" column="3"/>
+        <references refid="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" compoundref="_i2_c_8cpp" startline="51" endline="54">isMcp23017Reachable</references>
+        <references refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" compoundref="_i2_c_8cpp" startline="46" endline="49">mcp23017Setup</references>
+        <references refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" compoundref="_i2_c_8cpp" startline="19" endline="44">scan</references>
+        <references refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" compoundref="_i2_c_8cpp" startline="12" endline="17">writeRegister</references>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void I2C::scan</definition>
+        <argsstring>()</argsstring>
+        <name>scan</name>
+        <qualifiedname>I2C::scan</qualifiedname>
+        <briefdescription>
+<para>Durchsucht den I2C-Bus (Adressen 1-126) und prueft gezielt den MCP23017. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/I2C.h" line="20" column="15" bodyfile="D:/Gartenwasser/src/I2C.cpp" bodystart="19" bodyend="44"/>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fabb1ca97ec761fc37101737ba0aa2e7c5" compoundref="_logger_8h" startline="17">Logger::ERROR</references>
+        <references refid="class_logger_1a49d48fb3015159f2ac74ccd8e219ad79afb87bf1fc88386ca21395991f90fff95" compoundref="_logger_8h" startline="25">Logger::I2C</references>
+        <references refid="class_logger_1acc066f65d27368f795ed38ce6968737fa551b723eafd6a31d444fcb2f5920fbd3" compoundref="_logger_8h" startline="17">Logger::INFO</references>
+        <references refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" compoundref="_i2_c_8h" startline="15">kMcp23017Addr</references>
+        <references refid="class_logger_1a21705d43d3167e0687454df79dedb6d3" compoundref="_logger_8cpp" startline="73" endline="86">Logger::log</references>
+        <references refid="class_logger_1ae3fc9458e28edb18ce6c72033a5a97e4" compoundref="_logger_8cpp" startline="88" endline="104">Logger::logf</references>
+        <referencedby refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc">I2C</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_i2_c_1a839b151d693709d7767aeed03dcbc206" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void I2C::writeRegister</definition>
+        <argsstring>(uint8_t addr, uint8_t reg, uint8_t value)</argsstring>
+        <name>writeRegister</name>
+        <qualifiedname>I2C::writeRegister</qualifiedname>
+        <param>
+          <type>uint8_t</type>
+          <declname>addr</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>reg</declname>
+        </param>
+        <param>
+          <type>uint8_t</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+<para>Schreibt ein Register-Byte per <ref refid="class_i2_c" kindref="compound">I2C</ref> an ein Geraet. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/I2C.h" line="23" column="15" bodyfile="D:/Gartenwasser/src/I2C.cpp" bodystart="12" bodyend="17"/>
+        <referencedby refid="class_valve_controller_1a47dc7d3e249aa83c873c00e02409a557" compoundref="_valve_controller_8cpp" startline="20" endline="23">ValveController::begin</referencedby>
+        <referencedby refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc">I2C</referencedby>
+        <referencedby refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" compoundref="_i2_c_8cpp" startline="46" endline="49">mcp23017Setup</referencedby>
+        <referencedby refid="class_valve_controller_1aec0668cc044f40f0dc56918973ce849f" compoundref="_valve_controller_8cpp" startline="25" endline="39">ValveController::setValve</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void I2C::mcp23017Setup</definition>
+        <argsstring>()</argsstring>
+        <name>mcp23017Setup</name>
+        <qualifiedname>I2C::mcp23017Setup</qualifiedname>
+        <briefdescription>
+<para>Konfiguriert den MCP23017 (Port B, alle Pins Ausgang, LOW). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/I2C.h" line="26" column="15" bodyfile="D:/Gartenwasser/src/I2C.cpp" bodystart="46" bodyend="49"/>
+        <references refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" compoundref="_i2_c_8h" startline="15">kMcp23017Addr</references>
+        <references refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" compoundref="_i2_c_8cpp" startline="12" endline="17">writeRegister</references>
+        <referencedby refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc">I2C</referencedby>
+        <referencedby refid="main_8cpp_1a4fc01d736fe50cf5b977f755b675f11d" compoundref="main_8cpp" startline="40" endline="85">setup</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" prot="public" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool I2C::isMcp23017Reachable</definition>
+        <argsstring>()</argsstring>
+        <name>isMcp23017Reachable</name>
+        <qualifiedname>I2C::isMcp23017Reachable</qualifiedname>
+        <briefdescription>
+<para>Prueft, ob der MCP23017 aktuell auf dem I2C-Bus antwortet. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="D:/Gartenwasser/src/I2C.h" line="29" column="15" bodyfile="D:/Gartenwasser/src/I2C.cpp" bodystart="51" bodyend="54"/>
+        <references refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" compoundref="_i2_c_8h" startline="15">kMcp23017Addr</references>
+        <referencedby refid="class_diagnostics_1a61eb935f65df2ea332ac669ea6bed498" compoundref="_diagnostics_8cpp" startline="30" endline="42">Diagnostics::checkI2cStatus</referencedby>
+        <referencedby refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc">I2C</referencedby>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Gartenwasser/src/I2C.h" line="13" column="1" bodyfile="D:/Gartenwasser/src/I2C.h" bodystart="13" bodyend="30"/>
+    <listofallmembers>
+      <member refid="class_i2_c_1a06f68c1d827ffd15eea64fda461db4fc" prot="public" virt="non-virtual"><scope>I2C</scope><name>I2C</name></member>
+      <member refid="class_i2_c_1a4af540f66794fd0f04855e6cf79238f3" prot="public" virt="non-virtual"><scope>I2C</scope><name>isMcp23017Reachable</name></member>
+      <member refid="class_i2_c_1af2ed381ff340bcb678ac5dee2dfc3980" prot="public" virt="non-virtual"><scope>I2C</scope><name>kMcp23017Addr</name></member>
+      <member refid="class_i2_c_1ad8e211c40ab2d53bf5db54cf9fb269c4" prot="public" virt="non-virtual"><scope>I2C</scope><name>mcp23017Setup</name></member>
+      <member refid="class_i2_c_1ad3ebfa3204880e4fa60beeba997f357a" prot="public" virt="non-virtual"><scope>I2C</scope><name>scan</name></member>
+      <member refid="class_i2_c_1a839b151d693709d7767aeed03dcbc206" prot="public" virt="non-virtual"><scope>I2C</scope><name>writeRegister</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

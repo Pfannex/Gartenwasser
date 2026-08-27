@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.18.0" xml:lang="en-US">
+  <compounddef id="_wi_fi_controller_8h" kind="file" language="C++">
+    <compoundname>WiFiController.h</compoundname>
+    <includedby refid="_m_q_t_t_8cpp" local="yes">D:/Gartenwasser/src/MQTT.cpp</includedby>
+    <includedby refid="_web_i_f_8cpp" local="yes">D:/Gartenwasser/src/WebIF.cpp</includedby>
+    <includedby refid="_wi_fi_controller_8cpp" local="yes">D:/Gartenwasser/src/WiFiController.cpp</includedby>
+    <includedby refid="main_8cpp" local="yes">D:/Gartenwasser/src/main.cpp</includedby>
+    <invincdepgraph>
+      <node id="2">
+        <label>D:/Gartenwasser/src/MQTT.cpp</label>
+        <link refid="_m_q_t_t_8cpp"/>
+      </node>
+      <node id="3">
+        <label>D:/Gartenwasser/src/WebIF.cpp</label>
+        <link refid="_web_i_f_8cpp"/>
+      </node>
+      <node id="4">
+        <label>D:/Gartenwasser/src/WiFiController.cpp</label>
+        <link refid="_wi_fi_controller_8cpp"/>
+      </node>
+      <node id="1">
+        <label>D:/Gartenwasser/src/WiFiController.h</label>
+        <link refid="_wi_fi_controller_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>D:/Gartenwasser/src/main.cpp</label>
+        <link refid="main_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_wi_fi_controller">WiFiController</innernamespace>
+    <briefdescription>
+<para>WLAN-Verbindungsaufbau und nicht-blockierendes Reconnect-Handling. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8" refid="namespace_wi_fi_controller" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespace_wi_fi_controller" kindref="compound">WiFiController</ref><sp/>{</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10" refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" kindref="member">ReconnectCallback</ref><sp/>=<sp/>void<sp/>(*)();</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a1dfc0b0c84c0df5a9a80b59460b29a67" kindref="member">begin</ref>();</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a2622d7c47ada0e6e985e84813934e3bd" kindref="member">setReconnectCallback</ref>(<ref refid="namespace_wi_fi_controller_1af6ea14995c4f4f4b8646c15ce83dd383" kindref="member">ReconnectCallback</ref><sp/>callback);</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a61f4b17e8199349d61b889ad18ecb82c" kindref="member">loop</ref>();</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a30a5a5bd9817f793f11d9a8681c7e1c4" kindref="member">isConnected</ref>();</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="namespace_wi_fi_controller_1a922cc00a89685a09ed59f0d283111361" kindref="member">connectAndSyncTimeBlocking</ref>();</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>WiFiController</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="D:/Gartenwasser/src/WiFiController.h"/>
+  </compounddef>
+</doxygen>

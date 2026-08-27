@@ -1,0 +1,5 @@
+<map id="Diagnostics::checkI2cStatus" name="Diagnostics::checkI2cStatus">
+<area shape="rect" id="Node000001" title=" " alt="" coords="221,5,410,32"/>
+<area shape="rect" id="Node000002" href="$class_diagnostics.html#a011e87065e62fee7927c9e95b5c88a39" title=" " alt="" coords="5,5,173,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,19,173,21,173,16,208,19"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="HMI::loop" name="HMI::loop">
+<area shape="rect" id="Node000001" title="Muss regelmaessig aus loop() aufgerufen werden (LVGL&#45;Verarbeitung)." alt="" coords="133,43,211,69"/>
+<area shape="rect" id="Node000002" href="$class_h_m_i.html#a70accb733e35e9a48ca783523cb4151e" title=" " alt="" coords="5,5,85,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,41,85,33,85,28,120,39"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="22,80,68,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="115,73,69,89,67,84,120,71"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="65,65,59,61,45,59,32,61,26,65,24,71,28,79,22,80,19,71,21,62,30,56,45,53,61,56,70,64"/>
+</map>

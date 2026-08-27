@@ -1,0 +1,5 @@
+<map id="ValveController::getAuto" name="ValveController::getAuto">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,168,32"/>
+<area shape="rect" id="Node000002" href="$class_file_system.html#aa92266d9637b9f81cfc64172cb111f44" title="Automatik&#45;Flag fuer Ventil index (1..5): Teilnahme an der Automatik&#45;Sequenz (Phase 7)." alt="" coords="216,5,388,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,16,202,19,197,19,168,21"/>
+</map>

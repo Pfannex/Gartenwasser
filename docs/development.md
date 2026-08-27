@@ -49,24 +49,35 @@ cd tools/doxygen
 doxygen Doxyfile
 ```
 
-Ausgabe landet in `tools/doxygen/output/` (`html/` + `xml/`) — **nicht versioniert**
-(`.gitignore`), da jederzeit aus dem aktuellen Quelltext neu erzeugbar. Nach Code-Änderungen
-einfach neu laufen lassen, kein manuelles Nachpflegen einer Doku nötig.
+Ausgabe landet in [`docs/doxygen/`](doxygen/html/index.html) (`html/` + `xml/`) — **versioniert
+mitgeliefert** (bewusste Entscheidung, siehe unten), damit die Code-Doku direkt im Repository
+verfügbar ist, ohne dass Doxygen lokal installiert sein muss, nur um sie anzusehen. Nach
+Code-Änderungen neu laufen lassen und die entstandenen Änderungen unter `docs/doxygen/`
+committen — kein Auto-Sync, die Ausgabe kann also veralten, wenn das Neu-Generieren vergessen
+wird.
 
 ### Ansehen
 
-`tools/doxygen/output/html/index.html` im Browser öffnen. Einstiegspunkte:
-*Classes* (Klassenliste mit Kollaborationsdiagramm je Klasse), *Files* (Include-Graph je
-Datei), oder direkt auf eine Methode klicken → Call-Graph (was ruft diese Methode auf) bzw.
-Caller-Graph (wer ruft sie auf) am Seitenende.
+**→ [Code-Struktur durchsuchen](doxygen/html/index.html)** — direkter Einstieg in die
+generierte Doku. Weitere Einstiegspunkte dort: *Classes* (Klassenliste mit
+Kollaborationsdiagramm je Klasse), *Files* (Include-Graph je Datei), oder direkt auf eine
+Methode klicken → Call-Graph (was ruft diese Methode auf) bzw. Caller-Graph (wer ruft sie auf)
+am Seitenende.
 
 ### Für Claude nutzbar
 
-Die XML-Ausgabe (`tools/doxygen/output/xml/`) ist strukturiert und maschinell auswertbar
-(eine Datei je Klasse/Namespace, u. a. Member-Listen, Parameter, Aufruf-Referenzen zwischen
-Funktionen). Bei Fragen zur Codestruktur ("was ruft `HaDiscovery::publishAll` auf",
-"welche Klassen hängen von `MQTT` ab") kann dort gezielt nachgesehen werden, statt den
-kompletten Quelltext zu durchsuchen — Voraussetzung ist ein aktueller Lauf (siehe oben).
+Die XML-Ausgabe (`docs/doxygen/xml/`) ist strukturiert und maschinell auswertbar (eine Datei
+je Klasse/Namespace, u. a. Member-Listen, Parameter, Aufruf-Referenzen zwischen Funktionen).
+Bei Fragen zur Codestruktur ("was ruft `HaDiscovery::publishAll` auf", "welche Klassen hängen
+von `MQTT` ab") kann dort gezielt nachgesehen werden, statt den kompletten Quelltext zu
+durchsuchen — Voraussetzung ist ein aktueller Lauf (siehe oben).
+
+### Warum versioniert statt gitignored
+
+Ursprünglich als reines Build-Artefakt gitignored — auf Nutzerwunsch umgestellt, damit die
+Code-Struktur-Doku direkt im Repository/auf GitHub einsehbar ist (z. B. `docs/doxygen/html/
+index.html` lokal im Browser öffnen, ganz ohne Doxygen-Installation). Kehrseite: 926 Dateien,
+~6,3 MB, die bei jeder Regenerierung als Diff auftauchen und manuell committed werden müssen.
 
 ### Bekannte Kleinigkeit
 

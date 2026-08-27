@@ -1,0 +1,11 @@
+<map id="ValveController::setAlias" name="ValveController::setAlias">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,170,57"/>
+<area shape="rect" id="Node000002" href="$class_logger.html#ae3fc9458e28edb18ce6c72033a5a97e4" title=" " alt="" coords="260,5,350,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,32,247,25,242,26,170,37"/>
+<area shape="rect" id="Node000005" href="$class_file_system.html#a71d71d5d2586ccfd1982ee5efbb2db2c" title=" " alt="" coords="218,56,392,83"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="170,51,205,57,199,58,170,56"/>
+<area shape="rect" id="Node000003" href="$class_logger.html#a21705d43d3167e0687454df79dedb6d3" title=" " alt="" coords="440,5,525,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,16,427,18,421,19,350,21"/>
+<area shape="rect" id="Node000004" href="$class_logger.html#a8c85a0b2b35eb9f57ca874807a04b911" title="Formatiert den aktuellen Zeitstempel (wie am Anfang jeder Logzeile) nach buffer." alt="" coords="573,5,747,32"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="526,16,560,18,555,19,526,21"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="AutomaticController::begin" name="AutomaticController::begin">
+<area shape="rect" id="Node000001" title="Setzt den Zustand zurueck (keine Sequenz aktiv). Fuer den Boot&#45;Grundzustand." alt="" coords="198,47,334,89"/>
+<area shape="rect" id="Node000002" href="$class_automatic_controller.html#a8b21c0d87ae53811c98a06d7083bda22" title=" " alt="" coords="5,5,150,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,50,150,45,150,40,185,49"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="51,96,104,123"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,86,105,106,104,101,180,87"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="110,85,102,78,77,75,57,77,47,82,45,88,53,98,48,98,40,89,42,79,55,72,78,69,105,74,115,86"/>
+</map>
