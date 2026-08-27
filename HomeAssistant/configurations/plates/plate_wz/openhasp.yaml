@@ -507,6 +507,18 @@ objects:
         - service: script.gartenwasser_zeitplan_eintrag_toggle_aktiv
           data:
             index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+        # Erzwungener val-Nachschlag fuer p4b61 (Eintrags-Dropdown) - die Firmware
+        # setzt die Dropdown-Auswahl bei jedem "options"-Update intern auf Index 0
+        # zurueck, HA pusht "val" aber nur wenn sich der Index selbst aendert. Der
+        # geteilte Skript-Aufruf oben kann das nicht selbst uebernehmen (wird auch
+        # vom HA-Dashboard genutzt), deshalb hier direkt. Verzoegerung noetig, damit
+        # unser Push NACH der reaktiven "options"-Aktualisierung ankommt (die erst
+        # nach dem echten Firmware-Roundtrip passiert) statt davor.
+        - delay: "00:00:01.5"
+        - service: mqtt.publish
+          data:
+            topic: hasp/plate_wz/command/p4b61.val
+            payload: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
 
   - obj: "p4b63"
     properties:
