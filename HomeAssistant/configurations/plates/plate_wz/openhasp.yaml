@@ -446,7 +446,15 @@ objects:
   - obj: "p4b61"
     properties:
       "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
-      "options": >-
+      # options+val kombiniert ueber die "jsonl"-Property (JSON-Payload nach
+      # command/p4b61.jsonl) statt zwei getrennter Properties: die Firmware verarbeitet
+      # beide Keys in EINEM Durchlauf ohne Netzwerk-Zwischenschritt, dadurch kein
+      # sichtbares Aufblitzen des falschen Eintrags mehr (LVGL setzt die Auswahl bei
+      # jedem separaten "options"-Update sonst kurz auf Index 0 zurueck, bevor ein
+      # nachfolgender "val"-Push sie korrigiert - mit der kombinierten JSON-Property
+      # gibt es diesen Zwischenschritt gar nicht erst). Live getestet: ein einzelner
+      # {"options":"...","val":N}-Payload auf command/p4b61.jsonl setzt beides atomar.
+      "jsonl": >-
         {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
         {%- set wd = {'mon': 'Mo', 'tue': 'Di', 'wed': 'Mi', 'thu': 'Do', 'fri': 'Fr', 'sat': 'Sa', 'sun': 'So'} -%}
         {%- set ns = namespace(lines=[]) -%}
@@ -466,11 +474,11 @@ objects:
           {%- endif -%}
           {%- set ns.lines = ns.lines + [e.get('program', 'Kein Programm') ~ ' - ' ~ when] -%}
         {%- endfor -%}
-        {{ (ns.lines | join('\n')) if ns.lines else 'Keine Eintraege' }}
-      "val": >-
-        {%- set count = (state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count -%}
+        {%- set opts = (ns.lines | join('\n')) if ns.lines else 'Keine Eintraege' -%}
+        {%- set count = schedule | count -%}
         {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
-        {{ idx if idx < count else 0 }}
+        {%- set val_idx = idx if idx < count else 0 -%}
+        {{ {'options': opts, 'val': val_idx} | tojson }}
     event:
       "changed":
         - service: input_number.set_value
@@ -507,18 +515,8 @@ objects:
         - service: script.gartenwasser_zeitplan_eintrag_toggle_aktiv
           data:
             index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
-        # Erzwungener val-Nachschlag fuer p4b61 (Eintrags-Dropdown) - die Firmware
-        # setzt die Dropdown-Auswahl bei jedem "options"-Update intern auf Index 0
-        # zurueck, HA pusht "val" aber nur wenn sich der Index selbst aendert. Der
-        # geteilte Skript-Aufruf oben kann das nicht selbst uebernehmen (wird auch
-        # vom HA-Dashboard genutzt), deshalb hier direkt. Verzoegerung noetig, damit
-        # unser Push NACH der reaktiven "options"-Aktualisierung ankommt (die erst
-        # nach dem echten Firmware-Roundtrip passiert) statt davor.
-        - delay: "00:00:01.5"
-        - service: mqtt.publish
-          data:
-            topic: hasp/plate_wz/command/p4b61.val
-            payload: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
+        # Kein separater val-Nachschlag mehr noetig: p4b61 kombiniert options+val jetzt
+        # atomar in der "jsonl"-Property (siehe deren Definition weiter oben).
 
   - obj: "p4b63"
     properties:

@@ -583,21 +583,9 @@ gartenwasser_plate_zeitplan_typ_setzen:
       data:
         topic: "gartenwasser/main/schedule/set"
         payload: "{{ {'schedule': new_schedule} | tojson }}"
-    # Erzwungener val-Nachschlag fuer das Eintrags-Dropdown (p4b61, openHASP-Plate): die
-    # Firmware setzt bei jedem "options"-Update die Auswahl intern auf Index 0 zurueck
-    # (lv_dropdown_set_options()), HA pusht "val" aber nur, wenn sich der INDEX selbst
-    # aendert - bei einer reinen Feld-Aenderung (Typ/Zeit/Tag/Datum/Programm) bleibt der
-    # Index gleich, das Geraet bekaeme also nie die noetige Korrektur. Direkter Publish
-    # unabhaengig von HAs Change-Detection behebt das zuverlaessig. Die Verzoegerung ist
-    # noetig, weil die reaktive "options"-Aktualisierung erst nach dem echten Firmware-
-    # Roundtrip (main/schedule/set -> main/schedule/state -> Sensor-Update) passiert -
-    # ohne Wartezeit kaeme unser val-Push VOR "options" an und wuerde von dessen
-    # Reset-auf-0-Verhalten wieder ueberschrieben (live per MQTT-Mitschnitt bewiesen).
-    - delay: "00:00:01.5"
-    - action: mqtt.publish
-      data:
-        topic: "hasp/plate_wz/command/p4b61.val"
-        payload: "{{ index }}"
+    # Kein separater val-Nachschlag mehr noetig: p4b61 (Eintrags-Dropdown) kombiniert
+    # options+val jetzt in einer einzigen "jsonl"-Property (siehe openhasp.yaml),
+    # dadurch atomar ohne Zwischenschritt.
 
 gartenwasser_plate_zeitplan_zeit_setzen:
   alias: "Gartenwasser: Plate - Zeitplan-Uhrzeit setzen"
@@ -619,13 +607,8 @@ gartenwasser_plate_zeitplan_zeit_setzen:
       data:
         topic: "gartenwasser/main/schedule/set"
         payload: "{{ {'schedule': new_schedule} | tojson }}"
-    # Erzwungener val-Nachschlag fuer p4b61 (inkl. Verzoegerung) - siehe Kommentar in
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
     # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
-    - delay: "00:00:01.5"
-    - action: mqtt.publish
-      data:
-        topic: "hasp/plate_wz/command/p4b61.val"
-        payload: "{{ index }}"
 
 gartenwasser_plate_zeitplan_wochentag_toggle:
   alias: "Gartenwasser: Plate - Zeitplan-Wochentag umschalten"
@@ -657,13 +640,8 @@ gartenwasser_plate_zeitplan_wochentag_toggle:
       data:
         topic: "gartenwasser/main/schedule/set"
         payload: "{{ {'schedule': new_schedule} | tojson }}"
-    # Erzwungener val-Nachschlag fuer p4b61 (inkl. Verzoegerung) - siehe Kommentar in
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
     # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
-    - delay: "00:00:01.5"
-    - action: mqtt.publish
-      data:
-        topic: "hasp/plate_wz/command/p4b61.val"
-        payload: "{{ index }}"
 
 gartenwasser_plate_zeitplan_datum_setzen:
   alias: "Gartenwasser: Plate - Zeitplan-Datum setzen"
@@ -685,13 +663,8 @@ gartenwasser_plate_zeitplan_datum_setzen:
       data:
         topic: "gartenwasser/main/schedule/set"
         payload: "{{ {'schedule': new_schedule} | tojson }}"
-    # Erzwungener val-Nachschlag fuer p4b61 (inkl. Verzoegerung) - siehe Kommentar in
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
     # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
-    - delay: "00:00:01.5"
-    - action: mqtt.publish
-      data:
-        topic: "hasp/plate_wz/command/p4b61.val"
-        payload: "{{ index }}"
 
 gartenwasser_plate_zeitplan_programm_setzen:
   alias: "Gartenwasser: Plate - Zeitplan-Programm setzen"
@@ -713,10 +686,5 @@ gartenwasser_plate_zeitplan_programm_setzen:
       data:
         topic: "gartenwasser/main/schedule/set"
         payload: "{{ {'schedule': new_schedule} | tojson }}"
-    # Erzwungener val-Nachschlag fuer p4b61 (inkl. Verzoegerung) - siehe Kommentar in
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
     # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
-    - delay: "00:00:01.5"
-    - action: mqtt.publish
-      data:
-        topic: "hasp/plate_wz/command/p4b61.val"
-        payload: "{{ index }}"
