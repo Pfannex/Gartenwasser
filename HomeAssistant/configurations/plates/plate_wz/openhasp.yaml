@@ -648,7 +648,7 @@ objects:
       "border_width": "{{ 0 if is_state('input_boolean.gartenwasser_plate_settings_zeit_minute_modus', 'on') else 4 }}"
     event:
       "up":
-        - service: input_boolean.toggle
+        - service: input_boolean.turn_off
           target:
             entity_id: input_boolean.gartenwasser_plate_settings_zeit_minute_modus
 
@@ -667,7 +667,7 @@ objects:
       "border_width": "{{ 4 if is_state('input_boolean.gartenwasser_plate_settings_zeit_minute_modus', 'on') else 0 }}"
     event:
       "up":
-        - service: input_boolean.toggle
+        - service: input_boolean.turn_on
           target:
             entity_id: input_boolean.gartenwasser_plate_settings_zeit_minute_modus
 
@@ -964,9 +964,7 @@ objects:
       "up":
         - service: input_select.select_option
           data:
-            option: >-
-              {%- set cur = states('input_select.gartenwasser_plate_settings_datum_feld') -%}
-              {{ 'Monat' if cur == 'Tag' else ('Jahr' if cur == 'Monat' else 'Tag') }}
+            option: "Tag"
           target:
             entity_id: input_select.gartenwasser_plate_settings_datum_feld
 
@@ -996,9 +994,7 @@ objects:
       "up":
         - service: input_select.select_option
           data:
-            option: >-
-              {%- set cur = states('input_select.gartenwasser_plate_settings_datum_feld') -%}
-              {{ 'Monat' if cur == 'Tag' else ('Jahr' if cur == 'Monat' else 'Tag') }}
+            option: "Monat"
           target:
             entity_id: input_select.gartenwasser_plate_settings_datum_feld
 
@@ -1028,9 +1024,7 @@ objects:
       "up":
         - service: input_select.select_option
           data:
-            option: >-
-              {%- set cur = states('input_select.gartenwasser_plate_settings_datum_feld') -%}
-              {{ 'Monat' if cur == 'Tag' else ('Jahr' if cur == 'Monat' else 'Tag') }}
+            option: "Jahr"
           target:
             entity_id: input_select.gartenwasser_plate_settings_datum_feld
 
