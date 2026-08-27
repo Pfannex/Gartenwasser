@@ -42,9 +42,7 @@ objects:
 
   - obj: "p4b20"
     properties:
-      "bg_color": "{{ '#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else '#333333' }}"
-      "bg_color30": "{{ '#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else '#333333' }}"
-      "bg_color40": "{{ '#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else '#333333' }}"
+      "border_width": "{{ 3 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else 0 }}"
     event:
       "up":
         - service: input_select.select_option
@@ -55,9 +53,7 @@ objects:
 
   - obj: "p4b82"
     properties:
-      "bg_color": "{{ '#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Programme') else '#333333' }}"
-      "bg_color30": "{{ '#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Programme') else '#333333' }}"
-      "bg_color40": "{{ '#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Programme') else '#333333' }}"
+      "border_width": "{{ 3 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Programme') else 0 }}"
     event:
       "up":
         - service: input_select.select_option
@@ -68,12 +64,10 @@ objects:
 
   - obj: "p4b83"
     properties:
-      "bg_color": >-
-        {{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else ('#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Zeitplan') else '#333333') }}
-      "bg_color30": >-
-        {{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else ('#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Zeitplan') else '#333333') }}
-      "bg_color40": >-
-        {{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else ('#e53935' if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Zeitplan') else '#333333') }}
+      "border_width": "{{ 3 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Zeitplan') else 0 }}"
+      "bg_color": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#333333' }}"
+      "bg_color30": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#333333' }}"
+      "bg_color40": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#333333' }}"
     event:
       "up":
         - service: input_select.select_option
