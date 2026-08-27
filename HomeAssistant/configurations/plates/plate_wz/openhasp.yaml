@@ -478,6 +478,18 @@ objects:
           data:
             index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
 
+  - obj: "p4b81"
+    properties:
+      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "bg_color": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#757575' }}"
+      "bg_color30": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#757575' }}"
+      "bg_color40": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#757575' }}"
+    event:
+      "up":
+        - service: switch.toggle
+          target:
+            entity_id: switch.gartenwasser_zeitplan_aktiv
+
   - obj: "p4b63"
     properties:
       "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
