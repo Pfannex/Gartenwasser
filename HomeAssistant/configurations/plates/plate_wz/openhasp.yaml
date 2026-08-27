@@ -42,7 +42,7 @@ objects:
 
   - obj: "p4b20"
     properties:
-      "border_width": "{{ 3 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else 0 }}"
+      "border_width": "{{ 4 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else 0 }}"
     event:
       "up":
         - service: input_select.select_option
@@ -53,7 +53,7 @@ objects:
 
   - obj: "p4b82"
     properties:
-      "border_width": "{{ 3 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Programme') else 0 }}"
+      "border_width": "{{ 4 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Programme') else 0 }}"
     event:
       "up":
         - service: input_select.select_option
@@ -64,7 +64,7 @@ objects:
 
   - obj: "p4b83"
     properties:
-      "border_width": "{{ 3 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Zeitplan') else 0 }}"
+      "border_width": "{{ 4 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Zeitplan') else 0 }}"
       "bg_color": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#333333' }}"
       "bg_color30": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#333333' }}"
       "bg_color40": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#333333' }}"
@@ -464,8 +464,7 @@ objects:
           {%- else -%}
             {%- set when = 'Täglich, ' ~ e.get('time', '00:00') ~ ' Uhr' -%}
           {%- endif -%}
-          {%- set suffix = '' if e.get('enabled', true) else ' (pausiert)' -%}
-          {%- set ns.lines = ns.lines + [e.get('program', 'Kein Programm') ~ ' - ' ~ when ~ suffix] -%}
+          {%- set ns.lines = ns.lines + [e.get('program', 'Kein Programm') ~ ' - ' ~ when] -%}
         {%- endfor -%}
         {{ (ns.lines | join('\n')) if ns.lines else 'Keine Eintraege' }}
       "val": >-
@@ -483,6 +482,11 @@ objects:
   - obj: "p4b80"
     properties:
       "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
+      "text": >-
+        {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
+        {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
+        {%- set enabled = (schedule[idx].get('enabled', true) if idx < (schedule | count) else true) -%}
+        {{ 'Zeitplan AKTIV' if enabled else 'Zeitplan PAUSIERT' }}
       "bg_color": >-
         {%- set schedule = state_attr('sensor.gartenwasser_zeitplan', 'schedule') or [] -%}
         {%- set idx = states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) -%}
@@ -503,18 +507,6 @@ objects:
         - service: script.gartenwasser_zeitplan_eintrag_toggle_aktiv
           data:
             index: "{{ states('input_number.gartenwasser_plate_settings_zeitplan_eintrag') | int(0) }}"
-
-  - obj: "p4b81"
-    properties:
-      "hidden": "{{ states('input_select.gartenwasser_plate_settings_kategorie') != 'Zeitplan' }}"
-      "bg_color": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#757575' }}"
-      "bg_color30": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#757575' }}"
-      "bg_color40": "{{ '#43a047' if is_state('switch.gartenwasser_zeitplan_aktiv', 'on') else '#757575' }}"
-    event:
-      "up":
-        - service: switch.toggle
-          target:
-            entity_id: switch.gartenwasser_zeitplan_aktiv
 
   - obj: "p4b63"
     properties:
