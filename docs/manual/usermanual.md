@@ -621,6 +621,10 @@ Voraussetzung: Gerät läuft bereits und ist im WLAN erreichbar (mDNS-Name `gart
 
 Nach jedem Update lässt sich die tatsächlich laufende Version im Web-Interface unter *Info* → *Firmware* ablesen (Format „V<Version> Build <Nummer>") — die Build-Nummer zählt bei jedem Firmware-Build automatisch hoch, unabhängig von der manuell vergebenen Versionsnummer.
 
+### 11.5 Code-Struktur nachvollziehen (für Entwickler)
+
+Wer sich im Firmware-Quelltext (`src/`) orientieren will, statt nur ein fertiges Update einzuspielen: [Doxygen](https://www.doxygen.nl/) + [Graphviz](https://graphviz.org/) erzeugen daraus automatisch Klassendiagramme, Aufruf-/Aufrufer-Graphen und Include-Abhängigkeitsgraphen, browsbar als HTML. Installation, Konfiguration (`tools/doxygen/Doxyfile`) und Regenerieren der Ausgabe: `docs/development.md`.
+
 ---
 
 ## 12. Anhang: Fehlerbehebung
