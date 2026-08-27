@@ -623,7 +623,7 @@ Nach jedem Update lässt sich die tatsächlich laufende Version im Web-Interface
 
 ### 11.5 Code-Struktur nachvollziehen (für Entwickler)
 
-Wer sich im Firmware-Quelltext (`src/`) orientieren will, statt nur ein fertiges Update einzuspielen: [Doxygen](https://www.doxygen.nl/) + [Graphviz](https://graphviz.org/) erzeugen daraus automatisch Klassendiagramme, Aufruf-/Aufrufer-Graphen und Include-Abhängigkeitsgraphen. Fertig generiert und direkt im Repository einsehbar: **[docs/doxygen/html/index.html](../doxygen/html/index.html)**. Installation, Konfiguration (`tools/doxygen/Doxyfile`) und Regenerieren nach Code-Änderungen: `docs/development.md`.
+Wer sich im Firmware-Quelltext (`src/`) orientieren will, statt nur ein fertiges Update einzuspielen: [Doxygen](https://www.doxygen.nl/) + [Graphviz](https://graphviz.org/) erzeugen daraus automatisch Klassendiagramme, Aufruf-/Aufrufer-Graphen und Include-Abhängigkeitsgraphen. Fertig generiert, direkt gerendert (nicht nur als Quelltext): **[Code-Struktur durchsuchen](https://pfannex.github.io/Gartenwasser/doxygen/html/index.html)**. Installation, Konfiguration (`tools/doxygen/Doxyfile`) und Regenerieren nach Code-Änderungen: `docs/development.md`.
 
 ---
 

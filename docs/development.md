@@ -53,7 +53,7 @@ cd tools/doxygen
 doxygen Doxyfile
 ```
 
-Ausgabe landet in [`docs/doxygen/`](doxygen/html/index.html) (`html/` + `xml/`) — **versioniert
+Ausgabe landet in `docs/doxygen/` (`html/` + `xml/`) — **versioniert
 mitgeliefert** (bewusste Entscheidung, siehe unten), damit die Code-Doku direkt im Repository
 verfügbar ist, ohne dass Doxygen lokal installiert sein muss, nur um sie anzusehen. Nach
 Code-Änderungen neu laufen lassen und die entstandenen Änderungen unter `docs/doxygen/`
@@ -62,11 +62,19 @@ wird.
 
 ### Ansehen
 
-**→ [Code-Struktur durchsuchen](doxygen/html/index.html)** — direkter Einstieg in die
-generierte Doku. Weitere Einstiegspunkte dort: *Classes* (Klassenliste mit
-Kollaborationsdiagramm je Klasse), *Files* (Include-Graph je Datei), oder direkt auf eine
-Methode klicken → Call-Graph (was ruft diese Methode auf) bzw. Caller-Graph (wer ruft sie auf)
-am Seitenende.
+**→ [Code-Struktur durchsuchen](https://pfannex.github.io/Gartenwasser/doxygen/html/index.html)**
+— öffnet direkt gerendert (GitHub Pages; ein Klick auf `docs/doxygen/html/index.html` im
+Repository selbst zeigt nur Quelltext, siehe unten). Weitere Einstiegspunkte dort: *Classes*
+(Klassenliste mit Kollaborationsdiagramm je Klasse), *Files* (Include-Graph je Datei), oder
+direkt auf eine Methode klicken → Call-Graph (was ruft diese Methode auf) bzw. Caller-Graph
+(wer ruft sie auf) am Seitenende.
+
+> **Warum kein normaler Repo-Link?** Weder GitHub noch VS Code rendern `.html`-Dateien beim
+> Anklicken im Repository/Editor — beide zeigen nur den Quelltext (kein automatisches
+> HTML-Rendering von beliebigem Repo-Inhalt, VS Code öffnet `.html` grundsätzlich im
+> Code-Editor). Der Link oben zeigt stattdessen auf die über GitHub Pages veröffentlichte,
+> tatsächlich gerenderte Version. In VS Code lässt sich dieselbe URL auch direkt im Editor
+> öffnen: `Strg+Umschalt+P` → *Simple Browser: Show* → URL einfügen.
 
 ### Für Claude nutzbar
 

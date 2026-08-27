@@ -167,6 +167,6 @@ die tatsächlich validiert und persistiert.
 
 - Vollständige Entity-/Objekt-Referenz: `docs/manual/usermanual.md`, Kapitel 8 (HA) und 9 (Plate).
 - Vollständiger MQTT-Topic-Baum: `docs/manual/usermanual.md`, Kapitel 7.
-- C++-Firmware-Struktur (Klassen/Aufrufgraphen): `docs/development.md` → `docs/doxygen/html/index.html`.
+- C++-Firmware-Struktur (Klassen/Aufrufgraphen): [Code-Struktur durchsuchen](https://pfannex.github.io/Gartenwasser/doxygen/html/index.html) (siehe auch `docs/development.md`).
 - Technische Stolpersteine/Lessons Learned zu HA/openHASP (Reload-Verhalten, Ghost-State,
   Freeze-Properties u. a.): `docs/homeassistant/README.md`.
