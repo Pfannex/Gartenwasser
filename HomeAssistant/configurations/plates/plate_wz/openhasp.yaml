@@ -40,6 +40,10 @@ objects:
             topic: hasp/plate_wz/command/page
             payload: "3"
 
+  - obj: "p4b88"
+    properties:
+      "hidden": "{{ not is_state('sensor.gartenbewasserung_i2c_status', 'unavailable') }}"
+
   - obj: "p4b20"
     properties:
       "border_width": "{{ 4 if is_state('input_select.gartenwasser_plate_settings_kategorie', 'Konfiguration') else 0 }}"
