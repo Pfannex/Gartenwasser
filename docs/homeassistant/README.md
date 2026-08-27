@@ -62,6 +62,7 @@ HomeAssistant/
   configurations/
     packages/
       gartenwasser.yaml           # buendelt die 9 Domains unten in die echten Top-Level-Keys
+      plate_wz.yaml                # buendelt die plate_wz-Domains (aktuell nur automation)
     gartenwasser/                 # die rohen Domain-Dateien, vom Package eingebunden
       input_number.yaml
       input_boolean.yaml
@@ -73,22 +74,77 @@ HomeAssistant/
       mqtt.yaml
       template.yaml
     plates/                       # openHASP-Touchpanels, ein Unterordner je Geraet
+      openhasp.yaml                # duenner Manifest: Slug -> Geraete-Unterordner
       plate_wz/
-        device/                  # Backup des tatsaechlichen Geraete-Stands (read-only Referenz)
+        openhasp.yaml               # objects: Property-Bindungen/Events fuer die Status-Seite
+        automations.yaml            # plate-spezifische Automationen (z.B. Idle-Dimmen)
+        device/                    # Backup des tatsaechlichen Geraete-Stands (read-only Referenz)
           pages.jsonl
-          config.json            # Passwoerter kommen bereits maskiert vom Geraet ("********")
+          config.json              # Passwoerter maskiert ("********"), NUR Boot-Zeit-Snapshot -
+                                    # laufende Config-Aenderungen ueber /api/config/<x>/ zeigen
+                                    # sich hier erst nach einem echten Neustart
+          play.png / stop.png       # eigene PNG-Icons fuer den Start/Stop-Button
   dashboards/
     gartenwasser.yaml             # das Lovelace-Dashboard (YAML-Modus)
   themes/
 ```
 
-**openHASP-Integration:** rein YAML-gesteuert (kein Config-Entry, siehe
-`.storage/core.config_entries` — 0 Eintraege fuer `openhasp`), die Integration laedt nur, wenn der
-Top-Level-Schluessel `openhasp:` in `configuration.yaml` ueberhaupt vorhanden ist. Solange kein
-Geraet echte YAML-Konfiguration braucht, reicht `openhasp: {}` inline in `configuration.yaml` —
-bewusst KEINE eigene Datei dafuer, um keine leere Include-Datei mitzuschleppen. Sobald ein Plate
-eigene HA-seitige Einstellungen braucht, gehoert die Datei in dessen `configurations/plates/<name>/`
-und wird dann gezielt eingebunden.
+**Persistente Geraete-Einstellungen (z. B. Idle-Timeouts, Backlight-Pin) NICHT per MQTT
+`config/<submodul>` setzen** - kam im Test nachweislich nicht an (per MQTT-Mitschnitt bestaetigt,
+trotz gegenteiliger Doku-Aussage). Der tatsaechlich funktionierende Weg (reverse-engineered aus dem
+Web-Editor, `static/main.js`, Funktion `submitOldConfig`): `GET /api/config/<submodul>/` liefert das
+aktuelle Objekt, `POST /api/config/<submodul>/` mit dem KOMPLETTEN (nicht nur geaenderten) Objekt als
+JSON-Body speichert es persistent. Nach einer Aenderung zeigt `GET /api/config/<submodul>/` sofort
+den neuen Stand, `config.json` (Boot-Snapshot) aber erst nach einem echten Neustart.
+
+**`hasp.color2` (Submodul `hasp`, `GET`/`POST /api/config/hasp/`) ist die THEME-Sekundaerfarbe und
+wird von LVGL geraeteweit fuers Pressed/Checked-Feedback interaktiver Elemente verwendet** - lokale
+Objekt-Style-Overrides (`bg_color02`/`bg_color03`, siehe Styling-Suffixe unten) koennen das fuer
+manche Zustandskombinationen NICHT ueberschreiben (per Diagnose-Test verifiziert: `color2` testweise
+auf eine Kontrastfarbe gesetzt, der Press-Flash uebernahm sie direkt, obwohl lokale Overrides gesetzt
+waren - siehe `docs/Log.md`). Fuer plate_wz aktuell auf `#e53935` (unser Rot) gesetzt, damit der
+Press-Flash beim Einschalten eines Ventils nicht kontrastiert. Wirkt sich auf ALLE Seiten des
+Geraets aus, nicht nur eine einzelne - bei einer neuen Farbwahl alle Seiten pruefen.
+
+**openHASP-Styling-Suffixe** (fuer `bg_color`/`text_color`/etc. an einzelnen Objekten): zweistelliger
+Zahlen-Suffix, 1. Ziffer = Teil (0 = Hauptteil, andere Werte fuer Sub-Widgets wie btnmatrix-Items),
+2. Ziffer = Zustand (0=Standard, 1=umgeschaltet/checked, 2=gedrueckt nicht umgeschaltet, 3=gedrueckt
+UND umgeschaltet, 4=deaktiviert nicht umgeschaltet, 5=deaktiviert umgeschaltet) - z. B. `bg_color03`
+= Hauptteil, gedrueckt+umgeschaltet. Aus der Firmware-Quelle (`src/hasp/hasp_attribute.cpp`,
+`hasp_attribute_get_part_state_new()`) verifiziert, nicht nur aus Doku/Community-Posts uebernommen.
+
+**openHASP-Integration:** hybrid, nicht rein YAML-gesteuert wie urspruenglich angenommen. Ein
+Plate wird per echter MQTT-Discovery automatisch als Config-Entry angelegt (`hasp/discovery/<hwid>`,
+sichtbar unter Einstellungen → Geraete & Dienste → openHASP), sobald es online ist. Der YAML-Block
+unter `openhasp: <slug>:` liefert nur die ERGAENZENDE `objects`-Konfiguration (Property-Bindungen,
+Event-Handler) zu diesem bereits per Discovery angelegten Entry - ohne den YAML-Eintrag wirft die
+Integration bei jeder MQTT-Nachricht vom Geraet einen Fehler ("No YAML configuration for `<slug>`,
+please create an entry under 'openhasp' with the slug: `<slug>`"), auch wenn das Geraet laengst
+online ist. Minimal reicht `<slug>: {objects: []}` zum Stillhalten des Fehlers.
+
+**Wichtig — Aenderungen an `openhasp: <slug>: objects:` brauchen den gezielten Entry-Reload, NICHT
+"Alle YAML-Konfigurationen neu laden":** empirisch getestet (2026-08-25, `docs/Log.md`) - ein
+Property testweise auf einen fixen Marker-Wert gesetzt, `homeassistant.reload_all` aufgerufen,
+Marker blieb wirkungslos; derselbe gezielte Reload (Einstellungen → Geraete & Dienste → openHASP →
+`<slug>` → Neu laden, bzw. `POST /api/config/config_entries/entry/<entry_id>/reload`) zog die
+Aenderung sofort. `reload_all` deckt nur eine feste Liste von Domains mit eigenem
+`<domain>.reload`-Service ab (automation/script/scene/input_*/...) - Config-Entry-Integrationen wie
+openHASP sind dort nicht dabei.
+
+**Reconnect nach Geraete-Reboot braucht KEINEN manuellen Entry-Reload - aber nicht wegen MQTT-retain:**
+im Quellcode der Integration (`HASwitchPlate/openHASP-custom-component`, `custom_components/openhasp/__init__.py`)
+lassen ausnahmslos ALLE `mqtt.async_publish()`-Aufrufe `retain=False` gesetzt (per Live-Mitschnitt
+2026-08-26 bestaetigt: kein einziges `command/<obj>.<property>` landet retained auf dem Broker). Der
+tatsaechliche Mechanismus ist ein anderer: die Integration abonniert `hasp/<slug>/LWT`, und sobald dort
+`online` reinkommt (Geraet frisch gebootet/reconnected), ruft ihr LWT-Handler automatisch `refresh()`
+auf, was jedes aktuell in `openhasp.yaml` gebundene Objekt neu an das Geraet pusht (per Live-Mitschnitt
+waehrend eines echten Reboots verifiziert - alle Properties kamen ungefragt zurueck). Praktische Folge:
+ein reiner Geraete-Neustart reicht, um den korrekten Zustand wiederherzustellen, ohne manuellen
+Entry-Reload hinterher. Nur wird eine Property komplett aus `openhasp.yaml` ENTFERNT (nicht nur
+geaendert), pusht `refresh()` dafuer nichts mehr - dann bleibt der alte Geraete-interne Wert stehen,
+bis ein echter Reboot die Firmware-Objekte auf ihre Datei-Defaults zuruecksetzt (siehe "Ghost State"
+weiter oben). Ein reiner `pages reload` (ohne Geraete-Reboot) loest dagegen kein LWT-Event aus - dort
+bleibt der manuelle Entry-Reload weiterhin noetig.
 
 ## Einrichtungsschritte
 

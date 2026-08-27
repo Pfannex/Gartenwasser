@@ -152,7 +152,7 @@ views:
                 color: black !important;
               }
               ha-card {
-                --bubble-button-icon-background-color: ${hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? '#e53935' : '#43a047'} !important;
+                --bubble-button-icon-background-color: ${(hass.states['sensor.gartenbewasserung_i2c_status'].state === 'unavailable' || hass.states['input_select.gartenwasser_programm'].state === 'Kein Programm') ? '#757575' : (hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? '#e53935' : '#43a047')} !important;
               }
               ${card.querySelector('.bubble-name').textContent = hass.states['text.gartenwasser_v0_alias'].state}
               ${card.querySelector('.bubble-state').textContent = hass.states['binary_sensor.gartenbewasserung_hauptventil'].state === 'on' ? 'An' : 'Aus'}

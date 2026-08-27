@@ -254,6 +254,94 @@ gartenwasser_programm_neu_starten:
       data:
         value: "{{ idx }}"
 
+# Zwei Skripte fuer das Programme-Panel auf der Plate-Settings-Seite (openHASP, page 4) -
+# bewusst KEIN Entwurf/Speichern wie beim HA-Dashboard-Formular oben: die Plate schreibt
+# bei jedem Tap direkt (ein Feld pro Aufruf), analog zu den Ventil-Buttons auf der
+# Status-Seite. "time" bleibt sparse (nur auto=true-Ventile), exakt wie bei
+# gartenwasser_programm_speichern - siehe Kommentar oben im Datei-Kopf.
+gartenwasser_plate_programm_auto_toggle:
+  alias: "Gartenwasser: Plate - Automatik in Programm umschalten"
+  fields:
+    index:
+      description: "0-basierter Index des Programms im programs-Array"
+      example: 0
+    valve:
+      description: "Ventilnummer 1-5"
+      example: 1
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | count) }}"
+    - variables:
+        programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
+        active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
+        prog: "{{ programs[index] }}"
+        new_state: "{{ not (prog.get('auto', {}) or {}).get('V' ~ valve, false) }}"
+    - variables:
+        new_auto: >-
+          {% set ns = namespace(d={}) %}
+          {% for n in range(1, 6) %}
+            {% set k = 'V' ~ n %}
+            {% set is_on = (new_state if n == valve else (prog.get('auto', {}) or {}).get(k, false)) %}
+            {% set ns.d = dict(ns.d, **{k: is_on}) %}
+          {% endfor %}
+          {{ ns.d }}
+        # "time" bleibt beim Deaktivieren UNVERAENDERT stehen (kein Loeschen mehr) - auto
+        # allein entscheidet, ob das Ventil laeuft, "time" ist einfach "die zuletzt
+        # eingestellte Dauer", genau wie im HA-Dashboard-Formular (dort bleibt der Wert
+        # in den Entwurfs-Helpern erhalten, solange man nicht "Speichern" drueckt). Nur
+        # beim ERSTEN Aktivieren eines Ventils ohne bisherigen Wert wird ein Default (5)
+        # ergaenzt, damit die Anzeige etwas Sinnvolles zeigt.
+        new_time: >-
+          {%- set existing = prog.get('time', {}) or {} -%}
+          {%- if new_state -%}
+            {{ dict(existing, **{'V' ~ valve: existing.get('V' ~ valve, 5)}) }}
+          {%- else -%}
+            {{ existing }}
+          {%- endif -%}
+    - variables:
+        new_prog:
+          name: "{{ prog.get('name', '') }}"
+          time: "{{ new_time }}"
+          auto: "{{ new_auto }}"
+        new_programs: "{{ programs[:index] + [new_prog] + programs[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/programs/set"
+        payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
+
+gartenwasser_plate_programm_laufzeit_setzen:
+  alias: "Gartenwasser: Plate - Laufzeit in Programm setzen"
+  fields:
+    index:
+      description: "0-basierter Index des Programms im programs-Array"
+      example: 0
+    valve:
+      description: "Ventilnummer 1-5"
+      example: 1
+    value:
+      description: "Neue Laufzeit in Minuten (0-180)"
+      example: 5
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_programme', 'programs') or []) | count) }}"
+    - variables:
+        programs: "{{ state_attr('sensor.gartenwasser_programme', 'programs') }}"
+        active: "{{ state_attr('sensor.gartenwasser_programme', 'activeProgram') }}"
+        prog: "{{ programs[index] }}"
+    # Laufzeit ist unabhaengig von AUTO editierbar (Nutzer-Entscheidung 2026-08-26) - kein
+    # Guard mehr auf den Automatik-Status. Firmware akzeptiert einen "time"-Eintrag fuer
+    # ein auto=false-Ventil klaglos, siehe gartenwasser_plate_programm_auto_toggle oben.
+    - variables:
+        new_prog:
+          name: "{{ prog.get('name', '') }}"
+          time: "{{ dict(prog.get('time', {}) or {}, **{'V' ~ valve: value}) }}"
+          auto: "{{ prog.get('auto', {}) }}"
+        new_programs: "{{ programs[:index] + [new_prog] + programs[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/programs/set"
+        payload: "{{ {'programs': new_programs, 'activeProgram': active} | tojson }}"
+
 # Fuenf Skripte fuer den Zeitplan-Editor (Zeitplan-Seite) - gleiches Grundmuster wie die
 # Programm-Skripte oben (Bearbeiten starten/Speichern/Loeschen/Neu, plus Abbrechen), auf
 # das schedule-Array statt programs-Array angewendet (main/schedule/set ersetzt ebenfalls
@@ -439,3 +527,164 @@ gartenwasser_zeitplan_eintrag_neu_starten:
         entity_id: input_number.gartenwasser_zeitplan_editier_index
       data:
         value: "{{ idx }}"
+
+# Fuenf Skripte fuer das Zeitplan-Panel auf der Plate-Settings-Seite (openHASP, page 4) -
+# gleiches Prinzip wie die Programme-Skripte weiter oben: direktes Schreiben pro Tap,
+# kein Entwurf/Speichern. "enabled" nutzt den bestehenden
+# gartenwasser_zeitplan_eintrag_toggle_aktiv von oben (unveraendert wiederverwendbar).
+# weekdays/date werden beim Wechsel des Typs NICHT geloescht, falls schon vorhanden -
+# gleiche Unabhaengigkeits-Logik wie bei Programme (auto/time), damit ein Hin-und-Her
+# zwischen z.B. Woechentlich und Einmalig die jeweils andere Einstellung nicht vergisst.
+
+gartenwasser_plate_zeitplan_typ_setzen:
+  alias: "Gartenwasser: Plate - Zeitplan-Typ setzen"
+  fields:
+    index:
+      description: "0-basierter Index des Eintrags im schedule-Array"
+      example: 0
+    type:
+      description: "daily, weekly oder once"
+      example: "daily"
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count) }}"
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        entry: "{{ schedule[index] }}"
+        # Immer FRISCH aufbauen (nur die 4 gemeinsamen Felder), dann genau EIN
+        # typ-spezifisches Feld ergaenzen - gleiches Muster wie das bestehende
+        # gartenwasser_zeitplan_eintrag_speichern. NICHT weekdays/date aus dem alten
+        # Typ mituebernehmen: die Firmware verwirft einen Eintrag komplett, wenn er
+        # gleichzeitig weekdays UND date enthaelt (live per MQTT-Mitschnitt bewiesen -
+        # main/schedule/set kam mit 4 Eintraegen raus, main/schedule/state nur noch mit
+        # 3 zurueck, der Eintrag mit beiden Feldern fehlte ersatzlos).
+        base:
+          enabled: "{{ entry.get('enabled', true) }}"
+          type: "{{ type }}"
+          time: "{{ entry.get('time', '06:00') }}"
+          program: "{{ entry.get('program', 'Kein Programm') }}"
+    - variables:
+        # Wichtig: "weekly" MIT LEERER weekdays-Liste wird von der Firmware ebenfalls
+        # komplett verworfen (zweiter live bewiesener Fall - main/schedule/set mit
+        # "weekdays": [] kam bei main/schedule/state ohne den Eintrag zurueck). Deshalb
+        # beim Wechsel zu "weekly" ohne vorhandene Tage den heutigen Wochentag als
+        # Startwert setzen, nie eine leere Liste senden.
+        new_entry: >-
+          {%- if type == 'weekly' -%}
+            {%- set wds = (entry.weekdays if (entry.get('weekdays') or []) else [['mon','tue','wed','thu','fri','sat','sun'][now().weekday()]]) -%}
+            {{ dict(base, weekdays=wds) }}
+          {%- elif type == 'once' -%}
+            {{ dict(base, date=(entry.date if 'date' in entry else now().strftime('%Y-%m-%d'))) }}
+          {%- else -%}
+            {{ base }}
+          {%- endif -%}
+        new_schedule: "{{ schedule[:index] + [new_entry] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+    # Kein separater val-Nachschlag mehr noetig: p4b61 (Eintrags-Dropdown) kombiniert
+    # options+val jetzt in einer einzigen "jsonl"-Property (siehe openhasp.yaml),
+    # dadurch atomar ohne Zwischenschritt.
+
+gartenwasser_plate_zeitplan_zeit_setzen:
+  alias: "Gartenwasser: Plate - Zeitplan-Uhrzeit setzen"
+  fields:
+    index:
+      description: "0-basierter Index des Eintrags im schedule-Array"
+      example: 0
+    time:
+      description: "Neue Uhrzeit im Format HH:MM"
+      example: "06:00"
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count) }}"
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        new_entry: "{{ dict(schedule[index], time=time) }}"
+        new_schedule: "{{ schedule[:index] + [new_entry] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
+    # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
+
+gartenwasser_plate_zeitplan_wochentag_toggle:
+  alias: "Gartenwasser: Plate - Zeitplan-Wochentag umschalten"
+  fields:
+    index:
+      description: "0-basierter Index des Eintrags im schedule-Array"
+      example: 0
+    day:
+      description: "mon/tue/wed/thu/fri/sat/sun"
+      example: "mon"
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count) }}"
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        entry: "{{ schedule[index] }}"
+        wd_list: "{{ entry.weekdays | default([]) }}"
+        new_wd: "{{ (wd_list | reject('eq', day) | list) if day in wd_list else (wd_list + [day]) }}"
+    # Mindestens ein Wochentag muss stehen bleiben - die Firmware verwirft einen
+    # "weekly"-Eintrag mit leerer weekdays-Liste komplett (siehe
+    # gartenwasser_plate_zeitplan_typ_setzen), das Entfernen des letzten Tages waere
+    # also ein stiller Datenverlust. Statt zu schreiben einfach nichts tun.
+    - condition: template
+      value_template: "{{ new_wd | count > 0 }}"
+    - variables:
+        new_entry: "{{ dict(entry, weekdays=new_wd) }}"
+        new_schedule: "{{ schedule[:index] + [new_entry] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
+    # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
+
+gartenwasser_plate_zeitplan_datum_setzen:
+  alias: "Gartenwasser: Plate - Zeitplan-Datum setzen"
+  fields:
+    index:
+      description: "0-basierter Index des Eintrags im schedule-Array"
+      example: 0
+    date:
+      description: "Neues Datum im Format YYYY-MM-DD"
+      example: "2026-08-26"
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count) }}"
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        new_entry: "{{ dict(schedule[index], date=date) }}"
+        new_schedule: "{{ schedule[:index] + [new_entry] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
+    # gartenwasser_plate_zeitplan_typ_setzen weiter oben.
+
+gartenwasser_plate_zeitplan_programm_setzen:
+  alias: "Gartenwasser: Plate - Zeitplan-Programm setzen"
+  fields:
+    index:
+      description: "0-basierter Index des Eintrags im schedule-Array"
+      example: 0
+    program:
+      description: "Programmname"
+      example: "Rasen"
+  sequence:
+    - condition: template
+      value_template: "{{ index < ((state_attr('sensor.gartenwasser_zeitplan', 'schedule') or []) | count) }}"
+    - variables:
+        schedule: "{{ state_attr('sensor.gartenwasser_zeitplan', 'schedule') }}"
+        new_entry: "{{ dict(schedule[index], program=program) }}"
+        new_schedule: "{{ schedule[:index] + [new_entry] + schedule[index + 1:] }}"
+    - action: mqtt.publish
+      data:
+        topic: "gartenwasser/main/schedule/set"
+        payload: "{{ {'schedule': new_schedule} | tojson }}"
+    # Kein separater val-Nachschlag mehr noetig - siehe Kommentar in
+    # gartenwasser_plate_zeitplan_typ_setzen weiter oben.

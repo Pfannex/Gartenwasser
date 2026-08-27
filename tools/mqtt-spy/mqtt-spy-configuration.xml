@@ -18,89 +18,28 @@
             <CleanSession>true</CleanSession>
             <ConnectionTimeout>30</ConnectionTimeout>
             <KeepAliveInterval>60</KeepAliveInterval>
-            <!-- V0: Hauptventil (nur Alias editierbar, kein cmd/time/auto) -->
-            <Publication topic="gartenwasser/V0/alias/set"/>
+            <!-- Gartenwasser-Topics 2026-08-25 entfernt (Fokus liegt aktuell auf dem
+                 openHASP-Plate) - archiviert in gartenwasser-topics-backup.xml,
+                 bei Wiederbedarf von dort zurueckkopieren. -->
 
-            <!-- V1-V5: Bewässerungsventile -->
-            <Publication topic="gartenwasser/V1/cmd"/>
-            <Publication topic="gartenwasser/V1/alias/set"/>
-            <Publication topic="gartenwasser/V1/time/set"/>
-            <Publication topic="gartenwasser/V1/auto/set"/>
+            <!-- plate_wz (openHASP-Touchpanel): Seiten-Navigation -->
+            <Publication topic="hasp/plate_wz/command/page"/>
 
-            <Publication topic="gartenwasser/V2/cmd"/>
-            <Publication topic="gartenwasser/V2/alias/set"/>
-            <Publication topic="gartenwasser/V2/time/set"/>
-            <Publication topic="gartenwasser/V2/auto/set"/>
+            <!-- plate_wz: generischer Kommando-Wrapper ("<keyword> <parameter>" als Payload,
+                 z.B. "backlight off" - siehe openHASP-Doku "Commands") -->
+            <Publication topic="hasp/plate_wz/command"/>
 
-            <Publication topic="gartenwasser/V3/cmd"/>
-            <Publication topic="gartenwasser/V3/alias/set"/>
-            <Publication topic="gartenwasser/V3/time/set"/>
-            <Publication topic="gartenwasser/V3/auto/set"/>
+            <!-- plate_wz: Verfuegbarkeit (LWT) -->
+            <Subscription createTab="true" qos="0" topic="hasp/plate_wz/LWT" scriptFile=""/>
 
-            <Publication topic="gartenwasser/V4/cmd"/>
-            <Publication topic="gartenwasser/V4/alias/set"/>
-            <Publication topic="gartenwasser/V4/time/set"/>
-            <Publication topic="gartenwasser/V4/auto/set"/>
+            <!-- plate_wz: alle Status-/Objekt-Events (statusupdate, sensors, page, pXbY-Events) -->
+            <Subscription createTab="true" qos="0" topic="hasp/plate_wz/state/#" scriptFile=""/>
 
-            <Publication topic="gartenwasser/V5/cmd"/>
-            <Publication topic="gartenwasser/V5/alias/set"/>
-            <Publication topic="gartenwasser/V5/time/set"/>
-            <Publication topic="gartenwasser/V5/auto/set"/>
+            <!-- plate_wz: alle gesendeten Kommandos (zum Mitlesen/Debuggen eigener Publishes) -->
+            <Subscription createTab="true" qos="0" topic="hasp/plate_wz/command/#" scriptFile=""/>
 
-            <!-- main: Sequenzsteuerung -->
-            <Publication topic="gartenwasser/main/cmd"/>
-            <Publication topic="gartenwasser/main/config/set"/>
-
-            <!-- main: Programme -->
-            <Publication topic="gartenwasser/main/programs/set"/>
-            <Publication topic="gartenwasser/main/program/cmd"/>
-
-            <!-- main: Zeitplan -->
-            <Publication topic="gartenwasser/main/schedule/set"/>
-            <Publication topic="gartenwasser/main/schedule/cmd"/>
-            <Publication topic="gartenwasser/main/schedule/cleanup"/>
-
-            <!-- Live-Log: Replay-Anfrage (kompletten Ringpuffer erneut senden) -->
-            <Publication topic="gartenwasser/diagnostics/livelog/replay"/>
-
-            <!-- LWT -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/availability" scriptFile=""/>
-
-            <!-- Ist-Zustand aller Ventile (V0-V5) + Sequenz-Status (main), da main/state gleiche Ebene wie V0-V5/state hat -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/+/state" scriptFile=""/>
-
-            <!-- Aliase aller Ventile (V0-V5) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/+/alias" scriptFile=""/>
-
-            <!-- Laufzeit-Einstellung aller Ventile (nur V1-V5, V0 hat kein time/) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/+/time/state" scriptFile=""/>
-
-            <!-- Restlaufzeit aller Ventile (nur V1-V5) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/+/time/remaining" scriptFile=""/>
-
-            <!-- Automatik-Flag aller Ventile (nur V1-V5) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/+/auto/state" scriptFile=""/>
-
-            <!-- main: Sequenzsteuerung (Einzeltopics, da keine gemeinsame Ebene mit V0-V5 bzw. Verwechslungsgefahr mit main/cmd) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/main/activeValve" scriptFile=""/>
-            <Subscription createTab="true" qos="0" topic="gartenwasser/main/remainingTotal" scriptFile=""/>
-            <Subscription createTab="true" qos="0" topic="gartenwasser/main/time/maxTime" scriptFile=""/>
-
-            <!-- main: State-Topics aller Sub-Namespaces (config/state, programs/state, program/state, schedule/state) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/main/+/state" scriptFile=""/>
-
-            <!-- Hardware-/Systeminfo (Info-Seite, main/info/*) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/main/info/+" scriptFile=""/>
-
-            <!-- Diagnose (i2cStatus, lastError, livelog) -->
-            <Subscription createTab="true" qos="0" topic="gartenwasser/diagnostics/+" scriptFile=""/>
-
-            <!-- Home-Assistant-MQTT-Discovery (Phase 10): alle 26 Discovery-Configs (switch/
-                 binary_sensor/number/sensor) unter homeassistant/<component>/gartenwasser/
-                 <object_id>/config. Bewusst nicht "homeassistant/#" - auf demselben Broker
-                 laufen fremde Geraete mit eigenen Discovery-Configs (z.B. "venti_001"), die
-                 hier nicht mit reinsollen. -->
-            <Subscription createTab="true" qos="0" topic="homeassistant/+/gartenwasser/+/config" scriptFile=""/>
+            <!-- MQTT-Discovery neuer/weiterer openHASP-Plates (hwid-Topic) -->
+            <Subscription createTab="true" qos="0" topic="hasp/discovery/+" scriptFile=""/>
 
             <AutoOpen>false</AutoOpen>
             <AutoConnect>true</AutoConnect>

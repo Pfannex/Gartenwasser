@@ -36,3 +36,26 @@ gartenwasser_zeitplan_entwurf_type:
     - "Taeglich"
     - "Woechentlich"
     - "Einmalig"
+
+# Kategorie-Umschalter fuer die openHASP-Plate-Settings-Seite (page 4) - EIN Dropdown
+# statt separater Unterseiten, der Bearbeitungsbereich darunter blendet sich per
+# hidden-Property um (siehe openhasp.yaml, p4b20 + hidden-Bindings der Konfiguration-Gruppe).
+gartenwasser_plate_settings_kategorie:
+  name: "Gartenwasser Plate Settings Kategorie"
+  icon: mdi:cog
+  options:
+    - "Konfiguration"
+    - "Programme"
+    - "Zeitplan"
+
+# Auswahl-Modus fuer den Datum-Stepper auf der Plate-Settings-Seite (Zeitplan-Kategorie,
+# Typ "Einmalig"): welches der drei Felder Tag/Monat/Jahr die <>-Buttons gerade
+# veraendern. Tap auf einen der drei Buttons schaltet zyklisch weiter (siehe
+# openhasp.yaml, p4b77/p4b85/p4b87).
+gartenwasser_plate_settings_datum_feld:
+  name: "Gartenwasser Plate Settings Datum Feld"
+  icon: mdi:calendar-cursor
+  options:
+    - "Tag"
+    - "Monat"
+    - "Jahr"

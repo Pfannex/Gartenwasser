@@ -1,0 +1,23 @@
+- alias: "openHASP plate_wz: Backlight bei Idle dimmen"
+  description: >-
+    Dimmt auf 50% nach Short-Idle (idle1, per REST-API auf 30s gesetzt),
+    stellt bei Beruehrung wieder volle Helligkeit her. Long-Idle ist
+    deaktiviert (idle2:0 ueber /api/config/gui/) - das Display geht nie
+    ganz aus.
+  trigger:
+    - platform: mqtt
+      topic: hasp/plate_wz/state/idle
+  action:
+    - choose:
+        - conditions: "{{ trigger.payload == 'short' }}"
+          sequence:
+            - service: mqtt.publish
+              data:
+                topic: hasp/plate_wz/command/backlight
+                payload: '{"state":"on","brightness":128}'
+        - conditions: "{{ trigger.payload == 'off' }}"
+          sequence:
+            - service: mqtt.publish
+              data:
+                topic: hasp/plate_wz/command/backlight
+                payload: '{"state":"on","brightness":255}'

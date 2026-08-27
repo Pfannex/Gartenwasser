@@ -159,3 +159,87 @@
         {% else %}
           0
         {% endif %}
+
+    # Restzeit/Gesamtzeit als fertiger "mm:ss / mm:ss Min."-Text - fuers openHASP-Plate
+    # (configurations/plates/plate_wz/openhasp.yaml). Property-Bindings dort werten now()
+    # NICHT periodisch neu aus (anders als HA-eigene Template-Entities) - deshalb dieser
+    # Sensor als Zwischenschicht: er selbst tickt dank des time_pattern-Triggers oben
+    # sekuendlich, das Plate bindet nur noch stumpf an seinen state.
+    - name: "Gartenwasser Sequenz Restzeit Text"
+      unique_id: gartenwasser_sequenz_restzeit_text
+      state: >-
+        {% set total_sec = (states('sensor.gartenwasser_gesamtlaufzeit') | float(0)) * 60 %}
+        {% set sw = states.switch.gartenbewasserung_automatik_sequenz %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
+
+    # Restzeit-Text je Ventil (V1-V5) - gleiches Muster/Grund wie die Sequenz-Restzeit
+    # oben, fuers openHASP-Plate (Ventil-Matrix, configurations/plates/plate_wz/
+    # openhasp.yaml). Nur die Restzeit (kein "/ Gesamtzeit"), da im Plate nur bei
+    # laufendem Ventil sichtbar - die konfigurierte Laufzeit selbst ist dann nicht
+    # relevant.
+    - name: "Gartenwasser V1 Restzeit Text"
+      unique_id: gartenwasser_v1_restzeit_text
+      state: >-
+        {% set sw = states.switch.gartenbewasserung_ventil_1 %}
+        {% set total_sec = (states('number.gartenbewasserung_ventil_1_laufzeit') | float(0)) * 60 %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
+    - name: "Gartenwasser V2 Restzeit Text"
+      unique_id: gartenwasser_v2_restzeit_text
+      state: >-
+        {% set sw = states.switch.gartenbewasserung_ventil_2 %}
+        {% set total_sec = (states('number.gartenbewasserung_ventil_2_laufzeit') | float(0)) * 60 %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
+    - name: "Gartenwasser V3 Restzeit Text"
+      unique_id: gartenwasser_v3_restzeit_text
+      state: >-
+        {% set sw = states.switch.gartenbewasserung_ventil_3 %}
+        {% set total_sec = (states('number.gartenbewasserung_ventil_3_laufzeit') | float(0)) * 60 %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
+    - name: "Gartenwasser V4 Restzeit Text"
+      unique_id: gartenwasser_v4_restzeit_text
+      state: >-
+        {% set sw = states.switch.gartenbewasserung_ventil_4 %}
+        {% set total_sec = (states('number.gartenbewasserung_ventil_4_laufzeit') | float(0)) * 60 %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
+    - name: "Gartenwasser V5 Restzeit Text"
+      unique_id: gartenwasser_v5_restzeit_text
+      state: >-
+        {% set sw = states.switch.gartenbewasserung_ventil_5 %}
+        {% set total_sec = (states('number.gartenbewasserung_ventil_5_laufzeit') | float(0)) * 60 %}
+        {% if sw and sw.state == 'on' %}
+          {% set elapsed = (now() - sw.last_changed).total_seconds() | int %}
+          {% set remaining = [total_sec - elapsed, 0] | max | int %}
+        {% else %}
+          {% set remaining = total_sec | int %}
+        {% endif %}
+        {{ '%02d:%02d' | format(remaining // 60, remaining % 60) }} Min.
