@@ -462,18 +462,20 @@ Home Assistant bindet das Gerät auf zwei sich ergänzenden Wegen ein: automatis
 
 Erscheinen als ein Gerät „Gartenbewässerung" unter *Einstellungen → Geräte & Dienste*, sobald das Gerät zum ersten Mal mit dem Broker verbindet — keine Handarbeit nötig. Alle 26 Entities hängen an `gartenwasser/availability` (Kapitel 7.1): geht das Gerät offline, erscheinen sie gemeinsam als „nicht verfügbar".
 
-| Entity | Domäne | Bedeutung | Bedienbar? |
-|---|---|---|---|
-| `binary_sensor.gartenbewasserung_hauptventil` | binary_sensor | Hauptventil (V0) an/aus | nur Anzeige |
-| `switch.gartenbewasserung_ventil_1` … `_5` | switch | Ventil V1–V5 an/aus | ja, direkt schaltbar |
-| `binary_sensor.gartenbewasserung_ventil_1_automatik` … `_5` | binary_sensor | Nimmt das Ventil an der Automatik teil? | nur Anzeige (Änderung nur über Programme, siehe Kapitel 1) |
-| `number.gartenbewasserung_ventil_1_laufzeit` … `_5` | number | Konfigurierte Laufzeit je Ventil (Minuten) | ja |
-| `sensor.gartenbewasserung_ventil_1_restlaufzeit` … `_5` | sensor | Rohe Restlaufzeit-Angabe der Firmware (`V{n}/time/remaining`) | nur Anzeige |
-| `switch.gartenbewasserung_automatik_sequenz` | switch | Automatik-Sequenz Start/Stop | ja |
-| `sensor.gartenbewasserung_aktives_ventil` | sensor | Aktuell aktives Ventil der Sequenz | nur Anzeige |
-| `sensor.gartenbewasserung_restzeit_sequenz` | sensor | Restzeit der Gesamtsequenz (roh, `main/remainingTotal`) | nur Anzeige |
-| `sensor.gartenbewasserung_i2c_status` | sensor | I2C-Bus/MCP23017 erreichbar? (`ok`/`error`) | nur Anzeige — **zentraler Offline-Indikator**, siehe Kapitel 8.6 |
-| `sensor.gartenbewasserung_letzter_fehler` | sensor | Letzte Fehlermeldung der Firmware | nur Anzeige |
+| Entity | Domäne | Geräte-Topic(s) | Bedeutung | Bedienbar? |
+|---|---|---|---|---|
+| `binary_sensor.gartenbewasserung_hauptventil` | binary_sensor | `V0/state` | Hauptventil (V0) an/aus | nur Anzeige |
+| `switch.gartenbewasserung_ventil_1` … `_5` | switch | `V{n}/cmd` (Befehl) / `V{n}/state` (Ist) | Ventil V1–V5 an/aus | ja, direkt schaltbar |
+| `binary_sensor.gartenbewasserung_ventil_1_automatik` … `_5` | binary_sensor | `V{n}/auto/state` | Nimmt das Ventil an der Automatik teil? | nur Anzeige (Änderung nur über Programme, siehe Kapitel 1) |
+| `number.gartenbewasserung_ventil_1_laufzeit` … `_5` | number | `V{n}/time/set` (Befehl) / `V{n}/time/state` (Ist) | Konfigurierte Laufzeit je Ventil (Minuten) | ja |
+| `sensor.gartenbewasserung_ventil_1_restlaufzeit` … `_5` | sensor | `V{n}/time/remaining` | Rohe Restlaufzeit-Angabe der Firmware | nur Anzeige |
+| `switch.gartenbewasserung_automatik_sequenz` | switch | `main/cmd` (Befehl) / `main/state` (Ist) | Automatik-Sequenz Start/Stop | ja |
+| `sensor.gartenbewasserung_aktives_ventil` | sensor | `main/activeValve` | Aktuell aktives Ventil der Sequenz | nur Anzeige |
+| `sensor.gartenbewasserung_restzeit_sequenz` | sensor | `main/remainingTotal` | Restzeit der Gesamtsequenz (roh) | nur Anzeige |
+| `sensor.gartenbewasserung_i2c_status` | sensor | `diagnostics/i2cStatus` | I2C-Bus/MCP23017 erreichbar? (`ok`/`error`) | nur Anzeige — **zentraler Offline-Indikator**, siehe Kapitel 8.6 |
+| `sensor.gartenbewasserung_letzter_fehler` | sensor | `diagnostics/lastError` | Letzte Fehlermeldung der Firmware | nur Anzeige |
+
+Alle Topics ohne führenden Pfad sind relativ zu `gartenwasser/` (siehe Kapitel 7.1) — `V{n}` steht für `V0`–`V5` (Discovery erzeugt je Ventil V1–V5 eigene Entities, `V0` nur als `binary_sensor`).
 
 > Die rohen Restlaufzeit-Sensoren (`_restlaufzeit`/`_restzeit_sequenz`) werden von der mitgelieferten Konfiguration **nicht** direkt anzeigt — stattdessen berechnen eigene Template-Sensoren (Kapitel 8.3) die Restzeit robuster aus Schaltzeitpunkt + konfigurierter Laufzeit, unabhängig vom nicht-retained MQTT-Sekundentakt.
 
@@ -481,20 +483,26 @@ Erscheinen als ein Gerät „Gartenbewässerung" unter *Einstellungen → Gerät
 
 Decken ab, was Discovery nicht kann: Alias-Namen (kein Discovery-Topic dafür vorgesehen), Programme/Zeitplan als strukturierte JSON-Objekte, sowie Diagnose-/Systeminfo im Klartext.
 
-| Entity | Domäne | Bedeutung |
-|---|---|---|
-| `text.gartenwasser_v0_alias` … `_v5_alias` | text | Ventil-Aliasnamen, editierbar (spiegelt `V{n}/alias`) |
-| `number.gartenwasser_v1_laufzeit` … `_v5_laufzeit` | number | Alternative Laufzeit-Entities (Alias-nahes Pendant zu 8.1) |
-| `number.gartenwasser_max_time` | number | Globale Obergrenze pro Ventil (`main/time/maxTime`) |
-| `sensor.gartenwasser_programme` | sensor | Anzahl Programme; Attribute `programs[]` (komplette Liste) + `activeProgram` |
-| `sensor.gartenwasser_zeitplan` | sensor | Attribut `schedule[]` — komplette Zeitplan-Liste |
-| `switch.gartenwasser_zeitplan_aktiv` | switch | Globaler Zeitplan-Schalter (`main/schedule/cmd`) |
-| `sensor.gartenwasser_firmware` | sensor | Firmware-Version + Build-Nummer |
-| `sensor.gartenwasser_ram`, `sensor.gartenwasser_flash` | sensor | Speicherauslastung in Prozent |
-| `sensor.gartenwasser_reset_grund` | sensor | Grund des letzten Neustarts |
-| `sensor.gartenwasser_uptime`, `sensor.gartenwasser_stack_free` | sensor | Laufzeit seit Boot, freier Stack |
-| `sensor.gartenwasser_rssi`, `sensor.gartenwasser_ip`, `sensor.gartenwasser_broker` | sensor | WLAN-Signalstärke, eigene IP, Broker-Adresse |
-| `sensor.gartenwasser_partitionen` | sensor | Partitionstabelle als Attribut (JSON-Array) |
+| Entity | Domäne | Geräte-Topic(s) | Bedeutung |
+|---|---|---|---|
+| `text.gartenwasser_v0_alias` … `_v5_alias` | text | `V{n}/alias` (Ist) / `V{n}/alias/set` (Befehl) | Ventil-Aliasnamen, editierbar |
+| `number.gartenwasser_v1_laufzeit` … `_v5_laufzeit` | number | `V{n}/time/state` (Ist) / `V{n}/time/set` (Befehl) | Alternative Laufzeit-Entities (Alias-nahes Pendant zu 8.1, dieselben Topics) |
+| `number.gartenwasser_max_time` | number | `main/time/maxTime` (Ist) / `main/config/set` (Befehl, JSON `{"maxTime": …}`) | Globale Obergrenze pro Ventil |
+| `sensor.gartenwasser_programme` | sensor | `main/programs/state` | Anzahl Programme; Attribute `programs[]` (komplette Liste) + `activeProgram` |
+| `sensor.gartenwasser_zeitplan` | sensor | `main/schedule/state` | Attribut `schedule[]` — komplette Zeitplan-Liste |
+| `switch.gartenwasser_zeitplan_aktiv` | switch | `main/schedule/state` (Feld `enabled`, Ist) / `main/schedule/cmd` (Befehl) | Globaler Zeitplan-Schalter |
+| `sensor.gartenwasser_firmware` | sensor | `diagnostics/version` | Firmware-Version + Build-Nummer |
+| `sensor.gartenwasser_ram` | sensor | `diagnostics/ram` | RAM-Auslastung in Prozent |
+| `sensor.gartenwasser_flash` | sensor | `diagnostics/flash` | Flash-Auslastung in Prozent |
+| `sensor.gartenwasser_reset_grund` | sensor | `main/info/resetReason` | Grund des letzten Neustarts |
+| `sensor.gartenwasser_uptime` | sensor | `main/info/uptime` | Laufzeit seit Boot |
+| `sensor.gartenwasser_stack_free` | sensor | `main/info/stackFree` | Freier loopTask-Stack |
+| `sensor.gartenwasser_rssi` | sensor | `main/info/rssi` | WLAN-Signalstärke |
+| `sensor.gartenwasser_ip` | sensor | `main/info/ip` | Eigene IP-Adresse |
+| `sensor.gartenwasser_broker` | sensor | `main/info/broker` | MQTT-Broker-Adresse |
+| `sensor.gartenwasser_partitionen` | sensor | `main/info/partitions` | Partitionstabelle als Attribut (JSON-Array) |
+
+Auch hier: alle Topics relativ zu `gartenwasser/`. Diese Entities laufen **parallel** zu den 26 Discovery-Entities aus 8.1 (eigene `unique_id`, teils identisches Topic wie z. B. bei den Laufzeit-Entities) — kein Konflikt, aber bei einigen Werten (Laufzeit V1–V5) existieren dadurch bewusst zwei unabhängige HA-Entities für dasselbe Geräte-Topic.
 
 ### 8.3 Berechnete Entities (Template-Sensoren)
 
