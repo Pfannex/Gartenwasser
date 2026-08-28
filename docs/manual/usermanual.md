@@ -508,24 +508,26 @@ Auch hier: alle Topics relativ zu `gartenwasser/`. Diese Entities laufen **paral
 
 Rein HA-seitig berechnet, kein eigenes MQTT-Topic. Zweck: robustere Restzeit-Anzeige, die nicht auf den nicht-retained `.../time/remaining`-Sekundentakt angewiesen ist, sondern aus `switch`-Schaltzeitpunkt (`last_changed`) + konfigurierter Laufzeit rechnet — übersteht dadurch z. B. einen HA-Neustart mitten in einem laufenden Ventil unbeschadet.
 
-| Entity | Bedeutung |
-|---|---|
-| `sensor.gartenwasser_v1_restlaufzeit_prozent` … `_v5_...` | Restlaufzeit je Ventil in Prozent (für Fortschrittsbalken) |
-| `sensor.gartenwasser_v1_restzeit_text` … `_v5_...` | Restlaufzeit je Ventil als „mm:ss Min."-Text |
-| `sensor.gartenwasser_sequenz_restlaufzeit_prozent` | Restzeit der Gesamtsequenz in Prozent |
-| `sensor.gartenwasser_sequenz_restzeit_text` | Restzeit der Gesamtsequenz als Text |
-| `sensor.gartenwasser_gesamtlaufzeit` | Angenäherte Gesamtdauer der aktuellen Sequenz (Summe der `auto=on`-Laufzeiten — Näherung, siehe Backlog-Idee in `docs/requirements.md`) |
+| Entity | Geräte-Topic | Berechnet aus | Bedeutung |
+|---|---|---|---|
+| `sensor.gartenwasser_v1_restlaufzeit_prozent` … `_v5_...` | **– kein Topic** | `switch.gartenbewasserung_ventil_{n}` (Zustand + `last_changed`) + `number.gartenbewasserung_ventil_{n}_laufzeit` | Restlaufzeit je Ventil in Prozent (für Fortschrittsbalken) |
+| `sensor.gartenwasser_v1_restzeit_text` … `_v5_...` | **– kein Topic** | dieselben wie oben | Restlaufzeit je Ventil als „mm:ss Min."-Text |
+| `sensor.gartenwasser_sequenz_restlaufzeit_prozent` | **– kein Topic** | `switch.gartenbewasserung_automatik_sequenz` + `sensor.gartenwasser_gesamtlaufzeit` | Restzeit der Gesamtsequenz in Prozent |
+| `sensor.gartenwasser_sequenz_restzeit_text` | **– kein Topic** | dieselben wie oben | Restzeit der Gesamtsequenz als Text |
+| `sensor.gartenwasser_gesamtlaufzeit` | **– kein Topic** | `binary_sensor.gartenbewasserung_ventil_{n}_automatik` + `number.gartenbewasserung_ventil_{n}_laufzeit` (alle 5 Ventile) | Angenäherte Gesamtdauer der aktuellen Sequenz (Summe der `auto=on`-Laufzeiten — Näherung, siehe Backlog-Idee in `docs/requirements.md`) |
 
 ### 8.4 Helper-Entities (Formulare, Entwürfe, Plate-Bedienzustand)
 
 Reine Hilfs-Entities ohne eigene MQTT-Anbindung — halten Zwischenzustände von Formularen bzw. den aktuellen Bedienzustand des openHASP-Panels fest. Nicht für die direkte Bedienung gedacht, werden ausschließlich von Skripten/Automationen bzw. den Dashboard-Formularen verwendet.
 
-| Zweck | Entities |
-|---|---|
-| Programm-Editor (Entwurf vor „Speichern") | `input_text.gartenwasser_entwurf_name`, `input_boolean.gartenwasser_entwurf_v1_auto`…`_v5_auto`, `input_number.gartenwasser_entwurf_v1_zeit`…`_v5_zeit`, `input_number.gartenwasser_editier_index` |
-| Zeitplan-Editor (Entwurf vor „Speichern") | `input_select.gartenwasser_zeitplan_entwurf_program`, `input_select.gartenwasser_zeitplan_entwurf_type`, `input_datetime.gartenwasser_zeitplan_entwurf_zeit`, `input_datetime.gartenwasser_zeitplan_entwurf_datum`, `input_boolean.gartenwasser_zeitplan_entwurf_mon`…`_sun`, `input_number.gartenwasser_zeitplan_editier_index` |
-| Programm-Dropdown-Sync (Status-Seite/Plate) | `input_select.gartenwasser_programm` |
-| openHASP-Plate — Settings-Seite (Kapitel 9.3) | `input_select.gartenwasser_plate_settings_kategorie`, `input_number.gartenwasser_plate_settings_ventil`, `input_number.gartenwasser_plate_settings_programm`, `input_number.gartenwasser_plate_settings_zeitplan_eintrag`, `input_boolean.gartenwasser_plate_settings_zeit_minute_modus`, `input_select.gartenwasser_plate_settings_datum_feld` |
+| Zweck | Geräte-Topic | Entities |
+|---|---|---|
+| Programm-Editor (Entwurf vor „Speichern") | **– kein Topic** | `input_text.gartenwasser_entwurf_name`, `input_boolean.gartenwasser_entwurf_v1_auto`…`_v5_auto`, `input_number.gartenwasser_entwurf_v1_zeit`…`_v5_zeit`, `input_number.gartenwasser_editier_index` |
+| Zeitplan-Editor (Entwurf vor „Speichern") | **– kein Topic** | `input_select.gartenwasser_zeitplan_entwurf_program`, `input_select.gartenwasser_zeitplan_entwurf_type`, `input_datetime.gartenwasser_zeitplan_entwurf_zeit`, `input_datetime.gartenwasser_zeitplan_entwurf_datum`, `input_boolean.gartenwasser_zeitplan_entwurf_mon`…`_sun`, `input_number.gartenwasser_zeitplan_editier_index` |
+| Programm-Dropdown-Sync (Status-Seite/Plate) | **– kein eigenes Topic**, aber per Automation (8.5) bidirektional mit `main/program/cmd`/`main/program/state` synchron gehalten | `input_select.gartenwasser_programm` |
+| openHASP-Plate — Settings-Seite (Kapitel 9.3) | **– kein Topic** | `input_select.gartenwasser_plate_settings_kategorie`, `input_number.gartenwasser_plate_settings_ventil`, `input_number.gartenwasser_plate_settings_programm`, `input_number.gartenwasser_plate_settings_zeitplan_eintrag`, `input_boolean.gartenwasser_plate_settings_zeit_minute_modus`, `input_select.gartenwasser_plate_settings_datum_feld` |
+
+Alle Helper-Entities sind reine HA-`input_*`-Domänen (`input_text`/`input_boolean`/`input_number`/`input_select`/`input_datetime`) ohne MQTT-Integration — technisch **könnten** sie gar nicht an ein Geräte-Topic gebunden sein, selbst wenn gewollt.
 
 ### 8.5 Automationen und Skripte
 
