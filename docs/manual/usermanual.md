@@ -220,9 +220,9 @@ Die resultierende Adresse (`ws://<Broker-IP>:9001/mqtt`) steht als `BROKER_WS_UR
 
 ### 5.1 Hauptseite
 
-| Ruhezustand | Laufende Automatik |
-|---|---|
-| ![Hauptseite im Ruhezustand](images/hmi-start.webp) | ![Hauptseite mit laufender Automatik](images/hmi-betrieb.webp) |
+| Ruhezustand | Manuell geschaltetes Ventil | Laufende Automatik |
+|---|---|---|
+| ![Hauptseite im Ruhezustand](images/hmi-start.webp) | ![Hauptseite mit manuell geschaltetem Ventil](images/hmi-manuell.webp) | ![Hauptseite mit laufender Automatik](images/hmi-betrieb.webp) |
 
 Aufbau von oben nach unten: Titelzeile, START/STOP-Button (volle Breite), Ventil-Matrix (4×4, `V0`–`V5` belegt, Rest Platzhalter für eine spätere Erweiterung), Programme-Button, zweizeilige Statuszeile.
 
@@ -259,9 +259,11 @@ Erreichbar über `http://<Geräte-IP>/` im Browser (Smartphone, Tablet, PC — k
 
 ### 6.1 Status (Startseite)
 
-![WebIF Status-Seite](images/webif-status.webp)
+| Ruhezustand | Laufende Automatik |
+|---|---|
+| ![WebIF Status-Seite im Ruhezustand](images/webif-status.webp) | ![WebIF Status-Seite mit laufender Automatik](images/webif-status-betrieb.webp) |
 
-Übersicht: START/STOP-Button + Programmwahl im Hero-Bereich, „Nächster Termin" (nächster Zeitplan-Trigger, im Browser berechnet), Ventilkacheln mit Live-Status/Restlaufzeit, sowie eine Diagnostics-Karte (I2C-Status, letzter Fehler, Firmware-Version, RAM/Flash-Auslastung).
+Übersicht: START/STOP-Button + Programmwahl im Hero-Bereich, „Nächster Termin" (nächster Zeitplan-Trigger, im Browser berechnet) bzw. bei laufender Automatik Restlaufzeit + Fortschrittsbalken für aktuelles Ventil und Gesamtsequenz, Ventilkacheln mit Live-Status/Restlaufzeit, sowie eine Diagnostics-Karte (I2C-Status, letzter Fehler, Firmware-Version, RAM/Flash-Auslastung).
 
 ### 6.2 Konfiguration
 
@@ -291,13 +293,11 @@ Bis zu 16 Einträge, je Eintrag: verknüpftes Programm (per Name), Trigger-Typ (
 
 ### 6.5 Log
 
+![WebIF Log-Seite](images/webif-log.webp)
+
+Live-Mitschnitt aller Logmeldungen des Geräts (inklusive der Boot-Sequenz und allem MQTT-Publish-/Subscribe-Verkehr). Filterbar nach Quelle und Typ (Fehler/Info/Debug/Publish/Subscribe), Volltextsuche über die Event-Spalte (Spaltenüberschrift wird per Klick zum Live-Suchfeld). JSON-Nutzlasten (z. B. Konfigurationsstände) lassen sich über einen „JSON-Payload"-Button einzeln aufklappen:
+
 ![WebIF Log-Seite mit aufgeklapptem JSON-Payload](images/webif-log-json.webp)
-
-Live-Mitschnitt aller Logmeldungen des Geräts (inklusive der Boot-Sequenz und allem MQTT-Publish-/Subscribe-Verkehr). Filterbar nach Quelle und Typ (Fehler/Info/Debug/Publish/Subscribe), Volltextsuche über die Event-Spalte. JSON-Nutzlasten (z. B. Konfigurationsstände) lassen sich über einen „JSON-Payload"-Button einzeln aufklappen.
-
-![WebIF Log-Seite mit aktivem Eventfilter](images/webif-log-filter.webp)
-
-Die Event-Spaltenüberschrift wird per Klick zum Live-Suchfeld — hier gefiltert auf „flash".
 
 ### 6.6 Update
 
@@ -537,15 +537,33 @@ Eigenes Lovelace-Dashboard „Gartenwasser" (`HomeAssistant/dashboards/gartenwas
 
 **Status** — Startbildschirm mit Live-Übersicht und Schnellbedienung. Ein großer „Automatik"-Knopf startet/stoppt die Sequenz, darunter (nur im Ruhezustand wählbar) eine Programm-Dropdown-Auswahl sowie Restlaufzeit als Countdown mit Fortschrittsbalken. Kachel-Raster darunter: Hauptventil-Kachel zeigt nur den Zustand (grau bei Offline/„Kein Programm", sonst rot/grün), die fünf Ventilkacheln zeigen Alias, Zustand, bei laufendem Ventil die Restlaufzeit samt Balken — Antippen schaltet das jeweilige Ventil manuell. Eine Diagnose-Kachel zeigt Verbindungsstatus, I2C-Status sowie RAM-/Flash-Auslastung.
 
+| Ruhezustand | Programmwahl | Laufende Automatik |
+|---|---|---|
+| ![HA-Dashboard Status im Ruhezustand](images/ha-status.webp) | ![HA-Dashboard Status, Programm-Dropdown geöffnet](images/ha-status-programmwahl.webp) | ![HA-Dashboard Status mit laufender Automatik](images/ha-status-betrieb.webp) |
+
 **Konfiguration** — Ein globaler Schieberegler setzt die maximale Laufzeit pro Ventil; überschreitet die individuelle Laufzeit diesen Wert, erscheint eine Warnzeile. Für jedes Ventil ein editierbares Textfeld (Alias) und ein Laufzeit-Schieberegler, Änderungen wirken sofort. Kein Automatik-Schalter hier — das läuft ausschließlich über Programme.
+
+![HA-Dashboard Konfiguration](images/ha-konfiguration.webp)
 
 **Programme** — Liste aller Programme mit Name und aktiven-Ventile-Zusammenfassung, je Eintrag Aktivieren/Bearbeiten/Löschen. „Neues Programm" öffnet einen Editor (Name, je Ventil Auto-Schalter + Laufzeit-Schieberegler) über die Entwurfs-Helper aus 8.4, Speichern/Abbrechen übernimmt bzw. verwirft.
 
+![HA-Dashboard Programme bearbeiten](images/ha-programme-bearbeiten.webp)
+
 **Zeitplan** — Globaler Schalter „Zeitplan aktiv" oben, darunter alle Einträge mit Programm, Zeittyp und Uhrzeit; Antippen schaltet einen Eintrag einzeln aktiv/pausiert (referenziert der Eintrag ein gelöschtes Programm, erscheint „Programm nicht gefunden!" und die Kachel wird gesperrt). Bearbeiten/Löschen je Eintrag, „Neuer Eintrag" öffnet den Editor (Programm, Typ, Uhrzeit, je nach Typ Datum oder Wochentage).
+
+| Eintragsliste | Eintrag bearbeiten |
+|---|---|
+| ![HA-Dashboard Zeitplan-Liste](images/ha-zeitplan.webp) | ![HA-Dashboard Zeitplan-Eintrag bearbeiten](images/ha-zeitplan-bearbeiten.webp) |
 
 **Log** — Kein Nachbau des vollständigen Geräte-Logs (das bleibt dem WebIF vorbehalten, Kapitel 6.5) — stattdessen das Standard-Home-Assistant-Logbuch der letzten 24 Stunden für Automatik-Schalter und alle fünf Ventilschalter, reine Anzeige.
 
+![HA-Dashboard Log/Aktivität](images/ha-log.webp)
+
 **Info** — Reine Anzeigeseite: Firmware (Version, Uptime, letzter Neustartgrund), Hardware (statische Eckdaten), Speicher (RAM/Flash-Auslastung, freier Stack, Partitionstabelle) und Netzwerk (IP, WLAN-Signalstärke, Broker-Adresse).
+
+| Firmware/Hardware | Speicher/Partitionen/Netzwerk |
+|---|---|
+| ![HA-Dashboard Info, oberer Teil](images/ha-info.webp) | ![HA-Dashboard Info, unterer Teil](images/ha-info-2.webp) |
 
 ---
 
@@ -561,6 +579,10 @@ Im Gegensatz zum Geräte-eigenen HMI (172×320px, Kapitel 5) hat das Panel eine 
 
 Nachbau der wichtigsten WebIF-Status-Funktionen: START/STOP-Button (Automatik-Sequenz), Programm-Auswahl-Dropdown, sechs Ventilkacheln (Hauptventil + V1–V5) mit Live-Restlaufzeit-Text, sowie eine Diagnosezeile (I2C-Status, RAM-/Flash-Auslastung in Prozent). Die Ventilkacheln V1–V5 sind antippbar und schalten das jeweilige Ventil direkt manuell (identische Farblogik wie das Geräte-HMI, Kapitel 5.1: grün = für Automatik vorgesehen, dunkelgrau = nicht vorgesehen, rot = läuft gerade). Das Hauptventil ist reine Anzeige (grau bei Geräte-offline oder „Kein Programm" gewählt, sonst rot/grün je nach Zustand — identische Logik wie auf dem HA-Dashboard, Kapitel 8.6).
 
+| Ruhezustand | Programmwahl | Laufende Automatik |
+|---|---|---|
+| ![Plate Status im Ruhezustand](images/plate-status.webp) | ![Plate Status, Programm-Dropdown geöffnet](images/plate-status-programmwahl.webp) | ![Plate Status mit laufender Automatik](images/plate-status-betrieb.webp) |
+
 Geht das Gerät offline, zeigt die Start-Bubble ein WLAN-Aus-Symbol samt „Offline"-Text statt Start/Stop, die Programmauswahl wird gesperrt.
 
 ### 9.3 Settings-Seite
@@ -569,9 +591,19 @@ Geht das Gerät offline, zeigt die Start-Bubble ein WLAN-Aus-Symbol samt „Offl
 
 **Konfiguration** — Ventil-Pager (`‹`/`›` blättert durch V1–V5, zeigt Alias groß + Ventilnummer klein, **nur Anzeige, nicht editierbar**) plus ein `-`/`+`-Stepper für die zugehörige Standard-Laufzeit (0–180 min, geteilter Zustand mit der Programme-Kategorie).
 
+![Plate Settings, Kategorie Konfiguration](images/plate-settings-konfiguration.webp)
+
 **Programme** — Programm-Pager (blättert durch alle vorhandenen Programme) plus ein zweiter Pager, der gleichzeitig als AUTO-Umschalter für das aktuell gewählte Ventil innerhalb dieses Programms dient (Antippen der Mitte schaltet um, grün = an), darunter ein Laufzeit-Stepper (funktioniert unabhängig vom AUTO-Zustand). **Nur bestehende Programme editierbar** — Anlegen, Umbenennen oder Löschen eines Programms ist auf dem Panel nicht möglich, dafür WebIF (6.3) oder HA-Dashboard (8.6) nutzen.
 
+![Plate Settings, Kategorie Programme](images/plate-settings-programme.webp)
+
 **Zeitpläne** — Eintrags-Auswahl-Dropdown oben (zeigt „Programmname – wann", z. B. „extraKurz – Di, Do, Sa, 07:00 Uhr"), daneben ein Programm-Dropdown und ein AKTIV/PAUSIERT-Umschalter für den gewählten Eintrag. Darunter Modus-Auswahl (Täglich/Wöchentlich/Einmalig als drei Buttons), darunter je nach Modus eine Zeit- oder Datumseinstellung sowie bei „Wöchentlich" eine Wochentagsreihe (Mo–So, einzeln antippbar). Zeit und Datum lassen sich **feldweise** einstellen: Antippen von Stunde/Minute bzw. Tag/Monat/Jahr wählt das jeweilige Feld direkt aus (weißer Rahmen zeigt die Auswahl), die `‹`/`›`-Pfeile verändern gezielt nur dieses Feld — vermeidet, dass eine große Zeit-/Datumsverschiebung viele einzelne Taps braucht. Ein langer Druck (Long-Press) auf den Kategorie-Button „Zeitpläne" schaltet den **globalen** Zeitplan-Schalter um (unabhängig von der gerade gewählten Kategorie, bleibt als Dauerzustand grün sichtbar, solange aktiv). **Nur bestehende Einträge editierbar** — Anlegen oder endgültiges Löschen eines Zeitplan-Eintrags ist auf dem Panel nicht möglich, dafür WebIF (6.4) oder HA-Dashboard (8.6) nutzen.
+
+Modus-abhängige Darstellung — Täglich (nur Zeit), Wöchentlich (Zeit + Wochentage), Einmalig (Zeit + Datum), sowie die geöffnete Eintrags-Auswahl:
+
+| Täglich | Wöchentlich | Einmalig | Eintrags-Auswahl |
+|---|---|---|---|
+| ![Plate Zeitpläne, Modus Täglich](images/plate-settings-zeitplaene-taeglich.webp) | ![Plate Zeitpläne, Modus Wöchentlich](images/plate-settings-zeitplaene.webp) | ![Plate Zeitpläne, Modus Einmalig](images/plate-settings-zeitplaene-einmalig.webp) | ![Plate Zeitpläne, Eintrags-Dropdown geöffnet](images/plate-settings-zeitplaene-auswahl.webp) |
 
 Auch hier: unten rechts erscheint bei Geräte-Ausfall der Hinweis „Device ist offline!" (rot).
 
