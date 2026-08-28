@@ -189,7 +189,7 @@ pio run -e esp32-c6-devkitc-1 --target upload      # Firmware
 pio run -e esp32-c6-devkitc-1 --target uploadfs    # Web-Interface-Dateien
 ```
 
-Nach dem ersten erfolgreichen Boot ist das Gerät auch kabellos erreichbar (siehe Kapitel 9).
+Nach dem ersten erfolgreichen Boot ist das Gerät auch kabellos erreichbar (siehe Kapitel 11).
 
 ### 4.4 MQTT-Broker: WebSocket-Zugang für den Browser einrichten
 
@@ -303,7 +303,7 @@ Live-Mitschnitt aller Logmeldungen des Geräts (inklusive der Boot-Sequenz und a
 
 ![WebIF Update-Seite](images/webif-update.webp)
 
-Firmware- und Dateisystem-Update direkt aus dem Browser, ohne Entwicklungsumgebung — siehe Kapitel 9.
+Firmware- und Dateisystem-Update direkt aus dem Browser, ohne Entwicklungsumgebung — siehe Kapitel 11.
 
 ### 6.7 Info
 
