@@ -86,7 +86,7 @@ Ein externes Relaismodul (6 Kanäle, potentialfrei) wird zwischen MCP23017-Ausg�
 
 ### 2.3 I/O-Erweiterung: MCP23017
 
-16-Bit-I2C-GPIO-Expander (Microchip), stellt die 6 Ventil-Ausgänge auf Port B bereit. Adresse `0x20` (Adresspins A0–A2 alle auf GND). Teilt sich den I2C-Bus mit dem Touch-Controller (siehe Kapitel 3).
+16-Bit-I2C-GPIO-Expander (Microchip), stellt die 6 Ventil-Ausgänge auf Port B bereit. Adresse `0x20` (Adresspins A0–A2 alle auf GND). Teilt sich den I2C-Bus mit dem Touch-Controller (siehe Kapitel 3). Versorgungs- **und** Logikspannung (`VDD`) sind **5V**, nicht 3,3V — das Board stellt dafür einen eigenen 5V-Pin bereit (aus dem USB-C-VBUS abgeleitet). Die I2C-Leitungen (`SDA`/`SCL`) bleiben davon unberührt, da sie mit dem 3,3V-Bus des ESP32 verbunden sind.
 
 | Ventil | MCP23017-Pin (GPB) | Chip-Pin # |
 |---|---|---|
@@ -108,17 +108,17 @@ graph LR
     subgraph ESP["Waveshare ESP32-C6-Touch-LCD-1.47"]
         G18["GPIO18 (SDA)"]
         G19["GPIO19 (SCL)"]
-        G3V["3.3V"]
+        G5V["5V"]
         GGND["GND"]
     end
 
     subgraph MCP["MCP23017 (I2C-Adresse 0x20)"]
         M13["Pin 13 · SDA"]
         M12["Pin 12 · SCL"]
-        M9["Pin 9 · VDD"]
+        M9["Pin 9 · VDD (5V)"]
         M10["Pin 10 · VSS"]
         M1517["Pin 15-17 · A0-A2 → GND"]
-        M18["Pin 18 · RESET → 3.3V"]
+        M18["Pin 18 · RESET → 5V"]
         MB7["GPB7 (Pin 4)"]
         MB2["GPB2 (Pin 27)"]
         MB3["GPB3 (Pin 28)"]
@@ -138,8 +138,8 @@ graph LR
 
     G18 --- M13
     G19 --- M12
-    G3V --- M9
-    G3V --- M18
+    G5V --- M9
+    G5V --- M18
     GGND --- M10
     GGND --- M1517
     MB7 --> R0
