@@ -86,7 +86,9 @@ Ein externes Relaismodul (6 Kanäle, potentialfrei) wird zwischen MCP23017-Ausg�
 
 ### 2.3 I/O-Erweiterung: MCP23017
 
-16-Bit-I2C-GPIO-Expander (Microchip), stellt die 6 Ventil-Ausgänge auf Port B bereit. Adresse `0x20` (Adresspins A0–A2 alle auf GND). Teilt sich den I2C-Bus mit dem Touch-Controller (siehe Kapitel 3). Versorgungs- **und** Logikspannung (`VDD`) sind **5V**, nicht 3,3V — das Board stellt dafür einen eigenen 5V-Pin bereit (aus dem USB-C-VBUS abgeleitet). Die I2C-Leitungen (`SDA`/`SCL`) bleiben davon unberührt, da sie mit dem 3,3V-Bus des ESP32 verbunden sind.
+16-Bit-I2C-GPIO-Expander (Microchip), stellt die 6 Ventil-Ausgänge auf Port B bereit. Adresse `0x20` (Adresspins A0–A2 alle auf GND). Teilt sich den I2C-Bus mit dem Touch-Controller (siehe Kapitel 3). Versorgungs- **und** Logikspannung (`VDD`) sind **5V**, nicht 3,3V — das Board stellt dafür einen eigenen 5V-Pin bereit (aus dem USB-C-VBUS abgeleitet).
+
+**I2C-Pegelanpassung notwendig:** Bei `VDD = 5V` liegen die Schmitt-Trigger-Schwellen von `SDA`/`SCL` laut Microchip-Datenblatt (DS20001952C, Tabelle 1-1) bei V_IL(max) = 0,2·VDD = **1,0V** und V_IH(min) = 0,8·VDD = **4,0V**. Der I2C-Bus ist Open-Drain, der High-Pegel wird also vom Pull-up bestimmt — der muss auf 5V liegen, damit der MCP23017 zuverlässig „High" erkennt. Die ESP32-C6-GPIOs (3,3V-Logik, laut Espressif nicht 5V-tolerant) dürften dann aber nicht direkt an diesem Pegel hängen. Deshalb sitzt zwischen ESP32 und MCP23017 ein bidirektionaler I2C-Level-Shifter (siehe Kapitel 3) — `SDA`/`SCL` laufen **nicht** direkt auf dem 3,3V-Bus des ESP32, sondern über diesen Pegelwandler.
 
 | Ventil | MCP23017-Pin (GPB) | Chip-Pin # |
 |---|---|---|
@@ -101,54 +103,17 @@ Ein externes Relaismodul (6 Kanäle, potentialfrei) wird zwischen MCP23017-Ausg�
 
 ## 3. Schaltplan / Verkabelung
 
-Display und Touch-Controller sind bereits fest auf dem Waveshare-Board verdrahtet — hier nur relevant für die I2C-Bus-Zuordnung. Der MCP23017 ist ein separates, extern angeschlossenes Bauteil.
+Display und Touch-Controller sind bereits fest auf dem Waveshare-Board verdrahtet — hier nur relevant für die I2C-Bus-Zuordnung. MCP23017, I2C-Level-Shifter und Relaismodul sind separate, extern angeschlossene Bauteile.
 
-```mermaid
-graph LR
-    subgraph ESP["Waveshare ESP32-C6-Touch-LCD-1.47"]
-        G18["GPIO18 (SDA)"]
-        G19["GPIO19 (SCL)"]
-        G5V["5V"]
-        GGND["GND"]
-    end
+![Vollständiger Stromlaufplan: ESP32-C6, I2C-Level-Shifter, MCP23017, Relaismodul](images/schaltplan-vollstaendig.webp)
 
-    subgraph MCP["MCP23017 (I2C-Adresse 0x20)"]
-        M13["Pin 13 · SDA"]
-        M12["Pin 12 · SCL"]
-        M9["Pin 9 · VDD (5V)"]
-        M10["Pin 10 · VSS"]
-        M1517["Pin 15-17 · A0-A2 → GND"]
-        M18["Pin 18 · RESET → 5V"]
-        MB7["GPB7 (Pin 8)"]
-        MB2["GPB2 (Pin 3)"]
-        MB3["GPB3 (Pin 4)"]
-        MB4["GPB4 (Pin 5)"]
-        MB5["GPB5 (Pin 6)"]
-        MB6["GPB6 (Pin 7)"]
-    end
+Beide Hauptbausteine sind vollständig mit allen Pins dargestellt (nicht nur die hier genutzte Teilmenge). Nicht beschaltete Pins (z.B. `GPIO4`–`GPIO9`, `GPA0`–`GPA7`, `INTA`/`INTB`, `NC`) sind mit offenem Ende gezeichnet.
 
-    subgraph REL["Relaismodul (extern, 6 Kanäle)"]
-        R0["V0 Hauptventil"]
-        R1["V1"]
-        R2["V2"]
-        R3["V3"]
-        R4["V4"]
-        R5["V5"]
-    end
+**I2C-Level-Shifter:** Ein bidirektionaler, MOSFET-basierter Pegelwandler (4-Kanal-Modul, hier werden 2 der 4 Kanäle genutzt: `SDA`, `SCL`) verbindet die 3,3V-Seite des ESP32 (`LV`) mit der 5V-Seite des MCP23017 (`HV`). Wirkprinzip je Kanal:
 
-    G18 --- M13
-    G19 --- M12
-    G5V --- M9
-    G5V --- M18
-    GGND --- M10
-    GGND --- M1517
-    MB7 --> R0
-    MB2 --> R1
-    MB3 --> R2
-    MB4 --> R3
-    MB5 --> R4
-    MB6 --> R5
-```
+![Wirkprinzip eines Level-Shifter-Kanals](images/levelshifter-prinzip.webp)
+
+Pro Kanal sitzt ein N-Kanal-MOSFET zwischen zwei 10-kΩ-Pull-ups (einer je Spannungsseite). Gate und Source liegen auf der LV-Seite zusammen — dadurch sperrt der MOSFET, sobald die LV-Seite Low zieht (zieht dann auch HV über den Kanal nach Low), und leitet in Sperrichtung nicht, wenn die HV-Seite Low zieht (Body-Diode plus Gate-Steuerung ziehen dann auch LV nach Low). So funktioniert die Pegelanpassung unabhängig von der Übertragungsrichtung, wie es der Open-Drain-Betrieb von I2C erfordert.
 
 **Hinweis Touch/Display-Pins** (bereits auf dem Board verdrahtet, nur zur Referenz):
 
