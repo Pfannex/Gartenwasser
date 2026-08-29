@@ -103,13 +103,15 @@ Ein externes Relaismodul (6 Kanäle, potentialfrei) wird zwischen MCP23017-Ausg�
 
 ## 3. Schaltplan / Verkabelung
 
-Display und Touch-Controller sind bereits fest auf dem Waveshare-Board verdrahtet — hier nur relevant für die I2C-Bus-Zuordnung. MCP23017, I2C-Level-Shifter und Relaismodul sind separate, extern angeschlossene Bauteile.
+Display und Touch-Controller sind bereits fest auf dem Waveshare-Board verdrahtet — hier nur relevant für die I2C-Bus-Zuordnung. MCP23017 und I2C-Level-Shifter sind separate, extern angeschlossene Bauteile.
 
-![Vollständiger Stromlaufplan: ESP32-C6, I2C-Level-Shifter, MCP23017, Relaismodul](images/schaltplan-vollstaendig.webp)
+![Vollständiger Stromlaufplan: ESP32-C6, I2C-Level-Shifter, MCP23017](images/schaltplan-vollstaendig.webp)
 
-Beide Hauptbausteine sind vollständig mit allen Pins dargestellt (nicht nur die hier genutzte Teilmenge). Nicht beschaltete Pins (z.B. `GPIO4`–`GPIO9`, `GPA0`–`GPA7`, `INTA`/`INTB`, `NC`) sind mit offenem Ende gezeichnet.
+ESP32-C6-Board und MCP23017 sind vollständig mit allen Pins dargestellt (nicht nur die hier genutzte Teilmenge). Nicht beschaltete Pins (z.B. `GPIO4`–`GPIO9`, `GPA0`–`GPA7`, `INTA`/`INTB`, `NC`) sind mit offenem Ende gezeichnet. Editierbare Quelle (KiCad-Projekt): [`docs/schematics/kicad/`](../schematics/kicad/).
 
-**I2C-Level-Shifter:** Ein bidirektionaler, MOSFET-basierter Pegelwandler (4-Kanal-Modul, hier werden 2 der 4 Kanäle genutzt: `SDA`, `SCL`) verbindet die 3,3V-Seite des ESP32 (`LV`) mit der 5V-Seite des MCP23017 (`HV`). Wirkprinzip je Kanal:
+**Ventil-Ausgänge:** `V0` (Hauptventil) und `V1`–`V5` verlassen den Plan als Signal-Bezeichner an den jeweiligen `GPBx`-Pins (siehe Tabelle in Kapitel 2.3) — das externe Relaismodul selbst (siehe Kapitel 2.2) ist hier nicht als eigenes Bauteil gezeichnet, nur die Verbindungspunkte dorthin.
+
+**I2C-Level-Shifter:** Ein bidirektionaler, MOSFET-basierter Pegelwandler (4-Kanal-Modul, hier werden 2 der 4 Kanäle genutzt: Kanal 3 = `SCL`, Kanal 4 = `SDA`) verbindet die 3,3V-Seite des ESP32 (`LV`) mit der 5V-Seite des MCP23017 (`HV`). Zusätzlich zu den im Modul integrierten Pull-ups sitzen an `HV3`/`HV4` noch einmal diskrete 5-kΩ-Pull-up-Widerstände (`R1`, `R2`) gegen 5V. Wirkprinzip je Kanal:
 
 ![Wirkprinzip eines Level-Shifter-Kanals](images/levelshifter-prinzip.webp)
 

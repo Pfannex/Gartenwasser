@@ -10,4 +10,9 @@ data/*.bundle.js
 data/mqtt.min.js
 tools/schematics/kicad/*.lck
 tools/schematics/kicad/*.bak
+tools/schematics/kicad/*.kicad_prl
 tools/schematics/kicad/.history/
+docs/schematics/kicad/*.lck
+docs/schematics/kicad/*.bak
+docs/schematics/kicad/*.kicad_prl
+docs/schematics/kicad/.history/

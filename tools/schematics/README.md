@@ -21,16 +21,10 @@ python levelshifter_prinzip.py
 
 Nach dem Bearbeiten der SVG (händisch oder per Skript) als WebP exportieren und `docs/manual/images/schaltplan-vollstaendig.webp` bzw. `docs/manual/images/levelshifter-prinzip.webp` ersetzen. In Inkscape: Datei → Exportieren als PNG, dann z.B. mit Pillow (`Image.open(...).save(..., 'webp')`) nach WebP konvertieren.
 
-## KiCad-Projekt (`kicad/`)
+## KiCad-Projekt
 
-Echtes Schaltplan-Projekt (Bauteil-Symbole, elektrische Netze, ERC-fähig) zum grafischen Nacharbeiten in KiCad — Alternative zum reinen SVG-Editing, wenn eine "richtige" EDA-Bearbeitung gewünscht ist.
+**Umgezogen nach [`docs/schematics/kicad/`](../../docs/schematics/kicad/)** — das ist inzwischen die für Kapitel 3 des Handbuchs tatsächlich genutzte Version (von Hand in KiCad weiterverdrahtet, kein Skript-Output mehr). Details dort in `docs/schematics/README.md`.
 
-- `kicad/stromlaufplan.kicad_pro` — Projekt, in KiCad öffnen.
-- `kicad/stromlaufplan.kicad_sch` — Schaltplan: ESP32-C6, I2C-Level-Shifter, MCP23017, Relaismodul, gleiche Verdrahtung wie der schemdraw-Plan. Alle vier Bauteile als eigene, vollständige Symbole (`gartenwasser.kicad_sym`, per `sym-lib-table` im Projekt registriert).
-- `kicad/build_kicad_sch.py` — generiert die drei Dateien oben aus denselben Pin-Listen wie `stromlaufplan.py`. Bei Pin-Änderungen dort zuerst anpassen, dann `python build_kicad_sch.py` neu laufen lassen (überschreibt manuelle KiCad-Änderungen!).
+`build_kicad_sch.py` (dieses Verzeichnis) ist das Skript, mit dem das KiCad-Projekt ursprünglich als Startgerüst erzeugt wurde (Bauteil-Symbole, ERC-fähige Verdrahtung, gleiche Pin-Listen wie `stromlaufplan.py`). Es regeneriert **nicht** mehr den aktuellen Stand in `docs/schematics/kicad/` — nur noch als Referenz/Ausgangspunkt nützlich, falls z.B. ein komplett neues Schaltplan-Projekt mit denselben Bauteilen aufgesetzt werden soll.
 
-Rechts-Pins sind wie beim echten DIP/SOIC-Gehäuse "umgewickelt" nummeriert (Pin 1 oben links, runter, dann rechts wieder hoch) — beim MCP23017 stimmt das jetzt mit dem Microchip-Datenblatt überein (Pin 15=A0 unten rechts, Pin 28=GPA7 oben rechts). Elektrische Pin-Typen sind semantisch gesetzt (power_in für VDD/VSS/GND/VBUS/3V3, input für A0-A2/RESET/IN0-5, output für INTA/INTB/OUT0-5, no_connect für NC1/NC2, sonst bidirektional).
-
-Erwartete ERC-Meldungen (keine echten Fehler):
-- "nicht verbunden" für absichtlich offene Pins (GPIO4-9, GPA0-7, USB-Pins etc. — passend zum "vollständig mit allen Pins"-Ansatz).
-- "power pin not driven" für die power_in-Pins, weil Stromversorgung hier über Global Labels (`+5V`/`+3V3`/`GND`) statt über echte KiCad-Power-Symbole läuft — ERC verlangt dafür einen "power_out"-Pin auf dem Netz. Bei Bedarf in KiCad die Global Labels gegen die Standard-Symbole `power:+5V`/`power:+3V3`/`power:GND` tauschen, dann verschwindet die Meldung.
+Technische Hintergründe des Generators (Pin-Raster, DIP-Wraparound-Nummerierung, elektrische Pin-Typen, erwartete ERC-Meldungen) stehen als Kommentare direkt im Skript.
