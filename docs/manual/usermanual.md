@@ -417,11 +417,22 @@ Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag,
 | `main/schedule/cmd` | – | `ON`/`OFF` | Zeitplan global ein/aus |
 | `main/schedule/cleanup` | – | beliebig | Abgelaufene „einmalig"-Einträge entfernen |
 
-**`main/config/set`/`state`** — `time`/`auto`/`alias` sind je Ventil geschlüsselte Objekte (`time`/`auto` nur `V1`–`V5`, `alias` zusätzlich `V0`), `maxTime` steht auf oberster Ebene (kein Wert je Ventil, sondern eine geräteweite Obergrenze). `set` akzeptiert eine beliebige Teilmenge dieser vier Felder — nicht enthaltene Felder bleiben unverändert.
+Acht Topics in dieser Gruppe tragen JSON — jedes einzeln, da sich `set` und `state` nicht immer dieselbe Struktur teilen:
+
+**`main/config/set`** — akzeptiert eine **beliebige Teilmenge** von `time`/`auto`/`alias`/`maxTime`; nicht enthaltene Felder bleiben unverändert. Beispiel für ein Teil-Update (nur Laufzeit + Automatik von `V2` ändern):
 
 ```json
 {
-  "time": {"V1": 5, "V2": 10, "V3": 5, "V4": 15, "V5": 5},
+  "time": {"V2": 12},
+  "auto": {"V2": true}
+}
+```
+
+**`main/config/state`** — immer der **vollständige** aktuelle Stand, unabhängig davon, wie viel das letzte `set` enthielt. `time`/`auto`/`alias` sind je Ventil geschlüsselte Objekte (`time`/`auto` nur `V1`–`V5`, `alias` zusätzlich `V0`), `maxTime` steht auf oberster Ebene (geräteweite Obergrenze, kein Wert je Ventil):
+
+```json
+{
+  "time": {"V1": 5, "V2": 12, "V3": 5, "V4": 15, "V5": 5},
   "auto": {"V1": true, "V2": true, "V3": false, "V4": true, "V5": false},
   "alias": {
     "V0": "Hauptventil",
@@ -435,7 +446,7 @@ Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag,
 }
 ```
 
-**`main/programs/set`/`state`** — `time`/`auto` je Programm sind **sparse**: nur aufgeführte Ventile werden beim Anwenden verändert, fehlende bleiben, wie sie sind. `activeProgram` ist 1-basiert, `0` = kein Programm gewählt („Manueller Modus", Kapitel 1).
+**`main/programs/set`** — Array-Replace: **immer das vollständige** Array, kein Teil-Update wie bei `config` (fehlt ein Programm gegenüber dem alten Stand, ist es danach gelöscht). `time`/`auto` je Programm sind sparse — nur aufgeführte Ventile werden beim Anwenden verändert, fehlende bleiben, wie sie sind. `activeProgram` ist 1-basiert, `0` = kein Programm gewählt („Manueller Modus", Kapitel 1):
 
 ```json
 {
@@ -448,7 +459,17 @@ Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag,
 }
 ```
 
-**`main/schedule/set`/`state`** — das äußere `enabled` ist der globale Zeitplan-Schalter (Kapitel 6.4), `enabled` je Eintrag pausiert nur diesen einen. `weekdays` (nur bei `type: "weekly"`) nutzt englische Drei-Buchstaben-Kürzel klein geschrieben (`mon`…`sun`); `date` (nur bei `type: "once"`) im Format `YYYY-MM-DD`. `program` referenziert ein Programm per **Name**, nicht per Index. Ein Eintrag darf **entweder** `weekdays` **oder** `date` enthalten, nie beide gleichzeitig — die Firmware verwirft sonst den kompletten Eintrag kommentarlos.
+**`main/programs/state`** — Echo des zuletzt akzeptierten `set`, **identische Struktur** wie oben (keine Teilmenge möglich, da `set` ohnehin immer vollständig sein muss).
+
+**`main/program/cmd`** — kein JSON, sondern ein einzelner Integer (Programm-Index, 1-basiert, `0` = keins): `2`
+
+**`main/program/state`** — knappes JSON, nur Index + Name des gerade aktiven Programms (redundant zu `programs/state.activeProgram`, aber ohne das komplette Array mitzuschicken):
+
+```json
+{"index": 2, "name": "Rasen"}
+```
+
+**`main/schedule/set`** — Array-Replace wie bei `programs`: **immer das vollständige** Zeitplan-Array. Das äußere `enabled` ist der globale Zeitplan-Schalter (Kapitel 6.4), `enabled` je Eintrag pausiert nur diesen einen. `weekdays` (nur bei `type: "weekly"`) nutzt englische Drei-Buchstaben-Kürzel klein geschrieben (`mon`…`sun`); `date` (nur bei `type: "once"`) im Format `YYYY-MM-DD`. `program` referenziert ein Programm per **Name**, nicht per Index. Ein Eintrag darf **entweder** `weekdays` **oder** `date` enthalten, nie beide gleichzeitig — die Firmware verwirft sonst den kompletten Eintrag kommentarlos:
 
 ```json
 {
@@ -460,6 +481,8 @@ Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag,
   ]
 }
 ```
+
+**`main/schedule/state`** — Echo des zuletzt akzeptierten `set`, **identische Struktur** wie oben.
 
 ### 7.5 Diagnose (`diagnostics/`)
 
