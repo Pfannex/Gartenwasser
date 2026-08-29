@@ -428,7 +428,7 @@ Acht Topics in dieser Gruppe tragen JSON — jedes einzeln, da sich `set` und `s
 }
 ```
 
-**`main/config/state`** — immer der **vollständige** aktuelle Stand, unabhängig davon, wie viel das letzte `set` enthielt. `time`/`auto`/`alias` sind je Ventil geschlüsselte Objekte (`time`/`auto` nur `V1`–`V5`, `alias` zusätzlich `V0`), `maxTime` steht auf oberster Ebene (geräteweite Obergrenze, kein Wert je Ventil):
+**`main/config/state`** — immer der **vollständige** aktuelle Stand, unabhängig davon, wie viel das letzte `set` enthielt. `time`/`auto`/`alias` sind je Ventil geschlüsselte Objekte (`time`/`auto` nur `V1`–`V5`, `alias` zusätzlich `V0`), `maxTime` steht auf oberster Ebene (geräteweite Obergrenze, kein Wert je Ventil). Genau dafür gedacht: als **Backup** sichern und später unverändert auf `.../set` zurückspielen — Beispiel mit `mosquitto_sub`/`mosquitto_pub` in Kapitel 7.7:
 
 ```json
 {
@@ -531,7 +531,15 @@ mosquitto_pub -t gartenwasser/main/cmd -m ON
 
 # Live-Log ab jetzt mitlesen
 mosquitto_sub -t gartenwasser/diagnostics/livelog
+
+# Konfiguration sichern (Snapshot in eine Datei)
+mosquitto_sub -t gartenwasser/main/config/state -C 1 > config-backup.json
+
+# ... und später wiederherstellen
+mosquitto_pub -t gartenwasser/main/config/set -f config-backup.json
 ```
+
+Dasselbe Prinzip (Snapshot vom `.../state`-Topic sichern, später unverändert auf das zugehörige `.../set`-Topic zurückspielen) funktioniert genauso für `main/programs/state` → `main/programs/set` und `main/schedule/state` → `main/schedule/set` — beide sind ebenfalls retained und liefern immer den vollständigen aktuellen Stand (Kapitel 7.4). Ein Restore ersetzt bei allen dreien den kompletten Bereich — bei `programs`/`schedule` ist das ohnehin die einzige Möglichkeit (Array-Replace), bei `config` ist es ein Sonderfall des sonst auch teilweise möglichen Updates.
 
 ---
 
