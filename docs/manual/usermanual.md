@@ -90,12 +90,12 @@ Ein externes Relaismodul (6 Kanäle, potentialfrei) wird zwischen MCP23017-Ausg�
 
 | Ventil | MCP23017-Pin (GPB) | Chip-Pin # |
 |---|---|---|
-| V0 (Hauptventil) | GPB7 | 4 |
-| V1 | GPB2 | 27 |
-| V2 | GPB3 | 28 |
-| V3 | GPB4 | 1 |
-| V4 | GPB5 | 2 |
-| V5 | GPB6 | 3 |
+| V0 (Hauptventil) | GPB7 | 8 |
+| V1 | GPB2 | 3 |
+| V2 | GPB3 | 4 |
+| V3 | GPB4 | 5 |
+| V4 | GPB5 | 6 |
+| V5 | GPB6 | 7 |
 
 ---
 
@@ -119,12 +119,12 @@ graph LR
         M10["Pin 10 · VSS"]
         M1517["Pin 15-17 · A0-A2 → GND"]
         M18["Pin 18 · RESET → 5V"]
-        MB7["GPB7 (Pin 4)"]
-        MB2["GPB2 (Pin 27)"]
-        MB3["GPB3 (Pin 28)"]
-        MB4["GPB4 (Pin 1)"]
-        MB5["GPB5 (Pin 2)"]
-        MB6["GPB6 (Pin 3)"]
+        MB7["GPB7 (Pin 8)"]
+        MB2["GPB2 (Pin 3)"]
+        MB3["GPB3 (Pin 4)"]
+        MB4["GPB4 (Pin 5)"]
+        MB5["GPB5 (Pin 6)"]
+        MB6["GPB6 (Pin 7)"]
     end
 
     subgraph REL["Relaismodul (extern, 6 Kanäle)"]
