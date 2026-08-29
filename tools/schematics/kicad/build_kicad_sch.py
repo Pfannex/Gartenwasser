@@ -33,27 +33,39 @@ mcp_right = [
     ('GPA2', '23'), ('GPA3', '24'), ('GPA4', '25'), ('GPA5', '26'), ('GPA6', '27'), ('GPA7', '28'),
 ]
 
-ls_left = [('LV1', None), ('LV2', None), ('LV3', None), ('LV4', None), ('LV', None), ('GND1', None)]
-ls_right = [('HV1', None), ('HV2', None), ('HV3', None), ('HV4', None), ('HV', None), ('GND2', None)]
+# Physisches Modul-Layout (Foto): oben HV1 HV2 HV GND HV3 HV4, unten LV1 LV2 LV GND LV3 LV4
+# (kurze numerische Pin-Nummern statt Namens-Fallback, sonst ueberlappt bei
+# senkrechten Pins der Name-Text mit dem Nummer-Text)
+ls_top = [('HV1', '1'), ('HV2', '2'), ('HV', '3'), ('GND2', '4'), ('HV3', '5'), ('HV4', '6')]
+ls_bottom = [('LV1', '7'), ('LV2', '8'), ('LV', '9'), ('GND1', '10'), ('LV3', '11'), ('LV4', '12')]
 
 relay_left = [('V0', 'OUT0'), ('V1', 'OUT1'), ('V2', 'OUT2'), ('V3', 'OUT3'), ('V4', 'OUT4'), ('V5', 'OUT5')]
 relay_right = [('IN0', None), ('IN1', None), ('IN2', None), ('IN3', None), ('IN4', None), ('IN5', None)]
 
 
 class IcDef:
-    """Builds a lib_symbols entry + records local pin offsets (library Y-up space)."""
+    """Builds a lib_symbols entry + records local pin offsets (library Y-up space).
 
-    def __init__(self, libname, symname, ref_prefix, left, right, width, value=None, types=None):
+    left/right pins are stacked vertically (standard IC style); top/bottom pins
+    are spread horizontally (header/module style, e.g. the level-shifter board).
+    Both can be combined on the same symbol if needed.
+    """
+
+    def __init__(self, libname, symname, ref_prefix, left=(), right=(), width=None,
+                 top=(), bottom=(), height=None, value=None, types=None, display=None):
         self.libname = libname
         self.symname = symname
         self.ref_prefix = ref_prefix
         self.value = value or symname
         self.types = types or {}
-        n = max(len(left), len(right))
-        self.height = (n + 1) * PITCH
+        self.display = display or {}
+        n_lr = max(len(left), len(right))
+        self.height = height if height is not None else (n_lr + 1) * PITCH
         half_h = self.height / 2
-        self.width = width
-        half_w = width / 2
+        n_tb = max(len(top), len(bottom))
+        min_width_tb = (n_tb - 1) * PITCH + 2 * PITCH if n_tb else 0
+        self.width = max(width or 0, min_width_tb)
+        half_w = self.width / 2
         self.local = {}  # pin_name -> (x, y) library space (Y-up)
         self.pin_num_map = {}
         self.pin_lines = []
@@ -73,14 +85,27 @@ class IcDef:
             self.local[name] = (x, y)
             self.pin_num_map[name] = num or name
             self.pin_lines.append(self._pin(name, num or name, x, y, 180))
+        for i, (name, num) in enumerate(top):
+            x = -((n_tb - 1) * PITCH) / 2 + i * PITCH
+            y = half_h + PIN_LEN
+            self.local[name] = (x, y)
+            self.pin_num_map[name] = num or name
+            self.pin_lines.append(self._pin(name, num or name, x, y, 270))
+        for i, (name, num) in enumerate(bottom):
+            x = -((n_tb - 1) * PITCH) / 2 + i * PITCH
+            y = -half_h - PIN_LEN
+            self.local[name] = (x, y)
+            self.pin_num_map[name] = num or name
+            self.pin_lines.append(self._pin(name, num or name, x, y, 90))
         self.half_w = half_w
         self.half_h = half_h
 
     def _pin(self, name, num, x, y, angle):
         etype = self.types.get(name, 'bidirectional')
+        label = self.display.get(name, name)
         return (
             f'\t\t\t\t(pin {etype} line (at {x:.2f} {y:.2f} {angle}) (length {PIN_LEN:.2f})\n'
-            f'\t\t\t\t\t(name "{esc(name)}" (effects (font (size 1.27 1.27))))\n'
+            f'\t\t\t\t\t(name "{esc(label)}" (effects (font (size 1.27 1.27))))\n'
             f'\t\t\t\t\t(number "{esc(num)}" (effects (font (size 1.27 1.27))))\n'
             f'\t\t\t\t)\n'
         )
@@ -199,6 +224,7 @@ mcp_types = {
 }
 
 ls_types = {'LV': 'power_in', 'HV': 'power_in', 'GND1': 'power_in', 'GND2': 'power_in'}
+ls_display = {'GND1': 'GND', 'GND2': 'GND'}
 
 relay_types = {f'V{i}': 'output' for i in range(6)}  # OUT0..OUT5 (named V0..V5)
 relay_types.update({f'IN{i}': 'input' for i in range(6)})
@@ -206,7 +232,8 @@ relay_types.update({f'IN{i}': 'input' for i in range(6)})
 # ---------------- build the components ----------------
 esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47', types=esp_types)
 mcp = IcDef('gartenwasser', 'MCP23017', 'U', mcp_left, mcp_right, width=28, value='MCP23017', types=mcp_types)
-ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', ls_left, ls_right, width=26, value='I2C Level-Shifter (4-Kanal, bidirektional)', types=ls_types)
+ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', top=ls_top, bottom=ls_bottom, height=20,
+           value='I2C Level-Shifter (4-Kanal, bidirektional)', types=ls_types, display=ls_display)
 relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)', types=relay_types)
 
 lib_symbols_text = esp.lib_text() + mcp.lib_text() + ls.lib_text() + relay.lib_text()
@@ -238,10 +265,10 @@ labels_text += power_stub(P_ESP.pin_pos('VBUS'), '+5V', 'left', shape='output')
 labels_text += power_stub(P_ESP.pin_pos('V3V3'), '+3V3', 'right', shape='output')
 labels_text += power_stub(P_ESP.pin_pos('GND'), 'GND', 'left', shape='input')
 
-labels_text += power_stub(P_LS.pin_pos('LV'), '+3V3', 'left', shape='input')
-labels_text += power_stub(P_LS.pin_pos('GND1'), 'GND', 'left', shape='input')
-labels_text += power_stub(P_LS.pin_pos('HV'), '+5V', 'right', shape='input')
-labels_text += power_stub(P_LS.pin_pos('GND2'), 'GND', 'right', shape='input')
+labels_text += power_stub(P_LS.pin_pos('LV'), '+3V3', 'down', shape='input')
+labels_text += power_stub(P_LS.pin_pos('GND1'), 'GND', 'down', shape='input')
+labels_text += power_stub(P_LS.pin_pos('HV'), '+5V', 'up', shape='input')
+labels_text += power_stub(P_LS.pin_pos('GND2'), 'GND', 'up', shape='input')
 
 labels_text += power_stub(P_MCP.pin_pos('VDD'), '+5V', 'left', shape='input')
 labels_text += power_stub(P_MCP.pin_pos('VSS'), 'GND', 'left', shape='input')
