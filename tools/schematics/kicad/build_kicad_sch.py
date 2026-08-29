@@ -43,11 +43,12 @@ relay_right = [('IN0', None), ('IN1', None), ('IN2', None), ('IN3', None), ('IN4
 class IcDef:
     """Builds a lib_symbols entry + records local pin offsets (library Y-up space)."""
 
-    def __init__(self, libname, symname, ref_prefix, left, right, width, value=None):
+    def __init__(self, libname, symname, ref_prefix, left, right, width, value=None, types=None):
         self.libname = libname
         self.symname = symname
         self.ref_prefix = ref_prefix
         self.value = value or symname
+        self.types = types or {}
         n = max(len(left), len(right))
         self.height = (n + 1) * PITCH
         half_h = self.height / 2
@@ -62,7 +63,11 @@ class IcDef:
             self.local[name] = (x, y)
             self.pin_num_map[name] = num or name
             self.pin_lines.append(self._pin(name, num or name, x, y, 0))
-        for i, (name, num) in enumerate(right):
+        # Right side: reversed order, so pin count N (last item) sits at the TOP
+        # and pin count N/2+1 (first item) sits at the BOTTOM -- matches the
+        # standard DIP/SOIC wraparound numbering (pin 1 top-left, counting down
+        # the left side, then back up the right side to pin N at top-right).
+        for i, (name, num) in enumerate(reversed(right)):
             y = half_h - PITCH * (i + 1)
             x = half_w + PIN_LEN
             self.local[name] = (x, y)
@@ -72,8 +77,9 @@ class IcDef:
         self.half_h = half_h
 
     def _pin(self, name, num, x, y, angle):
+        etype = self.types.get(name, 'bidirectional')
         return (
-            f'\t\t\t\t(pin bidirectional line (at {x:.2f} {y:.2f} {angle}) (length {PIN_LEN:.2f})\n'
+            f'\t\t\t\t(pin {etype} line (at {x:.2f} {y:.2f} {angle}) (length {PIN_LEN:.2f})\n'
             f'\t\t\t\t\t(name "{esc(name)}" (effects (font (size 1.27 1.27))))\n'
             f'\t\t\t\t\t(number "{esc(num)}" (effects (font (size 1.27 1.27))))\n'
             f'\t\t\t\t)\n'
@@ -81,6 +87,14 @@ class IcDef:
 
     def lib_text(self):
         pins = ''.join(self.pin_lines)
+        # pin-1 marker: small filled dot at the top-left corner of the body
+        dot_r = 0.5
+        dot_x = -self.half_w + dot_r + 0.3
+        dot_y = self.half_h - dot_r - 0.3
+        marker = (
+            f'\t\t\t\t(circle (center {dot_x:.2f} {dot_y:.2f}) (radius {dot_r:.2f})\n'
+            f'\t\t\t\t\t(stroke (width 0) (type default)) (fill (type outline)))\n'
+        )
         return (
             f'\t\t(symbol "{self.libname}:{self.symname}"\n'
             f'\t\t\t(in_bom yes) (on_board yes)\n'
@@ -89,6 +103,7 @@ class IcDef:
             f'\t\t\t(symbol "{self.symname}_0_1"\n'
             f'\t\t\t\t(rectangle (start {-self.half_w:.2f} {self.half_h:.2f}) (end {self.half_w:.2f} {-self.half_h:.2f})\n'
             f'\t\t\t\t\t(stroke (width 0.254) (type default)) (fill (type background)))\n'
+            f'{marker}'
             f'\t\t\t)\n'
             f'\t\t\t(symbol "{self.symname}_1_1"\n'
             f'{pins}'
@@ -132,21 +147,6 @@ class Placed:
         )
 
 
-def num_for(icdef, name):
-    # recover the pin "number" text used in the symbol def (falls back to name)
-    for lst_name, lst in (('left', None),):
-        pass
-    return icdef.pin_num_map[name]
-
-
-# augment IcDef with a pin_num_map for instance-pin references
-_orig_init = IcDef.__init__
-def _new_init(self, libname, symname, ref_prefix, left, right, width, value=None):
-    _orig_init(self, libname, symname, ref_prefix, left, right, width, value)
-    self.pin_num_map = {}
-    for name, num in list(left) + list(right):
-        self.pin_num_map[name] = num or name
-IcDef.__init__ = _new_init
 
 
 def wire(p1, p2):
@@ -187,11 +187,27 @@ def power_stub(pin_pos, text, direction, length=7.62, shape='input'):
     return txt
 
 
+# ---------------- electrical pin types (default: bidirectional) ----------------
+POWER = {'VBUS': 'power_in', 'GND': 'power_in', 'GND_2': 'power_in', 'GND_3': 'power_in', 'VBAT': 'power_in', 'V3V3': 'power_in'}
+esp_types = dict(POWER)
+
+mcp_types = {
+    'VDD': 'power_in', 'VSS': 'power_in',
+    'NC1': 'no_connect', 'NC2': 'no_connect',
+    'A0': 'input', 'A1': 'input', 'A2': 'input', 'RESET': 'input',
+    'INTB': 'output', 'INTA': 'output',
+}
+
+ls_types = {'LV': 'power_in', 'HV': 'power_in', 'GND1': 'power_in', 'GND2': 'power_in'}
+
+relay_types = {f'V{i}': 'output' for i in range(6)}  # OUT0..OUT5 (named V0..V5)
+relay_types.update({f'IN{i}': 'input' for i in range(6)})
+
 # ---------------- build the components ----------------
-esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47')
-mcp = IcDef('gartenwasser', 'MCP23017', 'U', mcp_left, mcp_right, width=28, value='MCP23017')
-ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', ls_left, ls_right, width=26, value='I2C Level-Shifter (4-Kanal, bidirektional)')
-relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)')
+esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47', types=esp_types)
+mcp = IcDef('gartenwasser', 'MCP23017', 'U', mcp_left, mcp_right, width=28, value='MCP23017', types=mcp_types)
+ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', ls_left, ls_right, width=26, value='I2C Level-Shifter (4-Kanal, bidirektional)', types=ls_types)
+relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)', types=relay_types)
 
 lib_symbols_text = esp.lib_text() + mcp.lib_text() + ls.lib_text() + relay.lib_text()
 
