@@ -1,0 +1,4 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "gartenwasser")(type "KiCad")(uri "${KIPRJMOD}/gartenwasser.kicad_sym")(options "")(descr "Gartenwasser Stromlaufplan Symbole"))
+)

@@ -1,0 +1,291 @@
+import uuid
+
+MM = 1.0  # kicad_sch native unit is mm
+PITCH = 2.54  # 100mil pin grid
+PIN_LEN = 5.08  # 200mil pin lead length
+
+def u():
+    return str(uuid.uuid4())
+
+def esc(s):
+    return s.replace('"', '\\"')
+
+# ---- pin data (name, pin_number_or_None) ----
+esp_left = [
+    ('VBUS', 'VBUS'), ('GND', 'GND1'), ('GPIO16', 'UART0_TX'), ('GPIO17', 'UART0_RX'),
+    ('RST', 'RST'), ('GPIO1', 'SPI_SCLK'), ('GPIO2', 'SPI_MOSI'), ('GPIO3', 'SPI_MISO'),
+    ('GPIO4', None), ('GPIO5', None), ('GPIO6', None),
+]
+esp_right = [
+    ('VBAT', 'VBAT'), ('GND_2', 'GND2'), ('GND_3', 'GND3'), ('V3V3', '3V3'),
+    ('GPIO19', 'I2C_SCL'), ('GPIO18', 'I2C_SDA'), ('GPIO13', 'USB_DP'), ('GPIO12', 'USB_DN'),
+    ('GPIO9', None), ('GPIO8', None), ('GPIO7', None),
+]
+
+mcp_left = [
+    ('GPB0', '1'), ('GPB1', '2'), ('GPB2', '3'), ('GPB3', '4'),
+    ('GPB4', '5'), ('GPB5', '6'), ('GPB6', '7'), ('GPB7', '8'),
+    ('VDD', '9'), ('VSS', '10'), ('NC1', '11'), ('SCL', '12'), ('SDA', '13'), ('NC2', '14'),
+]
+mcp_right = [
+    ('A0', '15'), ('A1', '16'), ('A2', '17'), ('RESET', '18'),
+    ('INTB', '19'), ('INTA', '20'), ('GPA0', '21'), ('GPA1', '22'),
+    ('GPA2', '23'), ('GPA3', '24'), ('GPA4', '25'), ('GPA5', '26'), ('GPA6', '27'), ('GPA7', '28'),
+]
+
+ls_left = [('LV1', None), ('LV2', None), ('LV3', None), ('LV4', None), ('LV', None), ('GND1', None)]
+ls_right = [('HV1', None), ('HV2', None), ('HV3', None), ('HV4', None), ('HV', None), ('GND2', None)]
+
+relay_left = [('V0', 'OUT0'), ('V1', 'OUT1'), ('V2', 'OUT2'), ('V3', 'OUT3'), ('V4', 'OUT4'), ('V5', 'OUT5')]
+relay_right = [('IN0', None), ('IN1', None), ('IN2', None), ('IN3', None), ('IN4', None), ('IN5', None)]
+
+
+class IcDef:
+    """Builds a lib_symbols entry + records local pin offsets (library Y-up space)."""
+
+    def __init__(self, libname, symname, ref_prefix, left, right, width, value=None):
+        self.libname = libname
+        self.symname = symname
+        self.ref_prefix = ref_prefix
+        self.value = value or symname
+        n = max(len(left), len(right))
+        self.height = (n + 1) * PITCH
+        half_h = self.height / 2
+        self.width = width
+        half_w = width / 2
+        self.local = {}  # pin_name -> (x, y) library space (Y-up)
+        self.pin_num_map = {}
+        self.pin_lines = []
+        for i, (name, num) in enumerate(left):
+            y = half_h - PITCH * (i + 1)
+            x = -half_w - PIN_LEN
+            self.local[name] = (x, y)
+            self.pin_num_map[name] = num or name
+            self.pin_lines.append(self._pin(name, num or name, x, y, 0))
+        for i, (name, num) in enumerate(right):
+            y = half_h - PITCH * (i + 1)
+            x = half_w + PIN_LEN
+            self.local[name] = (x, y)
+            self.pin_num_map[name] = num or name
+            self.pin_lines.append(self._pin(name, num or name, x, y, 180))
+        self.half_w = half_w
+        self.half_h = half_h
+
+    def _pin(self, name, num, x, y, angle):
+        return (
+            f'\t\t\t\t(pin bidirectional line (at {x:.2f} {y:.2f} {angle}) (length {PIN_LEN:.2f})\n'
+            f'\t\t\t\t\t(name "{esc(name)}" (effects (font (size 1.27 1.27))))\n'
+            f'\t\t\t\t\t(number "{esc(num)}" (effects (font (size 1.27 1.27))))\n'
+            f'\t\t\t\t)\n'
+        )
+
+    def lib_text(self):
+        pins = ''.join(self.pin_lines)
+        return (
+            f'\t\t(symbol "{self.libname}:{self.symname}"\n'
+            f'\t\t\t(in_bom yes) (on_board yes)\n'
+            f'\t\t\t(property "Reference" "{self.ref_prefix}" (at 0 {self.half_h + 2.54:.2f} 0) (effects (font (size 1.27 1.27))))\n'
+            f'\t\t\t(property "Value" "{esc(self.value)}" (at 0 {-(self.half_h + 2.54):.2f} 0) (effects (font (size 1.27 1.27))))\n'
+            f'\t\t\t(symbol "{self.symname}_0_1"\n'
+            f'\t\t\t\t(rectangle (start {-self.half_w:.2f} {self.half_h:.2f}) (end {self.half_w:.2f} {-self.half_h:.2f})\n'
+            f'\t\t\t\t\t(stroke (width 0.254) (type default)) (fill (type background)))\n'
+            f'\t\t\t)\n'
+            f'\t\t\t(symbol "{self.symname}_1_1"\n'
+            f'{pins}'
+            f'\t\t\t)\n'
+            f'\t\t)\n'
+        )
+
+
+class Placed:
+    """A symbol instance placed on the sheet, with sheet-space pin lookup."""
+
+    def __init__(self, icdef, ref, sx, sy):
+        self.icdef = icdef
+        self.ref = ref
+        self.sx = sx
+        self.sy = sy
+        self.uuid = u()
+
+    def pin_pos(self, name):
+        lx, ly = self.icdef.local[name]
+        return (self.sx + lx, self.sy - ly)  # library Y-up -> sheet Y-down
+
+    def instance_text(self):
+        d = self.icdef
+        pin_uuids = {name: u() for name in d.local}
+        self._pin_uuids = pin_uuids
+        pins_txt = ''.join(
+            f'\t\t(pin "{esc(d.pin_num_map[name])}" (uuid {pin_uuids[name]}))\n' for name in d.local
+        )
+        return (
+            f'\t(symbol\n'
+            f'\t\t(lib_id "{d.libname}:{d.symname}")\n'
+            f'\t\t(at {self.sx:.2f} {self.sy:.2f} 0)\n'
+            f'\t\t(unit 1)\n'
+            f'\t\t(in_bom yes) (on_board yes) (dnp no)\n'
+            f'\t\t(uuid {self.uuid})\n'
+            f'\t\t(property "Reference" "{self.ref}" (at {self.sx:.2f} {self.sy - d.half_h - 2.54:.2f} 0) (effects (font (size 1.27 1.27))))\n'
+            f'\t\t(property "Value" "{esc(d.value)}" (at {self.sx:.2f} {self.sy + d.half_h + 2.54:.2f} 0) (effects (font (size 1.27 1.27))))\n'
+            f'{pins_txt}'
+            f'\t)\n'
+        )
+
+
+def num_for(icdef, name):
+    # recover the pin "number" text used in the symbol def (falls back to name)
+    for lst_name, lst in (('left', None),):
+        pass
+    return icdef.pin_num_map[name]
+
+
+# augment IcDef with a pin_num_map for instance-pin references
+_orig_init = IcDef.__init__
+def _new_init(self, libname, symname, ref_prefix, left, right, width, value=None):
+    _orig_init(self, libname, symname, ref_prefix, left, right, width, value)
+    self.pin_num_map = {}
+    for name, num in list(left) + list(right):
+        self.pin_num_map[name] = num or name
+IcDef.__init__ = _new_init
+
+
+def wire(p1, p2):
+    return f'\t(wire (pts (xy {p1[0]:.2f} {p1[1]:.2f}) (xy {p2[0]:.2f} {p2[1]:.2f})) (stroke (width 0.1524) (type default)) (uuid {u()}))\n'
+
+
+def elbow_wire(p1, p2, via_x=None, via_y=None):
+    """Two-segment orthogonal route: horizontal then vertical (or via a fixed via_x)."""
+    if via_x is not None:
+        mid = (via_x, p1[1])
+        mid2 = (via_x, p2[1])
+        return wire(p1, mid) + wire(mid, mid2) + wire(mid2, p2)
+    mid = (p2[0], p1[1])
+    return wire(p1, mid) + wire(mid, p2)
+
+
+def global_label(text, pos, angle, shape='input'):
+    justify = 'left' if angle == 0 else 'right'
+    return (
+        f'\t(global_label "{esc(text)}" (shape {shape}) (at {pos[0]:.2f} {pos[1]:.2f} {angle})\n'
+        f'\t\t(effects (font (size 1.27 1.27)) (justify {justify}))\n'
+        f'\t\t(uuid {u()})\n'
+        f'\t)\n'
+    )
+
+
+def power_stub(pin_pos, text, direction, length=7.62, shape='input'):
+    """direction: 'left','right','up','down' -- which way the stub extends away from the pin."""
+    dx, dy, angle = {
+        'left': (-length, 0, 180),
+        'right': (length, 0, 0),
+        'up': (0, -length, 90),
+        'down': (0, length, 270),
+    }[direction]
+    end = (pin_pos[0] + dx, pin_pos[1] + dy)
+    txt = wire(pin_pos, end)
+    txt += global_label(text, end, angle, shape=shape)
+    return txt
+
+
+# ---------------- build the components ----------------
+esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47')
+mcp = IcDef('gartenwasser', 'MCP23017', 'U', mcp_left, mcp_right, width=28, value='MCP23017')
+ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', ls_left, ls_right, width=26, value='I2C Level-Shifter (4-Kanal, bidirektional)')
+relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)')
+
+lib_symbols_text = esp.lib_text() + mcp.lib_text() + ls.lib_text() + relay.lib_text()
+
+P_ESP = Placed(esp, 'A1', 60, 150)
+P_MCP = Placed(mcp, 'U1', 260, 150)
+P_RELAY = Placed(relay, 'K1', 170, 60)
+P_LS = Placed(ls, 'U2', 160, 200)
+
+instances_text = P_ESP.instance_text() + P_MCP.instance_text() + P_RELAY.instance_text() + P_LS.instance_text()
+
+wires_text = ''
+# I2C through the level shifter
+wires_text += elbow_wire(P_ESP.pin_pos('GPIO19'), P_LS.pin_pos('LV1'))
+wires_text += elbow_wire(P_ESP.pin_pos('GPIO18'), P_LS.pin_pos('LV2'))
+wires_text += elbow_wire(P_LS.pin_pos('HV1'), P_MCP.pin_pos('SCL'), via_x=230)
+wires_text += elbow_wire(P_LS.pin_pos('HV2'), P_MCP.pin_pos('SDA'), via_x=234)
+
+# valve relay wiring: GPB7=Hauptventil(V0), GPB2..GPB6=V1..V5
+wires_text += elbow_wire(P_MCP.pin_pos('GPB7'), P_RELAY.pin_pos('IN0'), via_x=220)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB2'), P_RELAY.pin_pos('IN1'), via_x=224)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB3'), P_RELAY.pin_pos('IN2'), via_x=228)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB4'), P_RELAY.pin_pos('IN3'), via_x=232)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB5'), P_RELAY.pin_pos('IN4'), via_x=236)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB6'), P_RELAY.pin_pos('IN5'), via_x=240)
+
+labels_text = ''
+labels_text += power_stub(P_ESP.pin_pos('VBUS'), '+5V', 'left', shape='output')
+labels_text += power_stub(P_ESP.pin_pos('V3V3'), '+3V3', 'right', shape='output')
+labels_text += power_stub(P_ESP.pin_pos('GND'), 'GND', 'left', shape='input')
+
+labels_text += power_stub(P_LS.pin_pos('LV'), '+3V3', 'left', shape='input')
+labels_text += power_stub(P_LS.pin_pos('GND1'), 'GND', 'left', shape='input')
+labels_text += power_stub(P_LS.pin_pos('HV'), '+5V', 'right', shape='input')
+labels_text += power_stub(P_LS.pin_pos('GND2'), 'GND', 'right', shape='input')
+
+labels_text += power_stub(P_MCP.pin_pos('VDD'), '+5V', 'left', shape='input')
+labels_text += power_stub(P_MCP.pin_pos('VSS'), 'GND', 'left', shape='input')
+labels_text += power_stub(P_MCP.pin_pos('RESET'), '+5V', 'right', shape='input')
+labels_text += power_stub(P_MCP.pin_pos('A0'), 'GND', 'right', shape='input')
+labels_text += power_stub(P_MCP.pin_pos('A1'), 'GND', 'right', shape='input')
+labels_text += power_stub(P_MCP.pin_pos('A2'), 'GND', 'right', shape='input')
+
+sch = f'''(kicad_sch
+\t(version 20211123)
+\t(generator eeschema)
+\t(uuid {u()})
+\t(paper "A2")
+\t(lib_symbols
+{lib_symbols_text}\t)
+{instances_text}{wires_text}{labels_text}\t(sheet_instances
+\t\t(path "/" (page "1"))
+\t)
+)
+'''
+
+with open('stromlaufplan.kicad_sch', 'w', encoding='utf-8') as f:
+    f.write(sch)
+
+# ---------------- standalone symbol library (so "Place Symbol" finds it too) ----------------
+symlib = f'''(kicad_symbol_lib
+\t(version 20211014)
+\t(generator kicad_symbol_editor)
+{lib_symbols_text}\t)
+'''
+with open('gartenwasser.kicad_sym', 'w', encoding='utf-8') as f:
+    f.write(symlib)
+
+with open('sym-lib-table', 'w', encoding='utf-8') as f:
+    f.write(
+        '(sym_lib_table\n'
+        '\t(version 7)\n'
+        '\t(lib (name "gartenwasser")(type "KiCad")(uri "${KIPRJMOD}/gartenwasser.kicad_sym")(options "")(descr "Gartenwasser Stromlaufplan Symbole"))\n'
+        ')\n'
+    )
+
+import json as _json
+project = {
+    "board": {"design_settings": {}},
+    "boards": [],
+    "cvpcb": {},
+    "erc": {"erc_exclusions": [], "meta": {"version": 0}, "pin_map": [], "rule_severities": {}},
+    "libraries": {"pinned_footprint_libs": [], "pinned_symbol_libs": []},
+    "meta": {"filename": "stromlaufplan.kicad_pro", "version": 1},
+    "net_settings": {"classes": [{"name": "Default"}]},
+    "pcbnew": {"page_layout_descr_file": ""},
+    "schematic": {
+        "drawing": {},
+        "legacy_lib_dir": "",
+        "legacy_lib_list": [],
+    },
+    "sheets": [],
+    "text_variables": {},
+}
+with open('stromlaufplan.kicad_pro', 'w', encoding='utf-8') as f:
+    _json.dump(project, f, indent=2)
+
+print('written stromlaufplan.kicad_sch, gartenwasser.kicad_sym, sym-lib-table, stromlaufplan.kicad_pro')
