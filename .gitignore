@@ -9,4 +9,5 @@ include/BuildNumber.h
 data/*.bundle.js
 data/mqtt.min.js
 tools/schematics/kicad/*.lck
+tools/schematics/kicad/*.bak
 tools/schematics/kicad/.history/

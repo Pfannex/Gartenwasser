@@ -52,13 +52,22 @@ class IcDef:
     """
 
     def __init__(self, libname, symname, ref_prefix, left=(), right=(), width=None,
-                 top=(), bottom=(), height=None, value=None, types=None, display=None):
+                 top=(), bottom=(), height=None, value=None, types=None, display=None,
+                 dip_wrap=True):
         self.libname = libname
         self.symname = symname
         self.ref_prefix = ref_prefix
         self.value = value or symname
         self.types = types or {}
         self.display = display or {}
+        # dip_wrap=True: right side numbered like a real DIP/SOIC package (pin 1
+        # top-left, down the left side, then back UP the right side to pin N at
+        # top-right) -- correct for chips with a physical datasheet pinout (e.g.
+        # MCP23017). dip_wrap=False: right side simply reads top-to-bottom like
+        # the left side -- correct for a plain 2-row pin header/module, where
+        # each row is just listed independently (e.g. the ESP32 board, the
+        # relay module) and there is no wraparound numbering to match.
+        right_order = list(reversed(right)) if dip_wrap else list(right)
         n_lr = max(len(left), len(right))
         self.height = height if height is not None else (n_lr + 1) * PITCH
         half_h = self.height / 2
@@ -75,11 +84,7 @@ class IcDef:
             self.local[name] = (x, y)
             self.pin_num_map[name] = num or name
             self.pin_lines.append(self._pin(name, num or name, x, y, 0))
-        # Right side: reversed order, so pin count N (last item) sits at the TOP
-        # and pin count N/2+1 (first item) sits at the BOTTOM -- matches the
-        # standard DIP/SOIC wraparound numbering (pin 1 top-left, counting down
-        # the left side, then back up the right side to pin N at top-right).
-        for i, (name, num) in enumerate(reversed(right)):
+        for i, (name, num) in enumerate(right_order):
             y = half_h - PITCH * (i + 1)
             x = half_w + PIN_LEN
             self.local[name] = (x, y)
@@ -230,11 +235,11 @@ relay_types = {f'V{i}': 'output' for i in range(6)}  # OUT0..OUT5 (named V0..V5)
 relay_types.update({f'IN{i}': 'input' for i in range(6)})
 
 # ---------------- build the components ----------------
-esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47', types=esp_types)
+esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47', types=esp_types, dip_wrap=False)
 mcp = IcDef('gartenwasser', 'MCP23017', 'U', mcp_left, mcp_right, width=28, value='MCP23017', types=mcp_types)
 ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', top=ls_top, bottom=ls_bottom, height=20,
            value='I2C Level-Shifter (4-Kanal, bidirektional)', types=ls_types, display=ls_display)
-relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)', types=relay_types)
+relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)', types=relay_types, dip_wrap=False)
 
 lib_symbols_text = esp.lib_text() + mcp.lib_text() + ls.lib_text() + relay.lib_text()
 
