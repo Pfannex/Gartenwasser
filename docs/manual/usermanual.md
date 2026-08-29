@@ -417,6 +417,50 @@ Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag,
 | `main/schedule/cmd` | – | `ON`/`OFF` | Zeitplan global ein/aus |
 | `main/schedule/cleanup` | – | beliebig | Abgelaufene „einmalig"-Einträge entfernen |
 
+**`main/config/set`/`state`** — `time`/`auto`/`alias` sind je Ventil geschlüsselte Objekte (`time`/`auto` nur `V1`–`V5`, `alias` zusätzlich `V0`), `maxTime` steht auf oberster Ebene (kein Wert je Ventil, sondern eine geräteweite Obergrenze). `set` akzeptiert eine beliebige Teilmenge dieser vier Felder — nicht enthaltene Felder bleiben unverändert.
+
+```json
+{
+  "time": {"V1": 5, "V2": 10, "V3": 5, "V4": 15, "V5": 5},
+  "auto": {"V1": true, "V2": true, "V3": false, "V4": true, "V5": false},
+  "alias": {
+    "V0": "Hauptventil",
+    "V1": "Rasen Vorgarten",
+    "V2": "Rasen Garten",
+    "V3": "Beet Rosen",
+    "V4": "Beet Gemüse",
+    "V5": "Kübelpflanzen"
+  },
+  "maxTime": 30
+}
+```
+
+**`main/programs/set`/`state`** — `time`/`auto` je Programm sind **sparse**: nur aufgeführte Ventile werden beim Anwenden verändert, fehlende bleiben, wie sie sind. `activeProgram` ist 1-basiert, `0` = kein Programm gewählt („Manueller Modus", Kapitel 1).
+
+```json
+{
+  "programs": [
+    {"name": "Kurz",  "time": {"V1": 2, "V2": 2}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
+    {"name": "Rasen", "time": {"V1": 10, "V2": 10}, "auto": {"V1": true, "V2": true, "V3": false, "V4": false, "V5": false}},
+    {"name": "Alles", "time": {"V1": 8, "V2": 8, "V3": 12, "V4": 15, "V5": 6}, "auto": {"V1": true, "V2": true, "V3": true, "V4": true, "V5": true}}
+  ],
+  "activeProgram": 2
+}
+```
+
+**`main/schedule/set`/`state`** — das äußere `enabled` ist der globale Zeitplan-Schalter (Kapitel 6.4), `enabled` je Eintrag pausiert nur diesen einen. `weekdays` (nur bei `type: "weekly"`) nutzt englische Drei-Buchstaben-Kürzel klein geschrieben (`mon`…`sun`); `date` (nur bei `type: "once"`) im Format `YYYY-MM-DD`. `program` referenziert ein Programm per **Name**, nicht per Index. Ein Eintrag darf **entweder** `weekdays` **oder** `date` enthalten, nie beide gleichzeitig — die Firmware verwirft sonst den kompletten Eintrag kommentarlos.
+
+```json
+{
+  "enabled": true,
+  "schedule": [
+    {"enabled": true, "type": "daily", "time": "21:00", "program": "Rasen"},
+    {"enabled": true, "type": "weekly", "weekdays": ["tue", "fri"], "time": "20:00", "program": "Beete"},
+    {"enabled": true, "type": "once", "date": "2026-02-01", "time": "11:00", "program": "Kurz"}
+  ]
+}
+```
+
 ### 7.5 Diagnose (`diagnostics/`)
 
 | Topic | Retain | Wert | Bedeutung |
@@ -437,6 +481,20 @@ Die Detail-Tabellen (7.2–7.7) zeigen dieselben Topics einzeln mit Retain-Flag,
 | `main/info/rssi` | ja | dBm | WLAN-Signalstärke |
 | `main/info/ip`, `main/info/broker` | ja | Text | Eigene IP / Broker-Adresse |
 | `main/info/partitions` | ja | JSON-Array | Partitionstabelle inkl. Belegung |
+
+**`main/info/partitions`** — `active` erscheint nur bei den beiden App-Partitionen (`app0`/`app1`, zeigt den gerade aktiven OTA-Slot); `used` nur, wo tatsächlich ermittelbar (aktiver App-Slot: Sketch-Größe; `webfs`/`config`: Dateisystem-Belegung) — `nvs`, `otadata` und `coredump` haben kein `used`-Feld.
+
+```json
+[
+  {"label": "app0", "size": 3145728, "active": true, "used": 987654},
+  {"label": "app1", "size": 3145728, "active": false},
+  {"label": "nvs", "size": 20480},
+  {"label": "otadata", "size": 8192},
+  {"label": "webfs", "size": 1835008, "used": 456789},
+  {"label": "config", "size": 131072, "used": 2048},
+  {"label": "coredump", "size": 65536}
+]
+```
 
 ### 7.7 Beispiele
 
