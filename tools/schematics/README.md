@@ -23,8 +23,6 @@ Nach dem Bearbeiten der SVG (händisch oder per Skript) als WebP exportieren und
 
 ## KiCad-Projekt
 
-**Umgezogen nach [`docs/schematics/kicad/`](../../docs/schematics/kicad/)** — das ist inzwischen die für Kapitel 3 des Handbuchs tatsächlich genutzte Version (von Hand in KiCad weiterverdrahtet, kein Skript-Output mehr). Details dort in `docs/schematics/README.md`.
+**Umgezogen nach [`docs/schematics/kicad/`](../../docs/schematics/kicad/)** — das ist die für Kapitel 3 des Handbuchs tatsächlich genutzte Version (von Hand in KiCad weiterverdrahtet). Details dort in `docs/schematics/README.md`.
 
-`build_kicad_sch.py` (dieses Verzeichnis) ist das Skript, mit dem das KiCad-Projekt ursprünglich als Startgerüst erzeugt wurde (Bauteil-Symbole, ERC-fähige Verdrahtung, gleiche Pin-Listen wie `stromlaufplan.py`). Es regeneriert **nicht** mehr den aktuellen Stand in `docs/schematics/kicad/` — nur noch als Referenz/Ausgangspunkt nützlich, falls z.B. ein komplett neues Schaltplan-Projekt mit denselben Bauteilen aufgesetzt werden soll.
-
-Technische Hintergründe des Generators (Pin-Raster, DIP-Wraparound-Nummerierung, elektrische Pin-Typen, erwartete ERC-Meldungen) stehen als Kommentare direkt im Skript.
+Der ursprüngliche Generator (`build_kicad_sch.py`, hat das KiCad-Projekt als Startgerüst erzeugt) wurde entfernt, da er den aktuellen, von Hand weiterbearbeiteten Stand ohnehin nicht mehr regeneriert hätte.
