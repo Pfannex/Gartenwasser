@@ -10,6 +10,14 @@ def u():
 def esc(s):
     return s.replace('"', '\\"')
 
+def even_ceil(n):
+    """Round up to the next even integer -- keeps half-of-that a clean PITCH multiple."""
+    return n if n % 2 == 0 else n + 1
+
+def snap(v):
+    """Snap a sheet coordinate onto the PITCH grid (so it's clickable in KiCad)."""
+    return round(v / PITCH) * PITCH
+
 # ---- pin data (name, pin_number_or_None) ----
 esp_left = [
     ('VBUS', 'VBUS'), ('GND', 'GND1'), ('GPIO16', 'UART0_TX'), ('GPIO17', 'UART0_RX'),
@@ -69,11 +77,15 @@ class IcDef:
         # relay module) and there is no wraparound numbering to match.
         right_order = list(reversed(right)) if dip_wrap else list(right)
         n_lr = max(len(left), len(right))
-        self.height = height if height is not None else (n_lr + 1) * PITCH
+        # even_ceil() so half_h always lands on a whole PITCH multiple -- otherwise
+        # every left/right pin (and thus every wire endpoint on this symbol) sits
+        # half a grid step off, and the wire tool can never click exactly onto it.
+        raw_height = height if height is not None else (n_lr + 1) * PITCH
+        self.height = even_ceil(round(raw_height / PITCH)) * PITCH
         half_h = self.height / 2
         n_tb = max(len(top), len(bottom))
-        min_width_tb = (n_tb - 1) * PITCH + 2 * PITCH if n_tb else 0
-        self.width = max(width or 0, min_width_tb)
+        min_width_tb = even_ceil(n_tb + 1) * PITCH if n_tb else 0
+        self.width = even_ceil(round((max(width or 0, min_width_tb)) / PITCH)) * PITCH
         half_w = self.width / 2
         self.local = {}  # pin_name -> (x, y) library space (Y-up)
         self.pin_num_map = {}
@@ -91,13 +103,19 @@ class IcDef:
             self.pin_num_map[name] = num or name
             self.pin_lines.append(self._pin(name, num or name, x, y, 180))
         for i, (name, num) in enumerate(top):
-            x = -((n_tb - 1) * PITCH) / 2 + i * PITCH
+            # -(n_tb//2) instead of exact centering: for an even n_tb, exact
+            # centering needs a half-PITCH offset, which would push these off
+            # the grid (see the height/width fix above for why that matters).
+            x = -(n_tb // 2) * PITCH + i * PITCH
             y = half_h + PIN_LEN
             self.local[name] = (x, y)
             self.pin_num_map[name] = num or name
             self.pin_lines.append(self._pin(name, num or name, x, y, 270))
         for i, (name, num) in enumerate(bottom):
-            x = -((n_tb - 1) * PITCH) / 2 + i * PITCH
+            # -(n_tb//2) instead of exact centering: for an even n_tb, exact
+            # centering needs a half-PITCH offset, which would push these off
+            # the grid (see the height/width fix above for why that matters).
+            x = -(n_tb // 2) * PITCH + i * PITCH
             y = -half_h - PIN_LEN
             self.local[name] = (x, y)
             self.pin_num_map[name] = num or name
@@ -237,16 +255,16 @@ relay_types.update({f'IN{i}': 'input' for i in range(6)})
 # ---------------- build the components ----------------
 esp = IcDef('gartenwasser', 'ESP32C6_TouchLCD', 'A', esp_left, esp_right, width=32, value='Waveshare ESP32-C6-Touch-LCD-1.47', types=esp_types, dip_wrap=False)
 mcp = IcDef('gartenwasser', 'MCP23017', 'U', mcp_left, mcp_right, width=28, value='MCP23017', types=mcp_types)
-ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', top=ls_top, bottom=ls_bottom, height=20,
+ls = IcDef('gartenwasser', 'LevelShifter4Ch', 'U', top=ls_top, bottom=ls_bottom, height=8 * PITCH,
            value='I2C Level-Shifter (4-Kanal, bidirektional)', types=ls_types, display=ls_display)
 relay = IcDef('gartenwasser', 'Relay6Ch', 'K', relay_left, relay_right, width=26, value='Relaismodul (6 Kanaele)', types=relay_types, dip_wrap=False)
 
 lib_symbols_text = esp.lib_text() + mcp.lib_text() + ls.lib_text() + relay.lib_text()
 
-P_ESP = Placed(esp, 'A1', 60, 150)
-P_MCP = Placed(mcp, 'U1', 260, 150)
-P_RELAY = Placed(relay, 'K1', 170, 60)
-P_LS = Placed(ls, 'U2', 160, 200)
+P_ESP = Placed(esp, 'A1', snap(60), snap(150))
+P_MCP = Placed(mcp, 'U1', snap(260), snap(150))
+P_RELAY = Placed(relay, 'K1', snap(170), snap(60))
+P_LS = Placed(ls, 'U2', snap(160), snap(200))
 
 instances_text = P_ESP.instance_text() + P_MCP.instance_text() + P_RELAY.instance_text() + P_LS.instance_text()
 
@@ -254,16 +272,18 @@ wires_text = ''
 # I2C through the level shifter
 wires_text += elbow_wire(P_ESP.pin_pos('GPIO19'), P_LS.pin_pos('LV1'))
 wires_text += elbow_wire(P_ESP.pin_pos('GPIO18'), P_LS.pin_pos('LV2'))
-wires_text += elbow_wire(P_LS.pin_pos('HV1'), P_MCP.pin_pos('SCL'), via_x=230)
-wires_text += elbow_wire(P_LS.pin_pos('HV2'), P_MCP.pin_pos('SDA'), via_x=234)
+wires_text += elbow_wire(P_LS.pin_pos('HV1'), P_MCP.pin_pos('SCL'), via_x=95 * PITCH)
+wires_text += elbow_wire(P_LS.pin_pos('HV2'), P_MCP.pin_pos('SDA'), via_x=96 * PITCH)
 
 # valve relay wiring: GPB7=Hauptventil(V0), GPB2..GPB6=V1..V5
-wires_text += elbow_wire(P_MCP.pin_pos('GPB7'), P_RELAY.pin_pos('IN0'), via_x=220)
-wires_text += elbow_wire(P_MCP.pin_pos('GPB2'), P_RELAY.pin_pos('IN1'), via_x=224)
-wires_text += elbow_wire(P_MCP.pin_pos('GPB3'), P_RELAY.pin_pos('IN2'), via_x=228)
-wires_text += elbow_wire(P_MCP.pin_pos('GPB4'), P_RELAY.pin_pos('IN3'), via_x=232)
-wires_text += elbow_wire(P_MCP.pin_pos('GPB5'), P_RELAY.pin_pos('IN4'), via_x=236)
-wires_text += elbow_wire(P_MCP.pin_pos('GPB6'), P_RELAY.pin_pos('IN5'), via_x=240)
+# distinct via_x lanes, all PITCH multiples and well clear of the SCL/SDA
+# lanes above so no two unrelated nets ever run along the same vertical line.
+wires_text += elbow_wire(P_MCP.pin_pos('GPB7'), P_RELAY.pin_pos('IN0'), via_x=85 * PITCH)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB2'), P_RELAY.pin_pos('IN1'), via_x=86 * PITCH)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB3'), P_RELAY.pin_pos('IN2'), via_x=87 * PITCH)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB4'), P_RELAY.pin_pos('IN3'), via_x=88 * PITCH)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB5'), P_RELAY.pin_pos('IN4'), via_x=89 * PITCH)
+wires_text += elbow_wire(P_MCP.pin_pos('GPB6'), P_RELAY.pin_pos('IN5'), via_x=90 * PITCH)
 
 labels_text = ''
 labels_text += power_stub(P_ESP.pin_pos('VBUS'), '+5V', 'left', shape='output')
