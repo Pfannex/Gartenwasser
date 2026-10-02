@@ -84,8 +84,8 @@ HomeAssistant/
                                     # laufende Config-Aenderungen ueber /api/config/<x>/ zeigen
                                     # sich hier erst nach einem echten Neustart
           play.png / stop.png       # eigene PNG-Icons fuer den Start/Stop-Button
-  dashboards/
-    gartenwasser.yaml             # das Lovelace-Dashboard (YAML-Modus)
+  dashboards/                     # leer - Dashboard seit 2026-10-02 im Repo HomeAssistant,
+                                  # dashboards/handy/gartenwasser/ (https://github.com/Pfannex/HomeAssistant)
   themes/
 ```
 
@@ -150,7 +150,7 @@ bleibt der manuelle Entry-Reload weiterhin noetig.
 
 1. Inhalt von `HomeAssistant/` in den Config-Root der eigenen HA-Instanz kopieren
    (bzw. mergen, falls dort schon andere, unrelated Konfiguration liegt — `packages:`,
-   `scene:`, `openhasp:` und `lovelace.dashboards.gartenwasser-dashboard` muessen dann von
+   `scene:` und `openhasp:` muessen dann von
    Hand in die eigene `configuration.yaml` uebernommen werden statt die Datei zu
    ueberschreiben).
 2. Vor dem Neustart validieren, ohne etwas zu riskieren: `POST /api/config/core/check_config`
@@ -169,7 +169,8 @@ bleibt der manuelle Entry-Reload weiterhin noetig.
    sollten unter denselben Entity-IDs erreichbar sein wie in einer bereits laufenden
    Installation.
 5. Entity-IDs im Dashboard vorher gegen die eigene Installation prüfen (Einstellungen →
-   Geräte & Dienste → Entitäten) — `dashboards/gartenwasser.yaml` enthält bereits die per
+   Geräte & Dienste → Entitäten) — das Dashboard (Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant),
+   `dashboards/handy/gartenwasser/`) enthält bereits die per
    Entity-Registry verifizierten IDs (Präfix `gartenbewasserung_`), bei Namenskollisionen
    kann HA aber einen abweichenden Suffix („_2") vergeben.
 

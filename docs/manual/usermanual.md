@@ -599,7 +599,7 @@ Alle Helper-Entities sind reine HA-`input_*`-Domänen (`input_text`/`input_boole
 
 ### 8.6 HA-Dashboard
 
-Eigenes Lovelace-Dashboard „Gartenwasser" (`HomeAssistant/dashboards/gartenwasser.yaml`, YAML-Modus), bildet fünf der sieben WebIF-Reiter nach (alle außer *Update* — ein Firmware-Update ist über das Dashboard nicht vorgesehen, dafür bleibt das WebIF zuständig, Kapitel 6.6) plus eine reine Info-Seite. Voraussetzung: mehrere HACS-Custom-Cards (Bubble Card, Mushroom, card_mod u. a. — siehe `docs/homeassistant/README.md`).
+Lovelace-Views „Gartenwasser" im Handy-Dashboard (Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant), `dashboards/handy/gartenwasser/`, YAML-Modus), bildet fünf der sieben WebIF-Reiter nach (alle außer *Update* — ein Firmware-Update ist über das Dashboard nicht vorgesehen, dafür bleibt das WebIF zuständig, Kapitel 6.6) plus eine reine Info-Seite. Voraussetzung: mehrere HACS-Custom-Cards (Bubble Card, Mushroom, card_mod u. a. — siehe `docs/homeassistant/README.md`).
 
 **Status** — Startbildschirm mit Live-Übersicht und Schnellbedienung. Ein großer „Automatik"-Knopf startet/stoppt die Sequenz, darunter (nur im Ruhezustand wählbar) eine Programm-Dropdown-Auswahl sowie Restlaufzeit als Countdown mit Fortschrittsbalken. Kachel-Raster darunter: Hauptventil-Kachel zeigt nur den Zustand (grau bei Offline/„Kein Programm", sonst rot/grün), die fünf Ventilkacheln zeigen Alias, Zustand, bei laufendem Ventil die Restlaufzeit samt Balken — Antippen schaltet das jeweilige Ventil manuell. Eine Diagnose-Kachel zeigt Verbindungsstatus, I2C-Status sowie RAM-/Flash-Auslastung.
 

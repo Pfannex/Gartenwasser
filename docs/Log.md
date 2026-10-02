@@ -1201,6 +1201,18 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Beide Helper (`input_boolean`/`input_select`) mussten zusaetzlich per `input_boolean.reload`/`input_select.reload`-Service geladen werden - ein reiner openHASP-Config-Entry-Reload reicht dafuer NICHT, da es sich um eigene YAML-Domains handelt (Lektion: bei neuen `input_*`-Helpern immer die passende `<domain>.reload`-Aktion nicht vergessen, nicht nur die Config-Entry-abhaengigen Integrationen neu laden).
 - Live durchgetestet (simulierte Taps + Screenshot-Vergleich vor/nach): Stunde/Minute-Umschaltung samt Rahmenwechsel, Minuten-Feinjustierung (07:00→07:01, Stunde blieb unveraendert), Tag→Monat-Umschaltung samt Rahmenwechsel, Monats-Inkrement mit korrektem Tages-Erhalt (27.08.2026→27.09.2026). Test-Aenderungen an einem echten Zeitplan-Eintrag (`extraKurz`) danach vollstaendig auf den Ausgangszustand zurueckgesetzt (weekly/07:00/Di,Do,Sa).
 
+## 2026-10-02
+
+### HA-Dashboard ins Repo HomeAssistant umgezogen
+
+- `HomeAssistant/dashboards/gartenwasser.yaml` geloescht (Stand bis hier in der Git-Historie, Commit afa3008).
+- Neuer Ort: Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant), `dashboards/handy/gartenwasser/` - eine Datei je View, eingebunden ins
+  Handy-Dashboard (`/handy-dashboard/...`). Status ist der View `gartenwasser`, Konfiguration/Programme/Zeitplan/
+  Log/Info sind Subviews mit Zurueck-Pfeil; Einstieg ueber die Zeile "Einstellungen" auf dem Status-View.
+- Offline-Waechter der Unterseiten springt jetzt auf `/handy-dashboard/gartenwasser`.
+- Ausgerollt wurde der Repo-Stand vom 2026-08-27 (inkl. grauem Hauptventil bei offline), der auf HA vorher noch fehlte.
+- `lovelace.dashboards.gartenwasser-dashboard` aus `configuration.yaml` entfernt.
+
 ## Offene Punkte / nächste Schritte
 
 - **Hauptcontroller (192.168.10.33) instabil - wiederholt offline** (2026-08-27, mehrfach beobachtet): erst als offline entdeckt, dann vom Nutzer als "läuft klasse!" bestaetigt, dann beim naechsten Test erneut offline (`gartenwasser/availability` retained `offline`, `main/info/uptime` eingefroren, weder Ping noch HTTP erreichbar). Kein Einzelfall mehr, sondern ein wiederkehrendes Muster - braucht eine echte Untersuchung vor Ort (Stromversorgung/WLAN-Signal/Watchdog-Reboots), keine Software-Diagnose von der HA-Seite aus moeglich.

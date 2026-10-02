@@ -13,12 +13,8 @@ scene: !include scenes.yaml
 
 openhasp: !include configurations/plates/openhasp.yaml
 
+# Das Gartenwasser-Dashboard ist seit 2026-10-02 Teil des Handy-Dashboards im Repo
+# https://github.com/Pfannex/HomeAssistant (dashboards/handy/gartenwasser/) - dort auch die
+# aktuelle configuration.yaml der Hauptinstanz.
 lovelace:
   mode: storage
-  dashboards:
-    gartenwasser-dashboard:
-      mode: yaml
-      title: Gartenwasser
-      icon: mdi:sprinkler-variant
-      show_in_sidebar: true
-      filename: dashboards/gartenwasser.yaml
