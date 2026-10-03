@@ -512,7 +512,7 @@ Dasselbe Prinzip (Snapshot vom `.../state`-Topic sichern, später unverändert a
 
 ## 8. Home-Assistant-Integration
 
-Home Assistant bindet das Gerät auf zwei sich ergänzenden Wegen ein: automatische **MQTT-Discovery** (26 Entities, kommen ohne jede manuelle Konfiguration, sobald das Gerät online ist) plus eine mitgelieferte, manuell einzubindende **Ergänzungskonfiguration** (`HomeAssistant/` im Repository) für alles, was Discovery allein nicht abbilden kann — Alias-Namen, Programm-/Zeitplan-Verwaltung, ein vollständiges Dashboard sowie die Anbindung des openHASP-Touchpanels (Kapitel 9). Einrichtungsschritte im Detail: `docs/homeassistant/README.md`.
+Home Assistant bindet das Gerät auf zwei sich ergänzenden Wegen ein: automatische **MQTT-Discovery** (26 Entities, kommen ohne jede manuelle Konfiguration, sobald das Gerät online ist) plus eine mitgelieferte, manuell einzubindende **Ergänzungskonfiguration** (Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant)) für alles, was Discovery allein nicht abbilden kann — Alias-Namen, Programm-/Zeitplan-Verwaltung, ein vollständiges Dashboard sowie die Anbindung des openHASP-Touchpanels (Kapitel 9). Einrichtungsschritte im Detail: Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant), `docs/gartenwasser_ha.md`.
 
 ### 8.1 Automatisch erkannte Entities (MQTT-Discovery)
 
@@ -637,7 +637,7 @@ Lovelace-Views „Gartenwasser" im Handy-Dashboard (Repo [HomeAssistant](https:/
 
 ### 9.1 Überblick
 
-Zusätzlich zum Touch-Display direkt am Gerät (Kapitel 5) lässt sich die Gartenbewässerung auch über ein **separates, per Wand-/Tischhalterung montiertes Touchpanel** bedienen — Hardware-unabhängig vom eigentlichen Steuerungs-Board, angebunden ausschließlich über MQTT + die [openHASP](https://www.openhasp.com/)-Firmware und die Home-Assistant-Integration `openhasp` (Konfiguration: `HomeAssistant/configurations/plates/plate_wz/openhasp.yaml`). Das Panel („`plate_wz`") ist ein Mehrzweck-Gerät — es hostet neben den beiden Gartenbewässerungs-Seiten auch fachfremde Seiten für andere Haussteuerungs-Funktionen (Hauptmenü, Beleuchtung), die hier nicht Teil der Dokumentation sind.
+Zusätzlich zum Touch-Display direkt am Gerät (Kapitel 5) lässt sich die Gartenbewässerung auch über ein **separates, per Wand-/Tischhalterung montiertes Touchpanel** bedienen — Hardware-unabhängig vom eigentlichen Steuerungs-Board, angebunden ausschließlich über MQTT + die [openHASP](https://www.openhasp.com/)-Firmware und die Home-Assistant-Integration `openhasp` (Konfiguration: Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant), `configurations/plates/plate_wz/openhasp.yaml`). Das Panel („`plate_wz`") ist ein Mehrzweck-Gerät — es hostet neben den beiden Gartenbewässerungs-Seiten auch fachfremde Seiten für andere Haussteuerungs-Funktionen (Hauptmenü, Beleuchtung), die hier nicht Teil der Dokumentation sind.
 
 Im Gegensatz zum Geräte-eigenen HMI (172×320px, Kapitel 5) hat das Panel eine deutlich größere Fläche (480×480px) und kann dadurch **mehr Funktionalität** unterbringen — inklusive eines Zeitplan-Editors, den das kleine Geräte-Display bewusst nicht anbietet (Kapitel 5.2).
 

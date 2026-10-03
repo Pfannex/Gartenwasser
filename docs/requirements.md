@@ -302,7 +302,7 @@ Discovery-Configs (insgesamt 26 Entities) werden retained unter `homeassistant/<
 beim Start einer Automatik-Sequenz (`main/cmd ON`) einmalig die Gesamtdauer des GERADE
 gestarteten Programms einfrieren und veröffentlichen, bis zum Sequenzende unverändert (unabhängig
 davon, ob der Nutzer währenddessen die Programmauswahl ändert). Hintergrund: der HA-Gesamtlaufzeit-
-Balken (`docs/homeassistant/dashboard-programme.yaml`) muss die Gesamtdauer aktuell in HA selbst
+Balken (Dashboard im Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant), `dashboards/handy/gartenwasser/`) muss die Gesamtdauer aktuell in HA selbst
 aus der Summe der Laufzeiten aller `auto=on`-Ventile annähern, da es dafür kein Topic gibt — diese
 Annäherung folgt aber den LIVE-Auto-Flags, nicht dem tatsächlich laufenden Programm, und kann bei
 einem Programmwechsel mitten im Lauf auf 0 fallen (siehe `docs/Log.md`, Nachtrag Fortschrittsbalken,

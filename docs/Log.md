@@ -1213,6 +1213,17 @@ Auf Nutzerwunsch vor dem Start von Phase 10 zurueckgestellt: "vorher noch zwei b
 - Ausgerollt wurde der Repo-Stand vom 2026-08-27 (inkl. grauem Hauptventil bei offline), der auf HA vorher noch fehlte.
 - `lovelace.dashboards.gartenwasser-dashboard` aus `configuration.yaml` entfernt.
 
+## 2026-10-03
+
+### HA-Konfiguration und openHASP-Panel ins Repo HomeAssistant umgezogen
+
+- Ordner `HomeAssistant/` geloescht (Packages `configurations/gartenwasser/`, `packages/gartenwasser.yaml`,
+  `packages/plate_wz.yaml`, `configurations/plates/` inkl. `plate_wz/device/`, `customize.yaml`, `configuration.yaml`).
+- Vor dem Loeschen gegen den Live-Stand der HA-Instanz abgeglichen: alle Dateien identisch (bis auf die
+  ohnehin veraltete `configuration.yaml`). Neuer Ort: Repo [HomeAssistant](https://github.com/Pfannex/HomeAssistant).
+- `docs/homeassistant/README.md` dorthin verschoben (`docs/gartenwasser_ha.md`), hier nur noch Verweis.
+- Verweise in Usermanual, architecture.md und requirements.md angepasst.
+
 ## Offene Punkte / nächste Schritte
 
 - **Hauptcontroller (192.168.10.33) instabil - wiederholt offline** (2026-08-27, mehrfach beobachtet): erst als offline entdeckt, dann vom Nutzer als "läuft klasse!" bestaetigt, dann beim naechsten Test erneut offline (`gartenwasser/availability` retained `offline`, `main/info/uptime` eingefroren, weder Ping noch HTTP erreichbar). Kein Einzelfall mehr, sondern ein wiederkehrendes Muster - braucht eine echte Untersuchung vor Ort (Stromversorgung/WLAN-Signal/Watchdog-Reboots), keine Software-Diagnose von der HA-Seite aus moeglich.
